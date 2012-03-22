@@ -43,5 +43,10 @@ int main(int argc, char *argv[]) {
   }
   printf("\n");
 
+  for (i = 0; i < nrows; i++) {
+    free(matrix[i]);
+  }
+  free(matrix);
+
   return 0;
 }
