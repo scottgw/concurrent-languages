@@ -13,17 +13,34 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-void randmat(int nrows, int ncols, int s, int** matrix) {
-  int i, j;
-  srand(s);
-  for (i = 0; i < nrows; i++) {
-    for (j = 0; j < ncols; j++) {
-      matrix[i][j] = rand();
-    }
+cilk void split_cols(int begin, int end, int row, int** matrix) {
+  int middle = begin + (end - begin) / 2;
+  if (begin >= end) return;
+  if (begin + 1 == end) {
+    matrix[row][begin] = rand();
+    return;
   }
+  spawn split_cols(begin, middle, row, matrix);
+  spawn split_cols(middle, end, row, matrix);
 }
 
-int main(int argc, char *argv[]) {
+cilk void split_rows(int begin, int end, int ncols, int** matrix) {
+  int middle = begin + (end - begin) / 2;
+  if (begin >= end) return;
+  if (begin + 1 == end) {
+    spawn split_cols(0, ncols, begin, matrix);
+    return;
+  }
+  spawn split_rows(begin, middle, ncols, matrix);
+  spawn split_rows(middle, end, ncols, matrix);
+}
+
+cilk void randmat(int nrows, int ncols, int s, int** matrix) {
+  srand(s);
+  spawn split_rows(0, nrows, ncols, matrix);
+}
+
+cilk int main(int argc, char *argv[]) {
   int nrows, ncols, s, i, j;
   int **matrix;
   scanf("%d%d%d", &nrows, &ncols, &s);
@@ -33,7 +50,8 @@ int main(int argc, char *argv[]) {
     matrix[i] = (int *) malloc(sizeof(int) * ncols);
   }
 
-  randmat(nrows, ncols, s, matrix);
+  spawn randmat(nrows, ncols, s, matrix);
+  sync;
 
   for (i = 0; i < nrows; i++) {
     for (j = 0; j < ncols; j++) {
