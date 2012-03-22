@@ -10,23 +10,34 @@
 
 use Random;
 
-proc main() {
+proc randmat(nrows: int, ncols: int, s: int,
+    matrix: [1..nrows, 1..ncols] int) {
   const INT_MAX: int = 2147483647;
 
+  var rand = new RandomStream(2 * s + 1); // s must be odd
+  for i in 1..nrows do {
+    for j in 1..ncols do {
+      matrix[i,j] = floor(rand.getNext() * INT_MAX) : int;
+    }
+  }
+}
+
+proc main() {
   var nrows: int;
   var ncols: int;
   var s: int;
 
   read(nrows, ncols, s);
-  s = 2 * s + 1; // s must be odd
+
+  var matrix: [1..nrows, 1..ncols] int;
+
+  randmat(nrows, ncols, s, matrix);
+
   writeln(nrows, " ", ncols);
 
-  var rand = new RandomStream(s);
   for i in 1..nrows do {
     for j in 1..ncols do {
-      var cur: int;
-      cur = floor(rand.getNext() * INT_MAX) : int;
-      write(cur, " ");
+      write(matrix[i, j], " ");
     }
     writeln();
   }
