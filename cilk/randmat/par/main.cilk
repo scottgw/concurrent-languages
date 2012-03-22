@@ -13,31 +13,30 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-cilk void split_cols(int begin, int end, int row, int** matrix) {
-  int middle = begin + (end - begin) / 2;
-  if (begin >= end) return;
-  if (begin + 1 == end) {
-    matrix[row][begin] = rand();
-    return;
-  }
-  spawn split_cols(begin, middle, row, matrix);
-  spawn split_cols(middle, end, row, matrix);
+typedef cilk void (*Function)(int, int, int**);
+
+cilk void update_matrix(int col, int row, int** matrix) {
+  matrix[row][col] = rand();
 }
 
-cilk void split_rows(int begin, int end, int ncols, int** matrix) {
+cilk void split(int begin, int end, int extra, int** matrix, Function f) {
   int middle = begin + (end - begin) / 2;
   if (begin >= end) return;
   if (begin + 1 == end) {
-    spawn split_cols(0, ncols, begin, matrix);
+    spawn f(begin, extra, matrix);
     return;
   }
-  spawn split_rows(begin, middle, ncols, matrix);
-  spawn split_rows(middle, end, ncols, matrix);
+  spawn split(begin, middle, extra, matrix, f);
+  spawn split(middle, end, extra, matrix, f);
+}
+
+cilk void start_cols(int row, int ncols, int** matrix) {
+  spawn split(0, ncols, row, matrix, update_matrix);
 }
 
 cilk void randmat(int nrows, int ncols, int s, int** matrix) {
   srand(s);
-  spawn split_rows(0, nrows, ncols, matrix);
+  spawn split(0, nrows, ncols, matrix, start_cols);
 }
 
 cilk int main(int argc, char *argv[]) {
