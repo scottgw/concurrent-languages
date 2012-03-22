@@ -2,3 +2,5 @@
 main
 .fuse_hidden*
 .*.swp
+erl_crash.dump
+*.beam
