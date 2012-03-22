@@ -11,6 +11,8 @@
 #include <cstdio>
 #include <cstdlib>
 
+// TODO: function randmat
+
 int main(int argc, char** argv) {
   assert(argc == 4);
   int nrows = atoi(argv[1]),
