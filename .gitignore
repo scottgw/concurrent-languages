@@ -4,3 +4,4 @@ main
 .*.swp
 erl_crash.dump
 *.beam
+*.8
