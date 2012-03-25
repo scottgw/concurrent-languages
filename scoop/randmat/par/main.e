@@ -16,7 +16,7 @@ feature
     -- Print a simple message.
   local
     nrows, ncols, s: INTEGER
-    matrix: ARRAY2[INTEGER]
+    matrix: separate ARRAY2[INTEGER]
     i, j: INTEGER
   do
     io.read_integer
@@ -50,28 +50,22 @@ feature
     end
   end
 
-  randmat(nrows, ncols, s: INTEGER; matrix: ARRAY2[INTEGER])
+  randmat(nrows, ncols, s: INTEGER; matrix: separate ARRAY2[INTEGER])
   local
     i, j: INTEGER
-    rand: RANDOM
+    worker: ARRAY[separate WORKER]
   do
-    create rand.set_seed(s)
+    create worker.make_empty
     from
       i := 1
     until
       i > nrows
     loop
-      from
-        j := 1
-      until
-        j > ncols
-      loop
-        rand.forth
-        matrix.put(rand.item, i, j)
-        j := j + 1
-      end
+      worker.force(create {WORKER}.make_with_matrix(matrix, ncols, s, i), i)
+      worker.item(i).fill
       i := i + 1
     end
   end
 
 end -- class MAIN 
+

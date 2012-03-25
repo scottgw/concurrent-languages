@@ -5,6 +5,6 @@ all: main
 	./main < main4.in
 	./main < main5.in
 
-main: main.e
+main: main.e worker.e
 	ec main.e
 
