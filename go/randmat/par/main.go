@@ -16,6 +16,13 @@ import (
   "rand"
 )
 
+func randvec(vector []int, n int, done chan bool) {
+  for i := 0; i < n; i++ {
+    vector[i] = rand.Int();
+  }
+  done <- true;
+}
+
 func randmat(nrows, ncols, s int) [][]int {
   var matrix [][]int;
   matrix = make([][]int, nrows);
@@ -23,10 +30,12 @@ func randmat(nrows, ncols, s int) [][]int {
     matrix[i] = make([]int, ncols);
   }
   rand.Seed(int64(s));
+  done := make(chan bool);
   for i := 0; i < nrows; i++ {
-    for j := 0; j < ncols; j++ {
-      matrix[i][j] = rand.Int();
-    }
+    go randvec(matrix[i], ncols, done);
+  }
+  for i := 0; i < nrows; i++ {
+    <-done;
   }
   return matrix;
 }
