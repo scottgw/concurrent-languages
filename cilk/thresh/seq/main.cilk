@@ -1,0 +1,52 @@
+/*
+ * randmat: random number generation
+ *
+ * input:
+ *   nrows, ncols: the number of rows and columns
+ *   s: the seed
+ *
+ * output:
+ *   matrix: an nrows x ncols integer matrix
+ */
+
+#include <cilk-lib.cilkh>
+#include <stdlib.h>
+#include <stdio.h>
+
+void randmat(int nrows, int ncols, int s, int** matrix) {
+  int i, j;
+  srand(s);
+  for (i = 0; i < nrows; i++) {
+    for (j = 0; j < ncols; j++) {
+      matrix[i][j] = rand();
+    }
+  }
+}
+
+int main(int argc, char *argv[]) {
+  int nrows, ncols, s, i, j;
+  int **matrix;
+  scanf("%d%d%d", &nrows, &ncols, &s);
+
+  matrix = (int **) malloc(sizeof(int *) * nrows);
+  for (i =  0; i < nrows; i++) {
+    matrix[i] = (int *) malloc(sizeof(int) * ncols);
+  }
+
+  randmat(nrows, ncols, s, matrix);
+
+  for (i = 0; i < nrows; i++) {
+    for (j = 0; j < ncols; j++) {
+      printf("%d ", matrix[i][j]);
+    }
+    printf("\n");
+  }
+  printf("\n");
+
+  for (i = 0; i < nrows; i++) {
+    free(matrix[i]);
+  }
+  free(matrix);
+
+  return 0;
+}
