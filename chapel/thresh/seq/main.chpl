@@ -1,23 +1,46 @@
-/* randmat: random number generation
+/* thresh: histogram thresholding
  * 
  * input:
+ *   matrix: the integer matrix to be thresholded
  *   nrows, ncols: the number of rows and columns
- *   s: the seed
+ *   percent: the percentage of cells to retain
  *
  * output:
- *   matrix: an nrows x ncols integer matrix
+ *   mask: a boolean matrix filled with true for the cells to be kept
  */
 
-use Random;
-
-proc randmat(nrows: int, ncols: int, s: int,
-    matrix: [1..nrows, 1..ncols] int) {
-  const INT_MAX: int = 2147483647;
-
-  var rand = new RandomStream(2 * s + 1); // s must be odd
+proc thresh(nrows: int, ncols: int,
+    matrix: [1..nrows, 1..ncols] int, percent: int,
+    mask: [1..nrows, 1..ncols] int) {
+  var nmax: int = 0;
   for i in 1..nrows do {
     for j in 1..ncols do {
-      matrix[i,j] = floor(rand.getNext() * INT_MAX) : int;
+      nmax = max(nmax, matrix[i,j]);
+    }
+  }
+
+  var histogram: [0..nmax] int;
+
+  for i in 1..nrows do {
+    for j in 1..ncols do {
+      histogram[matrix[i, j]] += 1;
+    }
+  }
+
+  var count: int = (nrows * ncols * percent) / 100;
+
+  var prefixsum: int = 0;
+  var threshold: int = nmax;
+
+  for i in 0..nmax do {
+    if (prefixsum > count) then break;
+    prefixsum += histogram[nmax - i];
+    threshold = nmax - i;
+  }
+
+  for i in 1..nrows do {
+    for j in 1..ncols do {
+      mask[i, j] = matrix[i, j] >= threshold;
     }
   }
 }
@@ -25,19 +48,28 @@ proc randmat(nrows: int, ncols: int, s: int,
 proc main() {
   var nrows: int;
   var ncols: int;
-  var s: int;
+  var percent: int;
 
-  read(nrows, ncols, s);
+  read(nrows, ncols);
 
   var matrix: [1..nrows, 1..ncols] int;
+  var mask: [1..nrows, 1..ncols] int;
 
-  randmat(nrows, ncols, s, matrix);
+  for i in 1..nrows do {
+    for j in 1..ncols do {
+      read(matrix[i,j]);
+    }
+  }
+
+  read(percent);
+
+  thresh(nrows, ncols, matrix, percent, mask);
 
   writeln(nrows, " ", ncols);
 
   for i in 1..nrows do {
     for j in 1..ncols do {
-      write(matrix[i, j], " ");
+      write(mask[i, j], " ");
     }
     writeln();
   }
