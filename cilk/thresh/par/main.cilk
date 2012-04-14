@@ -14,21 +14,57 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+typedef int (*Operator)(int, int);
+typedef cilk int (*GenericReduceFunction)(int, int, int**, Operator op);
+
 int max(int a, int b) {
   return a > b ? a : b;
 }
 
-void thresh(int nrows, int ncols, int** matrix, int percent, int** mask) {
+cilk int generic_reduce(int begin, int end, int extra, int** matrix,
+    Operator op, GenericReduceFunction f) {
+  int middle = begin + (end - begin) / 2;
+  int left, right, res;
+  if (begin + 1 == end) {
+    res = spawn f(begin, extra, matrix, op);
+    sync;
+    return res;
+  }
+  left = spawn generic_reduce(begin, middle, extra, matrix, op, f);
+  right = spawn generic_reduce(middle, end, extra, matrix, op, f);
+  sync;
+  return op(left, right);
+}
+
+cilk int reduce2d_identity(int col, int row, int** matrix, Operator op) {
+  return matrix[row][col];
+}
+
+cilk int reduce2d_start_cols(int row, int ncols, int** matrix,
+    Operator op) {
+  int res;
+  res = spawn generic_reduce(0, ncols, row, matrix, op, reduce2d_identity);
+  sync;
+  return res;
+}
+
+cilk int reduce2d(int nrows, int ncols, int** matrix, Operator op) {
+  int res;
+  res = spawn generic_reduce(0, nrows, ncols, matrix, op,
+      reduce2d_start_cols);
+  sync;
+  return res;
+}
+
+cilk void thresh(int nrows, int ncols, int** matrix, int percent,
+    int** mask) {
   int i, j;
   int nmax = 0;
   int* histogram;
   int count, prefixsum, threshold;
 
-  for (i = 0; i < nrows; i++) {
-    for (j = 0; j < ncols; j++) {
-      nmax = max(nmax, matrix[i][j]);
-    }
-  }
+  nmax = spawn reduce2d(nrows, ncols, matrix, max);
+  sync;
 
   histogram = (int*) malloc(sizeof(int) * (nmax + 1));
 
@@ -38,10 +74,10 @@ void thresh(int nrows, int ncols, int** matrix, int percent, int** mask) {
     }
   }
 
-  count = (nrows * ncols * percent) / 100;
-
   prefixsum = 0;
   threshold = nmax;
+
+  count = (nrows * ncols * percent) / 100;
 
   for (i = nmax; i >= 0 && prefixsum <= count; i--) {
     prefixsum += histogram[i];
@@ -57,7 +93,7 @@ void thresh(int nrows, int ncols, int** matrix, int percent, int** mask) {
   free(histogram);
 }
 
-int main(int argc, char *argv[]) {
+cilk int main(int argc, char *argv[]) {
   int nrows, ncols, percent, i, j;
   int** matrix, ** mask;
   scanf("%d%d", &nrows, &ncols);
@@ -80,7 +116,8 @@ int main(int argc, char *argv[]) {
 
   scanf("%d", &percent);
 
-  thresh(nrows, ncols, matrix, percent, mask);
+  spawn thresh(nrows, ncols, matrix, percent, mask);
+  sync;
 
   printf("%d %d\n", nrows, ncols);
   for (i = 0; i < nrows; i++) {
