@@ -1,9 +1,10 @@
 all: main
 	./main < main.in
-	echo "1 4 8" | ./main
-	echo "1 5 8" | ./main
-	echo "2 5 8" | ./main
-	echo "2 5 9" | ./main
+	./main < main2.in
+	./main < main3.in
+	./main < main4.in
+	./main < main5.in
+	./main < main6.in
 
 main: main.cilk
 	cilkc -o main main.cilk
