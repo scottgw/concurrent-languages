@@ -136,12 +136,28 @@ cilk void scan(int n, int* array, Operator op) {
   spawn scan_impl(0, n, array, 1, op);
 }
 
+int binary_search(int n, int* array, int target) {
+  int begin = 0, end = n;
+  while (begin < end) {
+    int middle = begin + (end - begin) / 2;
+    if (array[middle] < target) {
+      begin = middle + 1;
+    } else if(array[middle] > target) {
+      end = middle;
+    } else {
+      begin = end = middle;
+    }
+  }
+  return end;
+}
+
 cilk void thresh(int nrows, int ncols, int** matrix, int percent,
     int** mask) {
   int i, j;
   int nmax = 0;
   int* histogram;
   int count, prefixsum, threshold;
+  int index;
 
   nmax = spawn reduce2d(nrows, ncols, matrix, max);
   sync;
@@ -159,12 +175,16 @@ cilk void thresh(int nrows, int ncols, int** matrix, int percent,
 
   spawn scan(nmax + 1, histogram, sum);
   sync;
-  //binary_search(&count, histogram, 
 
+  threshold = binary_search(nmax + 1, histogram, count);
+
+  printf("count: %d\n", count);
   for (i = 0; i <= nmax; i++) {
     printf("%d ", histogram[i]);
   }
   printf("\n");
+
+  printf("thresh: %d\n", threshold);
 
   for (i = 0; i < nrows; i++) {
     for (j = 0; j < ncols; j++) {
