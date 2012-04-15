@@ -18,8 +18,8 @@ typedef int (*Operator)(int, int);
 typedef void* ReduceFilter;
 typedef cilk int (*GenericReduceFunction)(int index, int extra,
     int** matrix, Operator op, ReduceFilter filter, int extra2);
-typedef cilk void (*SplitFunction)(int index, int* histogram, int nrows,
-    int ncols, int** matrix);
+typedef cilk void (*SplitFunction)(int index, int* histogram, int extra,
+    int nrows, int ncols, int** matrix, int** mask, int threshold);
 
 int max(int a, int b) {
   return a > b ? a : b;
@@ -29,16 +29,18 @@ int sum(int a, int b) {
   return a + b;
 }
 
-cilk void split(int begin, int end, int* histogram, int nrows, int ncols,
-    int** matrix, SplitFunction f) {
+cilk void split(int begin, int end, int* histogram, int extra, int nrows,
+    int ncols, int** matrix, int** mask, int threshold, SplitFunction f) {
   int middle = begin + (end - begin) / 2;
   if (begin >= end) return;
   if (begin + 1 == end) {
-    spawn f(begin, histogram, nrows, ncols, matrix);
+    spawn f(begin, histogram, extra, nrows, ncols, matrix, mask, threshold);
     return;
   }
-  spawn split(begin, middle, histogram, nrows, ncols, matrix, f);
-  spawn split(middle, end, histogram, nrows, ncols, matrix, f);
+  spawn split(begin, middle, histogram, extra, nrows, ncols, matrix, mask,
+      threshold, f);
+  spawn split(middle, end, histogram, extra, nrows, ncols, matrix, mask,
+      threshold, f);
 }
 
 cilk int generic_reduce(int begin, int end, int extra, int** matrix,
@@ -93,15 +95,16 @@ cilk int filter_matrix(int col, int row, int** matrix, Operator op,
   return matrix[row][col] == value;
 }
 
-cilk void fill_histogram_index(int index, int* histogram, int nrows,
-    int ncols, int** matrix) {
+cilk void fill_histogram_index(int index, int* histogram, int extra,
+    int nrows, int ncols, int** matrix, int** mask, int threshold) {
   histogram[index] = spawn reduce2d_with_filter(nrows, ncols, matrix,
       sum, filter_matrix, index);
 }
 
 cilk void fill_histogram(int n, int* histogram, int nrows, int ncols,
     int** matrix) {
-  spawn split(0, n, histogram, nrows, ncols, matrix, fill_histogram_index);
+  spawn split(0, n, histogram, 0, nrows, ncols, matrix, NULL, 0,
+      fill_histogram_index);
 }
 
 cilk void scan_update_elements(int begin, int end, int* array, int size,
@@ -151,13 +154,28 @@ int binary_search(int n, int* array, int target) {
   return end;
 }
 
+cilk void fill_mask_update_matrix(int col, int* histogram, int row,
+    int nrows, int ncols, int** matrix, int** mask, int threshold) {
+  mask[row][col] = matrix[row][col] >= threshold;
+}
+
+cilk void fill_mask_start_cols(int row, int* histogram, int extra,
+    int nrows, int ncols, int** matrix, int** mask, int threshold) {
+  spawn split(0, ncols, NULL, row, nrows, ncols, matrix, mask, threshold,
+      fill_mask_update_matrix);
+}
+
+cilk void fill_mask(int nrows, int ncols, int** matrix, int** mask,
+    int threshold) {
+  spawn split(0, nrows, NULL, 0, nrows, ncols, matrix, mask, threshold,
+      fill_mask_start_cols);
+}
+
 cilk void thresh(int nrows, int ncols, int** matrix, int percent,
     int** mask) {
-  int i, j;
   int nmax = 0;
   int* histogram;
-  int count, prefixsum, threshold;
-  int index;
+  int count, threshold;
 
   nmax = spawn reduce2d(nrows, ncols, matrix, max);
   sync;
@@ -167,7 +185,6 @@ cilk void thresh(int nrows, int ncols, int** matrix, int percent,
   spawn fill_histogram(nmax + 1, histogram, nrows, ncols, matrix);
   sync;
 
-  prefixsum = 0;
   threshold = nmax;
 
   count = (nrows * ncols * percent) / 100;
@@ -178,19 +195,8 @@ cilk void thresh(int nrows, int ncols, int** matrix, int percent,
 
   threshold = binary_search(nmax + 1, histogram, count);
 
-  printf("count: %d\n", count);
-  for (i = 0; i <= nmax; i++) {
-    printf("%d ", histogram[i]);
-  }
-  printf("\n");
-
-  printf("thresh: %d\n", threshold);
-
-  for (i = 0; i < nrows; i++) {
-    for (j = 0; j < ncols; j++) {
-      mask[i][j] = matrix[i][j] >= threshold;
-    }
-  }
+  spawn fill_mask(nrows, ncols, matrix, mask, threshold);
+  sync;
 
   free(histogram);
 }
