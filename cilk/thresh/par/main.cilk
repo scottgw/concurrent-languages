@@ -16,8 +16,16 @@
 
 typedef int (*Operator)(int, int);
 typedef void* ReduceFilter;
-typedef cilk int (*GenericReduceFunction)(int index, int extra,
-    int** matrix, Operator op, ReduceFilter filter, int extra2);
+
+typedef struct sReduceState {
+  int extra, ncols;
+  int row;
+  int** matrix;
+  Operator op;
+  ReduceFilter filter;
+} ReduceState;
+
+typedef cilk int (*GenericReduceFunction)(int index, ReduceState state);
 typedef cilk void (*SplitFunction)(int index, int* histogram, int extra,
     int nrows, int ncols, int** matrix, int** mask, int threshold);
 
@@ -43,33 +51,29 @@ cilk void split(int begin, int end, int* histogram, int extra, int nrows,
       threshold, f);
 }
 
-cilk int generic_reduce(int begin, int end, int extra, int** matrix,
-    Operator op, ReduceFilter filter, int extra2, GenericReduceFunction f) {
+cilk int generic_reduce(int begin, int end, Operator op,
+    GenericReduceFunction f, ReduceState state) {
   int middle = begin + (end - begin) / 2;
   int left, right, res;
   if (begin + 1 == end) {
-    res = spawn f(begin, extra, matrix, op, filter, extra2);
+    res = spawn f(begin, state);
     sync;
     return res;
   }
-  left = spawn generic_reduce(begin, middle, extra, matrix, op, filter,
-      extra2, f);
-  right = spawn generic_reduce(middle, end, extra, matrix, op, filter,
-      extra2, f);
+  left = spawn generic_reduce(begin, middle, op, f, state);
+  right = spawn generic_reduce(middle, end, op, f, state);
   sync;
   return op(left, right);
 }
 
-cilk int reduce2d_identity_filter(int col, int row, int** matrix,
-    Operator op, ReduceFilter filter, int extra) {
-  return matrix[row][col];
+cilk int reduce2d_identity_filter(int col, ReduceState state) {
+  return state.matrix[state.row][col];
 }
 
-cilk int reduce2d_start_cols(int row, int ncols, int** matrix,
-    Operator op, ReduceFilter filter, int extra) {
+cilk int reduce2d_start_cols(int row, ReduceState state) {
   int res;
-  res = spawn generic_reduce(0, ncols, row, matrix, op, filter, extra,
-      filter);
+  state.row = row;
+  res = spawn generic_reduce(0, state.ncols, state.op, state.filter, state);
   sync;
   return res;
 }
@@ -77,8 +81,9 @@ cilk int reduce2d_start_cols(int row, int ncols, int** matrix,
 cilk int reduce2d_with_filter(int nrows, int ncols, int** matrix,
     Operator op, ReduceFilter filter, int extra) {
   int res;
-  res = spawn generic_reduce(0, nrows, ncols, matrix, op, filter, extra,
-      reduce2d_start_cols);
+  ReduceState state = {.ncols = ncols, .matrix = matrix, .op = op,
+    .filter = filter, .extra = extra};
+  res = spawn generic_reduce(0, nrows, op, reduce2d_start_cols, state);
   sync;
   return res;
 }
@@ -90,9 +95,8 @@ cilk int reduce2d(int nrows, int ncols, int** matrix, Operator op) {
   return res;
 }
 
-cilk int filter_matrix(int col, int row, int** matrix, Operator op,
-    ReduceFilter filter, int value) {
-  return matrix[row][col] == value;
+cilk int filter_matrix(int col, ReduceState state) {
+  return state.matrix[state.row][col] == state.extra;
 }
 
 cilk void fill_histogram_index(int index, int* histogram, int extra,
@@ -184,8 +188,6 @@ cilk void thresh(int nrows, int ncols, int** matrix, int percent,
 
   spawn fill_histogram(nmax + 1, histogram, nrows, ncols, matrix);
   sync;
-
-  threshold = nmax;
 
   count = (nrows * ncols * percent) / 100;
   count = nrows * ncols - count;  // scan starts from the beginning
