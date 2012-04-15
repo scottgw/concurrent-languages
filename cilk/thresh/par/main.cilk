@@ -104,6 +104,38 @@ cilk void fill_histogram(int n, int* histogram, int nrows, int ncols,
   spawn split(0, n, histogram, nrows, ncols, matrix, fill_histogram_index);
 }
 
+cilk void scan_update_elements(int begin, int end, int* array, int size,
+    Operator op) {
+  int middle, count;
+  if (end - begin <= size) {
+    return;
+  } else if (end - begin <= 2 * size) {
+    array[begin + size] = op(array[begin], array[begin + size]);
+  } else {
+    count = (end - begin) / size;
+    count /= 2;
+    count += count % 2;  // to ensure it is even
+    middle = begin + count * size;
+    spawn scan_update_elements(begin, middle, array, size, op);
+    spawn scan_update_elements(middle, end, array, size, op);
+  }
+}
+
+cilk void scan_impl(int begin, int end, int* array, int size, Operator op) {
+  if (end - begin > size) {
+    spawn scan_update_elements(begin, end, array, size, op);
+    sync;
+    spawn scan_impl(begin + size, end, array, 2 * size, op);
+    sync;
+    spawn scan_update_elements(begin + size, end, array, size, op);
+    sync;
+  }
+}
+
+cilk void scan(int n, int* array, Operator op) {
+  spawn scan_impl(0, n, array, 1, op);
+}
+
 cilk void thresh(int nrows, int ncols, int** matrix, int percent,
     int** mask) {
   int i, j;
@@ -123,12 +155,16 @@ cilk void thresh(int nrows, int ncols, int** matrix, int percent,
   threshold = nmax;
 
   count = (nrows * ncols * percent) / 100;
+  count = nrows * ncols - count;  // scan starts from the beginning
 
+  spawn scan(nmax + 1, histogram, sum);
+  sync;
+  //binary_search(&count, histogram, 
 
-  for (i = nmax; i >= 0 && prefixsum <= count; i--) {
-    prefixsum += histogram[i];
-    threshold = i;
+  for (i = 0; i <= nmax; i++) {
+    printf("%d ", histogram[i]);
   }
+  printf("\n");
 
   for (i = 0; i < nrows; i++) {
     for (j = 0; j < ncols; j++) {
