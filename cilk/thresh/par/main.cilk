@@ -124,6 +124,7 @@ cilk void thresh(int nrows, int ncols, int** matrix, int percent,
 
   count = (nrows * ncols * percent) / 100;
 
+
   for (i = nmax; i >= 0 && prefixsum <= count; i--) {
     prefixsum += histogram[i];
     threshold = i;
