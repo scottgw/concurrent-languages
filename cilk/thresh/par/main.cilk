@@ -25,9 +25,17 @@ typedef struct sReduceState {
   ReduceFilter filter;
 } ReduceState;
 
+typedef struct sSplitState {
+  int* histogram;
+  int nrows, ncols;
+  int** matrix;
+  int row;
+  int** mask;
+  int threshold;
+} SplitState;
+
 typedef cilk int (*GenericReduceFunction)(int index, ReduceState state);
-typedef cilk void (*SplitFunction)(int index, int* histogram, int extra,
-    int nrows, int ncols, int** matrix, int** mask, int threshold);
+typedef cilk void (*SplitFunction)(int index, SplitState state);
 
 int max(int a, int b) {
   return a > b ? a : b;
@@ -37,18 +45,15 @@ int sum(int a, int b) {
   return a + b;
 }
 
-cilk void split(int begin, int end, int* histogram, int extra, int nrows,
-    int ncols, int** matrix, int** mask, int threshold, SplitFunction f) {
+cilk void split(int begin, int end, SplitFunction f, SplitState state) {
   int middle = begin + (end - begin) / 2;
   if (begin >= end) return;
   if (begin + 1 == end) {
-    spawn f(begin, histogram, extra, nrows, ncols, matrix, mask, threshold);
+    spawn f(begin, state);
     return;
   }
-  spawn split(begin, middle, histogram, extra, nrows, ncols, matrix, mask,
-      threshold, f);
-  spawn split(middle, end, histogram, extra, nrows, ncols, matrix, mask,
-      threshold, f);
+  spawn split(begin, middle, f, state);
+  spawn split(middle, end, f, state);
 }
 
 cilk int generic_reduce(int begin, int end, Operator op,
@@ -79,7 +84,7 @@ cilk int reduce2d_start_cols(int row, ReduceState state) {
 }
 
 cilk int reduce2d_with_filter(int nrows, int ncols, int** matrix,
-    Operator op, ReduceFilter filter, int extra) {
+    Operator op, GenericReduceFunction filter, int extra) {
   int res;
   ReduceState state = {.ncols = ncols, .matrix = matrix, .op = op,
     .filter = filter, .extra = extra};
@@ -99,16 +104,16 @@ cilk int filter_matrix(int col, ReduceState state) {
   return state.matrix[state.row][col] == state.extra;
 }
 
-cilk void fill_histogram_index(int index, int* histogram, int extra,
-    int nrows, int ncols, int** matrix, int** mask, int threshold) {
-  histogram[index] = spawn reduce2d_with_filter(nrows, ncols, matrix,
-      sum, filter_matrix, index);
+cilk void fill_histogram_index(int index, SplitState state) {
+  state.histogram[index] = spawn reduce2d_with_filter(state.nrows,
+      state.ncols, state.matrix, sum, filter_matrix, index);
 }
 
 cilk void fill_histogram(int n, int* histogram, int nrows, int ncols,
     int** matrix) {
-  spawn split(0, n, histogram, 0, nrows, ncols, matrix, NULL, 0,
-      fill_histogram_index);
+  SplitState state = {.histogram = histogram, .nrows = nrows,
+    .ncols = ncols, .matrix = matrix};
+  spawn split(0, n, fill_histogram_index, state);
 }
 
 cilk void scan_update_elements(int begin, int end, int* array, int size,
@@ -128,6 +133,7 @@ cilk void scan_update_elements(int begin, int end, int* array, int size,
   }
 }
 
+// Ladner-Fischer
 cilk void scan_impl(int begin, int end, int* array, int size, Operator op) {
   if (end - begin > size) {
     spawn scan_update_elements(begin, end, array, size, op);
@@ -158,21 +164,21 @@ int binary_search(int n, int* array, int target) {
   return end;
 }
 
-cilk void fill_mask_update_matrix(int col, int* histogram, int row,
-    int nrows, int ncols, int** matrix, int** mask, int threshold) {
-  mask[row][col] = matrix[row][col] >= threshold;
+cilk void fill_mask_update_matrix(int col, SplitState state) {
+  state.mask[state.row][col] =
+    state.matrix[state.row][col] >= state.threshold;
 }
 
-cilk void fill_mask_start_cols(int row, int* histogram, int extra,
-    int nrows, int ncols, int** matrix, int** mask, int threshold) {
-  spawn split(0, ncols, NULL, row, nrows, ncols, matrix, mask, threshold,
-      fill_mask_update_matrix);
+cilk void fill_mask_start_cols(int row, SplitState state) {
+  state.row = row;
+  spawn split(0, state.ncols, fill_mask_update_matrix, state);
 }
 
 cilk void fill_mask(int nrows, int ncols, int** matrix, int** mask,
     int threshold) {
-  spawn split(0, nrows, NULL, 0, nrows, ncols, matrix, mask, threshold,
-      fill_mask_start_cols);
+  SplitState state = {.nrows = nrows, .ncols = ncols, .matrix = matrix,
+    .mask = mask, .threshold = threshold};
+  spawn split(0, nrows, fill_mask_start_cols, state);
 }
 
 cilk void thresh(int nrows, int ncols, int** matrix, int percent,
