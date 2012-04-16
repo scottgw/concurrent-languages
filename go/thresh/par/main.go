@@ -23,23 +23,21 @@ func max(a, b int) int {
   return b;
 }
 
-func worker(n int, array []int, op func(a, b int) int, result chan int) {
-  var res int;
-  if n == 1 {
-    res = array[0];
-  } else {
-    res = op(array[0], array[1]);
-  }
-  for i := 2; i < n; i++ {
+func worker(n int, array []int, op func(a, b int) int, start_value int,
+    result chan int) {
+  res := start_value;
+  for i := 0; i < n; i++ {
     res = op(res, array[i]);
   }
   result <- res;
 }
 
-func reduce2d(nrows, ncols int, matrix [][]int, op func(a, b int) int) int {
+func reduce2d(nrows, ncols int, matrix [][]int,
+    aggregator func(a, b int) int, aggregator_start_value int,
+    op func(a, b int) int, op_start_value int) int {
   response := make(chan int);
   for i := 0; i < nrows; i++ {
-    go worker(ncols, matrix[i], op, response);
+    go worker(ncols, matrix[i], op, op_start_value, response);
   }
 
   results := make([]int, nrows);
@@ -47,7 +45,7 @@ func reduce2d(nrows, ncols int, matrix [][]int, op func(a, b int) int) int {
     results[i] = <-response
   }
 
-  go worker(nrows, results, op, response);
+  go worker(nrows, results, aggregator, aggregator_start_value, response);
 
   return <-response;
 }
@@ -58,7 +56,7 @@ func thresh(nrows, ncols int, matrix [][]int, percent int) [][]int {
     mask[i] = make([]int, ncols);
   }
 
-  nmax := reduce2d(nrows, ncols, matrix, max);
+  nmax := reduce2d(nrows, ncols, matrix, max, 0, max, 0);
   histogram := make([]int, nmax + 1);
 
   for i := 0; i < nrows; i++ {
