@@ -23,22 +23,43 @@ func max(a, b int) int {
   return b;
 }
 
+func worker(n int, array []int, op func(a, b int) int, result chan int) {
+  var res int;
+  if n == 1 {
+    res = array[0];
+  } else {
+    res = op(array[0], array[1]);
+  }
+  for i := 2; i < n; i++ {
+    res = op(res, array[i]);
+  }
+  result <- res;
+}
+
+func reduce2d(nrows, ncols int, matrix [][]int, op func(a, b int) int) int {
+  response := make(chan int);
+  for i := 0; i < nrows; i++ {
+    go worker(ncols, matrix[i], op, response);
+  }
+
+  results := make([]int, nrows);
+  for i := 0; i < nrows; i++ {
+    results[i] = <-response
+  }
+
+  go worker(nrows, results, op, response);
+
+  return <-response;
+}
+
 func thresh(nrows, ncols int, matrix [][]int, percent int) [][]int {
-  var mask[][]int;
-  mask = make([][]int, nrows);
+  mask := make([][]int, nrows);
   for i := 0; i < nrows; i++ {
     mask[i] = make([]int, ncols);
   }
 
-  var nmax int = 0;
-  for i := 0; i < nrows; i++ {
-    for j := 0; j < ncols; j++ {
-      nmax = max(nmax, matrix[i][j]);
-    }
-  }
-
-  var histogram []int;
-  histogram = make([]int, nmax + 1);
+  nmax := reduce2d(nrows, ncols, matrix, max);
+  histogram := make([]int, nmax + 1);
 
   for i := 0; i < nrows; i++ {
     for j := 0; j < ncols; j++ {
@@ -46,15 +67,14 @@ func thresh(nrows, ncols int, matrix [][]int, percent int) [][]int {
     }
   }
 
-  var count int = (nrows * ncols * percent) / 100;
-  var prefixsum int = 0;
-  var threshold int = nmax;
+  count := (nrows * ncols * percent) / 100;
+  prefixsum := 0;
+  threshold := nmax;
 
   for i := nmax; i >= 0 && prefixsum <= count; i-- {
     prefixsum += histogram[i];
     threshold = i;
   }
-
 
   for i := 0; i < nrows; i++ {
     for j := 0; j < ncols; j++ {
@@ -69,11 +89,10 @@ func thresh(nrows, ncols int, matrix [][]int, percent int) [][]int {
 
 func main() {
   var nrows, ncols, percent int;
-  var matrix, mask [][]int;
 
   fmt.Scanf("%d%d", &nrows, &ncols);
 
-  matrix = make([][]int, nrows);
+  matrix := make([][]int, nrows);
   for i := 0; i < nrows; i++ {
     matrix[i] = make([]int, ncols);
   }
@@ -86,7 +105,7 @@ func main() {
 
   fmt.Scanf("%d", &percent);
 
-  mask = thresh(nrows, ncols, matrix, percent);
+  mask := thresh(nrows, ncols, matrix, percent);
 
   for i := 0; i < nrows; i++ {
     for j := 0; j < ncols; j++ {
