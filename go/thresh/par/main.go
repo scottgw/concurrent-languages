@@ -23,6 +23,10 @@ func max(a, b int) int {
   return b;
 }
 
+func sum(a, b int) int {
+  return a + b;
+}
+
 func worker(n int, array []int, op func(a, b int) int, start_value int,
     result chan int) {
   res := start_value;
@@ -50,6 +54,16 @@ func reduce2d(nrows, ncols int, matrix [][]int,
   return <-response;
 }
 
+func get_filter(value int) (func(a, b int) int) {
+  return func(a, b int) int {
+    if (b == value) {
+      return a + 1;
+    } else {
+      return a;
+    }
+  }
+}
+
 func thresh(nrows, ncols int, matrix [][]int, percent int) [][]int {
   mask := make([][]int, nrows);
   for i := 0; i < nrows; i++ {
@@ -59,11 +73,17 @@ func thresh(nrows, ncols int, matrix [][]int, percent int) [][]int {
   nmax := reduce2d(nrows, ncols, matrix, max, 0, max, 0);
   histogram := make([]int, nmax + 1);
 
-  for i := 0; i < nrows; i++ {
-    for j := 0; j < ncols; j++ {
-      histogram[matrix[i][j]]++;
-    }
+
+  for i := 0; i <= nmax; i++ {
+    filter := get_filter(i);
+    histogram[i] = reduce2d(nrows, ncols, matrix, filter, 0, sum, 0);
   }
+
+  //for i := 0; i < nrows; i++ {
+    //for j := 0; j < ncols; j++ {
+      //histogram[matrix[i][j]]++;
+    //}
+  //}
 
   count := (nrows * ncols * percent) / 100;
   prefixsum := 0;
