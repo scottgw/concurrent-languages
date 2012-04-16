@@ -1,4 +1,5 @@
-all: main
+all: main phil
+	./dining_philosophers
 	./main -i main.in
 	./main -i main2.in
 	./main -i main3.in
@@ -10,3 +11,5 @@ all: main
 main: main.e reduce2d_worker.e
 	ec main.e
 
+phil: dining_philosophers.e philosopher.e fork.e
+	ec dining_philosophers.e
