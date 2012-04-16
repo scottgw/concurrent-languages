@@ -15,7 +15,7 @@ feature
   make
   local
     nrows, ncols, percent: INTEGER
-    matrix, mask: ARRAY2[INTEGER]
+    matrix, mask: separate ARRAY2[INTEGER]
     i, j: INTEGER
     in: PLAIN_TEXT_FILE
     file_name: STRING
@@ -47,16 +47,16 @@ feature
 
     from i := 1 until i > nrows loop
       from j := 1 until j > ncols loop
-        print(mask.item(i, j).out + " ")
+        --print(mask.item(i, j).out + " ")
         j := j + 1
       end
-      print("%N")
+      --print("%N")
       i := i + 1
     end
   end
 
-  thresh(nrows, ncols: INTEGER; matrix: ARRAY2[INTEGER]; percent: INTEGER;
-    mask: ARRAY2[INTEGER])
+  thresh(nrows, ncols: INTEGER; matrix: separate ARRAY2[INTEGER];
+      percent: INTEGER; mask: ARRAY2[INTEGER])
   local
     i, j: INTEGER
     nmax: INTEGER
@@ -64,9 +64,10 @@ feature
     count: REAL_64
     prefixsum, threshold: INTEGER
   do
-    across matrix as m loop
-      nmax := nmax.max(m.item)
-    end
+    -- across matrix as m loop
+      -- nmax := nmax.max(m.item)
+    -- end
+    nmax := reduce2d(nrows, ncols, matrix);
 
     create histogram.make(0, nmax + 1)
 
@@ -94,6 +95,30 @@ feature
       end
       i := i + 1
     end
+  end
+
+  reduce2d(nrows, ncols: INTEGER; matrix: separate ARRAY2[INTEGER]): INTEGER
+  local
+    i: INTEGER
+    worker: separate REDUCE2D_WORKER
+  do
+    create reduce2d_workers.make
+    from i := 1 until i > nrows loop
+      create worker.make(nrows, ncols, matrix, i)
+      reduce2d_workers.extend(worker)
+      i := i + 1
+    end
+    reduce2d_workers.do_all(agent launch_reduce2d_worker)
+    Result := 10
+  end
+
+feature {NONE}
+  reduce2d_workers: LINKED_LIST [separate REDUCE2D_WORKER]
+
+  launch_reduce2d_worker(worker: separate REDUCE2D_WORKER)
+  do
+    print("+")
+    worker.live
   end
 
 end -- class MAIN 

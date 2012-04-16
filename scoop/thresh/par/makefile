@@ -5,7 +5,8 @@ all: main
 	./main -i main4.in
 	./main -i main5.in
 	./main -i main6.in
+	./main -i main7.in
 
-main: main.e
+main: main.e reduce2d_worker.e
 	ec main.e
 
