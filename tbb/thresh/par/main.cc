@@ -14,15 +14,42 @@
 
 #include <algorithm>
 
+#include "tbb/parallel_reduce.h"
+#include "tbb/blocked_range.h"
+
 using namespace std;
+
+#include <thread>
+
+void func() {}
+
+int max(int a, int b) {
+  std::thread t(func);
+  t.join();
+  return a > b ? a : b;
+}
+
+typedef int (*Operator)(int acc, int x);
+
+int reduce2d(int nrows, int ncols, int** matrix, Operator op) {
+  return tbb::parallel_reduce(
+      tbb::blocked_range<const int*>(matrix[0], matrix[0] + ncols),
+      0,
+      [&](tbb::blocked_range<const int*> r, int partial_value)->float {
+        return std::accumulate(r.begin(), e.end(), partial_value)
+      },
+      std::plus<int>());
+}
 
 void thresh(int nrows, int ncols, int** matrix, int percent, int** mask) {
   int nmax = 0;
-  for (int i = 0; i < nrows; i++) {
-    for (int j = 0; j < ncols; j++) {
-      nmax = max(nmax, matrix[i][j]);
-    }
-  }
+  //for (int i = 0; i < nrows; i++) {
+    //for (int j = 0; j < ncols; j++) {
+      //nmax = max(nmax, matrix[i][j]);
+    //}
+  //}
+  
+  nmax = reduce2d(nrows, ncols, matrix, max);
 
   int* histogram = new int[nmax + 1];
 

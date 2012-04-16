@@ -5,3 +5,4 @@ all: main
 	./$< < $<4.in
 	./$< < $<5.in
 	./$< < $<6.in
+CXXFLAGS+=-std=c++0x
