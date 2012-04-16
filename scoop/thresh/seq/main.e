@@ -1,47 +1,52 @@
--- randmat: random number generation
+-- thresh: histogram thresholding
 --
 -- input:
+--   matrix: the integer matrix to be thresholded
 --   nrows, ncols: the number of rows and cols
---   s: the seed
+--   percent: the percentage of cells to retain
 --
 -- output:
---   matrix: a nrows by ncols integer matrix
+--   mask: a boolean matrix filled with true for cells kept
 
-class MAIN create
-  make
-
+class MAIN
+inherit ARGUMENTS
+create make
 feature
-
   make
-    -- Print a simple message.
   local
-    nrows, ncols, s: INTEGER
-    matrix: ARRAY2[INTEGER]
+    nrows, ncols, percent: INTEGER
+    matrix, mask: ARRAY2[INTEGER]
     i, j: INTEGER
+    in: PLAIN_TEXT_FILE
+    file_name: STRING
   do
-    io.read_integer
-    nrows := io.last_integer
+    file_name := separate_character_option_value('i')
+    !!in.make_open_read(separate_character_option_value('i'))
 
-    io.read_integer
-    ncols := io.last_integer
+    in.read_integer
+    nrows := in.last_integer
 
-    io.read_integer
-    s := io.last_integer
+    in.read_integer
+    ncols := in.last_integer
 
     create matrix.make(nrows, ncols)
+    from i := 1 until i > nrows loop
+      from j := 1 until j > ncols loop
+        in.read_integer
+        matrix.put(in.last_integer, i, j)
+        j := j + 1
+      end
+      i := i + 1
+    end
 
-    randmat(nrows, ncols, s, matrix)
+    in.read_integer
+    percent := in.last_integer
 
-    from
-      i := 1
-    until
-      i > nrows
-    loop
-      from
-        j := 1
-      until
-        j > ncols
-      loop
+    create mask.make(nrows, ncols)
+    thresh(nrows, ncols, matrix, percent, mask)
+
+    from i := 1 until i > nrows loop
+      from j := 1 until j > ncols loop
         print(matrix.item(i, j).out + " ")
         j := j + 1
       end
@@ -50,24 +55,14 @@ feature
     end
   end
 
-  randmat(nrows, ncols, s: INTEGER; matrix: ARRAY2[INTEGER])
+  thresh(nrows, ncols: INTEGER; matrix: ARRAY2[INTEGER]; percent: INTEGER;
+    mask: ARRAY2[INTEGER])
   local
     i, j: INTEGER
-    rand: RANDOM
   do
-    create rand.set_seed(s)
-    from
-      i := 1
-    until
-      i > nrows
-    loop
-      from
-        j := 1
-      until
-        j > ncols
-      loop
-        rand.forth
-        matrix.put(rand.item, i, j)
+    from i := 1 until i > nrows
+      loop from j := 1 until j > ncols loop
+        mask.put(0, i, j)
         j := j + 1
       end
       i := i + 1
