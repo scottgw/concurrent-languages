@@ -72,6 +72,17 @@ func get_fill_histogram(nrows int, ncols int, matrix [][]int,
   }
 }
 
+func get_fill_mask(ncols int, matrix [][]int, mask [][]int,
+    threshold int) (func(index int)) {
+  return func(index int) {
+    for j := 0; j < ncols; j++ {
+      if matrix[index][j] >= threshold {
+        mask[index][j] = 1;
+      }
+    }
+  }
+}
+
 func split_worker(index int, op func(index int), done chan bool) {
   op(index);
   done <- true;
@@ -95,7 +106,6 @@ func thresh(nrows, ncols int, matrix [][]int, percent int) [][]int {
 
   nmax := reduce2d(nrows, ncols, matrix, max, 0, max, 0);
   histogram := make([]int, nmax + 1);
-
   split(0, nmax + 1, get_fill_histogram(nrows, ncols, matrix, histogram));
 
   count := (nrows * ncols * percent) / 100;
@@ -107,13 +117,7 @@ func thresh(nrows, ncols int, matrix [][]int, percent int) [][]int {
     threshold = i;
   }
 
-  for i := 0; i < nrows; i++ {
-    for j := 0; j < ncols; j++ {
-      if matrix[i][j] >= threshold {
-        mask[i][j] = 1;
-      }
-    }
-  }
+  split(0, nrows, get_fill_mask(ncols, matrix, mask, threshold));
 
   return mask;
 }
