@@ -119,8 +119,7 @@ feature
   do
     create reduce2d_workers.make
     from i := 1 until i > nrows loop
-      --create worker.make(nrows, ncols, matrix, i)
-      create worker.make(i)
+      create worker.make(nrows, ncols, matrix, i)
       reduce2d_workers.extend(worker)
       i := i + 1
     end
