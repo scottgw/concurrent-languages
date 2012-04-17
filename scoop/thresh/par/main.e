@@ -30,14 +30,7 @@ feature
     ncols := in.last_integer
 
     create matrix.make(nrows, ncols)
-    from i := 1 until i > nrows loop
-      from j := 1 until j > ncols loop
-        in.read_integer
-        matrix.put(in.last_integer, i, j)
-        j := j + 1
-      end
-      i := i + 1
-    end
+    read_matrix(nrows, ncols, matrix, in)
 
     in.read_integer
     percent := in.last_integer
@@ -55,14 +48,30 @@ feature
     end
   end
 
+  read_matrix(nrows, ncols: INTEGER; matrix: separate ARRAY2[INTEGER];
+      in: PLAIN_TEXT_FILE)
+  local
+    i, j: INTEGER
+  do
+    from i := 1 until i > nrows loop
+      from j := 1 until j > ncols loop
+        in.read_integer
+        matrix.put(in.last_integer, i, j)
+        j := j + 1
+      end
+      i := i + 1
+    end
+  end
+
   thresh(nrows, ncols: INTEGER; matrix: separate ARRAY2[INTEGER];
-      percent: INTEGER; mask: ARRAY2[INTEGER])
+      percent: INTEGER; mask: separate ARRAY2[INTEGER])
   local
     i, j: INTEGER
     nmax: INTEGER
     histogram: ARRAY[INTEGER]
     count: REAL_64
     prefixsum, threshold: INTEGER
+    index: INTEGER
   do
     -- across matrix as m loop
       -- nmax := nmax.max(m.item)
@@ -71,8 +80,13 @@ feature
 
     create histogram.make(0, nmax + 1)
 
-    across matrix as m loop
-      histogram.put(histogram.item(m.item) + 1, m.item)
+    from i:= 1 until i > nrows loop
+      from j := 1 until j > ncols loop
+        index := matrix.item(i, j)
+        histogram.put(histogram.item(index) + 1, index)
+        j := j + 1
+      end
+      i := i + 1
     end
 
     count := (nrows * ncols * percent) / 100
@@ -95,6 +109,7 @@ feature
       end
       i := i + 1
     end
+
   end
 
   reduce2d(nrows, ncols: INTEGER; matrix: separate ARRAY2[INTEGER]): INTEGER
@@ -120,6 +135,7 @@ feature {NONE}
   do
     print("+")
     worker.live
+    print("-")
   end
 
 end -- class MAIN 
