@@ -6,4 +6,5 @@ all: main
 	./$< < $<5.in
 	./$< < $<6.in
 CXXFLAGS+=-std=c++0x
+LDFLAGS+=-ltbb
 CXX=g++-4.5

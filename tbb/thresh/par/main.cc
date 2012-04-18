@@ -19,39 +19,44 @@
 
 using namespace std;
 
-#include <thread>
+typedef tbb::blocked_range<size_t> range;
 
-void func() {}
+struct sOpMax{
+  int operator()(const int& x, const int& y) const {
+    return max(x, y);
+  }
+};
 
-int max(int a, int b) {
-  std::thread t(func);
-  t.join();
-  return a > b ? a : b;
-}
-
-typedef int (*Operator)(int acc, int x);
-
-int reduce2d(int nrows, int ncols, int** matrix, Operator op) {
+template <class Operator>
+int reduce2d(int nrows, int ncols, const vector<vector<int>>& matrix,
+    Operator op) {
   return tbb::parallel_reduce(
-      tbb::blocked_range<const int*>(matrix[0], matrix[0] + ncols),
-      0,
-      [&](tbb::blocked_range<const int*> r, int partial_value)->float {
-        return std::accumulate(r.begin(), r.end(), partial_value);
+      range(0, nrows), 0,
+      [=](range r, int partial_value)->int {
+        int result = partial_value;
+        for (size_t i = r.begin(); i != r.end(); i++) {
+          result = op(result, tbb::parallel_reduce(
+            range(0, nrows), 0,
+            [=](range r, int partial_value)->int {
+              int result = partial_value;
+              for (size_t j = r.begin(); j != r.end(); j++) {
+                result = op(result, matrix[i][j]);
+              }
+              return result;
+            },
+            op));
+        }
+        return result;
       },
-      std::plus<int>());
+      op);
 }
 
-void thresh(int nrows, int ncols, int** matrix, int percent, int** mask) {
-  int nmax = 0;
-  //for (int i = 0; i < nrows; i++) {
-    //for (int j = 0; j < ncols; j++) {
-      //nmax = max(nmax, matrix[i][j]);
-    //}
-  //}
-  
-  nmax = reduce2d(nrows, ncols, matrix, max);
+void thresh(int nrows, int ncols, const vector<vector<int>>& matrix,
+    int percent, vector<vector<int>>* mask) {
 
-  int* histogram = new int[nmax + 1];
+  int nmax = reduce2d(nrows, ncols, matrix, sOpMax());
+
+  vector<int> histogram(nmax + 1, 0);
 
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
@@ -69,13 +74,13 @@ void thresh(int nrows, int ncols, int** matrix, int percent, int** mask) {
     threshold = i;
   }
 
+  printf("threshold: %d\n", threshold);
+
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
-      mask[i][j] = matrix[i][j] >= threshold;
+      (*mask)[i][j] = matrix[i][j] >= threshold;
     }
   }
-
-  delete[] histogram;
 }
 
 int main(int argc, char** argv) {
@@ -83,15 +88,8 @@ int main(int argc, char** argv) {
 
   scanf("%d%d", &nrows, &ncols);
 
-  int** matrix = new int* [nrows];
-  for (int i = 0; i < nrows; i++) {
-    matrix[i] = new int[ncols];
-  }
-
-  int** mask = new int* [nrows];
-  for (int i = 0; i < nrows; i++) {
-    mask[i] = new int[ncols];
-  }
+  vector<vector<int>> matrix(nrows, vector<int>(ncols));
+  vector<vector<int>> mask(nrows, vector<int>(ncols));
 
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
@@ -101,7 +99,7 @@ int main(int argc, char** argv) {
 
   scanf("%d", &percent);
 
-  thresh(nrows, ncols, matrix, percent, mask);
+  thresh(nrows, ncols, matrix, percent, &mask);
 
   printf("%d %d\n", nrows, ncols);
   for (int i = 0; i < nrows; i++) {
@@ -111,16 +109,6 @@ int main(int argc, char** argv) {
     printf("\n");
   }
   printf("\n");
-
-  for (int i = 0; i < nrows; i++) {
-    delete[] matrix[i];
-  }
-  delete[] matrix;
-
-  for (int i = 0; i < nrows; i++) {
-    delete[] mask[i];
-  }
-  delete[] mask;
 
   return 0;
 }
