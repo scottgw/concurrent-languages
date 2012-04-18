@@ -36,7 +36,7 @@ int reduce2d(int nrows, int ncols, int** matrix, Operator op) {
       tbb::blocked_range<const int*>(matrix[0], matrix[0] + ncols),
       0,
       [&](tbb::blocked_range<const int*> r, int partial_value)->float {
-        return std::accumulate(r.begin(), e.end(), partial_value)
+        return std::accumulate(r.begin(), r.end(), partial_value);
       },
       std::plus<int>());
 }
