@@ -2,14 +2,12 @@ class REDUCE2D_WORKER
 inherit EXECUTION_ENVIRONMENT
 create make
 feature
-  make (nrows_, ncols_: INTEGER; matrix_: separate ARRAY2[INTEGER];
-      index_: INTEGER)
+  make (nrows_, ncols_: INTEGER; array_: separate ARRAY[INTEGER])
   local
   do
     nrows := nrows_
     ncols := ncols_
-    matrix := matrix_
-    index := index_
+    array := array_
   end
 
 feature
@@ -18,7 +16,7 @@ feature
     res: INTEGER
   do
 
-    res := get_result(matrix)
+    res := get_result(array)
     -- send result back
 
     --sleep(100000000 * (index \\ 10))
@@ -28,20 +26,19 @@ feature
     --end
   end
 
-  get_result(a_matrix: separate ARRAY2[INTEGER]): INTEGER
+  get_result(an_array: separate ARRAY[INTEGER]): INTEGER
   local
     j: INTEGER
   do
-    Result := a_matrix.item(index, 1)
+    Result := an_array.item(1)
     from j := 2 until j > ncols loop
-      Result := Result.max(a_matrix.item(index, j))
+      Result := Result.max(an_array.item(j))
       j := j + 1
     end
   end
 
 feature {NONE}
   nrows, ncols: INTEGER
-  matrix: separate ARRAY2[INTEGER]
-  index: INTEGER
+  array: separate ARRAY[INTEGER]
 
 end

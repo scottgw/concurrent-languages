@@ -29,7 +29,7 @@ feature
     in.read_integer
     ncols := in.last_integer
 
-    create matrix.make(nrows, ncols)
+    create matrix.make(1, nrows)
     read_matrix(nrows, ncols, matrix, in)
 
     in.read_integer
@@ -48,23 +48,39 @@ feature
     end
   end
 
-  read_matrix(nrows, ncols: INTEGER; matrix: separate ARRAY2[INTEGER];
+  read_matrix(nrows, ncols: INTEGER; matrix: ARRAY[separate ARRAY[INTEGER]];
       in: PLAIN_TEXT_FILE)
   local
     i, j: INTEGER
   do
     from i := 1 until i > nrows loop
+      matrix.put(create_array(ncols), i)
       from j := 1 until j > ncols loop
         in.read_integer
-        matrix.put(in.last_integer, i, j)
+        put(matrix.item(i), in.last_integer, j)
         j := j + 1
       end
       i := i + 1
     end
   end
 
-  thresh(nrows, ncols: INTEGER; matrix: separate ARRAY2[INTEGER];
-      percent: INTEGER; mask: separate ARRAY2[INTEGER])
+  create_array(n: INTEGER): separate ARRAY[INTEGER]
+  do
+    create {separate ARRAY[INTEGER]} Result.make(1, n)
+  end
+
+  put(array: separate ARRAY[INTEGER]; value, index: INTEGER)
+  do
+    array.put(value, index)
+  end
+
+  item(array: separate ARRAY[INTEGER]; index: INTEGER): INTEGER
+  do
+    Result := array.item(index)
+  end
+
+  thresh(nrows, ncols: INTEGER; matrix: ARRAY[separate ARRAY[INTEGER]];
+      percent: INTEGER; mask: ARRAY[separate ARRAY[INTEGER]])
   local
     i, j: INTEGER
     nmax: INTEGER
@@ -82,7 +98,7 @@ feature
 
     from i:= 1 until i > nrows loop
       from j := 1 until j > ncols loop
-        index := matrix.item(i, j)
+        index := item(matrix.item(i), j)
         histogram.put(histogram.item(index) + 1, index)
         j := j + 1
       end
@@ -102,8 +118,8 @@ feature
 
     from i := 1 until i > nrows loop
       from j := 1 until j > ncols loop
-        if matrix.item(i, j) >= threshold then
-          mask.put(1, i, j)
+        if item(matrix.item(i), j) >= threshold then
+          put(mask.item(i), 1, j)
         end
         j := j + 1
       end
@@ -112,14 +128,15 @@ feature
 
   end
 
-  reduce2d(nrows, ncols: INTEGER; matrix: separate ARRAY2[INTEGER]): INTEGER
+  reduce2d(nrows, ncols: INTEGER; matrix: ARRAY[separate ARRAY[INTEGER]])
+      : INTEGER
   local
     i: INTEGER
     worker: separate REDUCE2D_WORKER
   do
     create reduce2d_workers.make
     from i := 1 until i > nrows loop
-      create worker.make(nrows, ncols, matrix, i)
+      create worker.make(nrows, ncols, matrix.item(i))
       reduce2d_workers.extend(worker)
       i := i + 1
     end
