@@ -58,8 +58,10 @@ feature
       from j := 1 until j > ncols loop
         in.read_integer
         put(matrix.item(i), in.last_integer, j)
+        --print(item(matrix.item(i), j).out + " ");
         j := j + 1
       end
+      --print("%N")
       i := i + 1
     end
   end
@@ -93,38 +95,39 @@ feature
       -- nmax := nmax.max(m.item)
     -- end
     nmax := reduce2d(nrows, ncols, matrix);
+    print("--> nmax: " + nmax.out + "%N")
 
-    create histogram.make(0, nmax + 1)
+    --create histogram.make(0, nmax + 1)
 
-    from i:= 1 until i > nrows loop
-      from j := 1 until j > ncols loop
-        index := item(matrix.item(i), j)
-        histogram.put(histogram.item(index) + 1, index)
-        j := j + 1
-      end
-      i := i + 1
-    end
-
-    count := (nrows * ncols * percent) / 100
-
-    prefixsum := 0
-    threshold := nmax
-
-    from i := nmax until not(i >= 0 and prefixsum <= count) loop
-      prefixsum := prefixsum + histogram[i];
-      threshold := i;
-      i := i - 1
-    end
-
-    from i := 1 until i > nrows loop
-      from j := 1 until j > ncols loop
-        if item(matrix.item(i), j) >= threshold then
-          put(mask.item(i), 1, j)
-        end
-        j := j + 1
-      end
-      i := i + 1
-    end
+    --from i:= 1 until i > nrows loop
+      --from j := 1 until j > ncols loop
+        --index := item(matrix.item(i), j)
+        --histogram.put(histogram.item(index) + 1, index)
+        --j := j + 1
+      --end
+      --i := i + 1
+    --end
+--
+    --count := (nrows * ncols * percent) / 100
+--
+    --prefixsum := 0
+    --threshold := nmax
+--
+    --from i := nmax until not(i >= 0 and prefixsum <= count) loop
+      --prefixsum := prefixsum + histogram[i];
+      --threshold := i;
+      --i := i - 1
+    --end
+--
+    --from i := 1 until i > nrows loop
+      --from j := 1 until j > ncols loop
+        --if item(matrix.item(i), j) >= threshold then
+          --put(mask.item(i), 1, j)
+        --end
+        --j := j + 1
+      --end
+      --i := i + 1
+    --end
 
   end
 
@@ -133,20 +136,26 @@ feature
   local
     i: INTEGER
     worker: separate REDUCE2D_WORKER
+    workers: LINKED_LIST [separate REDUCE2D_WORKER]
+    aggregator: separate REDUCE2D_AGGREGATOR
   do
-    create reduce2d_workers.make
+    create workers.make
+    create aggregator.make(nrows)
     from i := 1 until i > nrows loop
-      create worker.make(nrows, ncols, matrix.item(i))
-      reduce2d_workers.extend(worker)
+      create worker.make(nrows, ncols, matrix.item(i), aggregator)
+      workers.extend(worker)
       i := i + 1
     end
-    reduce2d_workers.do_all(agent launch_reduce2d_worker)
-    Result := 10
+    workers.do_all(agent launch_reduce2d_worker)
+    Result := reduce2d_result(aggregator)
+  end
+
+  reduce2d_result(aggregator: separate REDUCE2D_AGGREGATOR): INTEGER
+  do
+    Result := aggregator.get_result()
   end
 
 feature {NONE}
-  reduce2d_workers: LINKED_LIST [separate REDUCE2D_WORKER]
-
   launch_reduce2d_worker(worker: separate REDUCE2D_WORKER)
   do
     print("+")
