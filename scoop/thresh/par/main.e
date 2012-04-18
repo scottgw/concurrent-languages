@@ -15,7 +15,7 @@ feature
   make
   local
     nrows, ncols, percent: INTEGER
-    matrix, mask: separate ARRAY2[INTEGER]
+    matrix, mask: ARRAY[separate ARRAY[INTEGER]]
     i, j: INTEGER
     in: PLAIN_TEXT_FILE
     file_name: STRING
