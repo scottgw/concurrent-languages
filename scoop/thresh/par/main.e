@@ -137,7 +137,7 @@ feature
     i: INTEGER
     worker: separate REDUCE2D_WORKER
     workers: LINKED_LIST [separate REDUCE2D_WORKER]
-    aggregator: separate REDUCE2D_AGGREGATOR
+    reader: separate REDUCE2D_READER
   do
     create workers.make
     create aggregator.make(nrows)
@@ -147,15 +147,17 @@ feature
       i := i + 1
     end
     workers.do_all(agent launch_reduce2d_worker)
-    Result := reduce2d_result(aggregator)
+    Result := reduce2d_result(reader)
   end
 
-  reduce2d_result(aggregator: separate REDUCE2D_AGGREGATOR): INTEGER
+  reduce2d_result(reader: separate REDUCE2D_READER): INTEGER
   do
     Result := aggregator.get_result()
   end
 
 feature {NONE}
+  aggregator: separate REDUCE2D_AGGREGATOR
+
   launch_reduce2d_worker(worker: separate REDUCE2D_WORKER)
   do
     print("+")
