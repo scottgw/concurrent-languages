@@ -20,8 +20,9 @@ feature
     in: PLAIN_TEXT_FILE
     file_name: STRING
   do
+    print("HERE%N")
     file_name := separate_character_option_value('i')
-    !!in.make_open_read(separate_character_option_value('i'))
+    create in.make_open_read(separate_character_option_value('i'))
 
     in.read_integer
     nrows := in.last_integer
@@ -29,13 +30,13 @@ feature
     in.read_integer
     ncols := in.last_integer
 
-    create matrix.make(1, nrows)
+    create matrix.make_empty
     read_matrix(nrows, ncols, matrix, in)
 
     in.read_integer
     percent := in.last_integer
 
-    create mask.make(nrows, ncols)
+    create mask.make_empty -- TODO initialize mask
     thresh(nrows, ncols, matrix, percent, mask)
 
     from i := 1 until i > nrows loop
@@ -54,7 +55,7 @@ feature
     i, j: INTEGER
   do
     from i := 1 until i > nrows loop
-      matrix.put(create_array(ncols), i)
+      matrix.force(create_array(), i)
       from j := 1 until j > ncols loop
         in.read_integer
         put(matrix.item(i), in.last_integer, j)
@@ -66,14 +67,14 @@ feature
     end
   end
 
-  create_array(n: INTEGER): separate ARRAY[INTEGER]
+  create_array(): separate ARRAY[INTEGER]
   do
-    create {separate ARRAY[INTEGER]} Result.make(1, n)
+    create {separate ARRAY[INTEGER]} Result.make_empty
   end
 
   put(array: separate ARRAY[INTEGER]; value, index: INTEGER)
   do
-    array.put(value, index)
+    array.force(value, index)
   end
 
   item(array: separate ARRAY[INTEGER]; index: INTEGER): INTEGER
@@ -139,7 +140,9 @@ feature
     workers: LINKED_LIST [separate REDUCE2D_WORKER]
     reader: separate REDUCE2D_READER
   do
+    print("HERE%N")
     create workers.make
+    create reader.make
     create aggregator.make(nrows)
     from i := 1 until i > nrows loop
       create worker.make(nrows, ncols, matrix.item(i), aggregator)
@@ -152,7 +155,7 @@ feature
 
   reduce2d_result(reader: separate REDUCE2D_READER): INTEGER
   do
-    Result := aggregator.get_result()
+    Result := reader.get_result(aggregator)
   end
 
 feature {NONE}
