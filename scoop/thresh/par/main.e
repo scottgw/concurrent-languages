@@ -16,11 +16,9 @@ feature
   local
     nrows, ncols, percent: INTEGER
     matrix, mask: ARRAY[separate ARRAY[INTEGER]]
-    i, j: INTEGER
     in: PLAIN_TEXT_FILE
     file_name: STRING
   do
-    print("HERE%N")
     file_name := separate_character_option_value('i')
     create in.make_open_read(separate_character_option_value('i'))
 
@@ -39,31 +37,25 @@ feature
     create mask.make_empty -- TODO initialize mask
     thresh(nrows, ncols, matrix, percent, mask)
 
-    from i := 1 until i > nrows loop
-      from j := 1 until j > ncols loop
-        --print(mask.item(i, j).out + " ")
-        j := j + 1
+    across 1 |..| nrows as ic loop
+      across 2 |..| ncols as jc loop
+        --print(mask.item(ic.item, jc.item).out + " ")
       end
       --print("%N")
-      i := i + 1
     end
   end
 
   read_matrix(nrows, ncols: INTEGER; matrix: ARRAY[separate ARRAY[INTEGER]];
       in: PLAIN_TEXT_FILE)
-  local
-    i, j: INTEGER
   do
-    from i := 1 until i > nrows loop
-      matrix.force(create_array(), i)
-      from j := 1 until j > ncols loop
+    across 1 |..| nrows as ic loop
+      matrix.force(create_array(), ic.item)
+      across 1 |..| ncols as jc loop
         in.read_integer
-        put(matrix.item(i), in.last_integer, j)
-        --print(item(matrix.item(i), j).out + " ");
-        j := j + 1
+        put(matrix.item(ic.item), in.last_integer, jc.item)
+        --print(item(matrix.item(ic.item), jc.item).out + " ");
       end
       --print("%N")
-      i := i + 1
     end
   end
 
@@ -85,30 +77,29 @@ feature
   thresh(nrows, ncols: INTEGER; matrix: ARRAY[separate ARRAY[INTEGER]];
       percent: INTEGER; mask: ARRAY[separate ARRAY[INTEGER]])
   local
-    i, j: INTEGER
     nmax: INTEGER
     histogram: ARRAY[INTEGER]
     count: REAL_64
     prefixsum, threshold: INTEGER
     index: INTEGER
   do
-    -- across matrix as m loop
-      -- nmax := nmax.max(m.item)
-    -- end
     nmax := reduce2d(nrows, ncols, matrix);
     print("--> nmax: " + nmax.out + "%N")
 
-    --create histogram.make(0, nmax + 1)
+    create histogram.make_filled(0, 0, nmax + 1)
 
-    --from i:= 1 until i > nrows loop
-      --from j := 1 until j > ncols loop
-        --index := item(matrix.item(i), j)
-        --histogram.put(histogram.item(index) + 1, index)
-        --j := j + 1
-      --end
-      --i := i + 1
-    --end
---
+    across 1 |..| nrows as ic loop
+      across 1 |..| ncols as jc loop
+        index := item(matrix.item(ic.item), jc.item)
+        histogram.put(histogram.item(index) + 1, index)
+      end
+    end
+
+    across 0 |..| (nmax + 1) as ic loop
+      print(histogram.item(ic.item).out + " ")
+    end
+    print("%N")
+
     --count := (nrows * ncols * percent) / 100
 --
     --prefixsum := 0
@@ -135,19 +126,16 @@ feature
   reduce2d(nrows, ncols: INTEGER; matrix: ARRAY[separate ARRAY[INTEGER]])
       : INTEGER
   local
-    i: INTEGER
     worker: separate REDUCE2D_WORKER
     workers: LINKED_LIST [separate REDUCE2D_WORKER]
     reader: separate REDUCE2D_READER
   do
-    print("HERE%N")
     create workers.make
     create reader.make
     create aggregator.make(nrows)
-    from i := 1 until i > nrows loop
-      create worker.make(nrows, ncols, matrix.item(i), aggregator)
+    across 1 |..| nrows as ic loop
+      create worker.make(nrows, ncols, matrix.item(ic.item), aggregator)
       workers.extend(worker)
-      i := i + 1
     end
     workers.do_all(agent launch_reduce2d_worker)
     Result := reduce2d_result(reader)
