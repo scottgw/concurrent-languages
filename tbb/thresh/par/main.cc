@@ -101,25 +101,31 @@ void thresh(int nrows, int ncols, const vector<vector<int>>& matrix,
         }
       });
 
-  int count = (nrows * ncols * percent) / 100;
-  count = nrows * ncols - count;  // because we scan from left to right
-
   vector<int> prefixsum(nmax + 1);
-
   ScanSum scan_sum(&prefixsum, histogram);
   tbb::parallel_scan(
       range(0, nmax + 1),
       scan_sum,
       tbb::auto_partitioner());
 
+  int count = (nrows * ncols * percent) / 100;
+  count = nrows * ncols - count;  // because we scan from left to right
   int threshold = lower_bound(prefixsum.begin(), prefixsum.end(), count) -
      prefixsum.begin();
 
-  for (int i = 0; i < nrows; i++) {
-    for (int j = 0; j < ncols; j++) {
-      (*mask)[i][j] = matrix[i][j] >= threshold;
-    }
-  }
+  tbb::parallel_for(
+      range(0, nrows),
+      [&](range r) {
+        for (size_t i = r.begin(); i != r.end(); ++i) {
+          tbb::parallel_for(
+            range(0, ncols),
+            [&](range s) {
+              for (size_t j = s.begin(); j != s.end(); ++j) {
+                (*mask)[i][j] = matrix[i][j] >= threshold;
+              }
+            });
+        }
+      });
 }
 
 int main(int argc, char** argv) {
