@@ -203,5 +203,4 @@ feature {NONE}
   do
     worker.live
   end
-
 end -- class MAIN 
