@@ -14,9 +14,10 @@
 
 #include <algorithm>
 
+#include "tbb/blocked_range.h"
 #include "tbb/parallel_for.h"
 #include "tbb/parallel_reduce.h"
-#include "tbb/blocked_range.h"
+#include "tbb/parallel_scan.h"
 
 using namespace std;
 
@@ -59,6 +60,29 @@ int reduce2d(int nrows, int ncols, const vector<vector<int>>& matrix,
   return reduce2d_with_filter(nrows, ncols, matrix, op, op);
 }
 
+class ScanSum {
+  int sum;
+  vector<int>* y;
+  const vector<int>& x;
+
+public:
+  ScanSum(vector<int>* y_, const vector<int>& x_): sum(0), x(x_), y(y_) {}
+  template<typename Tag>
+  void operator()(range r, Tag) {
+    int res = sum;
+    for (size_t i = r.begin(); i != r.end(); ++i) {
+      res += x[i];
+      if (Tag::is_final_scan()) {
+        (*y)[i] = res;
+      }
+    }
+    sum = res;
+  }
+  ScanSum(ScanSum& other, tbb::split) : x(other.x), y(other.y), sum(0) {}
+  void reverse_join(ScanSum& other) { sum += other.sum; }
+  void assign(ScanSum& other) { sum = other.sum; }
+};
+
 void thresh(int nrows, int ncols, const vector<vector<int>>& matrix,
     int percent, vector<vector<int>>* mask) {
 
@@ -78,16 +102,18 @@ void thresh(int nrows, int ncols, const vector<vector<int>>& matrix,
       });
 
   int count = (nrows * ncols * percent) / 100;
+  count = nrows * ncols - count;  // because we scan from left to right
 
-  int prefixsum = 0;
-  int threshold = nmax;
+  vector<int> prefixsum(nmax + 1);
 
-  for (int i = nmax; i >= 0 && prefixsum <= count; i--) {
-    prefixsum += histogram[i];
-    threshold = i;
-  }
+  ScanSum scan_sum(&prefixsum, histogram);
+  tbb::parallel_scan(
+      range(0, nmax + 1),
+      scan_sum,
+      tbb::auto_partitioner());
 
-  printf("threshold: %d\n", threshold);
+  int threshold = lower_bound(prefixsum.begin(), prefixsum.end(), count) -
+     prefixsum.begin();
 
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
