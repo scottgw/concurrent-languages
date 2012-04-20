@@ -49,16 +49,16 @@ feature
       res := filter(res)
     end
     if ncols > 1 then
-      from j := 2 until j > ncols loop
+      across 2 |..| ncols as jc loop
+      --from j := 2 until j > ncols loop
         inspect op
         when {REDUCE2D_OPERATOR}.max then
-          res := res.max(an_array.item(j))
+          res := res.max(an_array.item(jc.item))
         when {REDUCE2D_OPERATOR}.filter then
-          res := res + filter(an_array.item(j))
+          res := res + filter(an_array.item(jc.item))
         else
           print("ERROR! %N%N%N%N%N")
         end
-        j := j + 1
       end
     end
     an_aggregator.put(res)

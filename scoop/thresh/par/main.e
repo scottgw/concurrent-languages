@@ -34,14 +34,14 @@ feature
     in.read_integer
     percent := in.last_integer
 
-    create mask.make_empty -- TODO initialize mask
+    create mask.make_empty
     thresh(nrows, ncols, matrix, percent, mask)
 
     across 1 |..| nrows as ic loop
-      across 2 |..| ncols as jc loop
-        --print(mask.item(ic.item, jc.item).out + " ")
+      across 1 |..| ncols as jc loop
+        print(item(mask.item(ic.item), jc.item).out + " ")
       end
-      --print("%N")
+      print("%N")
     end
   end
 
@@ -79,9 +79,9 @@ feature
   local
     nmax: INTEGER
     histogram: ARRAY[INTEGER]
-    --count: REAL_64
-    --prefixsum, threshold: INTEGER
-    --index: INTEGER
+    count: INTEGER
+    prefixsum, threshold: INTEGER
+    i: INTEGER
   do
     nmax := reduce2d(nrows, ncols, matrix);
     print("--> nmax: " + nmax.out + "%N")
@@ -93,29 +93,24 @@ feature
           ic.item)
     end
 
-    --across 1 |..| nrows as ic loop
-      --across 1 |..| ncols as jc loop
-        --index := item(matrix.item(ic.item), jc.item)
-        --histogram.put(histogram.item(index) + 1, index)
-      --end
-    --end
-
     across 0 |..| (nmax + 1) as ic loop
       print(histogram.item(ic.item).out + " ")
     end
     print("%N")
 
-    --count := (nrows * ncols * percent) / 100
---
-    --prefixsum := 0
-    --threshold := nmax
---
-    --from i := nmax until not(i >= 0 and prefixsum <= count) loop
-      --prefixsum := prefixsum + histogram[i];
-      --threshold := i;
-      --i := i - 1
-    --end
---
+    count := (nrows * ncols * percent) // 100
+
+    prefixsum := 0
+    threshold := nmax
+
+    from i := nmax until not(i >= 0 and prefixsum <= count) loop
+      prefixsum := prefixsum + histogram[i];
+      threshold := i;
+      i := i - 1
+    end
+
+    parfor(nrows, ncols, matrix, mask, threshold)
+
     --from i := 1 until i > nrows loop
       --from j := 1 until j > ncols loop
         --if item(matrix.item(i), j) >= threshold then
@@ -154,31 +149,57 @@ feature
   do
     create workers.make
     create reader.make
-    create aggregator.make(nrows, op_aggregator)
+    create reduce2d_aggregator.make(nrows, op_aggregator)
     across 1 |..| nrows as ic loop
       create worker.make_with_filter(nrows, ncols, matrix.item(ic.item), 
-        aggregator, op, value)
+        reduce2d_aggregator, op, value)
       workers.extend(worker)
     end
     workers.do_all(agent launch_reduce2d_worker)
     Result := reduce2d_result(reader)
   end
 
-
   reduce2d_result(reader: separate REDUCE2D_READER): INTEGER
   do
-    Result := reader.get_result(aggregator)
+    Result := reader.get_result(reduce2d_aggregator)
   end
 
-  max(x, y: INTEGER): INTEGER
+  parfor(nrows, ncols: INTEGER;
+    matrix, mask: ARRAY[separate ARRAY[INTEGER]];
+    threshold: INTEGER)
+  local
+    worker: separate PARFOR_WORKER
+    workers: LINKED_LIST[separate PARFOR_WORKER]
+    reader: separate PARFOR_READER
   do
-    Result := x.max(y)
+    create workers.make
+    create reader.make
+    create parfor_aggregator.make(nrows)
+    across 1 |..| nrows as ic loop
+      mask.force(create_array(), ic.item)
+      create worker.make(nrows, ncols, matrix.item(ic.item),
+        mask.item(ic.item), threshold, parfor_aggregator)
+      workers.extend(worker)
+    end
+    workers.do_all(agent launch_parfor_worker)
+    parfor_result(reader)
+  end
+
+  parfor_result(reader: separate PARFOR_READER)
+  do
+    reader.get_result(parfor_aggregator)
   end
 
 feature {NONE}
-  aggregator: separate REDUCE2D_AGGREGATOR
+  reduce2d_aggregator: separate REDUCE2D_AGGREGATOR
+  parfor_aggregator: separate PARFOR_AGGREGATOR
 
   launch_reduce2d_worker(worker: separate REDUCE2D_WORKER)
+  do
+    worker.live
+  end
+
+  launch_parfor_worker(worker: separate PARFOR_WORKER)
   do
     worker.live
   end

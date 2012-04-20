@@ -8,6 +8,7 @@ feature
     op := op_
     count := 0
     res := -1
+    calls := 0
   end
 
 feature
@@ -26,11 +27,13 @@ feature
       end
     end
     count := count + 1
-    print("missing " + (n - count).out + "%N")
+    print("reduce missing " + (n - count).out + "%N")
   end
 
   is_all_done(): BOOLEAN
   do
+    calls := calls + 1
+    print("reduce is_all_done " + calls.out + "%N")
     Result := count = n
   end
 
@@ -44,5 +47,6 @@ feature
 feature {NONE}
   n, op, count: INTEGER
   res: INTEGER
+  calls: INTEGER
 
 end
