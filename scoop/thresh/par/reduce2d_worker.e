@@ -1,21 +1,40 @@
 class REDUCE2D_WORKER
 inherit EXECUTION_ENVIRONMENT
-create make
+create
+  make,
+  make_with_filter
+
 feature
   make (nrows_, ncols_: INTEGER; array_: separate ARRAY[INTEGER];
-      aggregator_: separate REDUCE2D_AGGREGATOR)
+      aggregator_: separate REDUCE2D_AGGREGATOR;
+      op_: INTEGER)
   local
   do
     nrows := nrows_
     ncols := ncols_
     array := array_
     aggregator := aggregator_
+    op := op_
+  end
+
+  make_with_filter (nrows_, ncols_: INTEGER;
+      array_: separate ARRAY[INTEGER];
+      aggregator_: separate REDUCE2D_AGGREGATOR;
+      op_: INTEGER;
+      value_: INTEGER)
+  local
+  do
+    nrows := nrows_
+    ncols := ncols_
+    array := array_
+    aggregator := aggregator_
+    op := op_
+    value := value_
   end
 
 feature
   live
   do
-
     get_result(array, aggregator)
   end
 
@@ -26,18 +45,38 @@ feature
     res: INTEGER
   do
     res := an_array.item(1)
+    if op = {REDUCE2D_OPERATOR}.filter then
+      res := filter(res)
+    end
     if ncols > 1 then
       from j := 2 until j > ncols loop
-        res := res.max(an_array.item(j))
+        inspect op
+        when {REDUCE2D_OPERATOR}.max then
+          res := res.max(an_array.item(j))
+        when {REDUCE2D_OPERATOR}.filter then
+          res := res + filter(an_array.item(j))
+        else
+          print("ERROR! %N%N%N%N%N")
+        end
         j := j + 1
       end
     end
     an_aggregator.put(res)
   end
 
+  filter(x: INTEGER): INTEGER
+  do
+    Result := 0
+    if x = value then
+      Result := 1
+    end
+  end
+
 feature {NONE}
   nrows, ncols: INTEGER
   array: separate ARRAY[INTEGER]
   aggregator: separate REDUCE2D_AGGREGATOR
+  op: INTEGER
+  value: INTEGER
 
 end

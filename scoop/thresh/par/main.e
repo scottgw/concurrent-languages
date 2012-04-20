@@ -79,21 +79,26 @@ feature
   local
     nmax: INTEGER
     histogram: ARRAY[INTEGER]
-    count: REAL_64
-    prefixsum, threshold: INTEGER
-    index: INTEGER
+    --count: REAL_64
+    --prefixsum, threshold: INTEGER
+    --index: INTEGER
   do
     nmax := reduce2d(nrows, ncols, matrix);
     print("--> nmax: " + nmax.out + "%N")
 
     create histogram.make_filled(0, 0, nmax + 1)
 
-    across 1 |..| nrows as ic loop
-      across 1 |..| ncols as jc loop
-        index := item(matrix.item(ic.item), jc.item)
-        histogram.put(histogram.item(index) + 1, index)
-      end
+    across 0 |..| (nmax + 1) as ic loop
+      histogram.put(reduce2d_with_filter(nrows, ncols, matrix, ic.item),
+          ic.item)
     end
+
+    --across 1 |..| nrows as ic loop
+      --across 1 |..| ncols as jc loop
+        --index := item(matrix.item(ic.item), jc.item)
+        --histogram.put(histogram.item(index) + 1, index)
+      --end
+    --end
 
     across 0 |..| (nmax + 1) as ic loop
       print(histogram.item(ic.item).out + " ")
@@ -132,18 +137,45 @@ feature
   do
     create workers.make
     create reader.make
-    create aggregator.make(nrows)
+    create aggregator.make(nrows, {REDUCE2D_OPERATOR}.max)
     across 1 |..| nrows as ic loop
-      create worker.make(nrows, ncols, matrix.item(ic.item), aggregator)
+      create worker.make(nrows, ncols, matrix.item(ic.item), aggregator,
+        {REDUCE2D_OPERATOR}.max)
       workers.extend(worker)
     end
     workers.do_all(agent launch_reduce2d_worker)
     Result := reduce2d_result(reader)
   end
 
+  reduce2d_with_filter(nrows, ncols: INTEGER;
+      matrix: ARRAY[separate ARRAY[INTEGER]];
+      value: INTEGER): INTEGER
+  local
+    worker: separate REDUCE2D_WORKER
+    workers: LINKED_LIST [separate REDUCE2D_WORKER]
+    reader: separate REDUCE2D_READER
+  do
+    create workers.make
+    create reader.make
+    create aggregator.make(nrows, {REDUCE2D_OPERATOR}.sum)
+    across 1 |..| nrows as ic loop
+      create worker.make_with_filter(nrows, ncols, matrix.item(ic.item), 
+        aggregator, {REDUCE2D_OPERATOR}.filter, value)
+      workers.extend(worker)
+    end
+    workers.do_all(agent launch_reduce2d_worker)
+    Result := reduce2d_result(reader)
+  end
+
+
   reduce2d_result(reader: separate REDUCE2D_READER): INTEGER
   do
     Result := reader.get_result(aggregator)
+  end
+
+  max(x, y: INTEGER): INTEGER
+  do
+    Result := x.max(y)
   end
 
 feature {NONE}
