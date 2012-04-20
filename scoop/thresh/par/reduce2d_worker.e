@@ -2,30 +2,42 @@ class REDUCE2D_WORKER
 inherit EXECUTION_ENVIRONMENT
 create make
 feature
-  --make (nrows_, ncols_: INTEGER; matrix_: separate ARRAY2[INTEGER];
-      --index_: INTEGER)
-  make(index_: INTEGER)
+  make (nrows_, ncols_: INTEGER; array_: separate ARRAY[INTEGER];
+      aggregator_: separate REDUCE2D_AGGREGATOR)
   local
   do
-    --nrows := nrows_
-    --ncols := ncols_
-    --matrix := matrix_
-    index := index_
+    nrows := nrows_
+    ncols := ncols_
+    array := array_
+    aggregator := aggregator_
   end
 
 feature
   live
   do
-    sleep(100000000 * (index \\ 10))
-    print("!" + index.out + "!")
-    if ((index> 0) and index \\ 10 = 0) then
-      print("%N")
+
+    get_result(array, aggregator)
+  end
+
+  get_result(an_array: separate ARRAY[INTEGER];
+      an_aggregator: separate REDUCE2D_AGGREGATOR)
+  local
+    j: INTEGER
+    res: INTEGER
+  do
+    res := an_array.item(1)
+    if ncols > 1 then
+      from j := 2 until j > ncols loop
+        res := res.max(an_array.item(j))
+        j := j + 1
+      end
     end
+    an_aggregator.put(res)
   end
 
 feature {NONE}
-  --nrows, ncols: INTEGER
-  --matrix: separate ARRAY2[INTEGER]
-  index: INTEGER
+  nrows, ncols: INTEGER
+  array: separate ARRAY[INTEGER]
+  aggregator: separate REDUCE2D_AGGREGATOR
 
 end
