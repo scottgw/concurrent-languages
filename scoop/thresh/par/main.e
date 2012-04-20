@@ -130,26 +130,23 @@ feature
 
   reduce2d(nrows, ncols: INTEGER; matrix: ARRAY[separate ARRAY[INTEGER]])
       : INTEGER
-  local
-    worker: separate REDUCE2D_WORKER
-    workers: LINKED_LIST [separate REDUCE2D_WORKER]
-    reader: separate REDUCE2D_READER
   do
-    create workers.make
-    create reader.make
-    create aggregator.make(nrows, {REDUCE2D_OPERATOR}.max)
-    across 1 |..| nrows as ic loop
-      create worker.make(nrows, ncols, matrix.item(ic.item), aggregator,
-        {REDUCE2D_OPERATOR}.max)
-      workers.extend(worker)
-    end
-    workers.do_all(agent launch_reduce2d_worker)
-    Result := reduce2d_result(reader)
+    Result := reduce2d_impl(nrows, ncols, matrix, 0,
+      {REDUCE2D_OPERATOR}.max, {REDUCE2D_OPERATOR}.max)
   end
 
   reduce2d_with_filter(nrows, ncols: INTEGER;
+      matrix: ARRAY[separate ARRAY[INTEGER]]; value: INTEGER): INTEGER
+  do
+    Result := reduce2d_impl(nrows, ncols, matrix, value,
+      {REDUCE2D_OPERATOR}.sum, {REDUCE2D_OPERATOR}.filter)
+  end
+
+  reduce2d_impl(nrows, ncols: INTEGER;
       matrix: ARRAY[separate ARRAY[INTEGER]];
-      value: INTEGER): INTEGER
+      value: INTEGER;
+      op_aggregator: INTEGER;
+      op: INTEGER): INTEGER
   local
     worker: separate REDUCE2D_WORKER
     workers: LINKED_LIST [separate REDUCE2D_WORKER]
@@ -157,10 +154,10 @@ feature
   do
     create workers.make
     create reader.make
-    create aggregator.make(nrows, {REDUCE2D_OPERATOR}.sum)
+    create aggregator.make(nrows, op_aggregator)
     across 1 |..| nrows as ic loop
       create worker.make_with_filter(nrows, ncols, matrix.item(ic.item), 
-        aggregator, {REDUCE2D_OPERATOR}.filter, value)
+        aggregator, op, value)
       workers.extend(worker)
     end
     workers.do_all(agent launch_reduce2d_worker)
@@ -183,9 +180,7 @@ feature {NONE}
 
   launch_reduce2d_worker(worker: separate REDUCE2D_WORKER)
   do
-    print("+")
     worker.live
-    print("-")
   end
 
 end -- class MAIN 
