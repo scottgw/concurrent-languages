@@ -16,11 +16,9 @@ feature
   local
     nrows, ncols, percent: INTEGER
     matrix, mask: ARRAY[separate ARRAY[INTEGER]]
-    i, j: INTEGER
     in: PLAIN_TEXT_FILE
     file_name: STRING
   do
-    print("HERE%N")
     file_name := separate_character_option_value('i')
     create in.make_open_read(separate_character_option_value('i'))
 
@@ -36,34 +34,28 @@ feature
     in.read_integer
     percent := in.last_integer
 
-    create mask.make_empty -- TODO initialize mask
+    create mask.make_empty
     thresh(nrows, ncols, matrix, percent, mask)
 
-    from i := 1 until i > nrows loop
-      from j := 1 until j > ncols loop
-        --print(mask.item(i, j).out + " ")
-        j := j + 1
+    across 1 |..| nrows as ic loop
+      across 1 |..| ncols as jc loop
+        print(item(mask.item(ic.item), jc.item).out + " ")
       end
-      --print("%N")
-      i := i + 1
+      print("%N")
     end
   end
 
   read_matrix(nrows, ncols: INTEGER; matrix: ARRAY[separate ARRAY[INTEGER]];
       in: PLAIN_TEXT_FILE)
-  local
-    i, j: INTEGER
   do
-    from i := 1 until i > nrows loop
-      matrix.force(create_array(), i)
-      from j := 1 until j > ncols loop
+    across 1 |..| nrows as ic loop
+      matrix.force(create_array(), ic.item)
+      across 1 |..| ncols as jc loop
         in.read_integer
-        put(matrix.item(i), in.last_integer, j)
-        --print(item(matrix.item(i), j).out + " ");
-        j := j + 1
+        put(matrix.item(ic.item), in.last_integer, jc.item)
+        --print(item(matrix.item(ic.item), jc.item).out + " ");
       end
       --print("%N")
-      i := i + 1
     end
   end
 
@@ -85,41 +77,40 @@ feature
   thresh(nrows, ncols: INTEGER; matrix: ARRAY[separate ARRAY[INTEGER]];
       percent: INTEGER; mask: ARRAY[separate ARRAY[INTEGER]])
   local
-    i, j: INTEGER
     nmax: INTEGER
     histogram: ARRAY[INTEGER]
-    count: REAL_64
+    count: INTEGER
     prefixsum, threshold: INTEGER
-    index: INTEGER
+    i: INTEGER
   do
-    -- across matrix as m loop
-      -- nmax := nmax.max(m.item)
-    -- end
     nmax := reduce2d(nrows, ncols, matrix);
     print("--> nmax: " + nmax.out + "%N")
 
-    --create histogram.make(0, nmax + 1)
+    create histogram.make_filled(0, 0, nmax + 1)
 
-    --from i:= 1 until i > nrows loop
-      --from j := 1 until j > ncols loop
-        --index := item(matrix.item(i), j)
-        --histogram.put(histogram.item(index) + 1, index)
-        --j := j + 1
-      --end
-      --i := i + 1
-    --end
---
-    --count := (nrows * ncols * percent) / 100
---
-    --prefixsum := 0
-    --threshold := nmax
---
-    --from i := nmax until not(i >= 0 and prefixsum <= count) loop
-      --prefixsum := prefixsum + histogram[i];
-      --threshold := i;
-      --i := i - 1
-    --end
---
+    across 0 |..| (nmax + 1) as ic loop
+      histogram.put(reduce2d_with_filter(nrows, ncols, matrix, ic.item),
+          ic.item)
+    end
+
+    across 0 |..| (nmax + 1) as ic loop
+      print(histogram.item(ic.item).out + " ")
+    end
+    print("%N")
+
+    count := (nrows * ncols * percent) // 100
+
+    prefixsum := 0
+    threshold := nmax
+
+    from i := nmax until not(i >= 0 and prefixsum <= count) loop
+      prefixsum := prefixsum + histogram[i];
+      threshold := i;
+      i := i - 1
+    end
+
+    parfor(nrows, ncols, matrix, mask, threshold)
+
     --from i := 1 until i > nrows loop
       --from j := 1 until j > ncols loop
         --if item(matrix.item(i), j) >= threshold then
@@ -134,20 +125,35 @@ feature
 
   reduce2d(nrows, ncols: INTEGER; matrix: ARRAY[separate ARRAY[INTEGER]])
       : INTEGER
+  do
+    Result := reduce2d_impl(nrows, ncols, matrix, 0,
+      {REDUCE2D_OPERATOR}.max, {REDUCE2D_OPERATOR}.max)
+  end
+
+  reduce2d_with_filter(nrows, ncols: INTEGER;
+      matrix: ARRAY[separate ARRAY[INTEGER]]; value: INTEGER): INTEGER
+  do
+    Result := reduce2d_impl(nrows, ncols, matrix, value,
+      {REDUCE2D_OPERATOR}.sum, {REDUCE2D_OPERATOR}.filter)
+  end
+
+  reduce2d_impl(nrows, ncols: INTEGER;
+      matrix: ARRAY[separate ARRAY[INTEGER]];
+      value: INTEGER;
+      op_aggregator: INTEGER;
+      op: INTEGER): INTEGER
   local
-    i: INTEGER
     worker: separate REDUCE2D_WORKER
     workers: LINKED_LIST [separate REDUCE2D_WORKER]
     reader: separate REDUCE2D_READER
   do
-    print("HERE%N")
     create workers.make
     create reader.make
-    create aggregator.make(nrows)
-    from i := 1 until i > nrows loop
-      create worker.make(nrows, ncols, matrix.item(i), aggregator)
+    create reduce2d_aggregator.make(nrows, op_aggregator)
+    across 1 |..| nrows as ic loop
+      create worker.make_with_filter(nrows, ncols, matrix.item(ic.item), 
+        reduce2d_aggregator, op, value)
       workers.extend(worker)
-      i := i + 1
     end
     workers.do_all(agent launch_reduce2d_worker)
     Result := reduce2d_result(reader)
@@ -155,17 +161,46 @@ feature
 
   reduce2d_result(reader: separate REDUCE2D_READER): INTEGER
   do
-    Result := reader.get_result(aggregator)
+    Result := reader.get_result(reduce2d_aggregator)
+  end
+
+  parfor(nrows, ncols: INTEGER;
+    matrix, mask: ARRAY[separate ARRAY[INTEGER]];
+    threshold: INTEGER)
+  local
+    worker: separate PARFOR_WORKER
+    workers: LINKED_LIST[separate PARFOR_WORKER]
+    reader: separate PARFOR_READER
+  do
+    create workers.make
+    create reader.make
+    create parfor_aggregator.make(nrows)
+    across 1 |..| nrows as ic loop
+      mask.force(create_array(), ic.item)
+      create worker.make(nrows, ncols, matrix.item(ic.item),
+        mask.item(ic.item), threshold, parfor_aggregator)
+      workers.extend(worker)
+    end
+    workers.do_all(agent launch_parfor_worker)
+    parfor_result(reader)
+  end
+
+  parfor_result(reader: separate PARFOR_READER)
+  do
+    reader.get_result(parfor_aggregator)
   end
 
 feature {NONE}
-  aggregator: separate REDUCE2D_AGGREGATOR
+  reduce2d_aggregator: separate REDUCE2D_AGGREGATOR
+  parfor_aggregator: separate PARFOR_AGGREGATOR
 
   launch_reduce2d_worker(worker: separate REDUCE2D_WORKER)
   do
-    print("+")
     worker.live
-    print("-")
   end
 
+  launch_parfor_worker(worker: separate PARFOR_WORKER)
+  do
+    worker.live
+  end
 end -- class MAIN 
