@@ -39,7 +39,7 @@ int reduce2d_with_filter(int nrows, int ncols,
         int result = partial_value;
         for (size_t i = r.begin(); i != r.end(); i++) {
           result = aggregator(result, tbb::parallel_reduce(
-            range(0, nrows), 0,
+            range(0, ncols), 0,
             [=](range r, int partial_value)->int {
               int result = partial_value;
               for (size_t j = r.begin(); j != r.end(); j++) {
@@ -67,27 +67,15 @@ void thresh(int nrows, int ncols, const vector<vector<int>>& matrix,
   vector<int> histogram(nmax + 1, 0);
 
   tbb::parallel_for(
-      range(0, nrows),
+      range(0, nmax + 1),
       [&](range r) {
         for (size_t i = r.begin(); i != r.end(); ++i) {
           histogram[i] = reduce2d_with_filter(nrows, ncols, matrix, op_sum,
             [=](int acc, int value) {
-              printf("sum[%d](%d, %d)\n", i, acc, value);
               return acc + (value == i);
             });
         }
       });
-
-  for (int i = 0; i < nmax + 1; i++) {
-    printf("%d ", histogram[i]);
-  }
-  printf("\n");
-
-  //for (int i = 0; i < nrows; i++) {
-    //for (int j = 0; j < ncols; j++) {
-      //histogram[matrix[i][j]]++;
-    //}
-  //}
 
   int count = (nrows * ncols * percent) / 100;
 
