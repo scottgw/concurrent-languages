@@ -1,23 +1,59 @@
-/* randmat: random number generation
+/* winnow: weighted point selection
  * 
  * input:
+ *   matrix: an integer matrix, whose values are used as masses
+ *   mask: a boolean matrix showing which points are eligible for
+ *     consideration
  *   nrows, ncols: the number of rows and columns
- *   s: the seed
+ *   nelts: the number of points to select
  *
  * output:
- *   matrix: an nrows x ncols integer matrix
+ *   points: a vector of (x, y) points
  */
 
-use Random;
+proc winnow(nrows: int, ncols: int,
+    matrix: [1..nrows, 1..ncols] int,
+    mask: [1..nrows, 1..ncols] int,
+    nelts: int,
+    points: [1..nelts] (int, int)
+    ) {
 
-proc randmat(nrows: int, ncols: int, s: int,
-    matrix: [1..nrows, 1..ncols] int) {
-  const INT_MAX: int = 2147483647;
-
-  var rand = new RandomStream(2 * s + 1); // s must be odd
+  var n: int = 0;
   for i in 1..nrows do {
     for j in 1..ncols do {
-      matrix[i,j] = floor(rand.getNext() * INT_MAX) : int;
+      if (mask[i, j] == 1) {
+        n = n + 1;
+      }
+    }
+  }
+
+  var values: [1..n] (int, (int, int));
+  var count: int = 1;
+  for i in 1..nrows do {
+    for j in 1..ncols do {
+      if (mask[i, j] == 1) {
+        values[count] = (matrix[i, j], (i, j));
+        count = count + 1;
+      }
+    }
+  }
+
+  QuickSort(values);
+
+  var chunk: int = n / nelts;
+
+  for i in 1..nelts do {
+    var ind: int;
+    ind = (i - 1) * chunk + 1;
+    (, points[i]) = values[ind];
+  }
+}
+
+proc read_matrix(nrows, ncols: int,
+    matrix: [1..nrows, 1..ncols] int) {
+  for i in 1..nrows do {
+    for j in 1..ncols do {
+      read(matrix[i, j]);
     }
   }
 }
@@ -25,21 +61,26 @@ proc randmat(nrows: int, ncols: int, s: int,
 proc main() {
   var nrows: int;
   var ncols: int;
-  var s: int;
+  var nelts: int;
 
-  read(nrows, ncols, s);
+  read(nrows, ncols);
 
-  var matrix: [1..nrows, 1..ncols] int;
+  var matrix, mask: [1..nrows, 1..ncols] int;
 
-  randmat(nrows, ncols, s, matrix);
+  read_matrix(nrows, ncols, matrix);
+  read_matrix(nrows, ncols, mask);
 
-  writeln(nrows, " ", ncols);
+  read(nelts);
 
-  for i in 1..nrows do {
-    for j in 1..ncols do {
-      write(matrix[i, j], " ");
-    }
-    writeln();
+  var points: [1..nelts] (int, int);
+
+  winnow(nrows, ncols, matrix, mask, nelts, points);
+
+  writeln(nelts);
+
+  for i in 1..nelts do {
+    writeln(points[i]);
   }
+
   writeln();
 }
