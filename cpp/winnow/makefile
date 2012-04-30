@@ -1,5 +1,5 @@
 all: main
-	./$< < $<.in
-	./$< < $<2.in
-	./$< < $<3.in
-	./$< < $<4.in
+	./$< < $<.in > main.gold
+	./$< < $<2.in > main2.gold
+	./$< < $<3.in > main3.gold
+	./$< < $<4.in > main4.gold

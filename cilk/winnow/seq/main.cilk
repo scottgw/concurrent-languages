@@ -1,52 +1,108 @@
 /*
- * randmat: random number generation
+ * winnow: weighted point selection
  *
  * input:
+ *   matrix: an integer matrix, whose values are used as masses
+ *   mask: a boolean matrix showing which points are eligible for
+ *     consideration
  *   nrows, ncols: the number of rows and columns
- *   s: the seed
+ *   nelts: the number of points to select
  *
  * output:
- *   matrix: an nrows x ncols integer matrix
+ *   points: a vector of (x, y) points
  */
 
 #include <cilk-lib.cilkh>
 #include <stdlib.h>
 #include <stdio.h>
 
-void randmat(int nrows, int ncols, int s, int** matrix) {
-  int i, j;
-  srand(s);
+typedef struct sPoint {
+  int value, i, j;
+} Point;
+
+int compare(const void* vl, const void* vr) {
+  const Point* l = vl, *r = vr;
+  return (l->value - r->value);
+}
+
+void winnow(int nrows, int ncols, int** matrix, int** mask, int nelts,
+    Point* points) {
+  int i, j, n =  0, count = 0, chunk, index;
+  Point* values;
   for (i = 0; i < nrows; i++) {
     for (j = 0; j < ncols; j++) {
-      matrix[i][j] = rand();
+      n += mask[i][j];
     }
+  }
+  values = (Point* ) malloc(sizeof(Point) * n);
+
+  for (i = 0; i < nrows; i++) {
+    for (j = 0; j < ncols; j++) {
+      if (mask[i][j] == 1) {
+        values[count].value = matrix[i][j];
+        values[count].i = i;
+        values[count].j = j;
+        count++;
+      }
+    }
+  }
+
+  qsort(values, n, sizeof(*values), compare);
+
+  chunk = n / nelts;
+
+  for (i = 0; i < nelts; i++) {
+    index = i * chunk;
+    points[i] = values[index];
   }
 }
 
-int main(int argc, char *argv[]) {
-  int nrows, ncols, s, i, j;
-  int **matrix;
-  scanf("%d%d%d", &nrows, &ncols, &s);
-
-  matrix = (int **) malloc(sizeof(int *) * nrows);
+int** read_matrix(int nrows, int ncols) {
+  int i, j;
+  int** matrix = (int **) malloc(sizeof(int *) * nrows);
   for (i =  0; i < nrows; i++) {
     matrix[i] = (int *) malloc(sizeof(int) * ncols);
-  }
-
-  randmat(nrows, ncols, s, matrix);
-
-  for (i = 0; i < nrows; i++) {
     for (j = 0; j < ncols; j++) {
-      printf("%d ", matrix[i][j]);
+      scanf("%d", &matrix[i][j]);
     }
-    printf("\n");
   }
-  printf("\n");
+  return matrix;
+}
 
+void free_matrix(int nrows, int** matrix) {
+  int i;
   for (i = 0; i < nrows; i++) {
     free(matrix[i]);
   }
   free(matrix);
+}
+
+int main(int argc, char *argv[]) {
+  int nrows, ncols, nelts, i;
+  int** matrix;
+  int** mask;
+  Point* points;
+
+  scanf("%d%d", &nrows, &ncols);
+
+  matrix = read_matrix(nrows, ncols);
+  mask = read_matrix(nrows, ncols);
+
+  scanf("%d", &nelts);
+
+  points = (Point* ) malloc(sizeof(Point) * nelts);
+
+  winnow(nrows, ncols, matrix, mask, nelts, points);
+
+  printf("%d\n", nelts);
+  for (i = 0; i < nelts; i++) {
+    printf("%d %d\n", points[i].i, points[i].j);
+  }
+  printf("\n");
+
+  free_matrix(nrows, matrix);
+  free_matrix(nrows, mask);
+  free(points);
 
   return 0;
 }
