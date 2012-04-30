@@ -25,15 +25,78 @@ int compare(const void* vl, const void* vr) {
   return (l->value - r->value);
 }
 
-void winnow(int nrows, int ncols, int** matrix, int** mask, int nelts,
+typedef int (*Operator)(int, int);
+typedef void* ReduceFilter;
+
+typedef struct sReduceState {
+  int extra, ncols;
+  int row;
+  int** matrix;
+  Operator op;
+  ReduceFilter filter;
+} ReduceState;
+
+typedef cilk int (*GenericReduceFunction)(int index, ReduceState state);
+
+cilk int generic_reduce(int begin, int end, Operator op,
+    GenericReduceFunction f, ReduceState state) {
+  int middle = begin + (end - begin) / 2;
+  int left, right, res;
+  if (begin + 1 == end) {
+    res = spawn f(begin, state);
+    sync;
+    return res;
+  }
+  left = spawn generic_reduce(begin, middle, op, f, state);
+  right = spawn generic_reduce(middle, end, op, f, state);
+  sync;
+  return op(left, right);
+}
+
+cilk int reduce2d_identity_filter(int col, ReduceState state) {
+  return state.matrix[state.row][col];
+}
+
+cilk int reduce2d_start_cols(int row, ReduceState state) {
+  int res;
+  state.row = row;
+  res = spawn generic_reduce(0, state.ncols, state.op, state.filter, state);
+  sync;
+  return res;
+}
+
+cilk int reduce2d_with_filter(int nrows, int ncols, int** matrix,
+    Operator op, GenericReduceFunction filter, int extra) {
+  int res;
+  ReduceState state = {.ncols = ncols, .matrix = matrix, .op = op,
+    .filter = filter, .extra = extra};
+  res = spawn generic_reduce(0, nrows, op, reduce2d_start_cols, state);
+  sync;
+  return res;
+}
+
+cilk int reduce2d(int nrows, int ncols, int** matrix, Operator op) {
+  int res;
+  res = spawn reduce2d_with_filter(nrows, ncols, matrix, op,
+      reduce2d_identity_filter, 0);
+  return res;
+}
+
+cilk int filter_matrix(int col, ReduceState state) {
+  return state.matrix[state.row][col] == state.extra;
+}
+
+int sum(int a, int b) {
+  return a + b;
+}
+
+cilk void winnow(int nrows, int ncols, int** matrix, int** mask, int nelts,
     Point* points) {
   int i, j, n =  0, count = 0, chunk, index;
   Point* values;
-  for (i = 0; i < nrows; i++) {
-    for (j = 0; j < ncols; j++) {
-      n += mask[i][j];
-    }
-  }
+
+  n = spawn reduce2d(nrows, ncols, mask, sum);
+
   values = (Point* ) malloc(sizeof(Point) * n);
 
   for (i = 0; i < nrows; i++) {
@@ -77,7 +140,7 @@ void free_matrix(int nrows, int** matrix) {
   free(matrix);
 }
 
-int main(int argc, char *argv[]) {
+cilk int main(int argc, char *argv[]) {
   int nrows, ncols, nelts, i;
   int** matrix;
   int** mask;
@@ -92,7 +155,8 @@ int main(int argc, char *argv[]) {
 
   points = (Point* ) malloc(sizeof(Point) * nelts);
 
-  winnow(nrows, ncols, matrix, mask, nelts, points);
+  spawn winnow(nrows, ncols, matrix, mask, nelts, points);
+  sync;
 
   printf("%d\n", nelts);
   for (i = 0; i < nelts; i++) {
