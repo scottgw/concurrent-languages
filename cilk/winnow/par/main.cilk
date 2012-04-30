@@ -100,6 +100,8 @@ typedef struct sSplitState {
   int row;
   Point* values;
   int* count;
+  Point* points;
+  int chunk;
 } SplitState;
 
 typedef cilk void (*SplitFunction)(int index, SplitState state);
@@ -176,9 +178,19 @@ cilk void sort(int n, Point* values, CompareFunction is_less) {
   spawn sort_impl(0, n, values, is_less, 0);
 }
 
+cilk void fill_point(int i, SplitState state) {
+  int index = i * state.chunk;
+  state.points[i] = state.values[index];
+}
+
+cilk void fill_points(int n, Point* points, Point* values, int chunk) {
+  SplitState state = { .points = points, .values = values, .chunk = chunk};
+  spawn split(0, n, fill_point, state);
+}
+
 cilk void winnow(int nrows, int ncols, int** matrix, int** mask, int nelts,
     Point* points) {
-  int i, n = 0, chunk, index;
+  int n = 0, chunk;
   Point* values;
 
   n = spawn reduce2d(nrows, ncols, mask, sum);
@@ -192,10 +204,7 @@ cilk void winnow(int nrows, int ncols, int** matrix, int** mask, int nelts,
 
   chunk = n / nelts;
 
-  for (i = 0; i < nelts; i++) {
-    index = i * chunk;
-    points[i] = values[index];
-  }
+  spawn fill_points(nelts, points, values, chunk);
 }
 
 int** read_matrix(int nrows, int ncols) {
