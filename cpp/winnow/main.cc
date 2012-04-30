@@ -1,50 +1,79 @@
-/* randmat: random number generator
+/* winnow: weighted point selection
  *
  * input:
+ *   matrix: an integer matrix, whose values are used as masses
+ *   mask: a boolean matrix, showing which points are eligible for
+ *     consideration
  *   nrows, ncols: number of rows and columns
- *   s: random number generation seed
+ *   nelts: the number of points to select
  *
  * output:
- *   matrix: random nrows x ncols integer matrix
+ *   points: a vector of (x, y) points
  */
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
 
-void randmat(int nrows, int ncols, int s, int** matrix) {
-  srand(s);
+#include <algorithm>
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+void winnow(int nrows, int ncols, const vector<vector<int> >& matrix,
+    const vector<vector<int> >& mask, int nelts,
+    vector<pair<int, int> >* points) {
+  vector<pair<int, pair<int, int> > > values;
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
-      matrix[i][j] = rand();
+      if (mask[i][j]) {
+        values.push_back(make_pair(matrix[i][j], make_pair(i, j)));
+      }
+    }
+  }
+  sort(values.begin(), values.end());
+
+  size_t n = values.size();
+  size_t chunk = n / nelts;
+
+  for (int i = 0; i < nelts; i++) {
+    int index = i * chunk;
+    (*points)[i] = values[index].second;
+  }
+
+}
+
+void read_matrix(int nrows, int ncols, vector<vector<int> >* matrix) {
+  for (int i = 0; i < nrows; i++) {
+    for (int j = 0; j < ncols; j++) {
+      cin >> (*matrix)[i][j];
     }
   }
 }
 
 int main(int argc, char** argv) {
-  int nrows, ncols, s;
+  int nrows, ncols, nelts;
 
-  scanf("%d%d%d", &nrows, &ncols, &s);
+  scanf("%d%d", &nrows, &ncols);
 
-  int** matrix = new int* [nrows];
-  for (int i = 0; i < nrows; i++) {
-    matrix[i] = new int[ncols];
-  }
+  vector<vector<int> > matrix(nrows, vector<int>(ncols));
+  vector<vector<int> > mask(nrows, vector<int>(ncols));
 
-  randmat(nrows, ncols, s, matrix);
+  read_matrix(nrows, ncols, &matrix);
+  read_matrix(nrows, ncols, &mask);
 
-  printf("%d %d\n", nrows, ncols);
-  for (int i = 0; i < nrows; i++) {
-    for (int j = 0; j < ncols; j++) {
-      printf("%d ", matrix[i][j]);
-    }
-    printf("\n");
+  scanf("%d", &nelts);
+
+  vector<pair<int, int> > points(nelts);
+
+  winnow(nrows, ncols, matrix, mask, nelts, &points);
+
+  printf("%d\n", nelts);
+
+  for (int i = 0; i < nelts; i++) {
+    printf("%d %d\n", points[i].first, points[i].second);
   }
   printf("\n");
-
-  for (int i = 0; i < nrows; i++) {
-    delete[] matrix[i];
-  }
-  delete[] matrix;
 
   return 0;
 }
