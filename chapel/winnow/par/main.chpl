@@ -34,8 +34,10 @@ proc sort_impl(start: int, end: int, value: [?Dom]) {
   swap(spot, end, value);
   pivot_index = spot;
 
-  sort_impl(start, pivot_index, value);
-  sort_impl(pivot_index + 1, end, value);
+  cobegin {
+    sort_impl(start, pivot_index, value);
+    sort_impl(pivot_index + 1, end, value);
+  }
 }
 
 proc sort(n: int, value: [1..n] (int, (int, int))) {
