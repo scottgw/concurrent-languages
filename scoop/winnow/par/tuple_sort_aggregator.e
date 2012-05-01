@@ -1,18 +1,19 @@
-class PARFOR_AGGREGATOR
+class TUPLE_SORT_AGGREGATOR
 create make
 feature
-  make (n_: INTEGER)
+  make ()
   local
   do
-    n := n_
+    n := 2
     count := 0
     create res.make_empty
   end
 
 feature
-  put(v: separate TUPLE[INTEGER, INTEGER, INTEGER])
+  put(v: separate TUPLE[INTEGER, INTEGER, INTEGER];
+    index: INTEGER)
   do
-    res.force([v.integer_32_item(1), v.integer_32_item(2), v.integer_32_item(3)], res.count + 1)
+    res.force([v.integer_32_item(1), v.integer_32_item(2), v.integer_32_item(3)], index)
   end
 
   done()
