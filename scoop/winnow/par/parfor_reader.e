@@ -7,7 +7,7 @@ feature
 
 feature
   get_result(aggregator: separate PARFOR_AGGREGATOR)
-      : ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
+      : separate ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
   require
     aggregator.is_all_done
   do

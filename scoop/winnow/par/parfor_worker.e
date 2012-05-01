@@ -31,7 +31,7 @@ feature
   end
 
   put(an_aggregator: separate PARFOR_AGGREGATOR;
-      value: TUPLE[INTEGER, INTEGER, INTEGER])
+      value: separate TUPLE[INTEGER, INTEGER, INTEGER])
   do
     an_aggregator.put(value)
   end

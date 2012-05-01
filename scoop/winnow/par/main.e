@@ -18,12 +18,11 @@ feature
   local
     nrows, ncols, nelts: INTEGER
     matrix, mask: ARRAY[separate ARRAY[INTEGER]]
-    i, j: INTEGER
     file_name: STRING
     points: ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
   do
     file_name := separate_character_option_value('i')
-    !!in.make_open_read(separate_character_option_value('i'))
+    create in.make_open_read(separate_character_option_value('i'))
 
     nrows := read_integer
     ncols := read_integer
@@ -78,21 +77,20 @@ feature
     matrix, mask: ARRAY[separate ARRAY[INTEGER]];
     nelts: INTEGER) : ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
   local
-    points, values: ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
+    points: ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
+    values: ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
     sorter: TUPLE_SORTER
-    comparator: TUPLE_COMPARATOR
     n, chunk, index: INTEGER
   do
     values := parfor(nrows, ncols, matrix, mask);
 
-    create comparator
-    create sorter.make(comparator)
-    sorter.sort(values)
+    create sorter.make()
+    values := sorter.sort(values)
 
     n := values.count
     chunk := n // nelts
 
-    create points.make(1, nelts);
+    create points.make_filled([0, 0, 0], 1, nelts);
     across 1 |..| nelts as ic loop
       index := (ic.item - 1) * chunk + 1
       points[ic.item] := values[index]
@@ -129,7 +127,22 @@ feature
   parfor_result(reader: separate PARFOR_READER)
       : ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
   do
-    Result := reader.get_result(parfor_aggregator)
+    Result := to_local_values(reader.get_result(parfor_aggregator))
+  end
+
+  to_local_values(values: separate ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]])
+      : ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
+  local
+    local_values: ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
+  do
+    create local_values.make_empty
+    across 1 |..| values.count as ic loop
+      local_values.force([
+        values.item(ic.item).integer_32_item(1),
+        values.item(ic.item).integer_32_item(2),
+        values.item(ic.item).integer_32_item(3)], ic.item)
+    end
+    Result := local_values
   end
 
 feature {NONE}

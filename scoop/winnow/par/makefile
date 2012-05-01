@@ -8,7 +8,7 @@ all: main
 	./main -i main4.in > main4.out
 	diff main4.out main4.gold
 
-main: main.e comparator.e tuple_sorter.e \
+main: main.e tuple_comparator.e tuple_sorter.e \
 				parfor_aggregator.e parfor_worker.e parfor_reader.e
 	ec main.e
 

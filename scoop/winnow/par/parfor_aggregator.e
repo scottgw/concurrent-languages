@@ -11,9 +11,9 @@ feature
   end
 
 feature
-  put(v: TUPLE[INTEGER, INTEGER, INTEGER])
+  put(v: separate TUPLE[INTEGER, INTEGER, INTEGER])
   do
-    res.force(v, res.count + 1)
+    res.force([v.integer_32_item(1), v.integer_32_item(2), v.integer_32_item(3)], res.count + 1)
   end
 
   done()
