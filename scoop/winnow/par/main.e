@@ -17,7 +17,7 @@ feature
   make
   local
     nrows, ncols, nelts: INTEGER
-    matrix, mask: ARRAY2[INTEGER]
+    matrix, mask: ARRAY[separate ARRAY[INTEGER]]
     i, j: INTEGER
     file_name: STRING
     points: ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
@@ -27,8 +27,10 @@ feature
 
     nrows := read_integer
     ncols := read_integer
-    matrix := read_matrix(nrows, ncols)
-    mask := read_matrix(nrows, ncols)
+    create matrix.make_empty
+    read_matrix(nrows, ncols, matrix)
+    create mask.make_empty
+    read_matrix(nrows, ncols, mask)
     nelts := read_integer
 
     points := winnow(nrows, ncols, matrix, mask, nelts)
@@ -47,21 +49,33 @@ feature
     Result := in.last_integer
   end
 
-  read_matrix(nrows, ncols: INTEGER): ARRAY2[INTEGER]
-  local
-    i, j: INTEGER
-    matrix: ARRAY2[INTEGER]
+  read_matrix(nrows, ncols: INTEGER; matrix: ARRAY[separate ARRAY[INTEGER]])
   do
-    create matrix.make(nrows, ncols)
     across 1 |..| nrows as ic loop
+      matrix.force(create_array(), ic.item)
       across 1 |..| ncols as jc loop
-        matrix.put(read_integer, ic.item, jc.item)
+        put(matrix.item(ic.item), read_integer, jc.item)
       end
     end
-    Result := matrix
   end
 
-  winnow(nrows, ncols: INTEGER; matrix, mask: ARRAY2[INTEGER];
+  create_array(): separate ARRAY[INTEGER]
+  do
+    create {separate ARRAY[INTEGER]} Result.make_empty
+  end
+
+  put(array: separate ARRAY[INTEGER]; value, index: INTEGER)
+  do
+    array.force(value, index)
+  end
+
+  item(array: separate ARRAY[INTEGER]; index: INTEGER): INTEGER
+  do
+    Result := array.item(index)
+  end
+
+  winnow(nrows, ncols: INTEGER;
+    matrix, mask: ARRAY[separate ARRAY[INTEGER]];
     nelts: INTEGER) : ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
   local
     points, values: ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
@@ -72,11 +86,12 @@ feature
   do
     count := 1
     create values.make_empty
+
     across 1 |..| nrows as ic loop
       across 1 |..| ncols as jc loop
-        if (mask.item(ic.item, jc.item) = 1) then
-          values.force([matrix.item(ic.item, jc.item), ic.item, jc.item],
-              count)
+        if (item(mask.item(ic.item), jc.item) = 1) then
+          values.force([item(matrix.item(ic.item), jc.item),
+              ic.item, jc.item], count)
           count := count + 1
         end
       end
