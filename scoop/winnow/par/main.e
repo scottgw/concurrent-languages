@@ -79,7 +79,7 @@ feature
     nelts: INTEGER) : ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
   local
     points, values: ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
-    sorter: QUICK_SORTER[TUPLE[INTEGER, INTEGER, INTEGER]]
+    sorter: TUPLE_SORTER
     comparator: TUPLE_COMPARATOR
     n, chunk, index: INTEGER
   do
