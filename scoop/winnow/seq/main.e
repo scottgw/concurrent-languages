@@ -1,77 +1,104 @@
--- randmat: random number generation
+-- winnow: weighted point selection
 --
 -- input:
+--   matrix: an integer matrix, whose values are used as masses
+--   mask: a boolean matrix showing which points are eligible for
+--     consideration
 --   nrows, ncols: the number of rows and cols
---   s: the seed
+--   nelts: the number of points to select
 --
 -- output:
---   matrix: a nrows by ncols integer matrix
+--   points: a vector of (x, y) points
 
-class MAIN create
-  make
-
+class MAIN
+inherit ARGUMENTS
+create make
 feature
-
   make
-    -- Print a simple message.
   local
-    nrows, ncols, s: INTEGER
+    nrows, ncols, nelts: INTEGER
+    matrix, mask: ARRAY2[INTEGER]
+    i, j: INTEGER
+    file_name: STRING
+    points: ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
+  do
+    file_name := separate_character_option_value('i')
+    !!in.make_open_read(separate_character_option_value('i'))
+
+    nrows := read_integer
+    ncols := read_integer
+    matrix := read_matrix(nrows, ncols)
+    mask := read_matrix(nrows, ncols)
+    nelts := read_integer
+
+    points := winnow(nrows, ncols, matrix, mask, nelts)
+
+    print(nelts.out + "%N");
+    across 1 |..| nelts as ic loop
+      print(points.item(ic.item).integer_32_item(2).out + " " +
+          points.item(ic.item).integer_32_item(3).out + "%N");
+    end
+    print("%N");
+  end
+
+  read_integer(): INTEGER
+  do
+    in.read_integer
+    Result := in.last_integer
+  end
+
+  read_matrix(nrows, ncols: INTEGER): ARRAY2[INTEGER]
+  local
+    i, j: INTEGER
     matrix: ARRAY2[INTEGER]
-    i, j: INTEGER
   do
-    io.read_integer
-    nrows := io.last_integer
-
-    io.read_integer
-    ncols := io.last_integer
-
-    io.read_integer
-    s := io.last_integer
-
     create matrix.make(nrows, ncols)
-
-    randmat(nrows, ncols, s, matrix)
-
-    from
-      i := 1
-    until
-      i > nrows
-    loop
-      from
-        j := 1
-      until
-        j > ncols
-      loop
-        print(matrix.item(i, j).out + " ")
-        j := j + 1
+    across 1 |..| nrows as ic loop
+      across 1 |..| ncols as jc loop
+        matrix.put(read_integer, ic.item, jc.item)
       end
-      print("%N")
-      i := i + 1
     end
+    Result := matrix
   end
 
-  randmat(nrows, ncols, s: INTEGER; matrix: ARRAY2[INTEGER])
+  winnow(nrows, ncols: INTEGER; matrix, mask: ARRAY2[INTEGER];
+    nelts: INTEGER) : ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
   local
-    i, j: INTEGER
-    rand: RANDOM
+    points, values: ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
+    count: INTEGER
+    sorter: QUICK_SORTER[TUPLE[INTEGER, INTEGER, INTEGER]]
+    comparator: TUPLE_COMPARATOR
+    n, chunk, index: INTEGER
   do
-    create rand.set_seed(s)
-    from
-      i := 1
-    until
-      i > nrows
-    loop
-      from
-        j := 1
-      until
-        j > ncols
-      loop
-        rand.forth
-        matrix.put(rand.item, i, j)
-        j := j + 1
+    count := 1
+    create values.make_empty
+    across 1 |..| nrows as ic loop
+      across 1 |..| ncols as jc loop
+        if (mask.item(ic.item, jc.item) = 1) then
+          values.force([matrix.item(ic.item, jc.item), ic.item, jc.item],
+              count)
+          count := count + 1
+        end
       end
-      i := i + 1
     end
+
+    create comparator
+    create sorter.make(comparator)
+    sorter.sort(values)
+
+    n := values.count
+    chunk := n // nelts
+
+    create points.make(1, nelts);
+    across 1 |..| nelts as ic loop
+      index := (ic.item - 1) * chunk + 1
+      points[ic.item] := values[index]
+    end
+
+    Result := points
   end
+
+feature {NONE}
+  in: PLAIN_TEXT_FILE
 
 end -- class MAIN 
