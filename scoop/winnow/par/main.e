@@ -79,23 +79,11 @@ feature
     nelts: INTEGER) : ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
   local
     points, values: ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
-    count: INTEGER
     sorter: QUICK_SORTER[TUPLE[INTEGER, INTEGER, INTEGER]]
     comparator: TUPLE_COMPARATOR
     n, chunk, index: INTEGER
   do
-    count := 1
-    create values.make_empty
-
-    across 1 |..| nrows as ic loop
-      across 1 |..| ncols as jc loop
-        if (item(mask.item(ic.item), jc.item) = 1) then
-          values.force([item(matrix.item(ic.item), jc.item),
-              ic.item, jc.item], count)
-          count := count + 1
-        end
-      end
-    end
+    values := parfor(nrows, ncols, matrix, mask);
 
     create comparator
     create sorter.make(comparator)
@@ -113,7 +101,39 @@ feature
     Result := points
   end
 
+  parfor(nrows, ncols: INTEGER;
+      matrix, mask: ARRAY[separate ARRAY[INTEGER]])
+      : ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
+  local
+    worker: separate PARFOR_WORKER
+    workers: LINKED_LIST[separate PARFOR_WORKER]
+    reader: separate PARFOR_READER
+  do
+    create workers.make
+    create reader.make
+    create parfor_aggregator.make(nrows)
+    across 1 |..| nrows as ic loop
+      create worker.make(nrows, ncols, ic.item, matrix.item(ic.item),
+        mask.item(ic.item), parfor_aggregator)
+      workers.extend(worker)
+    end
+    workers.do_all(agent launch_parfor_worker)
+    Result := parfor_result(reader)
+  end
+
+  launch_parfor_worker(worker: separate PARFOR_WORKER)
+  do
+    worker.live
+  end
+
+  parfor_result(reader: separate PARFOR_READER)
+      : ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
+  do
+    Result := reader.get_result(parfor_aggregator)
+  end
+
 feature {NONE}
   in: PLAIN_TEXT_FILE
+  parfor_aggregator: separate PARFOR_AGGREGATOR
 
 end -- class MAIN 
