@@ -1,14 +1,14 @@
--- winnow: weighted point selection
+-- outer: outer product
 --
 -- input:
---   matrix: an integer matrix, whose values are used as masses
---   mask: a boolean matrix showing which points are eligible for
---     consideration
---   nrows, ncols: the number of rows and cols
---   nelts: the number of points to select
+--   vector: a vector of (x, y) points
+--   nelts: the number of points
 --
 -- output:
---   points: a vector of (x, y) points
+--   matrix: a real matrix, whose values are filled with inter-point
+--     distances
+--   vector: a real vector, whose values are filled with origin-to-point
+--     distances
 
 class MAIN
 inherit ARGUMENTS
@@ -16,27 +16,35 @@ create make
 feature
   make
   local
-    nrows, ncols, nelts: INTEGER
-    matrix, mask: ARRAY2[INTEGER]
+    nelts: INTEGER
+    points: ARRAY[TUPLE[INTEGER, INTEGER]]
+    matrix: ARRAY2[REAL]
+    vector: ARRAY[REAL]
     i, j: INTEGER
     file_name: STRING
-    points: ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
   do
     file_name := separate_character_option_value('i')
-    !!in.make_open_read(separate_character_option_value('i'))
+    create in.make_open_read(separate_character_option_value('i'))
 
-    nrows := read_integer
-    ncols := read_integer
-    matrix := read_matrix(nrows, ncols)
-    mask := read_matrix(nrows, ncols)
     nelts := read_integer
+    points := read_vector_of_points(nelts)
+    create matrix.make_filled(0, nelts, nelts)
+    create vector.make_filled(0, 1, nelts)
 
-    points := winnow(nrows, ncols, matrix, mask, nelts)
+    outer(nelts, points, matrix, vector)
+
+    print(nelts.out + " " + nelts.out + "%N");
+    across 1 |..| nelts as ic loop
+      across 1 |..| nelts as jc loop
+        print(matrix.item(ic.item, jc.item).out + " ");
+      end
+      print("%N");
+    end
+    print("%N");
 
     print(nelts.out + "%N");
     across 1 |..| nelts as ic loop
-      print(points.item(ic.item).integer_32_item(2).out + " " +
-          points.item(ic.item).integer_32_item(3).out + "%N");
+      print(vector[i].out + " ");
     end
     print("%N");
   end
@@ -47,55 +55,46 @@ feature
     Result := in.last_integer
   end
 
-  read_matrix(nrows, ncols: INTEGER): ARRAY2[INTEGER]
+  read_vector_of_points(nelts: INTEGER): ARRAY[TUPLE[INTEGER, INTEGER]]
   local
     i, j: INTEGER
-    matrix: ARRAY2[INTEGER]
+    vector: ARRAY[TUPLE[INTEGER, INTEGER]]
   do
-    create matrix.make(nrows, ncols)
-    across 1 |..| nrows as ic loop
-      across 1 |..| ncols as jc loop
-        matrix.put(read_integer, ic.item, jc.item)
-      end
+    create vector.make_filled([0, 0], 1, nelts)
+    across 1 |..| nelts as ic loop
+      vector.put([read_integer, read_integer], ic.item)
     end
-    Result := matrix
+    Result := vector
   end
 
-  winnow(nrows, ncols: INTEGER; matrix, mask: ARRAY2[INTEGER];
-    nelts: INTEGER) : ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
+  outer(nelts: INTEGER; points: ARRAY[TUPLE[INTEGER, INTEGER]];
+      matrix: ARRAY2[REAL]; vector: ARRAY[REAL])
   local
-    points, values: ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
-    count: INTEGER
-    sorter: QUICK_SORTER[TUPLE[INTEGER, INTEGER, INTEGER]]
-    comparator: TUPLE_COMPARATOR
-    n, chunk, index: INTEGER
+    nmax: REAL
   do
-    count := 1
-    create values.make_empty
-    across 1 |..| nrows as ic loop
-      across 1 |..| ncols as jc loop
-        if (mask.item(ic.item, jc.item) = 1) then
-          values.force([matrix.item(ic.item, jc.item), ic.item, jc.item],
-              count)
-          count := count + 1
+    across 1 |..| nelts as ic loop
+      nmax := -1
+      across 1 |..| nelts as jc loop
+        if (not(ic.item = jc.item)) then
+          matrix.put(distance(points.item(ic.item), points.item(jc.item)),
+            ic.item, jc.item)
+          nmax := nmax.max(matrix.item(ic.item, jc.item))
         end
+        matrix.put(nmax * nelts, ic.item, ic.item)
+        vector.put(distance([0, 0], points.item(ic.item)), ic.item)
       end
     end
+  end
 
-    create comparator
-    create sorter.make(comparator)
-    sorter.sort(values)
+  sqr(a: REAL): REAL
+  do
+    Result := a * a
+  end
 
-    n := values.count
-    chunk := n // nelts
-
-    create points.make(1, nelts);
-    across 1 |..| nelts as ic loop
-      index := (ic.item - 1) * chunk + 1
-      points[ic.item] := values[index]
-    end
-
-    Result := points
+  distance(a, b: TUPLE[INTEGER, INTEGER]): REAL
+  do
+    Result :=(sqr(a.integer_32_item(1) - b.integer_32_item(1)) +
+        a.integer_32_item(2) - b.integer_32_item(2)).sqrt();
   end
 
 feature {NONE}
