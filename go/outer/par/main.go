@@ -42,8 +42,23 @@ func distance(a, b Point) double {
         sqr(double(a.j - b.j)))));
 }
 
+func split_worker(index int, op func(index int), done chan bool) {
+  op(index);
+  done <- true;
+}
+  
+func split(begin, end int, op func(index int)) {
+  done := make(chan bool);
+  for i := begin; i < end; i++ {
+    go split_worker(i, op, done)
+  }
+  for i := begin; i < end; i++ {
+    <-done;
+  }
+}
+
 func outer(nelts int, points Points, matrix [][]double, vector []double) {
-  for i := 0; i < nelts; i++ {
+  split(0, nelts, func(i int) {
     var nmax double = -1;
     for j := 0; j < nelts; j++ {
       if (i != j) {
@@ -53,7 +68,7 @@ func outer(nelts int, points Points, matrix [][]double, vector []double) {
     }
     matrix[i][i] = double(nelts) * nmax;
     vector[i] = distance(Point{0, 0}, points[i]);
-  }
+  });
 }
 
 func read_integer() int {
