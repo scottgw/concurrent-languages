@@ -1,52 +1,29 @@
-/* outer: outer product
+/* product: matrix-vector product
  *
  * input:
- *   points: a vector of (x, y) points
- *   nelts: the number of points
+ *   matrix: a real matrix
+ *   vec: a real vector
+ *   nelts: the number of elements
  *
  * output:
- *   matrix: a real matrix, whose values are filled with inter-point
- *     distances
- *   vec: a real vector, whose values are filled with origin-to-point
- *     distances
+ *   result: a real vector, whose values are the result of the product
  */
-#include <cassert>
-#include <cmath>
 #include <cstdio>
-#include <cstdlib>
 
-#include <algorithm>
 #include <iostream>
 #include <vector>
 
 using namespace std;
 
-double sqr(double x) {
-  return x * x;
-}
+void product(int nelts, const vector<vector<double> >& matrix,
+    const vector<double>& vec, vector<double>* result) {
 
-double distance(const pair<int, int>& x, const pair<int, int>& y) {
-  return sqrt(sqr(x.first - y.first) + sqr(x.second - y.second));
-}
-
-void outer(int nelts, const vector<pair<int, int> > & points,
-    vector<vector<double> >* matrix, vector<double>* vec) {
   for (int i = 0; i < nelts; i++) {
-    double nmax = -1;
+    double sum = 0;
     for (int j = 0; j < nelts; j++) {
-      if (i != j) {
-        (*matrix)[i][j] = ::distance(points[i], points[j]);
-        nmax = max(nmax, (*matrix)[i][j]);
-      }
+      sum += matrix[i][j] * vec[j];
     }
-    (*matrix)[i][i] = nelts * nmax;
-    (*vec)[i] = ::distance(make_pair(0, 0), points[i]);
-  }
-}
-
-void read_vector_of_points(int nelts, vector<pair<int, int> >* vec) {
-  for (int i = 0; i < nelts; i++) {
-    cin >> (*vec)[i].first >> (*vec)[i].second;
+    (*result)[i] = sum;
   }
 }
 
@@ -54,26 +31,24 @@ int main(int argc, char** argv) {
   int nelts;
   scanf("%d", &nelts);
 
-  vector<pair<int, int> > points(nelts);
-  read_vector_of_points(nelts, &points);
-
   vector<vector<double> > matrix(nelts, vector<double>(nelts));
-  vector<double> vec(nelts);
+  vector<double> vec(nelts), result(nelts);
 
-  outer(nelts, points, &matrix, &vec);
-
-  printf("%d %d\n", nelts, nelts);
   for (int i = 0; i < nelts; i++) {
     for (int j = 0; j < nelts; j++) {
-      printf("%g ", matrix[i][j]);
+      cin >> matrix[i][j];
     }
-    printf("\n");
   }
-  printf("\n");
 
-  printf("%d\n", nelts);
   for (int i = 0; i < nelts; i++) {
-    printf("%g ", vec[i]);
+    cin >> vec[i];
+  }
+
+  product(nelts, matrix, vec, &result);
+
+  printf("%d\n", nelts, nelts);
+  for (int i = 0; i < nelts; i++) {
+    printf("%g ", result[i]);
   }
   printf("\n");
 
