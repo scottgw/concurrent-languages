@@ -1,0 +1,69 @@
+/*
+ * randmat: random number generation
+ *
+ * input:
+ *   nrows, ncols: the number of rows and columns
+ *   s: the seed
+ *
+ * output:
+ *   matrix: an nrows x ncols integer matrix
+ */
+
+#include <cilk-lib.cilkh>
+#include <stdlib.h>
+#include <stdio.h>
+
+typedef cilk void (*Function)(int, int, int**);
+
+cilk void split(int begin, int end, int extra, int** matrix, Function f) {
+  int middle = begin + (end - begin) / 2;
+  if (begin >= end) return;
+  if (begin + 1 == end) {
+    spawn f(begin, extra, matrix);
+    return;
+  }
+  spawn split(begin, middle, extra, matrix, f);
+  spawn split(middle, end, extra, matrix, f);
+}
+
+cilk void update_matrix(int col, int row, int** matrix) {
+  matrix[row][col] = rand();
+}
+
+cilk void start_cols(int row, int ncols, int** matrix) {
+  spawn split(0, ncols, row, matrix, update_matrix);
+}
+
+cilk void randmat(int nrows, int ncols, int s, int** matrix) {
+  srand(s);
+  spawn split(0, nrows, ncols, matrix, start_cols);
+}
+
+cilk int main(int argc, char *argv[]) {
+  int nrows, ncols, s, i, j;
+  int **matrix;
+  scanf("%d%d%d", &nrows, &ncols, &s);
+
+  matrix = (int **) malloc(sizeof(int *) * nrows);
+  for (i =  0; i < nrows; i++) {
+    matrix[i] = (int *) malloc(sizeof(int) * ncols);
+  }
+
+  spawn randmat(nrows, ncols, s, matrix);
+  sync;
+
+  for (i = 0; i < nrows; i++) {
+    for (j = 0; j < ncols; j++) {
+      printf("%d ", matrix[i][j]);
+    }
+    printf("\n");
+  }
+  printf("\n");
+
+  for (i = 0; i < nrows; i++) {
+    free(matrix[i]);
+  }
+  free(matrix);
+
+  return 0;
+}

@@ -1,0 +1,139 @@
+/*
+ * outer: outer product
+ *
+ * input:
+ *   points: a vector of (x, y) points
+ *   nelts: the number of points
+ *
+ * output:
+ *   matrix: a real matrix, whose values are filled with inter-point
+ *     distances
+ *   vector: a real vector, whose values are filled with origin-to-point
+ *     distances
+ */
+
+#include <cilk-lib.cilkh>
+#include <math.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+typedef struct sPoint {
+  int i, j;
+} Point;
+
+double sqr(double x) {
+  return x * x;
+}
+
+double distance(Point a, Point b) {
+  return sqrt(sqr(a.i - b.i) + sqr(a.j - b.j));
+}
+
+double max(double a, double b) {
+  return a > b ? a : b;
+}
+
+typedef struct sSplitState {
+  int nelts;
+  double** matrix;
+  double* vector;
+  Point* points;
+} SplitState;
+
+typedef cilk void (*SplitFunction)(int index, SplitState state);
+
+cilk void split(int begin, int end, SplitFunction f, SplitState state) {
+  int middle = begin + (end - begin) / 2;
+  if (begin >= end) return;
+  if (begin + 1 == end) {
+    spawn f(begin, state);
+    return;
+  }
+  spawn split(begin, middle, f, state);
+  spawn split(middle, end, f, state);
+}
+
+cilk void outer_split(int index, SplitState state) {
+  double nmax = -1;
+  int j;
+  for (j = 0; j < state.nelts; j++) {
+    if (index != j) {
+      state.matrix[index][j] = distance(state.points[index],
+          state.points[j]);
+      nmax = max(nmax, state.matrix[index][j]);
+    }
+    state.matrix[index][index] = nmax * state.nelts;
+    state.vector[index] = distance((Point){0, 0}, state.points[index]);
+  }
+}
+
+cilk void outer(int nelts, Point* points, double** matrix, double* vector) {
+  SplitState state = {.matrix = matrix, .vector = vector, .points = points,
+    .nelts = nelts};
+  spawn split(0, nelts, outer_split, state);
+  sync;
+}
+
+double** create_matrix(int nelts) {
+  int i;
+  double** matrix = (double **) malloc(sizeof(double *) * nelts);
+  for (i = 0; i < nelts; i++) {
+    matrix[i] = (double *) malloc(sizeof(double) * nelts);
+  }
+  return matrix;
+}
+
+void free_matrix(int nelts, double** matrix) {
+  int i;
+  for (i = 0; i < nelts; i++) {
+    free(matrix[i]);
+  }
+  free(matrix);
+}
+
+Point* read_vector_of_points(int nelts) {
+  int i, a, b;
+  Point* vector = (Point* ) malloc(sizeof(Point) * nelts);
+  for (i =  0; i < nelts; i++) {
+    scanf("%d %d", &a, &b);
+    vector[i].i = a;
+    vector[i].j = b;
+  }
+  return vector;
+}
+
+cilk int main(int argc, char *argv[]) {
+  int nelts, i, j;
+  Point* points;
+  double** matrix;
+  double* vector;
+
+  scanf("%d", &nelts);
+  points = read_vector_of_points(nelts);
+  matrix = create_matrix(nelts);
+  vector = (double* ) malloc(sizeof(double) * nelts);
+
+  spawn outer(nelts, points, matrix, vector);
+  sync;
+
+  printf("%d %d\n", nelts, nelts);
+  for (i = 0; i < nelts; i++) {
+    for (j = 0; j < nelts; j++) {
+      printf("%g ", matrix[i][j]);
+    }
+    printf("\n");
+  }
+  printf("\n");
+
+  printf("%d\n", nelts);
+  for (i = 0; i < nelts; i++) {
+    printf("%g ", vector[i]);
+  }
+  printf("\n");
+
+  free_matrix(nelts, matrix);
+  free(vector);
+  free(points);
+
+  return 0;
+}
