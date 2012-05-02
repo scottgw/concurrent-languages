@@ -37,72 +37,27 @@ typedef struct sSplitState {
 typedef cilk int (*GenericReduceFunction)(int index, ReduceState state);
 typedef cilk void (*SplitFunction)(int index, SplitState state);
 
-int max(int a, int b) {
+int max_int(int a, int b) {
   return a > b ? a : b;
 }
 
-int sum(int a, int b) {
-  return a + b;
-}
+int sum(int a, int b);
 
-cilk void split(int begin, int end, SplitFunction f, SplitState state) {
-  int middle = begin + (end - begin) / 2;
-  if (begin >= end) return;
-  if (begin + 1 == end) {
-    spawn f(begin, state);
-    return;
-  }
-  spawn split(begin, middle, f, state);
-  spawn split(middle, end, f, state);
-}
+cilk void split(int begin, int end, SplitFunction f, SplitState state);
 
 cilk int generic_reduce(int begin, int end, Operator op,
-    GenericReduceFunction f, ReduceState state) {
-  int middle = begin + (end - begin) / 2;
-  int left, right, res;
-  if (begin + 1 == end) {
-    res = spawn f(begin, state);
-    sync;
-    return res;
-  }
-  left = spawn generic_reduce(begin, middle, op, f, state);
-  right = spawn generic_reduce(middle, end, op, f, state);
-  sync;
-  return op(left, right);
-}
+    GenericReduceFunction f, ReduceState state);
 
-cilk int reduce2d_identity_filter(int col, ReduceState state) {
-  return state.matrix[state.row][col];
-}
+cilk int reduce2d_identity_filter(int col, ReduceState state);
 
-cilk int reduce2d_start_cols(int row, ReduceState state) {
-  int res;
-  state.row = row;
-  res = spawn generic_reduce(0, state.ncols, state.op, state.filter, state);
-  sync;
-  return res;
-}
+cilk int reduce2d_start_cols(int row, ReduceState state);
 
 cilk int reduce2d_with_filter(int nrows, int ncols, int** matrix,
-    Operator op, GenericReduceFunction filter, int extra) {
-  int res;
-  ReduceState state = {.ncols = ncols, .matrix = matrix, .op = op,
-    .filter = filter, .extra = extra};
-  res = spawn generic_reduce(0, nrows, op, reduce2d_start_cols, state);
-  sync;
-  return res;
-}
+    Operator op, GenericReduceFunction filter, int extra);
 
-cilk int reduce2d(int nrows, int ncols, int** matrix, Operator op) {
-  int res;
-  res = spawn reduce2d_with_filter(nrows, ncols, matrix, op,
-      reduce2d_identity_filter, 0);
-  return res;
-}
+cilk int reduce2d(int nrows, int ncols, int** matrix, Operator op);
 
-cilk int filter_matrix(int col, ReduceState state) {
-  return state.matrix[state.row][col] == state.extra;
-}
+cilk int filter_matrix(int col, ReduceState state);
 
 cilk void fill_histogram_index(int index, SplitState state) {
   state.histogram[index] = spawn reduce2d_with_filter(state.nrows,
@@ -187,7 +142,7 @@ cilk void thresh(int nrows, int ncols, int** matrix, int percent,
   int* histogram;
   int count, threshold;
 
-  nmax = spawn reduce2d(nrows, ncols, matrix, max);
+  nmax = spawn reduce2d(nrows, ncols, matrix, max_int);
   sync;
 
   histogram = (int*) malloc(sizeof(int) * (nmax + 1));
@@ -209,50 +164,3 @@ cilk void thresh(int nrows, int ncols, int** matrix, int percent,
   free(histogram);
 }
 
-cilk int main(int argc, char *argv[]) {
-  int nrows, ncols, percent, i, j;
-  int** matrix, ** mask;
-  scanf("%d%d", &nrows, &ncols);
-
-  matrix = (int**) malloc(sizeof(int*) * nrows);
-  for (i = 0; i < nrows; i++) {
-    matrix[i] = (int*) malloc(sizeof(int) * ncols);
-  }
-
-  mask = (int **) malloc(sizeof(int*) * nrows);
-  for (i = 0; i < nrows; i++) {
-    mask[i] = (int*) malloc(sizeof(int) * ncols);
-  }
-
-  for (i = 0; i < nrows; i++) {
-    for (j = 0; j < ncols; j++) {
-      scanf("%d", &matrix[i][j]);
-    }
-  }
-
-  scanf("%d", &percent);
-
-  spawn thresh(nrows, ncols, matrix, percent, mask);
-  sync;
-
-  printf("%d %d\n", nrows, ncols);
-  for (i = 0; i < nrows; i++) {
-    for (j = 0; j < ncols; j++) {
-      printf("%d ", mask[i][j]);
-    }
-    printf("\n");
-  }
-  printf("\n");
-
-  for (i = 0; i < nrows; i++) {
-    free(matrix[i]);
-  }
-  free(matrix);
-
-  for (i = 0; i < nrows; i++) {
-    free(mask[i]);
-  }
-  free(mask);
-
-  return 0;
-}
