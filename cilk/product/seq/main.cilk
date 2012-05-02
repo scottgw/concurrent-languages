@@ -1,0 +1,113 @@
+/*
+ * outer: outer product
+ *
+ * input:
+ *   points: a vector of (x, y) points
+ *   nelts: the number of points
+ *
+ * output:
+ *   matrix: a real matrix, whose values are filled with inter-point
+ *     distances
+ *   vector: a real vector, whose values are filled with origin-to-point
+ *     distances
+ */
+
+#include <cilk-lib.cilkh>
+#include <math.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+typedef struct sPoint {
+  int i, j;
+} Point;
+
+double sqr(double x) {
+  return x * x;
+}
+
+double distance(Point a, Point b) {
+  return sqrt(sqr(a.i - b.i) + sqr(a.j - b.j));
+}
+
+double max(double a, double b) {
+  return a > b ? a : b;
+}
+
+void outer(int nelts, Point* points, double** matrix, double* vector) {
+  int i, j;
+  double nmax;
+  for (i = 0; i < nelts; i++) {
+    nmax = -1;
+    for (j = 0; j < nelts; j++) {
+      if (i != j) {
+        matrix[i][j] = distance(points[i], points[j]);
+        nmax = max(nmax, matrix[i][j]);
+      }
+      matrix[i][i] = nmax * nelts;
+      vector[i] = distance((Point){0, 0}, points[i]);
+    }
+  }
+}
+
+double** create_matrix(int nelts) {
+  int i;
+  double** matrix = (double **) malloc(sizeof(double *) * nelts);
+  for (i = 0; i < nelts; i++) {
+    matrix[i] = (double *) malloc(sizeof(double) * nelts);
+  }
+  return matrix;
+}
+
+void free_matrix(int nelts, double** matrix) {
+  int i;
+  for (i = 0; i < nelts; i++) {
+    free(matrix[i]);
+  }
+  free(matrix);
+}
+
+Point* read_vector_of_points(int nelts) {
+  int i, a, b;
+  Point* vector = (Point* ) malloc(sizeof(Point) * nelts);
+  for (i =  0; i < nelts; i++) {
+    scanf("%d %d", &a, &b);
+    vector[i].i = a;
+    vector[i].j = b;
+  }
+  return vector;
+}
+
+int main(int argc, char *argv[]) {
+  int nelts, i, j;
+  Point* points;
+  double** matrix;
+  double* vector;
+
+  scanf("%d", &nelts);
+  points = read_vector_of_points(nelts);
+  matrix = create_matrix(nelts);
+  vector = (double* ) malloc(sizeof(double) * nelts);
+
+  outer(nelts, points, matrix, vector);
+
+  printf("%d %d\n", nelts, nelts);
+  for (i = 0; i < nelts; i++) {
+    for (j = 0; j < nelts; j++) {
+      printf("%g ", matrix[i][j]);
+    }
+    printf("\n");
+  }
+  printf("\n");
+
+  printf("%d\n", nelts);
+  for (i = 0; i < nelts; i++) {
+    printf("%g ", vector[i]);
+  }
+  printf("\n");
+
+  free_matrix(nelts, matrix);
+  free(vector);
+  free(points);
+
+  return 0;
+}
