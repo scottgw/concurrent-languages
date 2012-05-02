@@ -13,10 +13,12 @@
 #include <cstdlib>
 
 #include <algorithm>
+#include <vector>
 
 using namespace std;
 
-void thresh(int nrows, int ncols, int** matrix, int percent, int** mask) {
+void thresh(int nrows, int ncols, const vector<vector<int> >& matrix,
+    int percent, vector<vector<int> >* mask) {
   int nmax = 0;
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
@@ -44,56 +46,10 @@ void thresh(int nrows, int ncols, int** matrix, int percent, int** mask) {
 
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
-      mask[i][j] = matrix[i][j] >= threshold;
+      (*mask)[i][j] = matrix[i][j] >= threshold;
     }
   }
 
   delete[] histogram;
 }
 
-int main(int argc, char** argv) {
-  int nrows, ncols, percent;
-
-  scanf("%d%d", &nrows, &ncols);
-
-  int** matrix = new int* [nrows];
-  for (int i = 0; i < nrows; i++) {
-    matrix[i] = new int[ncols];
-  }
-
-  int** mask = new int* [nrows];
-  for (int i = 0; i < nrows; i++) {
-    mask[i] = new int[ncols];
-  }
-
-  for (int i = 0; i < nrows; i++) {
-    for (int j = 0; j < ncols; j++) {
-      scanf("%d", &matrix[i][j]);
-    }
-  }
-
-  scanf("%d", &percent);
-
-  thresh(nrows, ncols, matrix, percent, mask);
-
-  printf("%d %d\n", nrows, ncols);
-  for (int i = 0; i < nrows; i++) {
-    for (int j = 0; j < ncols; j++) {
-      printf("%d ", mask[i][j]);
-    }
-    printf("\n");
-  }
-  printf("\n");
-
-  for (int i = 0; i < nrows; i++) {
-    delete[] matrix[i];
-  }
-  delete[] matrix;
-
-  for (int i = 0; i < nrows; i++) {
-    delete[] mask[i];
-  }
-  delete[] mask;
-
-  return 0;
-}

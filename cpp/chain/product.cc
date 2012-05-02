@@ -27,30 +27,3 @@ void product(int nelts, const vector<vector<double> >& matrix,
   }
 }
 
-int main(int argc, char** argv) {
-  int nelts;
-  scanf("%d", &nelts);
-
-  vector<vector<double> > matrix(nelts, vector<double>(nelts));
-  vector<double> vec(nelts), result(nelts);
-
-  for (int i = 0; i < nelts; i++) {
-    for (int j = 0; j < nelts; j++) {
-      cin >> matrix[i][j];
-    }
-  }
-
-  for (int i = 0; i < nelts; i++) {
-    cin >> vec[i];
-  }
-
-  product(nelts, matrix, vec, &result);
-
-  printf("%d\n", nelts, nelts);
-  for (int i = 0; i < nelts; i++) {
-    printf("%g ", result[i]);
-  }
-  printf("\n");
-
-  return 0;
-}
