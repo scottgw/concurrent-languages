@@ -9,6 +9,7 @@
  *   mask: a boolean matrix filled with true for the cells to be kept
  */
 
+module Thresh {
 use Search;
 
 proc thresh(nrows: int, ncols: int,
@@ -38,33 +39,4 @@ proc thresh(nrows: int, ncols: int,
   }
 }
 
-proc main() {
-  var nrows: int;
-  var ncols: int;
-  var percent: int;
-
-  read(nrows, ncols);
-
-  var matrix: [1..nrows, 1..ncols] int;
-  var mask: [1..nrows, 1..ncols] int;
-
-  for i in 1..nrows do {
-    for j in 1..ncols do {
-      read(matrix[i,j]);
-    }
-  }
-
-  read(percent);
-
-  thresh(nrows, ncols, matrix, percent, mask);
-
-  writeln(nrows, " ", ncols);
-
-  for i in 1..nrows do {
-    for j in 1..ncols do {
-      write(mask[i, j], " ");
-    }
-    writeln();
-  }
-  writeln();
 }

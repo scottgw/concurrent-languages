@@ -11,6 +11,7 @@
  *   points: a vector of (x, y) points
  */
 
+module Winnow {
 proc swap(x: int, y: int, value: [?Dom]) {
   var v = value[x];
   value[x] = value[y];
@@ -87,29 +88,4 @@ proc read_matrix(nrows, ncols: int,
   }
 }
 
-proc main() {
-  var nrows: int;
-  var ncols: int;
-  var nelts: int;
-
-  read(nrows, ncols);
-
-  var matrix, mask: [1..nrows, 1..ncols] int;
-
-  read_matrix(nrows, ncols, matrix);
-  read_matrix(nrows, ncols, mask);
-
-  read(nelts);
-
-  var points: [1..nelts] (int, int);
-
-  winnow(nrows, ncols, matrix, mask, nelts, points);
-
-  writeln(nelts);
-
-  for i in 1..nelts do {
-    writeln(points[i]);
-  }
-
-  writeln();
 }

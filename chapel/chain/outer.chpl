@@ -11,6 +11,7 @@
  *     distances
  */
 
+module Outer {
 proc sqr(x: real): real {
   return x * x;
 }
@@ -47,30 +48,4 @@ proc read_vector_of_points(nelts: int, vector: [1..nelts] (int, int)) {
   }
 }
 
-proc main() {
-  var nelts: int;
-  read(nelts);
-
-  var points: [1..nelts] (int, int);
-
-  read_vector_of_points(nelts, points);
-
-  var matrix: [1..nelts, 1..nelts] real;
-  var vector: [1..nelts] real;
-  outer(nelts, points, matrix, vector);
-
-  writeln(nelts + " " + nelts);
-  for i in 1..nelts do {
-    for j in 1..nelts do {
-      write(matrix[i, j] + " ");
-    }
-    writeln();
-  }
-  writeln();
-
-  writeln(nelts);
-  for i in 1..nelts do {
-    write(vector[i] + " ");
-  }
-  writeln();
 }
