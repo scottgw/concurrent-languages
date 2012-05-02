@@ -17,15 +17,30 @@ import (
 
 type double float64;
 
+func split_worker(index int, op func(index int), done chan bool) {
+  op(index);
+  done <- true;
+}
+  
+func split(begin, end int, op func(index int)) {
+  done := make(chan bool);
+  for i := begin; i < end; i++ {
+    go split_worker(i, op, done)
+  }
+  for i := begin; i < end; i++ {
+    <-done;
+  }
+}
+
 func product(nelts int, matrix [][]double, vector []double,
     result []double) {
-  for i := 0; i < nelts; i++ {
+  split(0, nelts, func(i int) {
     var sum double = 0;
     for j := 0; j < nelts; j++ {
       sum += matrix[i][j] * vector[j];
     }
     result[i] = sum;
-  }
+  });
 }
 
 func read_integer() int {
