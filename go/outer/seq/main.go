@@ -1,84 +1,59 @@
 /*
- * winnow: weighted point selection
+ * outer: outer product
  *
  * input:
- *   matrix: an integer matrix, whose values are used as masses
- *   mask: a boolean matrix showing which points are eligible for
- *     consideration
- *   nrows, ncols: the number of rows and columns
- *   nelts: the number of points to select
+ *   vector: a vector of (x, y) points
+ *   nelts: the number of points
  *
  * output:
- *   points: a vector of (x, y) points
- *
+ *   matrix: a real matrix, whose values are filled with inter-point
+ *     distances
+ *   vector: a real vector, whose values are filled with origin-to-point
+ *     distances
  */
 package main
 
 import (
   "fmt"
-  "sort"
+  "math"
 )
 
 type Point struct {
-  value, i, j int;
+  i, j int;
 }
+
+type double float64;
 
 type Points []Point;
 
-func (p Points) Len() int { return len(p) }
-func (p Points) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
-func (p Points) Less(i, j int) bool {
-  if p[i].value < p[j].value {
-    return true;
+func max(a, b double) double {
+  if a > b {
+    return a;
   }
-  if p[i].value > p[j].value {
-    return false;
-  }
-  if p[i].i < p[j].i {
-    return true;
-  }
-  if p[i].i > p[j].i {
-    return false;
-  }
-  return p[i].j < p[j].j;
+  return b;
 }
 
-func winnow(nrows, ncols int, matrix, mask [][]int, nelts int) []Point {
-  var n = 0;
+func sqr(x double) double {
+  return x * x;
+}
 
-  for i := 0; i < nrows; i++ {
-    for j := 0; j < ncols; j++ {
-      if mask[i][j] == 1 {
-        n++;
-      }
-    }
-  }
+func distance(a, b Point) double {
+  return double(math.Sqrt(float64(sqr(double(a.i - b.i)) +
+        sqr(double(a.j - b.j)))));
+}
 
-  var points, values Points;
-  points = make(Points, n);
-  values = make(Points, n);
-
-  var count = 0;
-  for i := 0; i < nrows; i++ {
-    for j := 0; j < ncols; j++ {
-      if mask[i][j] == 1 {
-        values[count] = Point{matrix[i][j], i, j};
-        count++;
-      }
-    }
-  }
-  
-  sort.Sort(values);
-
-  var total = len(values);
-  var chunk int = total / nelts;
-
+func outer(nelts int, points Points, matrix [][]double, vector []double) {
   for i := 0; i < nelts; i++ {
-    var index = i * chunk;
-    points[i] = values[index];
+    var nmax double = -1;
+    for j := 0; j < nelts; j++ {
+      if (i != j) {
+        matrix[i][j] = distance(points[i], points[j]);
+        nmax = max(nmax, matrix[i][j]);
+      }
+    }
+    matrix[i][i] = double(nelts) * nmax;
+    vector[i] = distance(Point{0, 0}, points[i]);
   }
-
-  return points;
 }
 
 func read_integer() int {
@@ -92,33 +67,51 @@ func read_integer() int {
   return value;
 }
 
-func read_matrix(nrows, ncols int) [][]int {
-  var matrix [][]int;
-  matrix = make([][]int, nrows);
-  for i := 0; i < nrows; i++ {
-    matrix[i] = make([]int, ncols);
-    for j := 0; j < ncols; j++ {
-      matrix[i][j] = read_integer();
-    }
+func create_matrix(nelts int) [][]double {
+  var matrix [][]double;
+  matrix = make([][]double, nelts);
+  for i := 0; i < nelts; i++ {
+    matrix[i] = make([]double, nelts);
   }
   return matrix;
 }
 
+func read_vector_of_points(nelts int) Points {
+  var vector Points;
+  vector = make(Points, nelts);
+  for i := 0; i < nelts; i++ {
+    a := read_integer();
+    b := read_integer();
+    vector[i] = Point{a, b};
+  }
+  return vector;
+}
+
 func main() {
-  var nrows, ncols, nelts int;
-  var matrix, mask [][]int;
+  var nelts int;
+  var points Points;
+  var matrix [][]double;
+  var vector []double;
 
-  nrows = read_integer();
-  ncols = read_integer();
-  matrix = read_matrix(nrows, ncols);
-  mask = read_matrix(nrows, ncols);
   nelts = read_integer();
+  points = read_vector_of_points(nelts);
+  matrix = create_matrix(nelts);
+  vector = make([]double, nelts);
 
-  var points = winnow(nrows, ncols, matrix, mask, nelts);
+  outer(nelts, points, matrix, vector);
+
+  fmt.Printf("%d %d\n", nelts, nelts);
+  for i := 0; i < nelts; i++ {
+    for j := 0; j < nelts; j++ {
+      fmt.Printf("%g ", matrix[i][j]);
+    }
+    fmt.Printf("\n");
+  }
+  fmt.Printf("\n");
 
   fmt.Printf("%d\n", nelts);
   for i := 0; i < nelts; i++ {
-    fmt.Printf("%d %d\n", points[i].i, points[i].j);
+    fmt.Printf("%g ", vector[i]);
   }
   fmt.Printf("\n");
 }
