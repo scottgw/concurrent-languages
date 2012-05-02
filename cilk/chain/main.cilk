@@ -15,31 +15,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-typedef cilk void (*Function)(int, int, int**);
+#include "common.cilkh"
 
-cilk void split(int begin, int end, int extra, int** matrix, Function f) {
+cilk void split(int begin, int end, SplitFunction f, SplitState state) {
   int middle = begin + (end - begin) / 2;
+
   if (begin >= end) return;
   if (begin + 1 == end) {
-    spawn f(begin, extra, matrix);
+    spawn f(begin, state);
     return;
   }
-  spawn split(begin, middle, extra, matrix, f);
-  spawn split(middle, end, extra, matrix, f);
+  spawn split(begin, middle, f, state);
+  spawn split(middle, end, f, state);
 }
-
-typedef int (*Operator)(int, int);
-typedef void* ReduceFilter;
-
-typedef struct sReduceState {
-  int extra, ncols;
-  int row;
-  int** matrix;
-  Operator op;
-  ReduceFilter filter;
-} ReduceState;
-
-typedef cilk int (*GenericReduceFunction)(int index, ReduceState state);
 
 cilk int reduce2d_identity_filter(int col, ReduceState state) {
   return state.matrix[state.row][col];
@@ -127,12 +115,50 @@ void free_matrix_double(int nrows, double** matrix) {
   free(matrix);
 }
 
-typedef struct sPoint {
-  int i, j;
-} Point;
+cilk void randmat(int, int, int, int**);
+cilk void thresh(int, int, int**, int, int**);
+cilk void winnow(int, int, int**, int**, int, Point*);
+cilk void outer(int, Point*, double**, double*);
+cilk void product(int, double**, double*, double*);
 
 cilk int main() {
-  //int nelts, randmat_seed, thresh_percent, winnow_nelts;
+  int nelts, randmat_seed, thresh_percent, winnow_nelts, i;
+  int** randmat_matrix, **thresh_mask;
+  Point* winnow_points;
+  double** outer_matrix;
+  double* outer_vector, *product_result;
+
+  setbuf(stdout, NULL); // TODO REMOVE !!!!
+
+  scanf("%d%d%d%d", &nelts, &randmat_seed, &thresh_percent, &winnow_nelts);
+
+  randmat_matrix = create_matrix_int(nelts, nelts);
+  thresh_mask = create_matrix_int(nelts, nelts);
+  winnow_points = (Point*) malloc(sizeof(Point) * winnow_nelts);
+  outer_matrix = create_matrix_double(winnow_nelts, winnow_nelts);
+  outer_vector = (double*) malloc(sizeof(double) * winnow_nelts);
+  product_result = (double*) malloc(sizeof(double) * winnow_nelts);
+
+  spawn randmat(nelts, nelts, randmat_seed, randmat_matrix);
+  spawn thresh(nelts, nelts, randmat_matrix, thresh_percent, thresh_mask);
+  spawn winnow(nelts, nelts, randmat_matrix, thresh_mask, winnow_nelts,
+      winnow_points);
+  spawn outer(winnow_nelts, winnow_points, outer_matrix, outer_vector);
+  spawn product(winnow_nelts, outer_matrix, outer_vector, product_result);
+
+  printf("%d\n", winnow_nelts);
+  for (i = 0; i < winnow_nelts; i++) {
+    printf("%g ", product_result[i]);
+  }
+  printf("\n");
+
+  free_matrix_int(nelts, randmat_matrix);
+  free_matrix_int(nelts, thresh_mask);
+  free(winnow_points);
+  free_matrix_double(winnow_nelts, outer_matrix);
+  free(outer_vector);
+  free(product_result);
+
   return 0;
 }
 

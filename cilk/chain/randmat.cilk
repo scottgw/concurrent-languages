@@ -13,20 +13,20 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-typedef cilk void (*Function)(int, int, int**);
+#include "common.cilkh"
 
-cilk void split(int begin, int end, int extra, int** matrix, Function f);
-
-cilk void update_matrix(int col, int row, int** matrix) {
-  matrix[row][col] = rand();
+cilk void update_matrix(int col, SplitState state) {
+  state.matrix_int[state.row][col] = rand() % 1000;
 }
 
-cilk void start_cols(int row, int ncols, int** matrix) {
-  spawn split(0, ncols, row, matrix, update_matrix);
+cilk void start_cols(int row, SplitState state) {
+  state.row = row;
+  spawn split(0, state.ncols, update_matrix, state);
 }
 
 cilk void randmat(int nrows, int ncols, int s, int** matrix) {
+  SplitState state = {.ncols = ncols, .matrix_int = matrix };
   srand(s);
-  spawn split(0, nrows, ncols, matrix, start_cols);
+  spawn split(0, nrows, start_cols, state);
 }
 

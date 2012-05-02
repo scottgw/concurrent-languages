@@ -14,14 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct sSplitState {
-  int nelts;
-  double** matrix;
-  double* vector;
-  double* result;
-} SplitState;
-
-typedef cilk void (*SplitFunction)(int index, SplitState state);
+#include "common.cilkh"
 
 cilk void split(int begin, int end, SplitFunction f, SplitState state);
 
@@ -29,15 +22,15 @@ cilk void product_split(int index, SplitState state) {
   double sum = 0;
   int j;
   for (j = 0; j < state.nelts; j++) {
-    sum += state.matrix[index][j] * state.vector[j];
+    sum += state.matrix_double[index][j] * state.vector[j];
   }
   state.result[index] = sum;
 }
 
 cilk void product(int nelts, double** matrix, double* vector,
     double* result) {
-  SplitState state = {.nelts = nelts, .matrix = matrix, .vector = vector,
-    .result = result};
+  SplitState state = {.nelts = nelts, .matrix_double = matrix,
+    .vector = vector, .result = result};
   spawn split(0, nelts, product_split, state);
 }
 

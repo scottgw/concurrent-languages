@@ -17,9 +17,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-typedef struct sPoint {
-  int i, j;
-} Point;
+#include "common.cilkh"
 
 double sqr(double x) {
   return x * x;
@@ -33,15 +31,6 @@ double max_double(double a, double b) {
   return a > b ? a : b;
 }
 
-typedef struct sSplitState {
-  int nelts;
-  double** matrix;
-  double* vector;
-  Point* points;
-} SplitState;
-
-typedef cilk void (*SplitFunction)(int index, SplitState state);
-
 cilk void split(int begin, int end, SplitFunction f, SplitState state);
 
 cilk void outer_split(int index, SplitState state) {
@@ -49,18 +38,19 @@ cilk void outer_split(int index, SplitState state) {
   int j;
   for (j = 0; j < state.nelts; j++) {
     if (index != j) {
-      state.matrix[index][j] = distance(state.points[index],
+      state.matrix_double[index][j] = distance(state.points[index],
           state.points[j]);
-      nmax = max_double(nmax, state.matrix[index][j]);
+      nmax = max_double(nmax, state.matrix_double[index][j]);
     }
-    state.matrix[index][index] = nmax * state.nelts;
-    state.vector[index] = distance((Point){0, 0}, state.points[index]);
+    state.matrix_double[index][index] = nmax * state.nelts;
+    state.vector[index] = distance((Point){.i = 0, .j = 0},
+        state.points[index]);
   }
 }
 
 cilk void outer(int nelts, Point* points, double** matrix, double* vector) {
-  SplitState state = {.matrix = matrix, .vector = vector, .points = points,
-    .nelts = nelts};
+  SplitState state = {.matrix_double = matrix, .vector = vector,
+    .points = points, .nelts = nelts};
   spawn split(0, nelts, outer_split, state);
   sync;
 }
