@@ -26,7 +26,7 @@ proc outer(nelts: int,
     points: [1..nelts] (int, int),
     matrix: [1..nelts, 1..nelts] real, vector: [1..nelts] real) {
 
-  for i in 1..nelts do {
+  forall i in 1..nelts do {
     var nmax: real = -1;
     for j in 1..nelts do {
       if (i != j) {
