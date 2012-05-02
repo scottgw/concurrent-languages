@@ -1,86 +1,49 @@
-/* winnow: weighted point selection
+/* product: matrix-vector product
  * 
  * input:
- *   matrix: an integer matrix, whose values are used as masses
- *   mask: a boolean matrix showing which points are eligible for
- *     consideration
- *   nrows, ncols: the number of rows and columns
- *   nelts: the number of points to select
+ *   nelts: the number of elements
+ *   matrix: a real matrix
+ *   vector: a real vector
  *
  * output:
- *   points: a vector of (x, y) points
+ *    result: a real vector, whose values are the result of the product
  */
 
-proc winnow(nrows: int, ncols: int,
-    matrix: [1..nrows, 1..ncols] int,
-    mask: [1..nrows, 1..ncols] int,
-    nelts: int,
-    points: [1..nelts] (int, int)
-    ) {
-
-  var n: int = 0;
-  for i in 1..nrows do {
-    for j in 1..ncols do {
-      if (mask[i, j] == 1) {
-        n = n + 1;
-      }
-    }
-  }
-
-  var values: [1..n] (int, (int, int));
-  var count: int = 1;
-  for i in 1..nrows do {
-    for j in 1..ncols do {
-      if (mask[i, j] == 1) {
-        values[count] = (matrix[i, j], (i, j));
-        count = count + 1;
-      }
-    }
-  }
-
-  QuickSort(values);
-
-  var chunk: int = n / nelts;
-
+proc product(nelts: int,
+    matrix: [1..nelts, 1..nelts] real,
+    vector: [1..nelts] real,
+    result: [1..nelts] real) {
   for i in 1..nelts do {
-    var ind: int;
-    ind = (i - 1) * chunk + 1;
-    (, points[i]) = values[ind];
-  }
-}
-
-proc read_matrix(nrows, ncols: int,
-    matrix: [1..nrows, 1..ncols] int) {
-  for i in 1..nrows do {
-    for j in 1..ncols do {
-      read(matrix[i, j]);
+    var sum: real = 0;
+    for j in 1..nelts do {
+      sum += matrix[i, j] * vector[j];
     }
+    result[i] = sum;
   }
 }
 
 proc main() {
-  var nrows: int;
-  var ncols: int;
   var nelts: int;
-
-  read(nrows, ncols);
-
-  var matrix, mask: [1..nrows, 1..ncols] int;
-
-  read_matrix(nrows, ncols, matrix);
-  read_matrix(nrows, ncols, mask);
-
   read(nelts);
 
-  var points: [1..nelts] (int, int);
-
-  winnow(nrows, ncols, matrix, mask, nelts, points);
-
-  writeln(nelts);
+  var matrix: [1..nelts, 1..nelts] real;
+  var vector, result: [1..nelts] real;
 
   for i in 1..nelts do {
-    writeln(points[i]);
+    for j in 1..nelts do {
+      read(matrix[i, j]);
+    }
   }
 
+  for i in 1..nelts do {
+    read(vector[i]);
+  }
+
+  product(nelts, matrix, vector, result);
+
+  writeln(nelts);
+  for i in 1..nelts do {
+    write(result[i] + " ");
+  }
   writeln();
 }
