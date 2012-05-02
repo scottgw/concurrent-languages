@@ -1,2 +1,3 @@
 all: main
-	./$< < $<.in
+	./$< < $<.in > main.out
+	diff main.out main.gold
