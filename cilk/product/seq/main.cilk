@@ -1,59 +1,39 @@
 /*
- * outer: outer product
+ * product: matrix-vector product
  *
  * input:
- *   points: a vector of (x, y) points
- *   nelts: the number of points
+ *   nelts: the number of elements
+ *   matrix: a real matrix
+ *   vector: a real vector
  *
  * output:
- *   matrix: a real matrix, whose values are filled with inter-point
- *     distances
- *   vector: a real vector, whose values are filled with origin-to-point
- *     distances
+ *   result: a real vector, whose values are the result of the product
  */
 
 #include <cilk-lib.cilkh>
-#include <math.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-typedef struct sPoint {
+void product(int nelts, double** matrix, double* vector, double* result) {
   int i, j;
-} Point;
-
-double sqr(double x) {
-  return x * x;
-}
-
-double distance(Point a, Point b) {
-  return sqrt(sqr(a.i - b.i) + sqr(a.j - b.j));
-}
-
-double max(double a, double b) {
-  return a > b ? a : b;
-}
-
-void outer(int nelts, Point* points, double** matrix, double* vector) {
-  int i, j;
-  double nmax;
+  double sum;
   for (i = 0; i < nelts; i++) {
-    nmax = -1;
+    sum = 0;
     for (j = 0; j < nelts; j++) {
-      if (i != j) {
-        matrix[i][j] = distance(points[i], points[j]);
-        nmax = max(nmax, matrix[i][j]);
-      }
-      matrix[i][i] = nmax * nelts;
-      vector[i] = distance((Point){0, 0}, points[i]);
+      sum += matrix[i][j] * vector[j];
     }
+    result[i] = sum;
   }
 }
 
-double** create_matrix(int nelts) {
-  int i;
+double** read_matrix(int nelts) {
+  int i, j;
   double** matrix = (double **) malloc(sizeof(double *) * nelts);
   for (i = 0; i < nelts; i++) {
     matrix[i] = (double *) malloc(sizeof(double) * nelts);
+    for (j = 0; j < nelts; j++) {
+      scanf("%lf", &matrix[i][j]);
+    }
   }
   return matrix;
 }
@@ -66,48 +46,37 @@ void free_matrix(int nelts, double** matrix) {
   free(matrix);
 }
 
-Point* read_vector_of_points(int nelts) {
-  int i, a, b;
-  Point* vector = (Point* ) malloc(sizeof(Point) * nelts);
+double* read_vector(int nelts) {
+  int i;
+  double* vector = (double* ) malloc(sizeof(double) * nelts);
   for (i =  0; i < nelts; i++) {
-    scanf("%d %d", &a, &b);
-    vector[i].i = a;
-    vector[i].j = b;
+    scanf("%lf", &vector[i]);
   }
   return vector;
 }
 
 int main(int argc, char *argv[]) {
-  int nelts, i, j;
-  Point* points;
+  int nelts, i;
   double** matrix;
   double* vector;
+  double* result;
 
   scanf("%d", &nelts);
-  points = read_vector_of_points(nelts);
-  matrix = create_matrix(nelts);
-  vector = (double* ) malloc(sizeof(double) * nelts);
+  matrix = read_matrix(nelts);
+  vector = read_vector(nelts);
+  result = (double* ) malloc(sizeof(double) * nelts);
 
-  outer(nelts, points, matrix, vector);
-
-  printf("%d %d\n", nelts, nelts);
-  for (i = 0; i < nelts; i++) {
-    for (j = 0; j < nelts; j++) {
-      printf("%g ", matrix[i][j]);
-    }
-    printf("\n");
-  }
-  printf("\n");
+  product(nelts, matrix, vector, result);
 
   printf("%d\n", nelts);
   for (i = 0; i < nelts; i++) {
-    printf("%g ", vector[i]);
+    printf("%g ", result[i]);
   }
   printf("\n");
 
   free_matrix(nelts, matrix);
   free(vector);
-  free(points);
+  free(result);
 
   return 0;
 }
