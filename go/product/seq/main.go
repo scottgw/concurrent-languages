@@ -1,58 +1,30 @@
 /*
- * outer: outer product
+ * product: matrix-vector product
  *
  * input:
- *   vector: a vector of (x, y) points
- *   nelts: the number of points
+ *   nelts: the number of elements
+ *   matrix: the real matrix
+ *   vector: the real vector
  *
  * output:
- *   matrix: a real matrix, whose values are filled with inter-point
- *     distances
- *   vector: a real vector, whose values are filled with origin-to-point
- *     distances
+ *   result: a real vector, whose values are the result of the product
  */
 package main
 
 import (
   "fmt"
-  "math"
 )
-
-type Point struct {
-  i, j int;
-}
 
 type double float64;
 
-type Points []Point;
-
-func max(a, b double) double {
-  if a > b {
-    return a;
-  }
-  return b;
-}
-
-func sqr(x double) double {
-  return x * x;
-}
-
-func distance(a, b Point) double {
-  return double(math.Sqrt(float64(sqr(double(a.i - b.i)) +
-        sqr(double(a.j - b.j)))));
-}
-
-func outer(nelts int, points Points, matrix [][]double, vector []double) {
+func product(nelts int, matrix [][]double, vector []double,
+    result []double) {
   for i := 0; i < nelts; i++ {
-    var nmax double = -1;
+    var sum double = 0;
     for j := 0; j < nelts; j++ {
-      if (i != j) {
-        matrix[i][j] = distance(points[i], points[j]);
-        nmax = max(nmax, matrix[i][j]);
-      }
+      sum += matrix[i][j] * vector[j];
     }
-    matrix[i][i] = double(nelts) * nmax;
-    vector[i] = distance(Point{0, 0}, points[i]);
+    result[i] = sum;
   }
 }
 
@@ -67,51 +39,53 @@ func read_integer() int {
   return value;
 }
 
-func create_matrix(nelts int) [][]double {
+func read_double() double {
+  var value double;
+  for true {
+    var read, _ = fmt.Scanf("%g", &value);
+    if read == 1 {
+      break;
+    }
+  }
+  return value;
+}
+
+func read_matrix(nelts int) [][]double {
   var matrix [][]double;
   matrix = make([][]double, nelts);
   for i := 0; i < nelts; i++ {
     matrix[i] = make([]double, nelts);
+    for j := 0; j < nelts; j++ {
+      matrix[i][j] = read_double();
+    }
   }
   return matrix;
 }
 
-func read_vector_of_points(nelts int) Points {
-  var vector Points;
-  vector = make(Points, nelts);
+func read_vector(nelts int) []double {
+  var vector []double;
+  vector = make([]double, nelts);
   for i := 0; i < nelts; i++ {
-    a := read_integer();
-    b := read_integer();
-    vector[i] = Point{a, b};
+    vector[i] = read_double();
   }
   return vector;
 }
 
 func main() {
   var nelts int;
-  var points Points;
   var matrix [][]double;
-  var vector []double;
+  var vector, result []double;
 
   nelts = read_integer();
-  points = read_vector_of_points(nelts);
-  matrix = create_matrix(nelts);
-  vector = make([]double, nelts);
+  matrix = read_matrix(nelts);
+  vector = read_vector(nelts);
+  result = make([]double, nelts);
 
-  outer(nelts, points, matrix, vector);
-
-  fmt.Printf("%d %d\n", nelts, nelts);
-  for i := 0; i < nelts; i++ {
-    for j := 0; j < nelts; j++ {
-      fmt.Printf("%g ", matrix[i][j]);
-    }
-    fmt.Printf("\n");
-  }
-  fmt.Printf("\n");
+  product(nelts, matrix, vector, result);
 
   fmt.Printf("%d\n", nelts);
   for i := 0; i < nelts; i++ {
-    fmt.Printf("%g ", vector[i]);
+    fmt.Printf("%g ", result[i]);
   }
   fmt.Printf("\n");
 }
