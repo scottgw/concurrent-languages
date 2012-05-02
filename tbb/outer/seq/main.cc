@@ -1,16 +1,17 @@
-/* winnow: weighted point selection
+/* outer: outer product
  *
  * input:
- *   matrix: an integer matrix, whose values are used as masses
- *   mask: a boolean matrix, showing which points are eligible for
- *     consideration
- *   nrows, ncols: number of rows and columns
- *   nelts: the number of points to select
+ *   points: a vector of (x, y) points
+ *   nelts: the number of points
  *
  * output:
- *   points: a vector of (x, y) points
+ *   matrix: a real matrix, whose values are filled with inter-point
+ *     distances
+ *   vec: a real vector, whose values are filled with origin-to-point
+ *     distances
  */
 #include <cassert>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 
@@ -20,58 +21,59 @@
 
 using namespace std;
 
-void winnow(int nrows, int ncols, const vector<vector<int> >& matrix,
-    const vector<vector<int> >& mask, int nelts,
-    vector<pair<int, int> >* points) {
-  vector<pair<int, pair<int, int> > > values;
-  for (int i = 0; i < nrows; i++) {
-    for (int j = 0; j < ncols; j++) {
-      if (mask[i][j]) {
-        values.push_back(make_pair(matrix[i][j], make_pair(i, j)));
-      }
-    }
-  }
-  sort(values.begin(), values.end());
-
-  size_t n = values.size();
-  size_t chunk = n / nelts;
-
-  for (int i = 0; i < nelts; i++) {
-    int index = i * chunk;
-    (*points)[i] = values[index].second;
-  }
-
+double sqr(double x) {
+  return x * x;
 }
 
-void read_matrix(int nrows, int ncols, vector<vector<int> >* matrix) {
-  for (int i = 0; i < nrows; i++) {
-    for (int j = 0; j < ncols; j++) {
-      cin >> (*matrix)[i][j];
+double distance(const pair<int, int>& x, const pair<int, int>& y) {
+  return sqrt(sqr(x.first - y.first) + sqr(x.second - y.second));
+}
+
+void outer(int nelts, const vector<pair<int, int> > & points,
+    vector<vector<double> >* matrix, vector<double>* vec) {
+  for (int i = 0; i < nelts; i++) {
+    double nmax = -1;
+    for (int j = 0; j < nelts; j++) {
+      if (i != j) {
+        (*matrix)[i][j] = ::distance(points[i], points[j]);
+        nmax = max(nmax, (*matrix)[i][j]);
+      }
     }
+    (*matrix)[i][i] = nelts * nmax;
+    (*vec)[i] = ::distance(make_pair(0, 0), points[i]);
+  }
+}
+
+void read_vector_of_points(int nelts, vector<pair<int, int> >* vec) {
+  for (int i = 0; i < nelts; i++) {
+    cin >> (*vec)[i].first >> (*vec)[i].second;
   }
 }
 
 int main(int argc, char** argv) {
-  int nrows, ncols, nelts;
-
-  scanf("%d%d", &nrows, &ncols);
-
-  vector<vector<int> > matrix(nrows, vector<int>(ncols));
-  vector<vector<int> > mask(nrows, vector<int>(ncols));
-
-  read_matrix(nrows, ncols, &matrix);
-  read_matrix(nrows, ncols, &mask);
-
+  int nelts;
   scanf("%d", &nelts);
 
   vector<pair<int, int> > points(nelts);
+  read_vector_of_points(nelts, &points);
 
-  winnow(nrows, ncols, matrix, mask, nelts, &points);
+  vector<vector<double> > matrix(nelts, vector<double>(nelts));
+  vector<double> vec(nelts);
+
+  outer(nelts, points, &matrix, &vec);
+
+  printf("%d %d\n", nelts, nelts);
+  for (int i = 0; i < nelts; i++) {
+    for (int j = 0; j < nelts; j++) {
+      printf("%g ", matrix[i][j]);
+    }
+    printf("\n");
+  }
+  printf("\n");
 
   printf("%d\n", nelts);
-
   for (int i = 0; i < nelts; i++) {
-    printf("%d %d\n", points[i].first, points[i].second);
+    printf("%g ", vec[i]);
   }
   printf("\n");
 
