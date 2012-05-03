@@ -14,7 +14,6 @@
 package all
 
 import (
-  "fmt"
   "math"
 )
 
@@ -22,24 +21,24 @@ type Point struct {
   value, i, j int;
 }
 
-type double float64;
+type Double float64;
 
 type Points []Point;
 
-func max(a, b double) double {
+func max(a, b Double) Double {
   if a > b {
     return a;
   }
   return b;
 }
 
-func sqr(x double) double {
+func sqr(x Double) Double {
   return x * x;
 }
 
-func distance(a, b Point) double {
-  return double(math.Sqrt(float64(sqr(double(a.i - b.i)) +
-        sqr(double(a.j - b.j)))));
+func distance(a, b Point) Double {
+  return Double(math.Sqrt(float64(sqr(Double(a.i - b.i)) +
+        sqr(Double(a.j - b.j)))));
 }
 
 func split_worker(index int, op func(index int), done chan bool) {
@@ -57,48 +56,17 @@ func split(begin, end int, op func(index int)) {
   }
 }
 
-func Outer(nelts int, points Points, matrix [][]double, vector []double) {
+func Outer(nelts int, points Points, matrix [][]Double, vector []Double) {
   split(0, nelts, func(i int) {
-    var nmax double = -1;
+    var nmax Double = -1;
     for j := 0; j < nelts; j++ {
       if (i != j) {
         matrix[i][j] = distance(points[i], points[j]);
         nmax = max(nmax, matrix[i][j]);
       }
     }
-    matrix[i][i] = double(nelts) * nmax;
+    matrix[i][i] = Double(nelts) * nmax;
     vector[i] = distance(Point{i: 0, j: 0}, points[i]);
   });
-}
-
-func read_integer() int {
-  var value int;
-  for true {
-    var read, _ = fmt.Scanf("%d", &value);
-    if read == 1 {
-      break;
-    }
-  }
-  return value;
-}
-
-func create_matrix(nelts int) [][]double {
-  var matrix [][]double;
-  matrix = make([][]double, nelts);
-  for i := 0; i < nelts; i++ {
-    matrix[i] = make([]double, nelts);
-  }
-  return matrix;
-}
-
-func read_vector_of_points(nelts int) Points {
-  var vector Points;
-  vector = make(Points, nelts);
-  for i := 0; i < nelts; i++ {
-    a := read_integer();
-    b := read_integer();
-    vector[i] = Point{i: a, j: b};
-  }
-  return vector;
 }
 

@@ -17,7 +17,7 @@ import (
 
 func randvec(vector []int, n int, done chan bool) {
   for i := 0; i < n; i++ {
-    vector[i] = rand.Int();
+    vector[i] = rand.Int() % 1000;
   }
   done <- true;
 }

@@ -1,5 +1,5 @@
 all: main
 	./main < main.in
 
-main:
+main: 
 	go build
