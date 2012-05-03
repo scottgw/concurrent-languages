@@ -8,9 +8,6 @@
  * output:
  *   result: a real vector, whose values are the result of the product
  */
-#include <cstdio>
-
-#include <iostream>
 #include <vector>
 
 #include "tbb/blocked_range.h"
@@ -35,4 +32,3 @@ void product(int nelts, const vector<vector<double> >& matrix,
       }
   });
 }
-

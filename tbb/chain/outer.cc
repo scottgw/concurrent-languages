@@ -10,12 +10,8 @@
  *   vec: a real vector, whose values are filled with origin-to-point
  *     distances
  */
-#include <cassert>
 #include <cmath>
-#include <cstdio>
-#include <cstdlib> 
 #include <algorithm>
-#include <iostream>
 #include <vector>
 
 #include "tbb/blocked_range.h"

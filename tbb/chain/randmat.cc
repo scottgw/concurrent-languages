@@ -17,7 +17,7 @@
 using namespace std;
 using namespace tbb;
 
-typedef tbb::blocked_range<size_t> range;
+typedef blocked_range<size_t> range;
 
 void randmat(int nrows, int ncols, int s, vector<vector<int> >* matrix) {
   srand(s);

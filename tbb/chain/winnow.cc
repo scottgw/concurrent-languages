@@ -10,12 +10,7 @@
  * output:
  *   points: a vector of (x, y) points
  */
-#include <cassert>
-#include <cstdio>
-#include <cstdlib>
-
 #include <algorithm>
-#include <iostream>
 #include <vector>
 
 #include "tbb/blocked_range.h"
@@ -39,7 +34,7 @@ void winnow(int nrows, int ncols, const vector<vector<int> >& matrix,
       range(0, nrows),
       [&](range r) {
         for (size_t i = r.begin(); i != r.end(); ++i) {
-          tbb::parallel_for(
+          parallel_for(
             range(0, ncols),
             [&](range s) {
               for (size_t j = s.begin(); j != s.end(); ++j) {

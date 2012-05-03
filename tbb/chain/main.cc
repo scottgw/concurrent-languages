@@ -9,9 +9,8 @@
  * output:
  *  result: a real vector, whose values are the result of the final product
  */
-
 #include <cstdio>
-#include <iostream>
+
 #include <vector>
 
 using namespace std;
@@ -33,23 +32,18 @@ int main() {
   int nelts, randmat_seed, thresh_percent, winnow_nelts;
   scanf("%d%d%d%d", &nelts, &randmat_seed, &thresh_percent, &winnow_nelts);
 
-  setbuf(stdout, NULL);
-
   MatrixInt randmat_matrix(nelts, VectorInt(nelts));
-  randmat(nelts, nelts, randmat_seed, &randmat_matrix);
-
   MatrixInt thresh_mask(nelts, VectorInt(nelts));
-  thresh(nelts, nelts, randmat_matrix, thresh_percent, &thresh_mask);
-
   VectorPairInt winnow_points(winnow_nelts);
-  winnow(nelts, nelts, randmat_matrix, thresh_mask, winnow_nelts,
-      &winnow_points);
-
   MatrixDouble outer_matrix(winnow_nelts, VectorDouble(winnow_nelts));
   VectorDouble outer_vector(winnow_nelts);
-  outer(winnow_nelts, winnow_points, &outer_matrix, &outer_vector);
-
   VectorDouble product_result(winnow_nelts);
+
+  randmat(nelts, nelts, randmat_seed, &randmat_matrix);
+  thresh(nelts, nelts, randmat_matrix, thresh_percent, &thresh_mask);
+  winnow(nelts, nelts, randmat_matrix, thresh_mask, winnow_nelts,
+      &winnow_points);
+  outer(winnow_nelts, winnow_points, &outer_matrix, &outer_vector);
   product(winnow_nelts, outer_matrix, outer_vector, &product_result);
 
   for (int i = 0; i < winnow_nelts; i++) {

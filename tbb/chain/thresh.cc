@@ -8,10 +8,6 @@
  * output:
  *   mask: a boolean matrix filled with true for cells that are kept
  */
-#include <cassert>
-#include <cstdio>
-#include <cstdlib>
-
 #include <algorithm>
 
 #include "tbb/blocked_range.h"
@@ -20,8 +16,9 @@
 #include "tbb/parallel_scan.h"
 
 using namespace std;
+using namespace tbb;
 
-typedef tbb::blocked_range<size_t> range;
+typedef blocked_range<size_t> range;
 typedef function<int (int, int)> Operator;
 
 int op_max(int x, int y) {
@@ -34,12 +31,12 @@ int op_sum(int x, int y) {
 
 int reduce2d_with_filter(int nrows, int ncols,
     const vector<vector<int>>& matrix, Operator aggregator, Operator op) {
-  return tbb::parallel_reduce(
+  return parallel_reduce(
       range(0, nrows), 0,
       [=](range r, int partial_value)->int {
         int result = partial_value;
         for (size_t i = r.begin(); i != r.end(); i++) {
-          result = aggregator(result, tbb::parallel_reduce(
+          result = aggregator(result, parallel_reduce(
             range(0, ncols), 0,
             [=](range r, int partial_value)->int {
               int result = partial_value;
@@ -78,7 +75,7 @@ public:
     }
     sum = res;
   }
-  ScanSum(ScanSum& other, tbb::split) : x(other.x), y(other.y), sum(0) {}
+  ScanSum(ScanSum& other, split) : x(other.x), y(other.y), sum(0) {}
   void reverse_join(ScanSum& other) { sum += other.sum; }
   void assign(ScanSum& other) { sum = other.sum; }
 };
@@ -90,7 +87,7 @@ void thresh(int nrows, int ncols, const vector<vector<int>>& matrix,
 
   vector<int> histogram(nmax + 1, 0);
 
-  tbb::parallel_for(
+  parallel_for(
       range(0, nmax + 1),
       [&](range r) {
         for (size_t i = r.begin(); i != r.end(); ++i) {
@@ -103,21 +100,21 @@ void thresh(int nrows, int ncols, const vector<vector<int>>& matrix,
 
   vector<int> prefixsum(nmax + 1);
   ScanSum scan_sum(&prefixsum, histogram);
-  tbb::parallel_scan(
+  parallel_scan(
       range(0, nmax + 1),
       scan_sum,
-      tbb::auto_partitioner());
+      auto_partitioner());
 
   int count = (nrows * ncols * percent) / 100;
   count = nrows * ncols - count;  // because we scan from left to right
   int threshold = lower_bound(prefixsum.begin(), prefixsum.end(), count) -
      prefixsum.begin();
 
-  tbb::parallel_for(
+  parallel_for(
       range(0, nrows),
       [&](range r) {
         for (size_t i = r.begin(); i != r.end(); ++i) {
-          tbb::parallel_for(
+          parallel_for(
             range(0, ncols),
             [&](range s) {
               for (size_t j = s.begin(); j != s.end(); ++j) {
