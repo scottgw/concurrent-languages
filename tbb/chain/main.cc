@@ -32,6 +32,8 @@ int main() {
   int nelts, randmat_seed, thresh_percent, winnow_nelts;
   scanf("%d%d%d%d", &nelts, &randmat_seed, &thresh_percent, &winnow_nelts);
 
+  setbuf(stdout, NULL);
+
   MatrixInt randmat_matrix(nelts, VectorInt(nelts));
   randmat(nelts, nelts, randmat_seed, &randmat_matrix);
 

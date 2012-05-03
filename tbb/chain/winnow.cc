@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "tbb/blocked_range.h"
+#include "tbb/mutex.h"
 #include "tbb/parallel_for.h"
 #include "tbb/parallel_sort.h"
 
@@ -32,6 +33,8 @@ void winnow(int nrows, int ncols, const vector<vector<int> >& matrix,
     vector<pair<int, int> >* points) {
   vector<pair<int, pair<int, int> > > values;
 
+  mutex m;
+
   parallel_for(
       range(0, nrows),
       [&](range r) {
@@ -41,8 +44,10 @@ void winnow(int nrows, int ncols, const vector<vector<int> >& matrix,
             [&](range s) {
               for (size_t j = s.begin(); j != s.end(); ++j) {
                 if (mask[i][j]) {
-                  values.push_back(make_pair(matrix[i][j],
-                      make_pair(i, j)));
+                  m.lock();
+                    values.push_back(make_pair(matrix[i][j],
+                        make_pair(i, j)));
+                  m.unlock();
                 }
               }
             });
@@ -62,39 +67,4 @@ void winnow(int nrows, int ncols, const vector<vector<int> >& matrix,
           (*points)[i] = values[index].second;
         }
       });
-}
-
-void read_matrix(int nrows, int ncols, vector<vector<int> >* matrix) {
-  for (int i = 0; i < nrows; i++) {
-    for (int j = 0; j < ncols; j++) {
-      cin >> (*matrix)[i][j];
-    }
-  }
-}
-
-int main(int argc, char** argv) {
-  int nrows, ncols, nelts;
-
-  scanf("%d%d", &nrows, &ncols);
-
-  vector<vector<int> > matrix(nrows, vector<int>(ncols));
-  vector<vector<int> > mask(nrows, vector<int>(ncols));
-
-  read_matrix(nrows, ncols, &matrix);
-  read_matrix(nrows, ncols, &mask);
-
-  scanf("%d", &nelts);
-
-  vector<pair<int, int> > points(nelts);
-
-  winnow(nrows, ncols, matrix, mask, nelts, &points);
-
-  printf("%d\n", nelts);
-
-  for (int i = 0; i < nelts; i++) {
-    printf("%d %d\n", points[i].first, points[i].second);
-  }
-  printf("\n");
-
-  return 0;
 }

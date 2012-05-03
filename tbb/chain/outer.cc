@@ -53,38 +53,3 @@ void outer(int nelts, const vector<pair<int, int> > & points,
     });
 }
 
-void read_vector_of_points(int nelts, vector<pair<int, int> >* vec) {
-  for (int i = 0; i < nelts; i++) {
-    cin >> (*vec)[i].first >> (*vec)[i].second;
-  }
-}
-
-int main(int argc, char** argv) {
-  int nelts;
-  scanf("%d", &nelts);
-
-  vector<pair<int, int> > points(nelts);
-  read_vector_of_points(nelts, &points);
-
-  vector<vector<double> > matrix(nelts, vector<double>(nelts));
-  vector<double> vec(nelts);
-
-  outer(nelts, points, &matrix, &vec);
-
-  printf("%d %d\n", nelts, nelts);
-  for (int i = 0; i < nelts; i++) {
-    for (int j = 0; j < nelts; j++) {
-      printf("%g ", matrix[i][j]);
-    }
-    printf("\n");
-  }
-  printf("\n");
-
-  printf("%d\n", nelts);
-  for (int i = 0; i < nelts; i++) {
-    printf("%g ", vec[i]);
-  }
-  printf("\n");
-
-  return 0;
-}

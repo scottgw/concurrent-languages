@@ -128,32 +128,3 @@ void thresh(int nrows, int ncols, const vector<vector<int>>& matrix,
       });
 }
 
-int main(int argc, char** argv) {
-  int nrows, ncols, percent;
-
-  scanf("%d%d", &nrows, &ncols);
-
-  vector<vector<int>> matrix(nrows, vector<int>(ncols));
-  vector<vector<int>> mask(nrows, vector<int>(ncols));
-
-  for (int i = 0; i < nrows; i++) {
-    for (int j = 0; j < ncols; j++) {
-      scanf("%d", &matrix[i][j]);
-    }
-  }
-
-  scanf("%d", &percent);
-
-  thresh(nrows, ncols, matrix, percent, &mask);
-
-  printf("%d %d\n", nrows, ncols);
-  for (int i = 0; i < nrows; i++) {
-    for (int j = 0; j < ncols; j++) {
-      printf("%d ", mask[i][j]);
-    }
-    printf("\n");
-  }
-  printf("\n");
-
-  return 0;
-}
