@@ -9,6 +9,7 @@
  * output:
  *  result: a real vector, whose values are the result of the final product
  */
+
 #include <cstdio>
 #include <iostream>
 #include <vector>
