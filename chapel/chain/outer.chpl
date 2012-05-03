@@ -40,12 +40,4 @@ proc outer(nelts: int,
   }
 }
 
-proc read_vector_of_points(nelts: int, vector: [1..nelts] (int, int)) {
-  var a, b: int;
-  for i in 1..nelts do {
-    read(a, b);
-    vector[i] = (a, b);
-  }
-}
-
 }

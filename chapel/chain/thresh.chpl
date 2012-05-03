@@ -20,7 +20,9 @@ proc thresh(nrows: int, ncols: int,
   var histogram: [0..nmax] int;
 
   forall m in matrix {
-    histogram[m] += 1;
+    histogram[m] += 1;  // race condition here?
+    // TODO: define custom reduce
+    // hitogram[m] = sum reduce filter(matrix)
   }
 
   var count: int = (nrows * ncols * percent) / 100;

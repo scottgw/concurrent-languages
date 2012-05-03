@@ -79,13 +79,4 @@ proc winnow(nrows: int, ncols: int,
   }
 }
 
-proc read_matrix(nrows, ncols: int,
-    matrix: [1..nrows, 1..ncols] int) {
-  for i in 1..nrows do {
-    for j in 1..ncols do {
-      read(matrix[i, j]);
-    }
-  }
-}
-
 }
