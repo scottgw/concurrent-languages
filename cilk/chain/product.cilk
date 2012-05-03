@@ -16,8 +16,6 @@
 
 #include "common.cilkh"
 
-cilk void split(int begin, int end, SplitFunction f, SplitState state);
-
 cilk void product_split(int index, SplitState state) {
   double sum = 0;
   int j;
@@ -33,13 +31,3 @@ cilk void product(int nelts, double** matrix, double* vector,
     .vector = vector, .result = result};
   spawn split(0, nelts, product_split, state);
 }
-
-double* read_vector(int nelts) {
-  int i;
-  double* vector = (double* ) malloc(sizeof(double) * nelts);
-  for (i =  0; i < nelts; i++) {
-    scanf("%lf", &vector[i]);
-  }
-  return vector;
-}
-

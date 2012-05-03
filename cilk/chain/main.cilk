@@ -127,8 +127,6 @@ cilk int main() {
   double** outer_matrix;
   double* outer_vector, *product_result;
 
-  setbuf(stdout, NULL); // TODO REMOVE !!!!
-
   scanf("%d%d%d%d", &nelts, &randmat_seed, &thresh_percent, &winnow_nelts);
 
   randmat_matrix = create_matrix_int(nelts, nelts);

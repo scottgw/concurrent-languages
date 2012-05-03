@@ -12,15 +12,12 @@
 
 #include <cilk-lib.cilkh>
 #include <stdlib.h>
-#include <stdio.h>
 
 #include "common.cilkh"
 
 int max_int(int a, int b) {
   return a > b ? a : b;
 }
-
-int sum(int a, int b);
 
 cilk void fill_histogram_index(int index, SplitState state) {
   state.histogram[index] = spawn reduce2d_with_filter(state.nrows,
@@ -54,12 +51,9 @@ cilk void scan_update_elements(int begin, int end, int* array, int size,
 // Ladner-Fischer
 cilk void scan_impl(int begin, int end, int* array, int size, Operator op) {
   if (end - begin > size) {
-    spawn scan_update_elements(begin, end, array, size, op);
-    sync;
-    spawn scan_impl(begin + size, end, array, 2 * size, op);
-    sync;
-    spawn scan_update_elements(begin + size, end, array, size, op);
-    sync;
+    spawn scan_update_elements(begin, end, array, size, op); sync;
+    spawn scan_impl(begin + size, end, array, 2 * size, op); sync;
+    spawn scan_update_elements(begin + size, end, array, size, op); sync;
   }
 }
 
@@ -105,24 +99,20 @@ cilk void thresh(int nrows, int ncols, int** matrix, int percent,
   int* histogram;
   int count, threshold;
 
-  nmax = spawn reduce2d(nrows, ncols, matrix, max_int);
-  sync;
+  nmax = spawn reduce2d(nrows, ncols, matrix, max_int); sync;
 
   histogram = (int*) malloc(sizeof(int) * (nmax + 1));
 
-  spawn fill_histogram(nmax + 1, histogram, nrows, ncols, matrix);
-  sync;
+  spawn fill_histogram(nmax + 1, histogram, nrows, ncols, matrix); sync;
 
   count = (nrows * ncols * percent) / 100;
   count = nrows * ncols - count;  // scan starts from the beginning
 
-  spawn scan(nmax + 1, histogram, sum);
-  sync;
+  spawn scan(nmax + 1, histogram, sum); sync;
 
   threshold = binary_search(nmax + 1, histogram, count);
 
-  spawn fill_mask(nrows, ncols, matrix, mask, threshold);
-  sync;
+  spawn fill_mask(nrows, ncols, matrix, mask, threshold); sync;
 
   free(histogram);
 }

@@ -52,4 +52,6 @@ cilk int reduce2d(int nrows, int ncols, int** matrix, Operator op);
 
 cilk int filter_matrix(int col, ReduceState state);
 
+int sum(int a, int b);
+
 #endif

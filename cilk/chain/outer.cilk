@@ -31,8 +31,6 @@ double max_double(double a, double b) {
   return a > b ? a : b;
 }
 
-cilk void split(int begin, int end, SplitFunction f, SplitState state);
-
 cilk void outer_split(int index, SplitState state) {
   double nmax = -1;
   int j;
@@ -52,26 +50,5 @@ cilk void outer(int nelts, Point* points, double** matrix, double* vector) {
   SplitState state = {.matrix_double = matrix, .vector = vector,
     .points = points, .nelts = nelts};
   spawn split(0, nelts, outer_split, state);
-  sync;
-}
-
-double** create_matrix(int nelts) {
-  int i;
-  double** matrix = (double **) malloc(sizeof(double *) * nelts);
-  for (i = 0; i < nelts; i++) {
-    matrix[i] = (double *) malloc(sizeof(double) * nelts);
-  }
-  return matrix;
-}
-
-Point* read_vector_of_points(int nelts) {
-  int i, a, b;
-  Point* vector = (Point* ) malloc(sizeof(Point) * nelts);
-  for (i =  0; i < nelts; i++) {
-    scanf("%d %d", &a, &b);
-    vector[i].i = a;
-    vector[i].j = b;
-  }
-  return vector;
 }
 

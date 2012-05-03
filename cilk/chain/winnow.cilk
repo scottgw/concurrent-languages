@@ -14,7 +14,6 @@
 
 #include <cilk-lib.cilkh>
 #include <stdlib.h>
-#include <stdio.h>
 
 #include "common.cilkh"
 
@@ -25,10 +24,6 @@ int compare(Point l, Point r) {
   if (l.i > r.i) return 0;
   return l.j < r.j;
 }
-
-int sum(int a, int b);
-
-cilk void split(int begin, int end, SplitFunction f, SplitState state);
 
 cilk void fill_value(int col, SplitState state) {
   int row = state.row;
@@ -106,17 +101,16 @@ cilk void winnow(int nrows, int ncols, int** matrix, int** mask, int nelts,
   int n = 0, chunk;
   Point* values;
 
-  n = spawn reduce2d(nrows, ncols, mask, sum);
+  n = spawn reduce2d(nrows, ncols, mask, sum); sync;
 
   values = (Point* ) malloc(sizeof(Point) * n);
 
-  spawn fill_values(nrows, ncols, matrix, mask, values);
+  spawn fill_values(nrows, ncols, matrix, mask, values); sync;
 
-  spawn sort(n, values, compare);
-  sync;
+  spawn sort(n, values, compare); sync;
 
   chunk = n / nelts;
 
-  spawn fill_points(nelts, points, values, chunk);
+  spawn fill_points(nelts, points, values, chunk); sync;
 }
 
