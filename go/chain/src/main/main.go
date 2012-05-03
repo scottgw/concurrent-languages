@@ -11,6 +11,7 @@
  *   result: a real vector, whose values are the result of the final product
  *
  */
+
 package main
 
 import (
