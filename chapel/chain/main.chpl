@@ -9,7 +9,6 @@
  * output:
  *   result: a real vector, whose values are the result of the final product
  */
-
 use Randmat, Thresh, Winnow, Outer, Product;
 
 proc main() {
