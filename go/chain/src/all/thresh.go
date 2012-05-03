@@ -10,18 +10,7 @@
  *   mask: a boolean matrix filled with true for cells that are kept
  *
  */
-package main
-
-import (
-  "fmt"
-)
-
-func max(a, b int) int {
-  if a > b {
-    return a;
-  }
-  return b;
-}
+package all
 
 func sum(a, b int) int {
   return a + b;
@@ -83,28 +72,20 @@ func get_fill_mask(ncols int, matrix [][]int, mask [][]int,
   }
 }
 
-func split_worker(index int, op func(index int), done chan bool) {
-  op(index);
-  done <- true;
-}
-  
-func split(begin, end int, op func(index int)) {
-  done := make(chan bool);
-  for i := begin; i < end; i++ {
-    go split_worker(i, op, done)
+func max_function(a, b int) int {
+  if a > b {
+    return a;
   }
-  for i := begin; i < end; i++ {
-    <-done;
-  }
+  return b;
 }
 
-func thresh(nrows, ncols int, matrix [][]int, percent int) [][]int {
+func Thresh(nrows, ncols int, matrix [][]int, percent int) [][]int {
   mask := make([][]int, nrows);
   for i := 0; i < nrows; i++ {
     mask[i] = make([]int, ncols);
   }
 
-  nmax := reduce2d(nrows, ncols, matrix, max, 0, max, 0);
+  nmax := reduce2d(nrows, ncols, matrix, max_function, 0, max_function, 0);
   histogram := make([]int, nmax + 1);
   split(0, nmax + 1, get_fill_histogram(nrows, ncols, matrix, histogram));
 
@@ -122,31 +103,3 @@ func thresh(nrows, ncols int, matrix [][]int, percent int) [][]int {
   return mask;
 }
 
-func main() {
-  var nrows, ncols, percent int;
-
-  fmt.Scanf("%d%d", &nrows, &ncols);
-
-  matrix := make([][]int, nrows);
-  for i := 0; i < nrows; i++ {
-    matrix[i] = make([]int, ncols);
-  }
-
-  for i := 0; i < nrows; i++ {
-    for j := 0; j < ncols; j++ {
-      fmt.Scanf("%d", &matrix[i][j]);
-    }
-  }
-
-  fmt.Scanf("%d", &percent);
-
-  mask := thresh(nrows, ncols, matrix, percent);
-
-  for i := 0; i < nrows; i++ {
-    for j := 0; j < ncols; j++ {
-      fmt.Printf("%d ", mask[i][j]);
-    }
-    fmt.Printf("\n");
-  }
-  fmt.Printf("\n");
-}

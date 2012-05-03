@@ -14,7 +14,13 @@
 package main
 
 import (
+    "fmt"
+    "all"
 )
 
 func main() {
+  var nelts, randmat_seed int;
+  fmt.Scanf("%d%d", &nelts, &randmat_seed);
+  fmt.Printf("nelts: %d\n", nelts);
+  all.Randmat(nelts, nelts, randmat_seed);
 }

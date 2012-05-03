@@ -9,30 +9,13 @@
  * output:
  *   result: a real vector, whose values are the result of the product
  */
-package main
+package all
 
 import (
   "fmt"
 )
 
-type double float64;
-
-func split_worker(index int, op func(index int), done chan bool) {
-  op(index);
-  done <- true;
-}
-  
-func split(begin, end int, op func(index int)) {
-  done := make(chan bool);
-  for i := begin; i < end; i++ {
-    go split_worker(i, op, done)
-  }
-  for i := begin; i < end; i++ {
-    <-done;
-  }
-}
-
-func product(nelts int, matrix [][]double, vector []double,
+func Product(nelts int, matrix [][]double, vector []double,
     result []double) {
   split(0, nelts, func(i int) {
     var sum double = 0;
@@ -41,17 +24,6 @@ func product(nelts int, matrix [][]double, vector []double,
     }
     result[i] = sum;
   });
-}
-
-func read_integer() int {
-  var value int;
-  for true {
-    var read, _ = fmt.Scanf("%d", &value);
-    if read == 1 {
-      break;
-    }
-  }
-  return value;
 }
 
 func read_double() double {
@@ -86,21 +58,3 @@ func read_vector(nelts int) []double {
   return vector;
 }
 
-func main() {
-  var nelts int;
-  var matrix [][]double;
-  var vector, result []double;
-
-  nelts = read_integer();
-  matrix = read_matrix(nelts);
-  vector = read_vector(nelts);
-  result = make([]double, nelts);
-
-  product(nelts, matrix, vector, result);
-
-  fmt.Printf("%d\n", nelts);
-  for i := 0; i < nelts; i++ {
-    fmt.Printf("%g ", result[i]);
-  }
-  fmt.Printf("\n");
-}

@@ -11,7 +11,7 @@
  *   vector: a real vector, whose values are filled with origin-to-point
  *     distances
  */
-package main
+package all
 
 import (
   "fmt"
@@ -19,7 +19,7 @@ import (
 )
 
 type Point struct {
-  i, j int;
+  value, i, j int;
 }
 
 type double float64;
@@ -57,7 +57,7 @@ func split(begin, end int, op func(index int)) {
   }
 }
 
-func outer(nelts int, points Points, matrix [][]double, vector []double) {
+func Outer(nelts int, points Points, matrix [][]double, vector []double) {
   split(0, nelts, func(i int) {
     var nmax double = -1;
     for j := 0; j < nelts; j++ {
@@ -67,7 +67,7 @@ func outer(nelts int, points Points, matrix [][]double, vector []double) {
       }
     }
     matrix[i][i] = double(nelts) * nmax;
-    vector[i] = distance(Point{0, 0}, points[i]);
+    vector[i] = distance(Point{i: 0, j: 0}, points[i]);
   });
 }
 
@@ -97,36 +97,8 @@ func read_vector_of_points(nelts int) Points {
   for i := 0; i < nelts; i++ {
     a := read_integer();
     b := read_integer();
-    vector[i] = Point{a, b};
+    vector[i] = Point{i: a, j: b};
   }
   return vector;
 }
 
-func main() {
-  var nelts int;
-  var points Points;
-  var matrix [][]double;
-  var vector []double;
-
-  nelts = read_integer();
-  points = read_vector_of_points(nelts);
-  matrix = create_matrix(nelts);
-  vector = make([]double, nelts);
-
-  outer(nelts, points, matrix, vector);
-
-  fmt.Printf("%d %d\n", nelts, nelts);
-  for i := 0; i < nelts; i++ {
-    for j := 0; j < nelts; j++ {
-      fmt.Printf("%g ", matrix[i][j]);
-    }
-    fmt.Printf("\n");
-  }
-  fmt.Printf("\n");
-
-  fmt.Printf("%d\n", nelts);
-  for i := 0; i < nelts; i++ {
-    fmt.Printf("%g ", vector[i]);
-  }
-  fmt.Printf("\n");
-}

@@ -9,11 +9,10 @@
  *   martix: a nrows x ncols integer matrix
  *
  */
-package main
+package all
 
 import (
-  "fmt"
-  "rand"
+  "math/rand"
 )
 
 func randvec(vector []int, n int, done chan bool) {
@@ -23,7 +22,7 @@ func randvec(vector []int, n int, done chan bool) {
   done <- true;
 }
 
-func randmat(nrows, ncols, s int) [][]int {
+func Randmat(nrows, ncols, s int) [][]int {
   var matrix [][]int;
   matrix = make([][]int, nrows);
   for i := 0; i < nrows; i++ {
@@ -40,19 +39,3 @@ func randmat(nrows, ncols, s int) [][]int {
   return matrix;
 }
 
-func main() {
-  var nrows, ncols, s int;
-  var matrix [][]int;
-
-  fmt.Scanf("%d%d%d", &nrows, &ncols, &s);
-
-  matrix = randmat(nrows, ncols, s);
-
-  for i := 0; i < nrows; i++ {
-    for j := 0; j < ncols; j++ {
-      fmt.Printf("%d ", matrix[i][j]);
-    }
-    fmt.Printf("\n");
-  }
-  fmt.Printf("\n");
-}
