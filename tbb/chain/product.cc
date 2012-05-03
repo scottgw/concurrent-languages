@@ -1,0 +1,66 @@
+/* product: matrix-vector product
+ *
+ * input:
+ *   matrix: a real matrix
+ *   vec: a real vector
+ *   nelts: the number of elements
+ *
+ * output:
+ *   result: a real vector, whose values are the result of the product
+ */
+#include <cstdio>
+
+#include <iostream>
+#include <vector>
+
+#include "tbb/blocked_range.h"
+#include "tbb/parallel_for.h"
+
+using namespace std;
+using namespace tbb;
+
+typedef blocked_range<size_t> range;
+
+void product(int nelts, const vector<vector<double> >& matrix,
+    const vector<double>& vec, vector<double>* result) {
+
+  parallel_for(
+    range(0, nelts),
+    [&](range r) {
+      for (size_t i = r.begin(); i != r.end(); ++i) {
+        double sum = 0;
+        for (int j = 0; j < nelts; j++) {
+          sum += matrix[i][j] * vec[j];
+        }
+        (*result)[i] = sum;
+      }
+  });
+}
+
+int main(int argc, char** argv) {
+  int nelts;
+  scanf("%d", &nelts);
+
+  vector<vector<double> > matrix(nelts, vector<double>(nelts));
+  vector<double> vec(nelts), result(nelts);
+
+  for (int i = 0; i < nelts; i++) {
+    for (int j = 0; j < nelts; j++) {
+      cin >> matrix[i][j];
+    }
+  }
+
+  for (int i = 0; i < nelts; i++) {
+    cin >> vec[i];
+  }
+
+  product(nelts, matrix, vec, &result);
+
+  printf("%d\n", nelts, nelts);
+  for (int i = 0; i < nelts; i++) {
+    printf("%g ", result[i]);
+  }
+  printf("\n");
+
+  return 0;
+}
