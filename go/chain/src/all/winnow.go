@@ -73,13 +73,10 @@ func sort(n int, values []Point) {
 }
 
 func Winnow(nrows, ncols int, matrix, mask [][]int, nelts int) []Point {
-  var n = 0;
+  n := reduce2d(nrows, ncols, mask, sum, 0, sum, 0);
 
-  n = reduce2d(nrows, ncols, mask, sum, 0, sum, 0);
-
-  var points, values Points;
-  points = make(Points, n);
-  values = make(Points, n);
+  points := make(Points, n);
+  values := make(Points, n);
 
   result := make(chan Point, n);
   split(0, nrows, get_count_func(ncols, matrix, mask, result));
@@ -90,11 +87,11 @@ func Winnow(nrows, ncols int, matrix, mask [][]int, nelts int) []Point {
 
   sort(n, values);
 
-  var total = len(values);
+  total := len(values);
   var chunk int = total / nelts;
 
   split(0, nelts, func(i int) {
-      var index = i * chunk;
+      index := i * chunk;
       points[i] = values[index];
     });
 

@@ -20,8 +20,7 @@ import (
 )
 
 func create_matrix_double(nelts int) [][]all.Double {
-  var matrix [][]all.Double;
-  matrix = make([][]all.Double, nelts);
+  matrix := make([][]all.Double, nelts);
   for i := 0; i < nelts; i++ {
     matrix[i] = make([]all.Double, nelts);
   }
