@@ -10,13 +10,10 @@
  *   vec: a real vector, whose values are filled with origin-to-point
  *     distances
  */
-#include <cassert>
 #include <cmath>
-#include <cstdio>
 #include <cstdlib>
 
 #include <algorithm>
-#include <iostream>
 #include <vector>
 
 using namespace std;
@@ -41,12 +38,6 @@ void outer(int nelts, const vector<pair<int, int> > & points,
     }
     (*matrix)[i][i] = nelts * nmax;
     (*vec)[i] = ::distance(make_pair(0, 0), points[i]);
-  }
-}
-
-void read_vector_of_points(int nelts, vector<pair<int, int> >* vec) {
-  for (int i = 0; i < nelts; i++) {
-    cin >> (*vec)[i].first >> (*vec)[i].second;
   }
 }
 

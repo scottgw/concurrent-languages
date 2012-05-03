@@ -10,12 +10,9 @@
  * output:
  *   points: a vector of (x, y) points
  */
-#include <cassert>
-#include <cstdio>
 #include <cstdlib>
 
 #include <algorithm>
-#include <iostream>
 #include <vector>
 
 using namespace std;
@@ -41,13 +38,5 @@ void winnow(int nrows, int ncols, const vector<vector<int> >& matrix,
     (*points)[i] = values[index].second;
   }
 
-}
-
-void read_matrix(int nrows, int ncols, vector<vector<int> >* matrix) {
-  for (int i = 0; i < nrows; i++) {
-    for (int j = 0; j < ncols; j++) {
-      cin >> (*matrix)[i][j];
-    }
-  }
 }
 

@@ -7,8 +7,6 @@
  * output:
  *   matrix: random nrows x ncols integer matrix
  */
-#include <cassert>
-#include <cstdio>
 #include <cstdlib>
 
 #include <vector>

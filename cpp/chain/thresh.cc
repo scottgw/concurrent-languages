@@ -8,8 +8,6 @@
  * output:
  *   mask: a boolean matrix filled with true for cells that are kept
  */
-#include <cassert>
-#include <cstdio>
 #include <cstdlib>
 
 #include <algorithm>
