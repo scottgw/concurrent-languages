@@ -10,7 +10,6 @@
  * output:
  *   result: a real vector, whose values are the result of the final product
  */
-
 #include <cilk-lib.cilkh>
 #include <stdlib.h>
 #include <stdio.h>
