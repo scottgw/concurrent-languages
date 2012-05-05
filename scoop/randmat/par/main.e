@@ -56,6 +56,7 @@ feature
     worker: ARRAY[separate WORKER]
   do
     create worker.make_empty
+    -- parallel for on rows
     from
       i := 1
     until

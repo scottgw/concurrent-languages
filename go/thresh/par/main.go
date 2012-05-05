@@ -40,6 +40,7 @@ func reduce2d(nrows, ncols int, matrix [][]int,
     aggregator func(acc, x int) int, aggregator_start_value int,
     op func(acc, x int) int, op_start_value int) int {
   response := make(chan int);
+  // parallel reduce on rows
   for i := 0; i < nrows; i++ {
     go reduce2d_worker(ncols, matrix[i], op, op_start_value, response);
   }
@@ -88,6 +89,7 @@ func split_worker(index int, op func(index int), done chan bool) {
   done <- true;
 }
   
+// parallel for on [begin, end), calling op()
 func split(begin, end int, op func(index int)) {
   done := make(chan bool);
   for i := begin; i < end; i++ {
@@ -106,6 +108,7 @@ func thresh(nrows, ncols int, matrix [][]int, percent int) [][]int {
 
   nmax := reduce2d(nrows, ncols, matrix, max, 0, max, 0);
   histogram := make([]int, nmax + 1);
+  // parallel for on [0, nmax + 1)
   split(0, nmax + 1, get_fill_histogram(nrows, ncols, matrix, histogram));
 
   count := (nrows * ncols * percent) / 100;
@@ -117,6 +120,7 @@ func thresh(nrows, ncols int, matrix [][]int, percent int) [][]int {
     threshold = i;
   }
 
+  // parallel for on [0, nrows)
   split(0, nrows, get_fill_mask(ncols, matrix, mask, threshold));
 
   return mask;

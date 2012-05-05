@@ -13,6 +13,7 @@ package all
 
 func Product(nelts int, matrix [][]Double, vector []Double) []Double {
   result := make([]Double, nelts);
+  // parallel for on [0, nelts)
   split(0, nelts, func(i int) {
     var sum Double = 0;
     for j := 0; j < nelts; j++ {

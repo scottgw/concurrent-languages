@@ -55,6 +55,7 @@ func reduce2d(nrows, ncols int, matrix [][]int,
     aggregator func(acc, x int) int, aggregator_start_value int,
     op func(acc, x int) int, op_start_value int) int {
   response := make(chan int);
+  // parallel reduce on rows
   for i := 0; i < nrows; i++ {
     go reduce2d_worker(ncols, matrix[i], op, op_start_value, response);
   }
@@ -79,6 +80,7 @@ func split_worker(index int, op func(index int), done chan bool) {
   done <- true;
 }
   
+// parallel for on [begin, end), calls op()
 func split(begin, end int, op func(index int)) {
   done := make(chan bool);
   for i := begin; i < end; i++ {
@@ -116,6 +118,7 @@ func sort_impl(begin, end int, values Points) {
   values.Swap(spot, end - 1);
   pivot_index = spot;
 
+  // both calls in parallel
   split(0, 2, func(index int) {
       if index == 0 {
         sort_impl(begin, pivot_index, values);
@@ -139,6 +142,7 @@ func winnow(nrows, ncols int, matrix, mask [][]int, nelts int) []Point {
   values = make(Points, n);
 
   result := make(chan Point, n);
+  // parallel for on rows
   split(0, nrows, get_count_func(ncols, matrix, mask, result));
 
   for i := 0; i < n; i++ {
@@ -150,6 +154,7 @@ func winnow(nrows, ncols int, matrix, mask [][]int, nelts int) []Point {
   var total = len(values);
   var chunk int = total / nelts;
 
+  // parallel for on [0, nelts)
   split(0, nelts, func(i int) {
       var index = i * chunk;
       points[i] = values[index];

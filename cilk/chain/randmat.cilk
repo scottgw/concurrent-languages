@@ -21,12 +21,14 @@ cilk void update_matrix(int col, SplitState state) {
 
 cilk void start_cols(int row, SplitState state) {
   state.row = row;
+  // parallel for on cols
   spawn split(0, state.ncols, update_matrix, state);
 }
 
 cilk void randmat(int nrows, int ncols, int s, int** matrix) {
   SplitState state = {.ncols = ncols, .matrix_int = matrix };
   srand(s);
+  // parallel for on rows
   spawn split(0, nrows, start_cols, state);
 }
 

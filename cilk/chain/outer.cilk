@@ -49,6 +49,7 @@ cilk void outer_split(int index, SplitState state) {
 cilk void outer(int nelts, Point* points, double** matrix, double* vector) {
   SplitState state = {.matrix_double = matrix, .vector = vector,
     .points = points, .nelts = nelts};
+  // parallel for on [0, nelts), calls outer_split()
   spawn split(0, nelts, outer_split, state);
 }
 

@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "tbb/blocked_range.h"
+#include "tbb/mutex.h"
 #include "tbb/parallel_for.h"
 #include "tbb/parallel_sort.h"
 
@@ -32,6 +33,8 @@ void winnow(int nrows, int ncols, const vector<vector<int> >& matrix,
     vector<pair<int, int> >* points) {
   vector<pair<int, pair<int, int> > > values;
 
+  mutex m;
+
   parallel_for(
       range(0, nrows),
       [&](range r) {
@@ -41,8 +44,10 @@ void winnow(int nrows, int ncols, const vector<vector<int> >& matrix,
             [&](range s) {
               for (size_t j = s.begin(); j != s.end(); ++j) {
                 if (mask[i][j]) {
-                  values.push_back(make_pair(matrix[i][j],
-                      make_pair(i, j)));
+                  m.lock();
+                    values.push_back(make_pair(matrix[i][j],
+                        make_pair(i, j)));
+                  m.unlock();
                 }
               }
             });

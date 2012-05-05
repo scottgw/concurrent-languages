@@ -54,7 +54,7 @@ proc winnow(nrows: int, ncols: int,
   var n: int = 0;
   
   n = + reduce mask;
-  var values: [1..n] (int, (int, int));
+  var values: [1..n] (int, (int, int));  // (value, (i, j))
   var can_go: sync bool = true;
   var count: int = 1;
   forall i in matrix.domain {

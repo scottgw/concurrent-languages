@@ -42,6 +42,8 @@ typedef struct sSplitState {
 
 typedef cilk void (*SplitFunction)(int index, SplitState state);
 
+// parallel for on [begin, end), calling f()
+// state carries the state, to simulate a closure
 cilk void split(int begin, int end, SplitFunction f, SplitState state) {
   int middle = begin + (end - begin) / 2;
   if (begin >= end) return;
@@ -70,6 +72,7 @@ cilk void outer_split(int index, SplitState state) {
 cilk void outer(int nelts, Point* points, double** matrix, double* vector) {
   SplitState state = {.matrix = matrix, .vector = vector, .points = points,
     .nelts = nelts};
+  // parallel for on [0, nelts), calls outer_split()
   spawn split(0, nelts, outer_split, state);
   sync;
 }

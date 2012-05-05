@@ -45,6 +45,8 @@ int sum(int a, int b) {
   return a + b;
 }
 
+// parallel for on [begin, end), calling f()
+// state carries the state, to simulate a closure
 cilk void split(int begin, int end, SplitFunction f, SplitState state) {
   int middle = begin + (end - begin) / 2;
   if (begin >= end) return;
@@ -56,6 +58,8 @@ cilk void split(int begin, int end, SplitFunction f, SplitState state) {
   spawn split(middle, end, f, state);
 }
 
+// parallel reduce on [begin, end) calling f()
+// state carries the state, to simulate a closure
 cilk int generic_reduce(int begin, int end, Operator op,
     GenericReduceFunction f, ReduceState state) {
   int middle = begin + (end - begin) / 2;
@@ -78,6 +82,7 @@ cilk int reduce2d_identity_filter(int col, ReduceState state) {
 cilk int reduce2d_start_cols(int row, ReduceState state) {
   int res;
   state.row = row;
+  // parallel reduce on cols
   res = spawn generic_reduce(0, state.ncols, state.op, state.filter, state);
   sync;
   return res;
@@ -88,6 +93,7 @@ cilk int reduce2d_with_filter(int nrows, int ncols, int** matrix,
   int res;
   ReduceState state = {.ncols = ncols, .matrix = matrix, .op = op,
     .filter = filter, .extra = extra};
+  // parallel reduce on rows, calling reduce2d_start_cols()
   res = spawn generic_reduce(0, nrows, op, reduce2d_start_cols, state);
   sync;
   return res;
@@ -113,6 +119,7 @@ cilk void fill_histogram(int n, int* histogram, int nrows, int ncols,
     int** matrix) {
   SplitState state = {.histogram = histogram, .nrows = nrows,
     .ncols = ncols, .matrix = matrix};
+  // parallel for on [0, n), calling fill_histogram_index()
   spawn split(0, n, fill_histogram_index, state);
 }
 
@@ -134,6 +141,7 @@ cilk void scan_update_elements(int begin, int end, int* array, int size,
 }
 
 // Ladner-Fischer
+// parallel scan on [begin, end)
 cilk void scan_impl(int begin, int end, int* array, int size, Operator op) {
   if (end - begin > size) {
     spawn scan_update_elements(begin, end, array, size, op);
@@ -171,6 +179,7 @@ cilk void fill_mask_update_matrix(int col, SplitState state) {
 
 cilk void fill_mask_start_cols(int row, SplitState state) {
   state.row = row;
+  // parallel for on cols, calling fill_mask_update_matrix()
   spawn split(0, state.ncols, fill_mask_update_matrix, state);
 }
 
@@ -178,6 +187,7 @@ cilk void fill_mask(int nrows, int ncols, int** matrix, int** mask,
     int threshold) {
   SplitState state = {.nrows = nrows, .ncols = ncols, .matrix = matrix,
     .mask = mask, .threshold = threshold};
+  // parallel for on rows, calling fill_mask_start_cols()
   spawn split(0, nrows, fill_mask_start_cols, state);
 }
 

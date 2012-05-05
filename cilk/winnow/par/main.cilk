@@ -41,6 +41,8 @@ typedef struct sReduceState {
 
 typedef cilk int (*GenericReduceFunction)(int index, ReduceState state);
 
+// parallel reduce on [begin, end) calling f()
+// state carries the state, to simulate a closure
 cilk int generic_reduce(int begin, int end, Operator op,
     GenericReduceFunction f, ReduceState state) {
   int middle = begin + (end - begin) / 2;
@@ -63,6 +65,7 @@ cilk int reduce2d_identity_filter(int col, ReduceState state) {
 cilk int reduce2d_start_cols(int row, ReduceState state) {
   int res;
   state.row = row;
+  // parallel reduce on cols
   res = spawn generic_reduce(0, state.ncols, state.op, state.filter, state);
   sync;
   return res;
@@ -73,6 +76,7 @@ cilk int reduce2d_with_filter(int nrows, int ncols, int** matrix,
   int res;
   ReduceState state = {.ncols = ncols, .matrix = matrix, .op = op,
     .filter = filter, .extra = extra};
+  // parallel reduce on rows, calls reduce2d_start_cols
   res = spawn generic_reduce(0, nrows, op, reduce2d_start_cols, state);
   sync;
   return res;
@@ -106,6 +110,8 @@ typedef struct sSplitState {
 
 typedef cilk void (*SplitFunction)(int index, SplitState state);
 
+// parallel for on [begin, end), calling f()
+// state carries the state, to simulate a closure
 cilk void split(int begin, int end, SplitFunction f, SplitState state) {
   int middle = begin + (end - begin) / 2;
   if (begin >= end) return;
@@ -129,6 +135,7 @@ cilk void fill_value(int col, SplitState state) {
 
 cilk void fill_values_start_cols(int row, SplitState state) {
   state.row = row;
+  // parallel for on cols
   spawn split(0, state.ncols, fill_value, state);
 }
 
@@ -137,6 +144,7 @@ cilk void fill_values(int nrows, int ncols, int** matrix, int** mask,
   int count = 0;
   SplitState state = {.nrows = nrows, .ncols = ncols, .matrix = matrix,
     .mask = mask, .values = values, .count = &count};
+  // parallel for on rows
   spawn split(0, nrows, fill_values_start_cols, state);
   sync;
 }

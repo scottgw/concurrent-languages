@@ -29,5 +29,6 @@ cilk void product(int nelts, double** matrix, double* vector,
     double* result) {
   SplitState state = {.nelts = nelts, .matrix_double = matrix,
     .vector = vector, .result = result};
+  // parallel for on [0, nelts), calls product_split()
   spawn split(0, nelts, product_split, state);
 }

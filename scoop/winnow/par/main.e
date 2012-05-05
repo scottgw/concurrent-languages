@@ -82,6 +82,7 @@ feature
     sorter: TUPLE_SORTER
     n, chunk, index: INTEGER
   do
+    -- parallel for on matrix
     values := parfor(nrows, ncols, matrix, mask);
 
     create sorter.make()
@@ -99,6 +100,7 @@ feature
     Result := points
   end
 
+  -- parallel for on matrix
   parfor(nrows, ncols: INTEGER;
       matrix, mask: ARRAY[separate ARRAY[INTEGER]])
       : ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
@@ -115,6 +117,7 @@ feature
         mask.item(ic.item), parfor_aggregator)
       workers.extend(worker)
     end
+    -- parallel for on rows
     workers.do_all(agent launch_parfor_worker)
     Result := parfor_result(reader)
   end

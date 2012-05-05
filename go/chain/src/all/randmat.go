@@ -21,6 +21,7 @@ func Randmat(nrows, ncols, s int) [][]int {
     matrix[i] = make([]int, ncols);
   }
   rand.Seed(int64(s));
+  // parallel for on rows
   split(0, nrows, func(i int) {
       for j := 0; j < ncols; j++ {
         matrix[i][j] = rand.Int() % 1000;

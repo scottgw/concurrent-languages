@@ -28,6 +28,7 @@ cilk void fill_histogram(int n, int* histogram, int nrows, int ncols,
     int** matrix) {
   SplitState state = {.histogram = histogram, .nrows = nrows,
     .ncols = ncols, .matrix_int = matrix};
+  // parallel for on [0, n), calls fill_histogram_index()
   spawn split(0, n, fill_histogram_index, state);
 }
 
@@ -49,6 +50,7 @@ cilk void scan_update_elements(int begin, int end, int* array, int size,
 }
 
 // Ladner-Fischer
+// parallel scan on [begin, end)
 cilk void scan_impl(int begin, int end, int* array, int size, Operator op) {
   if (end - begin > size) {
     spawn scan_update_elements(begin, end, array, size, op); sync;
@@ -83,6 +85,7 @@ cilk void fill_mask_update_matrix(int col, SplitState state) {
 
 cilk void fill_mask_start_cols(int row, SplitState state) {
   state.row = row;
+  // parallel for on cols
   spawn split(0, state.ncols, fill_mask_update_matrix, state);
 }
 
@@ -90,6 +93,7 @@ cilk void fill_mask(int nrows, int ncols, int** matrix, int** mask,
     int threshold) {
   SplitState state = {.nrows = nrows, .ncols = ncols, .matrix_int = matrix,
     .mask = mask, .threshold = threshold};
+  // parallel for on rows
   spawn split(0, nrows, fill_mask_start_cols, state);
 }
 

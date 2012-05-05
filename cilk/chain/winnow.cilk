@@ -37,6 +37,7 @@ cilk void fill_value(int col, SplitState state) {
 
 cilk void fill_values_start_cols(int row, SplitState state) {
   state.row = row;
+  // parallel for on cols, calls fill_value()
   spawn split(0, state.ncols, fill_value, state);
 }
 
@@ -45,6 +46,7 @@ cilk void fill_values(int nrows, int ncols, int** matrix, int** mask,
   int count = 0;
   SplitState state = {.nrows = nrows, .ncols = ncols, .matrix_int = matrix,
     .mask = mask, .values = values, .count = &count};
+  // parallel for on rows, calls fill_values_start_cols()
   spawn split(0, nrows, fill_values_start_cols, state);
   sync;
 }
@@ -93,6 +95,7 @@ cilk void fill_point(int i, SplitState state) {
 
 cilk void fill_points(int n, Point* points, Point* values, int chunk) {
   SplitState state = { .points = points, .values = values, .chunk = chunk};
+  // parallel for on [0, n), calls fill_point()
   spawn split(0, n, fill_point, state);
 }
 

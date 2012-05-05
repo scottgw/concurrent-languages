@@ -22,6 +22,7 @@ func split_worker(index int, op func(index int), done chan bool) {
   done <- true;
 }
   
+// parallel for on [begin, end), calls op()
 func split(begin, end int, op func(index int)) {
   done := make(chan bool);
   for i := begin; i < end; i++ {
@@ -34,6 +35,7 @@ func split(begin, end int, op func(index int)) {
 
 func product(nelts int, matrix [][]double, vector []double,
     result []double) {
+  // parallel for on [0, nelts)
   split(0, nelts, func(i int) {
     var sum double = 0;
     for j := 0; j < nelts; j++ {

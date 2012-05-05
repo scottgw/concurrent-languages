@@ -109,17 +109,8 @@ feature
       i := i - 1
     end
 
+    -- parallel for on matrix
     parfor(nrows, ncols, matrix, mask, threshold)
-
-    --from i := 1 until i > nrows loop
-      --from j := 1 until j > ncols loop
-        --if item(matrix.item(i), j) >= threshold then
-          --put(mask.item(i), 1, j)
-        --end
-        --j := j + 1
-      --end
-      --i := i + 1
-    --end
 
   end
 
@@ -155,6 +146,7 @@ feature
         reduce2d_aggregator, op, value)
       workers.extend(worker)
     end
+    -- parallel for on rows
     workers.do_all(agent launch_reduce2d_worker)
     Result := reduce2d_result(reader)
   end
@@ -164,6 +156,7 @@ feature
     Result := reader.get_result(reduce2d_aggregator)
   end
 
+  -- parallel for on matrix
   parfor(nrows, ncols: INTEGER;
     matrix, mask: ARRAY[separate ARRAY[INTEGER]];
     threshold: INTEGER)
@@ -181,6 +174,7 @@ feature
         mask.item(ic.item), threshold, parfor_aggregator)
       workers.extend(worker)
     end
+    -- parallel for on rows
     workers.do_all(agent launch_parfor_worker)
     parfor_result(reader)
   end

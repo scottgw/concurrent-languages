@@ -15,6 +15,7 @@
 
 typedef cilk void (*Function)(int, int, int**);
 
+// parallel for on [begin, end), calling f()
 cilk void split(int begin, int end, int extra, int** matrix, Function f) {
   int middle = begin + (end - begin) / 2;
   if (begin >= end) return;
@@ -31,11 +32,13 @@ cilk void update_matrix(int col, int row, int** matrix) {
 }
 
 cilk void start_cols(int row, int ncols, int** matrix) {
+  // parallel for on cols, calling update_matrix()
   spawn split(0, ncols, row, matrix, update_matrix);
 }
 
 cilk void randmat(int nrows, int ncols, int s, int** matrix) {
   srand(s);
+  // parallel for on rows, calling start_cols()
   spawn split(0, nrows, ncols, matrix, start_cols);
 }
 

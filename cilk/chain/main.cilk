@@ -32,6 +32,8 @@ cilk int reduce2d_identity_filter(int col, ReduceState state) {
   return state.matrix[state.row][col];
 }
 
+// parallel reduce on [begin, end) calling f()
+// state carries the state, to simulate a closure
 cilk int generic_reduce(int begin, int end, Operator op,
     GenericReduceFunction f, ReduceState state) {
   int middle = begin + (end - begin) / 2;
@@ -50,6 +52,7 @@ cilk int generic_reduce(int begin, int end, Operator op,
 cilk int reduce2d_start_cols(int row, ReduceState state) {
   int res;
   state.row = row;
+  // parallel reduce on cols
   res = spawn generic_reduce(0, state.ncols, state.op, state.filter, state);
   sync;
   return res;
@@ -60,6 +63,7 @@ cilk int reduce2d_with_filter(int nrows, int ncols, int** matrix,
   int res;
   ReduceState state = {.ncols = ncols, .matrix = matrix, .op = op,
     .filter = filter, .extra = extra};
+  // parallel reduce on rows, calls reduce2d_start_cols()
   res = spawn generic_reduce(0, nrows, op, reduce2d_start_cols, state);
   sync;
   return res;

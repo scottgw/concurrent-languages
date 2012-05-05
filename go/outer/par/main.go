@@ -47,6 +47,7 @@ func split_worker(index int, op func(index int), done chan bool) {
   done <- true;
 }
   
+// parallel for on [begin, end), calls op()
 func split(begin, end int, op func(index int)) {
   done := make(chan bool);
   for i := begin; i < end; i++ {
@@ -58,6 +59,7 @@ func split(begin, end int, op func(index int)) {
 }
 
 func outer(nelts int, points Points, matrix [][]double, vector []double) {
+  // parallel for on [0, nelts)
   split(0, nelts, func(i int) {
     var nmax double = -1;
     for j := 0; j < nelts; j++ {

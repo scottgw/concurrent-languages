@@ -59,6 +59,7 @@ func sort_impl(begin, end int, values Points) {
   values.Swap(spot, end - 1);
   pivot_index = spot;
 
+  // both calls in parallel
   split(0, 2, func(index int) {
       if index == 0 {
         sort_impl(begin, pivot_index, values);
@@ -79,6 +80,7 @@ func Winnow(nrows, ncols int, matrix, mask [][]int, nelts int) []Point {
   values := make(Points, n);
 
   result := make(chan Point, n);
+  // parallel for on rows
   split(0, nrows, get_count_func(ncols, matrix, mask, result));
 
   for i := 0; i < n; i++ {
@@ -90,6 +92,7 @@ func Winnow(nrows, ncols int, matrix, mask [][]int, nelts int) []Point {
   total := len(values);
   var chunk int = total / nelts;
 
+  // parallel for on [0, nelts)
   split(0, nelts, func(i int) {
       index := i * chunk;
       points[i] = values[index];

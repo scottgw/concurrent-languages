@@ -31,6 +31,7 @@ func randmat(nrows, ncols, s int) [][]int {
   }
   rand.Seed(int64(s));
   done := make(chan bool);
+  // parallel for on rows
   for i := 0; i < nrows; i++ {
     go randvec(matrix[i], ncols, done);
   }

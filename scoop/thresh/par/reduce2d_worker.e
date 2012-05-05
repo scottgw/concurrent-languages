@@ -50,7 +50,6 @@ feature
     end
     if ncols > 1 then
       across 2 |..| ncols as jc loop
-      --from j := 2 until j > ncols loop
         inspect op
         when {REDUCE2D_OPERATOR}.max then
           res := res.max(an_array.item(jc.item))
