@@ -1,14 +1,12 @@
--- outer: outer product
+-- product: matrix-vector product
 --
 -- input:
---   vector: a vector of (x, y) points
---   nelts: the number of points
+--   matrix: a real matrix
+--   vector: a real vector
+--   nelts: the number of elements
 --
 -- output:
---   matrix: a real matrix, whose values are filled with inter-point
---     distances
---   vector: a real vector, whose values are filled with origin-to-point
---     distances
+--   res: a real vector, whose values are the result of the product
 
 class MAIN
 inherit ARGUMENTS
@@ -17,83 +15,57 @@ feature
   make
   local
     nelts: INTEGER
-    points: ARRAY[TUPLE[INTEGER, INTEGER]]
     matrix: ARRAY2[DOUBLE]
     vector: ARRAY[DOUBLE]
-    file_name: STRING
+    res: ARRAY[DOUBLE]
   do
-    file_name := separate_character_option_value('i')
     create in.make_open_read(separate_character_option_value('i'))
 
-    nelts := read_integer
-    points := read_vector_of_points(nelts)
+    in.read_integer
+    nelts := in.last_integer
+
     create matrix.make_filled(0.0, nelts, nelts)
-    create vector.make_filled(0.0, 1, nelts)
-
-    outer(nelts, points, matrix, vector)
-
-    print(nelts.out + " " + nelts.out + "%N");
     across 1 |..| nelts as ic loop
       across 1 |..| nelts as jc loop
-        print(matrix.item(ic.item, jc.item).out + " ");
+        matrix.put(read_double(), ic.item, jc.item)
       end
-      print("%N");
     end
-    print("%N");
+
+    create vector.make_filled(0.0, 1, nelts)
+    across 1 |..| nelts as ic loop
+      vector.put(read_double(), ic.item)
+    end
+
+    res := product(nelts, matrix, vector)
 
     print(nelts.out + "%N");
     across 1 |..| nelts as ic loop
-      print(vector[ic.item].out + " ");
+      print(res.item(ic.item).out + " ");
     end
     print("%N");
   end
 
-  read_integer(): INTEGER
+  read_double(): DOUBLE
   do
-    in.read_integer
-    Result := in.last_integer
+    in.read_double
+    Result := in.last_double
   end
 
-  read_vector_of_points(nelts: INTEGER): ARRAY[TUPLE[INTEGER, INTEGER]]
+  product(nelts: INTEGER; matrix: ARRAY2[DOUBLE]; vector: ARRAY[DOUBLE])
+    : ARRAY[DOUBLE]
   local
-    vector: ARRAY[TUPLE[INTEGER, INTEGER]]
+    res: ARRAY[DOUBLE]
+    sum: DOUBLE
   do
-    create vector.make_filled([0, 0], 1, nelts)
+    create res.make_filled(0.0, 1, nelts)
     across 1 |..| nelts as ic loop
-      vector.put([read_integer, read_integer], ic.item)
-    end
-    Result := vector
-  end
-
-  outer(nelts: INTEGER; points: ARRAY[TUPLE[INTEGER, INTEGER]];
-      matrix: ARRAY2[DOUBLE]; vector: ARRAY[DOUBLE])
-  local
-    nmax: DOUBLE
-  do
-    across 1 |..| nelts as ic loop
-      nmax := -1
+      sum := 0
       across 1 |..| nelts as jc loop
-        if (not(ic.item = jc.item)) then
-          matrix.put(distance(points.item(ic.item), points.item(jc.item)),
-            ic.item, jc.item)
-          nmax := nmax.max(matrix.item(ic.item, jc.item))
-        end
-        matrix.put(nmax * nelts, ic.item, ic.item)
-        vector.put(distance([0, 0], points.item(ic.item)), ic.item)
+        sum := sum + matrix.item(ic.item, jc.item) * vector.item(jc.item)
       end
+      res.put(sum, ic.item)
     end
-  end
-
-  sqr(a: DOUBLE): DOUBLE
-  do
-    Result := a * a
-  end
-
-  distance(a, b: TUPLE[INTEGER, INTEGER]): DOUBLE
-  do
-    Result := {DOUBLE_MATH}.sqrt(
-      sqr(a.integer_32_item(1) - b.integer_32_item(1)) +
-      sqr(a.integer_32_item(2) - b.integer_32_item(2)));
+    Result := res
   end
 
 feature {NONE}
