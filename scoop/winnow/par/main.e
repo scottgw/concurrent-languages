@@ -18,10 +18,8 @@ feature
   local
     nrows, ncols, nelts: INTEGER
     matrix, mask: ARRAY[separate ARRAY[INTEGER]]
-    file_name: STRING
     points: ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
   do
-    file_name := separate_character_option_value('i')
     create in.make_open_read(separate_character_option_value('i'))
 
     nrows := read_integer
@@ -92,6 +90,7 @@ feature
     chunk := n // nelts
 
     create points.make_filled([0, 0, 0], 1, nelts);
+    -- this should also be a parallel for
     across 1 |..| nelts as ic loop
       index := (ic.item - 1) * chunk + 1
       points[ic.item] := values[index]
