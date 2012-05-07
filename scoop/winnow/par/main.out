@@ -1,23 +1,8 @@
-Sort Local Tuple before 
-Sort Local Tuple after 
-Sort Local Tuple before 
-Sort Local Tuple after 
-Sort Local Tuple before 
-Sort Local Tuple after 
-Sort Local Tuple before 
-Sort Local Tuple after 
-Sort Local Tuple before 
-Sort Local Tuple after 
-Sort Local Tuple before 
-Sort Local Tuple after 
-Sort Impl 1 7
-Sort Launch left 1 4
-After Launch left 1 4
-Sort Separate begin 1 4
-Copy values 1 4
-Sort Local Tuple before 
-Sort Launch right 5 7
-After Launch right 5 7
-Sort Separate begin 5 7
-Copy values 5 7
-Sort Local Tuple before 
+6
+1 1
+2 3
+1 2
+2 2
+1 3
+2 1
+
