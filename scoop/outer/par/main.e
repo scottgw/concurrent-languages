@@ -18,7 +18,7 @@ feature
   local
     nelts: INTEGER
     points: ARRAY[TUPLE[INTEGER, INTEGER]]
-    matrix: ARRAY2[DOUBLE]
+    matrix: ARRAY[separate ARRAY[DOUBLE]]
     vector: ARRAY[DOUBLE]
     file_name: STRING
   do
@@ -27,7 +27,10 @@ feature
 
     nelts := read_integer
     points := read_vector_of_points(nelts)
-    create matrix.make_filled(0.0, nelts, nelts)
+    create matrix.make_empty
+    across 1 |..| nelts as ic loop
+      matrix.force(create_array(), ic.item)
+    end
     create vector.make_filled(0.0, 1, nelts)
 
     outer(nelts, points, matrix, vector)
@@ -35,7 +38,7 @@ feature
     print(nelts.out + " " + nelts.out + "%N");
     across 1 |..| nelts as ic loop
       across 1 |..| nelts as jc loop
-        print(matrix.item(ic.item, jc.item).out + " ");
+        print(item(matrix.item(ic.item), jc.item).out + " ");
       end
       print("%N");
     end
@@ -46,6 +49,11 @@ feature
       print(vector[ic.item].out + " ");
     end
     print("%N");
+  end
+
+  create_array(): separate ARRAY[DOUBLE]
+  do
+    create {separate ARRAY[DOUBLE]} Result.make_empty
   end
 
   read_integer(): INTEGER
@@ -66,22 +74,57 @@ feature
   end
 
   outer(nelts: INTEGER; points: ARRAY[TUPLE[INTEGER, INTEGER]];
-      matrix: ARRAY2[DOUBLE]; vector: ARRAY[DOUBLE])
-  local
-    nmax: DOUBLE
+      matrix: ARRAY[separate ARRAY[DOUBLE]]; vector: ARRAY[DOUBLE])
   do
+    -- parallel for on nelts
+    parfor(nelts, points, matrix, vector);
+
     across 1 |..| nelts as ic loop
-      nmax := -1
-      across 1 |..| nelts as jc loop
-        if (not(ic.item = jc.item)) then
-          matrix.put(distance(points.item(ic.item), points.item(jc.item)),
-            ic.item, jc.item)
-          nmax := nmax.max(matrix.item(ic.item, jc.item))
-        end
-        matrix.put(nmax * nelts, ic.item, ic.item)
-        vector.put(distance([0, 0], points.item(ic.item)), ic.item)
-      end
+      vector.put(distance([0, 0], points.item(ic.item)), ic.item)
     end
+  end
+
+  -- parallel for on nelts
+  parfor(nelts: INTEGER; points: ARRAY[TUPLE[INTEGER, INTEGER]];
+      matrix: ARRAY[separate ARRAY[DOUBLE]]; vector: ARRAY[DOUBLE])
+  local
+    worker: separate PARFOR_WORKER
+    workers: LINKED_LIST[separate PARFOR_WORKER]
+    reader: separate PARFOR_READER
+  do
+    create workers.make
+    create reader.make
+    create parfor_aggregator.make(nelts)
+    across 1 |..| nelts as ic loop
+      create worker.make(nelts, ic.item, matrix.item(ic.item),
+        to_separate(nelts, points), parfor_aggregator)
+      workers.extend(worker)
+    end
+    -- parallel for on rows
+    workers.do_all(agent launch_parfor_worker)
+    parfor_result(reader)
+  end
+
+  to_separate(nelts: INTEGER; points: ARRAY[TUPLE[INTEGER, INTEGER]])
+    : separate ARRAY[TUPLE[INTEGER, INTEGER]]
+  local
+    res: separate ARRAY[TUPLE[INTEGER, INTEGER]]
+  do
+    create res.make_empty
+    across 1 |..| nelts as ic loop
+      res.force(points.item(ic.item), ic.item);
+    end
+    Result := res
+  end
+
+  launch_parfor_worker(worker: separate PARFOR_WORKER)
+  do
+    worker.live
+  end
+
+  parfor_result(reader: separate PARFOR_READER)
+  do
+    reader.get_result(parfor_aggregator)
   end
 
   sqr(a: DOUBLE): DOUBLE
@@ -96,8 +139,14 @@ feature
       sqr(a.integer_32_item(2) - b.integer_32_item(2)));
   end
 
+  item(array: separate ARRAY[DOUBLE]; index: INTEGER): DOUBLE
+  do
+    Result := array.item(index)
+  end
+
 feature {NONE}
   in: PLAIN_TEXT_FILE
+  parfor_aggregator: PARFOR_AGGREGATOR
 
 end -- class MAIN 
 
