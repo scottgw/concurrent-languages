@@ -55,8 +55,6 @@ feature
           res := res.max(an_array.item(jc.item))
         when {REDUCE2D_OPERATOR}.filter then
           res := res + filter(an_array.item(jc.item))
-        else
-          print("ERROR! %N%N%N%N%N")
         end
       end
     end

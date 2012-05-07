@@ -8,7 +8,6 @@ feature
     op := op_
     count := 0
     res := -1
-    calls := 0
   end
 
 feature
@@ -22,18 +21,13 @@ feature
         res := res.max(value)
       when {REDUCE2D_OPERATOR}.sum then
         res := res + value
-      else
-        print("ERROR!!! %N%N%N%N")
       end
     end
     count := count + 1
-    print("reduce missing " + (n - count).out + "%N")
   end
 
   is_all_done(): BOOLEAN
   do
-    calls := calls + 1
-    print("reduce is_all_done " + calls.out + "%N")
     Result := count = n
   end
 
@@ -47,6 +41,5 @@ feature
 feature {NONE}
   n, op, count: INTEGER
   res: INTEGER
-  calls: INTEGER
 
 end

@@ -53,9 +53,7 @@ feature
       across 1 |..| ncols as jc loop
         in.read_integer
         put(matrix.item(ic.item), in.last_integer, jc.item)
-        --print(item(matrix.item(ic.item), jc.item).out + " ");
       end
-      --print("%N")
     end
   end
 
@@ -84,7 +82,6 @@ feature
     i: INTEGER
   do
     nmax := reduce2d(nrows, ncols, matrix);
-    print("--> nmax: " + nmax.out + "%N")
 
     create histogram.make_filled(0, 0, nmax + 1)
 
@@ -92,11 +89,6 @@ feature
       histogram.put(reduce2d_with_filter(nrows, ncols, matrix, ic.item),
           ic.item)
     end
-
-    across 0 |..| (nmax + 1) as ic loop
-      print(histogram.item(ic.item).out + " ")
-    end
-    print("%N")
 
     count := (nrows * ncols * percent) // 100
 

@@ -18,13 +18,11 @@ feature
 feature
   live
   do
-    get_result(from_array, to_array, aggregator)
+    get_result(from_array, to_array)
   end
 
-  get_result(a_from_array, a_to_array: separate ARRAY[INTEGER];
-    an_aggregator: separate PARFOR_AGGREGATOR)
+  get_result(a_from_array, a_to_array: separate ARRAY[INTEGER])
   do
-    print("parfor worker begins %N")
     across 1 |..| ncols as jc loop
       if a_from_array.item(jc.item) >= threshold then
         a_to_array.force(1, jc.item)
@@ -32,10 +30,7 @@ feature
         a_to_array.force(0, jc.item)
       end
     end
-    print("parfor worker before put%N")
-    an_aggregator.put
-    print("parfor worker after put%N")
-    --put_result(aggregator)
+    put_result(aggregator)
   end
 
   put_result(an_aggregator: separate PARFOR_AGGREGATOR)
