@@ -18,9 +18,8 @@ feature
   local
     nelts: INTEGER
     points: ARRAY[TUPLE[INTEGER, INTEGER]]
-    matrix: ARRAY2[REAL]
-    vector: ARRAY[REAL]
-    i, j: INTEGER
+    matrix: ARRAY2[DOUBLE]
+    vector: ARRAY[DOUBLE]
     file_name: STRING
   do
     file_name := separate_character_option_value('i')
@@ -28,8 +27,8 @@ feature
 
     nelts := read_integer
     points := read_vector_of_points(nelts)
-    create matrix.make_filled(0, nelts, nelts)
-    create vector.make_filled(0, 1, nelts)
+    create matrix.make_filled(0.0, nelts, nelts)
+    create vector.make_filled(0.0, 1, nelts)
 
     outer(nelts, points, matrix, vector)
 
@@ -44,7 +43,7 @@ feature
 
     print(nelts.out + "%N");
     across 1 |..| nelts as ic loop
-      print(vector[i].out + " ");
+      print(vector[ic.item].out + " ");
     end
     print("%N");
   end
@@ -57,7 +56,6 @@ feature
 
   read_vector_of_points(nelts: INTEGER): ARRAY[TUPLE[INTEGER, INTEGER]]
   local
-    i, j: INTEGER
     vector: ARRAY[TUPLE[INTEGER, INTEGER]]
   do
     create vector.make_filled([0, 0], 1, nelts)
@@ -68,9 +66,9 @@ feature
   end
 
   outer(nelts: INTEGER; points: ARRAY[TUPLE[INTEGER, INTEGER]];
-      matrix: ARRAY2[REAL]; vector: ARRAY[REAL])
+      matrix: ARRAY2[DOUBLE]; vector: ARRAY[DOUBLE])
   local
-    nmax: REAL
+    nmax: DOUBLE
   do
     across 1 |..| nelts as ic loop
       nmax := -1
@@ -86,15 +84,16 @@ feature
     end
   end
 
-  sqr(a: REAL): REAL
+  sqr(a: DOUBLE): DOUBLE
   do
     Result := a * a
   end
 
-  distance(a, b: TUPLE[INTEGER, INTEGER]): REAL
+  distance(a, b: TUPLE[INTEGER, INTEGER]): DOUBLE
   do
-    Result :=(sqr(a.integer_32_item(1) - b.integer_32_item(1)) +
-        a.integer_32_item(2) - b.integer_32_item(2)).sqrt();
+    Result := {DOUBLE_MATH}.sqrt(
+      sqr(a.integer_32_item(1) - b.integer_32_item(1)) +
+      sqr(a.integer_32_item(2) - b.integer_32_item(2)));
   end
 
 feature {NONE}
