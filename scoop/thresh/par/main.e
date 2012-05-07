@@ -198,3 +198,4 @@ feature {NONE}
     worker.live
   end
 end -- class MAIN 
+
