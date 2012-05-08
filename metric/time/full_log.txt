@@ -1,0 +1,3066 @@
+commit e04b727288a1b71c6a344654ec7f16ef8713e604
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 8 18:31:47 2012 -0300
+
+    metric-time time_difference
+
+ metric/time/git_log.txt     |    3 +
+ metric/time/log.txt         |  245 +++++++++++++++++++++++++++++++++++++++++++
+ metric/time/log_reverse.txt |  244 ++++++++++++++++++++++++++++++++++++++++++
+ metric/time/main.py         |   30 +++++
+ 4 files changed, 522 insertions(+), 0 deletions(-)
+
+commit 0e5b5e2f7e99824a63219e25ecd1c21b46448285
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 8 10:23:45 2012 -0300
+
+    scoop-chain done
+
+ scoop/chain/outer.e                    |   57 +-------------------------------
+ scoop/chain/product.e                  |   44 +-----------------------
+ scoop/chain/randmat.e                  |   10 +----
+ scoop/chain/thresh.e                   |   45 +------------------------
+ scoop/chain/tuple_sort_aggregator.e    |    3 +-
+ scoop/chain/winnow.e                   |   45 +------------------------
+ scoop/chain/winnow_parfor_aggregator.e |    3 +-
+ 7 files changed, 11 insertions(+), 196 deletions(-)
+
+commit 1cb0692e9e23e7fc9ab8a2a62a2df64519c77f9a
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 8 10:17:10 2012 -0300
+
+    scoop-chain compiles
+
+ scoop/chain/main.e                       |   36 ++++++++----
+ scoop/chain/makefile                     |    2 +-
+ scoop/chain/outer.e                      |   26 ++++++---
+ scoop/chain/outer_parfor_aggregator.e    |   29 ++++++++++
+ scoop/chain/outer_parfor_reader.e        |   14 +++++
+ scoop/chain/outer_parfor_worker.e        |   63 +++++++++++++++++++++
+ scoop/chain/product.e                    |   20 ++++---
+ scoop/chain/product_parfor_aggregator.e  |   29 ++++++++++
+ scoop/chain/product_parfor_reader.e      |   14 +++++
+ scoop/chain/product_parfor_worker.e      |   53 ++++++++++++++++++
+ scoop/chain/randmat.e                    |   88 ++++++++++++++----------------
+ scoop/chain/randmat_parfor_aggregator.e  |   25 +++++++++
+ scoop/chain/randmat_parfor_reader.e      |   14 +++++
+ scoop/chain/randmat_parfor_worker.e      |   43 +++++++++++++++
+ scoop/chain/thresh.e                     |   34 ++++++------
+ scoop/chain/thresh_parfor_aggregator.e   |   25 +++++++++
+ scoop/chain/thresh_parfor_reader.e       |   14 +++++
+ scoop/chain/thresh_parfor_worker.e       |   47 ++++++++++++++++
+ scoop/chain/thresh_reduce2d_aggregator.e |   45 +++++++++++++++
+ scoop/chain/thresh_reduce2d_operator.e   |   10 ++++
+ scoop/chain/thresh_reduce2d_reader.e     |   15 +++++
+ scoop/chain/thresh_reduce2d_worker.e     |   79 +++++++++++++++++++++++++++
+ scoop/chain/tuple_comparator.e           |   26 +++++++++
+ scoop/chain/tuple_sort_aggregator.e      |   38 +++++++++++++
+ scoop/chain/tuple_sort_reader.e          |   16 ++++++
+ scoop/chain/tuple_sorter.e               |   75 +++++++++++++++++++++++++
+ scoop/chain/winnow.e                     |   16 +++---
+ scoop/chain/winnow_parfor_aggregator.e   |   37 +++++++++++++
+ scoop/chain/winnow_parfor_reader.e       |   16 ++++++
+ scoop/chain/winnow_parfor_worker.e       |   49 +++++++++++++++++
+ 30 files changed, 897 insertions(+), 101 deletions(-)
+
+commit a4e1c3ae03b690a37fb8850c69f02fae424336b9
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 8 08:59:59 2012 -0300
+
+    scoop-chain restart
+
+ scoop/chain/main.e |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 9f014cea79397c23861dffec7d902e31944cade7
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon May 7 21:31:21 2012 -0300
+
+    scoop-chain pause
+
+ scoop/chain/main.e    |   59 +++++++++++++++++++++++++++++++++++++++++++++++++
+ scoop/chain/main.in   |    4 +++
+ scoop/chain/makefile  |    6 +++++
+ scoop/chain/outer.e   |    4 +-
+ scoop/chain/product.e |    4 +-
+ scoop/chain/randmat.e |    4 +-
+ scoop/chain/thresh.e  |    4 +-
+ scoop/chain/winnow.e  |    4 +-
+ 8 files changed, 79 insertions(+), 10 deletions(-)
+
+commit 44a701554af87e603f5bc43e366a5eb1d9976586
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon May 7 21:14:20 2012 -0300
+
+    scoop-chain start
+
+ scoop/chain/outer.e   |  152 ++++++++++++++++++++++++++++++++++++++
+ scoop/chain/product.e |  137 +++++++++++++++++++++++++++++++++++
+ scoop/chain/randmat.e |   72 ++++++++++++++++++
+ scoop/chain/thresh.e  |  193 +++++++++++++++++++++++++++++++++++++++++++++++++
+ scoop/chain/winnow.e  |  154 +++++++++++++++++++++++++++++++++++++++
+ 5 files changed, 708 insertions(+), 0 deletions(-)
+
+commit 1eaad79aa08c7d731a1b34c3872ae12f85f378be
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon May 7 21:12:12 2012 -0300
+
+    scoop-product-par done
+
+ scoop/product/par/main.e              |   84 ++++++++++++++++++++++++++++----
+ scoop/product/par/parfor_aggregator.e |   29 +++++++++++
+ scoop/product/par/parfor_reader.e     |   14 ++++++
+ scoop/product/par/parfor_worker.e     |   53 +++++++++++++++++++++
+ 4 files changed, 169 insertions(+), 11 deletions(-)
+
+commit 7c857b85d8e468c0e189b6c50f97abd101e9de38
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon May 7 20:52:43 2012 -0300
+
+    scoop-product-par start
+
+ scoop/product/par/comparator.e |   26 ++++++++++++++
+ scoop/product/par/main.e       |   75 ++++++++++++++++++++++++++++++++++++++++
+ scoop/product/par/main.gold    |    2 +
+ scoop/product/par/main.in      |    9 +++++
+ scoop/product/par/main.out     |    2 +
+ scoop/product/par/makefile     |    7 ++++
+ 6 files changed, 121 insertions(+), 0 deletions(-)
+
+commit 2a6a3d435bf1ce92179dae57e59314ba78a59c66
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon May 7 20:51:40 2012 -0300
+
+    scoop-product-seq done
+
+ scoop/product/seq/main.e    |   88 +++++++++++++++----------------------------
+ scoop/product/seq/main.gold |   15 +------
+ scoop/product/seq/main.in   |   18 ++++-----
+ scoop/product/seq/main.out  |   15 +------
+ 4 files changed, 42 insertions(+), 94 deletions(-)
+
+commit 839e55183cea48b5387947f36e7e990cc570e7b8
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon May 7 20:38:21 2012 -0300
+
+    scoop-product-seq start
+
+ scoop/product/seq/comparator.e |   26 ++++++++++
+ scoop/product/seq/main.e       |  103 ++++++++++++++++++++++++++++++++++++++++
+ scoop/product/seq/main.gold    |   13 +++++
+ scoop/product/seq/main.in      |   11 ++++
+ scoop/product/seq/main.out     |   13 +++++
+ scoop/product/seq/makefile     |    7 +++
+ 6 files changed, 173 insertions(+), 0 deletions(-)
+
+commit 43567d22c57c5d297c00dee08d35ec8bedb95483
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon May 7 20:34:37 2012 -0300
+
+    scoop-outer-par done
+
+ scoop/outer/par/main.e              |   79 ++++++++++++++++++++++++++++-------
+ scoop/outer/par/parfor_aggregator.e |   29 +++++++++++++
+ scoop/outer/par/parfor_reader.e     |   14 ++++++
+ scoop/outer/par/parfor_worker.e     |   63 ++++++++++++++++++++++++++++
+ 4 files changed, 170 insertions(+), 15 deletions(-)
+
+commit a6c2a62dced7a6a7c0be3db64870bfb878539013
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon May 7 20:02:50 2012 -0300
+
+    scoop-outer-par start
+
+ scoop/outer/par/comparator.e |   26 +++++++++++
+ scoop/outer/par/main.e       |  103 ++++++++++++++++++++++++++++++++++++++++++
+ scoop/outer/par/main.gold    |   13 +++++
+ scoop/outer/par/main.in      |   11 +++++
+ scoop/outer/par/main.out     |   13 +++++
+ scoop/outer/par/makefile     |    7 +++
+ 6 files changed, 173 insertions(+), 0 deletions(-)
+
+commit 283e5fc80a494073cd6811716f944262368fdb0e
+Merge: 5f02edb 49a7c0e
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon May 7 20:02:03 2012 -0300
+
+    Merge branch 'scoop-winnow-par'
+
+commit 49a7c0ea89ad2eb72c5b027c4cb619e6e3575110
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon May 7 20:01:33 2012 -0300
+
+    scoop-winnow-par done
+
+ scoop/outer/seq/main.e |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 5f02edbec9dd1ca8efa2f3980345a9d4ea9e6144
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon May 7 20:00:52 2012 -0300
+
+    scoop-outer-seq done
+
+ scoop/outer/seq/main.e    |   25 ++++++++++++-------------
+ scoop/outer/seq/main.gold |   20 ++++++++++----------
+ scoop/outer/seq/main.out  |   13 +++++++++++++
+ 3 files changed, 35 insertions(+), 23 deletions(-)
+
+commit ad53d4b140933a5bf5d97367fe149a0a9aeca5a5
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon May 7 19:37:42 2012 -0300
+
+    scoop-outer-seq start
+
+ scoop/outer/seq/main.e |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 74e3bba3de005fc8a3abd641346fafb6005f107a
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon May 7 19:35:50 2012 -0300
+
+    scoop-winnow-par start
+
+ scoop/thresh/par/main.ecf       |    4 +-
+ scoop/winnow/par/main.e         |    3 +-
+ scoop/winnow/par/main.ecf       |    2 -
+ scoop/winnow/par/main.out       |   31 +++--------
+ scoop/winnow/par/tuple_sorter.e |  114 ++-------------------------------------
+ 5 files changed, 16 insertions(+), 138 deletions(-)
+
+commit 1d740273c47ab4c8e0fce550ab63b6a8f712a20c
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon May 7 19:00:04 2012 -0300
+
+    scoop-thresh-par done
+
+ scoop/thresh/par/main.e                |    8 --------
+ scoop/thresh/par/parfor_aggregator.e   |    5 -----
+ scoop/thresh/par/parfor_worker.e       |   11 +++--------
+ scoop/thresh/par/reduce2d_aggregator.e |    7 -------
+ scoop/thresh/par/reduce2d_worker.e     |    2 --
+ 5 files changed, 3 insertions(+), 30 deletions(-)
+
+commit 00e91d29ff5966abd0b765c8939654bed81386a9
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon May 7 18:45:37 2012 -0300
+
+    scoop-thesh-par restart
+
+ scoop/thresh/par/main.e |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 6b3cbd980f800170c41d345605a37514462ce962
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat May 5 19:28:21 2012 -0300
+
+    comments
+
+ chapel/chain/winnow.chpl           |    2 +-
+ chapel/winnow/par/main.chpl        |    2 +-
+ cilk/chain/main.cilk               |    4 ++++
+ cilk/chain/outer.cilk              |    1 +
+ cilk/chain/product.cilk            |    1 +
+ cilk/chain/randmat.cilk            |    2 ++
+ cilk/chain/thresh.cilk             |    4 ++++
+ cilk/chain/winnow.cilk             |    3 +++
+ cilk/outer/par/main.cilk           |    3 +++
+ cilk/product/par/main.cilk         |    3 +++
+ cilk/randmat/par/main.cilk         |    3 +++
+ cilk/thresh/par/main.cilk          |   10 ++++++++++
+ cilk/winnow/par/main.cilk          |    8 ++++++++
+ erlang/chain/outer.erl             |    2 ++
+ erlang/chain/product.erl           |    1 +
+ erlang/chain/randmat.erl           |    1 +
+ erlang/chain/thresh.erl            |    1 +
+ erlang/chain/winnow.erl            |    2 ++
+ erlang/outer/par/main.erl          |    2 ++
+ erlang/product/par/main.erl        |    1 +
+ erlang/randmat/par/main.erl        |    2 ++
+ erlang/thresh/par/main.erl         |    2 ++
+ erlang/winnow/par/main.erl         |    3 +++
+ go/chain/src/all/outer.go          |    2 ++
+ go/chain/src/all/product.go        |    1 +
+ go/chain/src/all/randmat.go        |    1 +
+ go/chain/src/all/thresh.go         |    3 +++
+ go/chain/src/all/winnow.go         |    3 +++
+ go/outer/par/main.go               |    2 ++
+ go/product/par/main.go             |    2 ++
+ go/randmat/par/main.go             |    1 +
+ go/thresh/par/main.go              |    4 ++++
+ go/winnow/par/main.go              |    5 +++++
+ scoop/randmat/par/main.e           |    1 +
+ scoop/thresh/par/main.e            |   14 ++++----------
+ scoop/thresh/par/reduce2d_worker.e |    1 -
+ scoop/winnow/par/main.e            |    3 +++
+ tbb/winnow/par/main.cc             |    9 +++++++--
+ 38 files changed, 100 insertions(+), 15 deletions(-)
+
+commit 2783d2fc7cc86665d564afdae16acce53a7575bf
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu May 3 10:52:04 2012 -0300
+
+    tbb-refac
+
+ tbb/chain/main.cc    |   20 +++++++-------------
+ tbb/chain/outer.cc   |    4 ----
+ tbb/chain/product.cc |    4 ----
+ tbb/chain/randmat.cc |    2 +-
+ tbb/chain/thresh.cc  |   23 ++++++++++-------------
+ tbb/chain/winnow.cc  |    7 +------
+ 6 files changed, 19 insertions(+), 41 deletions(-)
+
+commit 1c08806512ff06c3b3f55afa94211f13d17f3c68
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu May 3 10:44:08 2012 -0300
+
+    tbb-refac start
+
+ tbb/chain/main.cc |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 91ca70566f7cba5acd406038eebe29898c5a7d75
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu May 3 10:42:39 2012 -0300
+
+    go-refac done
+
+ go/chain/src/all/product.go |   37 -------------------------------------
+ go/chain/src/all/randmat.go |   23 +++++++----------------
+ go/chain/src/all/winnow.go  |   13 +++++--------
+ go/chain/src/main/main.go   |    3 +--
+ 4 files changed, 13 insertions(+), 63 deletions(-)
+
+commit 69543aafad4473bfc293256078a6b9ce6c65fb75
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu May 3 10:34:05 2012 -0300
+
+    go-refac start
+
+ go/chain/src/main/main.go |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 4224ba299d267b3032c57faac98b6cb5f5cc0ae6
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu May 3 10:32:12 2012 -0300
+
+    erlang-refac done
+
+ erlang/chain/outer.erl   |    9 +++------
+ erlang/chain/product.erl |    3 +--
+ erlang/chain/randmat.erl |   24 +++++-------------------
+ erlang/chain/thresh.erl  |   12 +++---------
+ erlang/chain/winnow.erl  |   25 +++++++++----------------
+ 5 files changed, 21 insertions(+), 52 deletions(-)
+
+commit 227155a25e8e566ad8772ff778c4e8dd7d35849a
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu May 3 10:22:23 2012 -0300
+
+    erlang-refac start
+
+ erlang/chain/main.erl |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit a4b1e02362b76f5e26c09aa06bba8bc0e7fadbd1
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu May 3 10:21:38 2012 -0300
+
+    cpp-refac done
+
+ cpp/chain/outer.cc   |    9 ---------
+ cpp/chain/product.cc |    3 ---
+ cpp/chain/randmat.cc |    2 --
+ cpp/chain/thresh.cc  |    2 --
+ cpp/chain/winnow.cc  |   11 -----------
+ 5 files changed, 0 insertions(+), 27 deletions(-)
+
+commit 6f766b3b23abf0789c38a3b20efe096f217e8cea
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu May 3 10:18:40 2012 -0300
+
+    cpp-refac start
+
+ cpp/chain/main.cc |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit de6511a0b14cb321edb3c7f6da2e1d63c4529429
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu May 3 10:17:22 2012 -0300
+
+    cilk-refac done
+
+ cilk/chain/common.cilkh |    2 ++
+ cilk/chain/main.cilk    |    2 --
+ cilk/chain/outer.cilk   |   23 -----------------------
+ cilk/chain/product.cilk |   12 ------------
+ cilk/chain/thresh.cilk  |   24 +++++++-----------------
+ cilk/chain/winnow.cilk  |   14 ++++----------
+ 6 files changed, 13 insertions(+), 64 deletions(-)
+
+commit 6d97dba6c3920d06e61f3bac1fd61c6fe4e01ae1
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu May 3 10:06:05 2012 -0300
+
+    cilk-refac start
+
+ cilk/chain/main.cilk |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit a324ca959f808cf87ed64b6c6a67941a3ff55878
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu May 3 10:05:10 2012 -0300
+
+    chapel-refac done
+
+ chapel/chain/outer.chpl  |    8 --------
+ chapel/chain/thresh.chpl |    4 +++-
+ chapel/chain/winnow.chpl |    9 ---------
+ 3 files changed, 3 insertions(+), 18 deletions(-)
+
+commit a26c9df1fab46b8d88e386dc50fea229518021dc
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu May 3 09:58:05 2012 -0300
+
+    chapel-refac start
+
+ chapel/chain/main.chpl |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit c3d037a2a27bced45042837e96d9e3be9a1c119e
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu May 3 09:54:49 2012 -0300
+
+    tbb-chain done
+
+ tbb/chain/main.cc    |    2 +
+ tbb/chain/outer.cc   |   35 -----------------------
+ tbb/chain/product.cc |   28 ------------------
+ tbb/chain/randmat.cc |   76 +++++++++----------------------------------------
+ tbb/chain/thresh.cc  |   29 -------------------
+ tbb/chain/winnow.cc  |   44 ++++------------------------
+ 6 files changed, 23 insertions(+), 191 deletions(-)
+
+commit 70c60472401feafdd138eff83a8aa23845772a64
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu May 3 09:35:18 2012 -0300
+
+    tbb-chain files
+
+ tbb/chain/.gitignore |    1 +
+ tbb/chain/main.cc    |   58 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tbb/chain/main.in    |    4 +++
+ tbb/chain/makefile   |    8 +++++++
+ 4 files changed, 71 insertions(+), 0 deletions(-)
+
+commit 156b211a34459956296716daa042746369eb56b8
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu May 3 09:33:08 2012 -0300
+
+    tbb-chain start
+
+ tbb/chain/outer.cc   |   90 ++++++++++++++++++++++++++++
+ tbb/chain/product.cc |   66 +++++++++++++++++++++
+ tbb/chain/randmat.cc |   82 ++++++++++++++++++++++++++
+ tbb/chain/thresh.cc  |  159 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tbb/chain/winnow.cc  |  100 +++++++++++++++++++++++++++++++
+ 5 files changed, 497 insertions(+), 0 deletions(-)
+
+commit db94217b6b56203b12c818d963e52048f4057fbb
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu May 3 09:30:01 2012 -0300
+
+    go-chain done
+
+ go/chain/src/all/outer.go   |   50 +++++++-----------------------------------
+ go/chain/src/all/product.go |   25 +++++++++++----------
+ go/chain/src/all/randmat.go |    2 +-
+ go/chain/src/main/main.go   |   44 ++++++++++++++++++++++++++++++++++---
+ go/chain/src/main/makefile  |    2 +-
+ 5 files changed, 64 insertions(+), 59 deletions(-)
+
+commit 663c7ba8584149ca94ea51f504a8309caa8815b1
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu May 3 09:00:23 2012 -0300
+
+    go-chain restart
+
+ go/chain/.gitignore         |    1 +
+ go/chain/main.go            |   20 ----
+ go/chain/main.in            |    4 -
+ go/chain/makefile           |    8 --
+ go/chain/outer.go           |  132 ----------------------------
+ go/chain/product.go         |  106 -----------------------
+ go/chain/randmat.go         |   58 ------------
+ go/chain/src/all/makefile   |    4 +
+ go/chain/src/all/outer.go   |  104 ++++++++++++++++++++++
+ go/chain/src/all/product.go |   60 +++++++++++++
+ go/chain/src/all/randmat.go |   41 +++++++++
+ go/chain/src/all/thresh.go  |  105 ++++++++++++++++++++++
+ go/chain/src/all/winnow.go  |  103 ++++++++++++++++++++++
+ go/chain/src/main/main.go   |   26 ++++++
+ go/chain/src/main/main.in   |    4 +
+ go/chain/src/main/makefile  |    5 +
+ go/chain/thresh.go          |  152 --------------------------------
+ go/chain/winnow.go          |  201 -------------------------------------------
+ 18 files changed, 453 insertions(+), 681 deletions(-)
+
+commit 4b3d01b0bed4ba48aa3e0da65defad6effa24d97
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 21:28:43 2012 -0300
+
+    go-chain pause
+
+ go/chain/main.go  |   20 ++++++++++++++++++++
+ go/chain/main.in  |    4 ++++
+ go/chain/makefile |    8 ++++++++
+ 3 files changed, 32 insertions(+), 0 deletions(-)
+
+commit 446a0d9b6a5b1c22532d309feb2c4c86ef651d66
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 21:04:07 2012 -0300
+
+    go-chain start
+
+ go/chain/outer.go   |  132 +++++++++++++++++++++++++++++++++
+ go/chain/product.go |  106 +++++++++++++++++++++++++++
+ go/chain/randmat.go |   58 +++++++++++++++
+ go/chain/thresh.go  |  152 ++++++++++++++++++++++++++++++++++++++
+ go/chain/winnow.go  |  201 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ 5 files changed, 649 insertions(+), 0 deletions(-)
+
+commit 495dea73d37905c6afb1d4e09616831cb8f5870f
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 20:56:56 2012 -0300
+
+    erlang-chain done
+
+ erlang/chain/main.erl    |   15 +++++++++++++--
+ erlang/chain/makefile    |    4 ++--
+ erlang/chain/outer.erl   |    5 -----
+ erlang/chain/product.erl |    9 ---------
+ erlang/chain/randmat.erl |    2 +-
+ erlang/chain/thresh.erl  |    9 ---------
+ erlang/chain/winnow.erl  |   13 ++-----------
+ 7 files changed, 18 insertions(+), 39 deletions(-)
+
+commit 4aae66746db4572563511de0ab1d3124c6cc809c
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 20:43:33 2012 -0300
+
+    erlang-chain compiles
+
+ erlang/chain/main.erl    |   21 +++++++++++++++++++++
+ erlang/chain/main.in     |    4 ++++
+ erlang/chain/makefile    |    5 +++++
+ erlang/chain/outer.erl   |    9 ++-------
+ erlang/chain/product.erl |   10 ++--------
+ erlang/chain/randmat.erl |    9 ++-------
+ erlang/chain/thresh.erl  |   10 ++--------
+ erlang/chain/winnow.erl  |   11 ++---------
+ 8 files changed, 40 insertions(+), 39 deletions(-)
+
+commit 7787376e57f68bbe720fc377a76bd38748a83d8b
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 20:35:14 2012 -0300
+
+    erlang-chain start
+
+ erlang/chain/outer.erl   |   57 +++++++++++++++++++++++++++++
+ erlang/chain/product.erl |   38 +++++++++++++++++++
+ erlang/chain/randmat.erl |   56 ++++++++++++++++++++++++++++
+ erlang/chain/thresh.erl  |   72 ++++++++++++++++++++++++++++++++++++
+ erlang/chain/winnow.erl  |   91 ++++++++++++++++++++++++++++++++++++++++++++++
+ 5 files changed, 314 insertions(+), 0 deletions(-)
+
+commit e4d29b0bd5145ff848dd5f3f588533dbed4b3ce0
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 20:33:27 2012 -0300
+
+    cilk-main done
+
+ cilk/chain/common.cilkh |   55 +++++++++++++++++++++++++++++++++++++
+ cilk/chain/main.cilk    |   70 ++++++++++++++++++++++++++++++++---------------
+ cilk/chain/outer.cilk   |   26 +++++------------
+ cilk/chain/product.cilk |   15 +++-------
+ cilk/chain/randmat.cilk |   16 +++++-----
+ cilk/chain/thresh.cilk  |   47 +++----------------------------
+ cilk/chain/winnow.cilk  |   48 ++------------------------------
+ 7 files changed, 131 insertions(+), 146 deletions(-)
+
+commit c49467beee95815fc1c0b82d8c5289bd245a2dbc
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 19:52:25 2012 -0300
+
+    cilk-chain compiles
+
+ cilk/chain/main.cilk    |  138 +++++++++++++++++++++++++++++++++++++++++++++++
+ cilk/chain/main.in      |    4 ++
+ cilk/chain/makefile     |    6 ++
+ cilk/chain/outer.cilk   |   58 +-------------------
+ cilk/chain/product.cilk |   57 +-------------------
+ cilk/chain/randmat.cilk |   39 +-------------
+ cilk/chain/thresh.cilk  |  112 ++++----------------------------------
+ cilk/chain/winnow.cilk  |  111 +++-----------------------------------
+ 8 files changed, 171 insertions(+), 354 deletions(-)
+
+commit 8ee3b3d15e4b6ceaacc5b3924547d3628f29cbb4
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 19:20:38 2012 -0300
+
+    cilk-chain start
+
+ cilk/chain/outer.cilk   |  139 +++++++++++++++++++++++++
+ cilk/chain/product.cilk |  107 +++++++++++++++++++
+ cilk/chain/randmat.cilk |   69 +++++++++++++
+ cilk/chain/thresh.cilk  |  258 ++++++++++++++++++++++++++++++++++++++++++++++
+ cilk/chain/winnow.cilk  |  259 +++++++++++++++++++++++++++++++++++++++++++++++
+ 5 files changed, 832 insertions(+), 0 deletions(-)
+
+commit 7e3daf2e1a33b37bc0becc9c29ac256d8b07eb17
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 19:18:58 2012 -0300
+
+    chapel-chain done
+
+ chapel/chain/main.chpl    |   36 ++++++++++++++++++++++++++++++++++++
+ chapel/chain/main.in      |    4 ++++
+ chapel/chain/makefile     |    5 +++++
+ chapel/chain/outer.chpl   |   27 +--------------------------
+ chapel/chain/product.chpl |   25 +------------------------
+ chapel/chain/randmat.chpl |   27 ++++-----------------------
+ chapel/chain/thresh.chpl  |   30 +-----------------------------
+ chapel/chain/winnow.chpl  |   26 +-------------------------
+ 8 files changed, 53 insertions(+), 127 deletions(-)
+
+commit c6c3b1141d2b489baa42a90ab6c7e51a232954aa
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 18:46:12 2012 -0300
+
+    chapel-chain start
+
+ chapel/chain/outer.chpl   |   76 +++++++++++++++++++++++++++++
+ chapel/chain/product.chpl |   49 +++++++++++++++++++
+ chapel/chain/randmat.chpl |   43 +++++++++++++++++
+ chapel/chain/thresh.chpl  |   70 +++++++++++++++++++++++++++
+ chapel/chain/winnow.chpl  |  115 +++++++++++++++++++++++++++++++++++++++++++++
+ 5 files changed, 353 insertions(+), 0 deletions(-)
+
+commit 4882fd876dc478bfc8475ffda5f91fc3020b8636
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 17:54:23 2012 -0300
+
+    cpp-chain done
+
+ cpp/chain/.gitignore |    1 +
+ cpp/chain/main.cc    |   58 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ cpp/chain/main.in    |    4 +++
+ cpp/chain/makefile   |    3 ++
+ cpp/chain/outer.cc   |   29 -------------------------
+ cpp/chain/product.cc |   27 -----------------------
+ cpp/chain/randmat.cc |   36 ++++++-------------------------
+ cpp/chain/thresh.cc  |   52 +++-----------------------------------------
+ cpp/chain/winnow.cc  |   26 ----------------------
+ 9 files changed, 77 insertions(+), 159 deletions(-)
+
+commit 144e8b78a3a75b9e17e0e67ae4a3e895a8454d39
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 17:16:59 2012 -0300
+
+    cpp-chain start
+
+ cpp/chain/outer.cc   |   81 +++++++++++++++++++++++++++++++++++++++++
+ cpp/chain/product.cc |   56 ++++++++++++++++++++++++++++
+ cpp/chain/randmat.cc |   50 +++++++++++++++++++++++++
+ cpp/chain/thresh.cc  |   99 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ cpp/chain/winnow.cc  |   79 ++++++++++++++++++++++++++++++++++++++++
+ 5 files changed, 365 insertions(+), 0 deletions(-)
+
+commit 710023ac20a94ccd1e4de55a102b63b4aff45908
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 17:13:32 2012 -0300
+
+    tbb-product-par done
+
+ tbb/product/par/main.cc |   24 +++++++++++++++++-------
+ 1 files changed, 17 insertions(+), 7 deletions(-)
+
+commit e8a4e81dd79a74d557898b38d858ebfc94070218
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 17:11:24 2012 -0300
+
+    tbb-product-par start
+
+ tbb/product/par/main.cc   |   56 +++++++++++++++++++++++++++++++++++++++++++++
+ tbb/product/par/main.gold |    2 +
+ tbb/product/par/main.in   |    9 +++++++
+ tbb/product/par/main.out  |    2 +
+ tbb/product/par/makefile  |    7 +++++
+ 5 files changed, 76 insertions(+), 0 deletions(-)
+
+commit 29ad7b5e0c645e987dd9a17fadbd4bf78f6c1407
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 17:10:45 2012 -0300
+
+    tbb-product-seq done
+
+ tbb/product/seq/main.cc   |   65 ++++++++++++++-------------------------------
+ tbb/product/seq/main.gold |   15 +---------
+ tbb/product/seq/main.in   |   18 +++++-------
+ tbb/product/seq/main.out  |   15 +---------
+ 4 files changed, 32 insertions(+), 81 deletions(-)
+
+commit 4983e2f718fb5415ce3a403b55618d21d543b038
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 17:10:00 2012 -0300
+
+    tbb-product-seq start
+
+ tbb/product/seq/main.cc   |   81 +++++++++++++++++++++++++++++++++++++++++++++
+ tbb/product/seq/main.gold |   13 +++++++
+ tbb/product/seq/main.in   |   11 ++++++
+ tbb/product/seq/main.out  |   13 +++++++
+ tbb/product/seq/makefile  |    7 ++++
+ 5 files changed, 125 insertions(+), 0 deletions(-)
+
+commit 8631c4d2c65fe9647017d1ff3f7aad3ddc9fcf7a
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 17:08:59 2012 -0300
+
+    go-product-par done
+
+ go/product/par/main.go |   19 +++++++++++++++++--
+ 1 files changed, 17 insertions(+), 2 deletions(-)
+
+commit 61c7f6a776e6c3c21800b80a0ba50da89687d147
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 17:07:40 2012 -0300
+
+    go-product-par start
+
+ go/product/par/main.go   |   91 ++++++++++++++++++++++++++++++++++++++++++++++
+ go/product/par/main.gold |    2 +
+ go/product/par/main.in   |    9 +++++
+ go/product/par/main.out  |    2 +
+ go/product/par/makefile  |    9 +++++
+ 5 files changed, 113 insertions(+), 0 deletions(-)
+
+commit 004fc26d24aa9a1394def4bdd2a2cd0ad0a19e24
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 17:07:01 2012 -0300
+
+    go-product-seq done
+
+ go/product/seq/main.go   |   96 +++++++++++++++++-----------------------------
+ go/product/seq/main.gold |   15 +------
+ go/product/seq/main.in   |   18 ++++-----
+ go/product/seq/main.out  |   15 +------
+ 4 files changed, 47 insertions(+), 97 deletions(-)
+
+commit 100da2e7edaa08c7f78de6c8c2917644261aa808
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 17:01:22 2012 -0300
+
+    go-product-seq start
+
+ go/product/seq/main.go   |  117 ++++++++++++++++++++++++++++++++++++++++++++++
+ go/product/seq/main.gold |   13 +++++
+ go/product/seq/main.in   |   11 ++++
+ go/product/seq/main.out  |   13 +++++
+ go/product/seq/makefile  |    9 ++++
+ 5 files changed, 163 insertions(+), 0 deletions(-)
+
+commit aa104e054f9d96e4f61e0932132192959f144867
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 16:58:42 2012 -0300
+
+    erlang-product-par done
+
+ erlang/product/par/main.erl |    8 +++++++-
+ 1 files changed, 7 insertions(+), 1 deletions(-)
+
+commit 47950d84226e73503448733b03ebc833a51caff6
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 16:55:48 2012 -0300
+
+    erlang-product-par start
+
+ erlang/product/par/main.erl  |   32 ++++++++++++++++++++++++++++++++
+ erlang/product/par/main.gold |    2 ++
+ erlang/product/par/main.in   |    9 +++++++++
+ erlang/product/par/main.out  |    2 ++
+ erlang/product/par/makefile  |    6 ++++++
+ 5 files changed, 51 insertions(+), 0 deletions(-)
+
+commit 4a9d225715a4b94f4a6964b1af8b9f4c7bd4ebba
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 16:55:04 2012 -0300
+
+    erlang-product-seq done
+
+ erlang/product/seq/main.erl  |   47 ++++++++++++++---------------------------
+ erlang/product/seq/main.gold |    2 +-
+ erlang/product/seq/main.in   |   18 +++++++---------
+ erlang/product/seq/main.out  |    2 +-
+ 4 files changed, 26 insertions(+), 43 deletions(-)
+
+commit 2e815a8c0a8975fafd7e27612b3dd3df1dd8f682
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 16:41:06 2012 -0300
+
+    erlang-product-seq start
+
+ erlang/product/seq/main.erl  |   47 ++++++++++++++++++++++++++++++++++++++++++
+ erlang/product/seq/main.gold |    2 +
+ erlang/product/seq/main.in   |   11 +++++++++
+ erlang/product/seq/main.out  |    2 +
+ erlang/product/seq/makefile  |    6 +++++
+ 5 files changed, 68 insertions(+), 0 deletions(-)
+
+commit 3f02222c82f1816bac7ea24fc2f04f63f2da793e
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 16:38:50 2012 -0300
+
+    cilk-product-par done
+
+ cilk/product/par/main.cilk |   47 +++++++++++++++++++++++++++++++++----------
+ 1 files changed, 36 insertions(+), 11 deletions(-)
+
+commit 197ce7d32fd89c266980da69d0b13fa305a9e7e9
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 16:34:18 2012 -0300
+
+    cilk-product-par start
+
+ cilk/product/par/main.cilk |   82 ++++++++++++++++++++++++++++++++++++++++++++
+ cilk/product/par/main.gold |    2 +
+ cilk/product/par/main.in   |    9 +++++
+ cilk/product/par/main.out  |    2 +
+ cilk/product/par/makefile  |    6 +++
+ 5 files changed, 101 insertions(+), 0 deletions(-)
+
+commit 4367f9354576dc6ec393321b9f91ca300cbf034c
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 16:32:57 2012 -0300
+
+    cilk-product-seq done
+
+ cilk/product/seq/main.cilk |   87 ++++++++++++++------------------------------
+ cilk/product/seq/main.gold |   15 +-------
+ cilk/product/seq/main.in   |   18 ++++-----
+ cilk/product/seq/main.out  |   15 +-------
+ 4 files changed, 40 insertions(+), 95 deletions(-)
+
+commit 916ee936acd828931a26f9326eafdd6e0bbbdd8c
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 16:27:00 2012 -0300
+
+    cilk-product-seq start
+
+ cilk/product/seq/main.cilk |  113 ++++++++++++++++++++++++++++++++++++++++++++
+ cilk/product/seq/main.gold |   13 +++++
+ cilk/product/seq/main.in   |   11 ++++
+ cilk/product/seq/main.out  |   13 +++++
+ cilk/product/seq/makefile  |    6 ++
+ 5 files changed, 156 insertions(+), 0 deletions(-)
+
+commit 037e11a9850e933a49e4b0562c9baf6b442ecf06
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 16:25:49 2012 -0300
+
+    chapel-product-par done
+
+ chapel/product/par/main.chpl |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit b7cc225ac4b284df8725d90cb59246d8e539b0ef
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 16:24:17 2012 -0300
+
+    chapel-product-par start
+
+ chapel/product/par/main.chpl |   49 ++++++++++++++++++++++++++++++++++++++++++
+ chapel/product/par/main.gold |    2 +
+ chapel/product/par/main.in   |    9 +++++++
+ chapel/product/par/main.out  |    2 +
+ chapel/product/par/makefile  |    6 +++++
+ 5 files changed, 68 insertions(+), 0 deletions(-)
+
+commit 46a7c11797127a8ed40927d274a86c0bdcc34c43
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 16:23:35 2012 -0300
+
+    chapel-product-seq done
+
+ chapel/product/seq/main.chpl |   89 ++++++++++++-----------------------------
+ chapel/product/seq/main.gold |    2 +
+ chapel/product/seq/main.in   |   12 +++---
+ chapel/product/seq/main.out  |    2 +
+ chapel/product/seq/main2.in  |    9 ----
+ chapel/product/seq/main3.in  |    9 ----
+ chapel/product/seq/main4.in  |    9 ----
+ chapel/product/seq/makefile  |    6 +--
+ 8 files changed, 38 insertions(+), 100 deletions(-)
+
+commit 589b5bd1dd2168376685daade5076b3597b44a9e
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 16:15:50 2012 -0300
+
+    chapel-product-seq start
+
+ chapel/product/seq/main.chpl |   86 ++++++++++++++++++++++++++++++++++++++++++
+ chapel/product/seq/main.in   |    9 ++++
+ chapel/product/seq/main2.in  |    9 ++++
+ chapel/product/seq/main3.in  |    9 ++++
+ chapel/product/seq/main4.in  |    9 ++++
+ chapel/product/seq/makefile  |    8 ++++
+ 6 files changed, 130 insertions(+), 0 deletions(-)
+
+commit 3b3d876336e3290fec335ac68d43c4ed38d5d6d4
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 16:11:19 2012 -0300
+
+    cpp-product done
+
+ cpp/product/main.cc   |   65 +++++++++++++++----------------------------------
+ cpp/product/main.gold |   15 +----------
+ cpp/product/main.in   |   18 ++++++-------
+ cpp/product/main.out  |   15 +----------
+ 4 files changed, 32 insertions(+), 81 deletions(-)
+
+commit a9e6110e6c82f6e2b2fa0c99b85ff70a7df4ef73
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 15:56:47 2012 -0300
+
+    cpp-product start
+
+ cpp/product/main.cc   |   81 +++++++++++++++++++++++++++++++++++++++++++++++++
+ cpp/product/main.gold |   13 ++++++++
+ cpp/product/main.in   |   11 +++++++
+ cpp/product/main.out  |   13 ++++++++
+ cpp/product/makefile  |    3 ++
+ 5 files changed, 121 insertions(+), 0 deletions(-)
+
+commit 5e5319cebefafa8f188d97ef6425c8fffcee91b9
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 13:16:46 2012 -0300
+
+    tbb-outer-par done
+
+ tbb/outer/par/main.cc |   33 +++++++++++++++++++++------------
+ 1 files changed, 21 insertions(+), 12 deletions(-)
+
+commit 33f229b52c0515c02808284332726b3c260dc2fc
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 13:14:21 2012 -0300
+
+    tbb-outer-par start
+
+ tbb/outer/par/main.cc   |   81 +++++++++++++++++++++++++++++++++++++++++++++++
+ tbb/outer/par/main.gold |   13 +++++++
+ tbb/outer/par/main.in   |   11 ++++++
+ tbb/outer/par/main.out  |   13 +++++++
+ tbb/outer/par/makefile  |    7 ++++
+ 5 files changed, 125 insertions(+), 0 deletions(-)
+
+commit 49f47d509cd3c5f2a2d043b758a330dbd61f4955
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 13:13:34 2012 -0300
+
+    tbb-outer-seq done
+
+ tbb/outer/seq/main.cc    |   86 +++++++++++++++++++++++----------------------
+ tbb/outer/seq/main.gold  |   19 ++++++----
+ tbb/outer/seq/main.in    |   16 +++++----
+ tbb/outer/seq/main.out   |   19 ++++++----
+ tbb/outer/seq/main2.gold |    5 ---
+ tbb/outer/seq/main2.in   |    9 -----
+ tbb/outer/seq/main2.out  |    5 ---
+ tbb/outer/seq/main3.gold |    5 ---
+ tbb/outer/seq/main3.in   |    9 -----
+ tbb/outer/seq/main3.out  |    5 ---
+ tbb/outer/seq/main4.gold |    4 --
+ tbb/outer/seq/main4.in   |    9 -----
+ tbb/outer/seq/main4.out  |    4 --
+ tbb/outer/seq/makefile   |    6 ---
+ 14 files changed, 77 insertions(+), 124 deletions(-)
+
+commit 54801af4e12cc963c35ce030da95a4ff930abc39
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 13:12:14 2012 -0300
+
+    tbb-outer-seq start
+
+ tbb/outer/seq/main.cc    |   79 ++++++++++++++++++++++++++++++++++++++++++++++
+ tbb/outer/seq/main.gold  |    8 +++++
+ tbb/outer/seq/main.in    |    9 +++++
+ tbb/outer/seq/main.out   |    8 +++++
+ tbb/outer/seq/main2.gold |    5 +++
+ tbb/outer/seq/main2.in   |    9 +++++
+ tbb/outer/seq/main2.out  |    5 +++
+ tbb/outer/seq/main3.gold |    5 +++
+ tbb/outer/seq/main3.in   |    9 +++++
+ tbb/outer/seq/main3.out  |    5 +++
+ tbb/outer/seq/main4.gold |    4 ++
+ tbb/outer/seq/main4.in   |    9 +++++
+ tbb/outer/seq/main4.out  |    4 ++
+ tbb/outer/seq/makefile   |   13 +++++++
+ 14 files changed, 172 insertions(+), 0 deletions(-)
+
+commit f465b712227c82671eb26892d2f74282e046bd50
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 13:11:02 2012 -0300
+
+    scoop-outer-seq pause
+
+ scoop/outer/seq/main.e     |  107 ++++++++++++++++++++++----------------------
+ scoop/outer/seq/main.gold  |   19 +++++---
+ scoop/outer/seq/main.in    |   16 ++++---
+ scoop/outer/seq/main.out   |    8 ---
+ scoop/outer/seq/main2.gold |    5 --
+ scoop/outer/seq/main2.in   |    9 ----
+ scoop/outer/seq/main2.out  |    5 --
+ scoop/outer/seq/main3.gold |    5 --
+ scoop/outer/seq/main3.in   |    9 ----
+ scoop/outer/seq/main3.out  |    5 --
+ scoop/outer/seq/main4.gold |    4 --
+ scoop/outer/seq/main4.in   |    9 ----
+ scoop/outer/seq/main4.out  |    4 --
+ scoop/outer/seq/main5.in   |    4 --
+ scoop/outer/seq/makefile   |    6 ---
+ 15 files changed, 74 insertions(+), 141 deletions(-)
+
+commit bfd382bbeec4b16732b96676725836fe1ea436c5
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 12:36:46 2012 -0300
+
+    scoop-outer-seq start
+
+ scoop/outer/seq/comparator.e |   26 ++++++++++
+ scoop/outer/seq/main.e       |  104 ++++++++++++++++++++++++++++++++++++++++++
+ scoop/outer/seq/main.gold    |    8 +++
+ scoop/outer/seq/main.in      |    9 ++++
+ scoop/outer/seq/main.out     |    8 +++
+ scoop/outer/seq/main2.gold   |    5 ++
+ scoop/outer/seq/main2.in     |    9 ++++
+ scoop/outer/seq/main2.out    |    5 ++
+ scoop/outer/seq/main3.gold   |    5 ++
+ scoop/outer/seq/main3.in     |    9 ++++
+ scoop/outer/seq/main3.out    |    5 ++
+ scoop/outer/seq/main4.gold   |    4 ++
+ scoop/outer/seq/main4.in     |    9 ++++
+ scoop/outer/seq/main4.out    |    4 ++
+ scoop/outer/seq/main5.in     |    4 ++
+ scoop/outer/seq/makefile     |   13 +++++
+ 16 files changed, 227 insertions(+), 0 deletions(-)
+
+commit 204bfe69aefd59fdcb2816d7780311a4b4cbe483
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 12:35:35 2012 -0300
+
+    go-outer-par done
+
+ go/outer/par/main.go |   19 +++++++++++++++++--
+ 1 files changed, 17 insertions(+), 2 deletions(-)
+
+commit 442afb63e6fb58ccae593dfd0ebbe1cd96628748
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 12:32:58 2012 -0300
+
+    go-outer-par start
+
+ go/outer/par/main.go   |  117 ++++++++++++++++++++++++++++++++++++++++++++++++
+ go/outer/par/main.gold |   13 +++++
+ go/outer/par/main.in   |   11 +++++
+ go/outer/par/main.out  |   13 +++++
+ go/outer/par/makefile  |    9 ++++
+ 5 files changed, 163 insertions(+), 0 deletions(-)
+
+commit 11514c569f3d8d5a4dbf3d93f69361818e9093a1
+Merge: 1683957 ad63893
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 11:27:21 2012 -0300
+
+    go-outer-seq merged
+
+commit ad63893a456a91c716fbb5f256c7a5a4c006c9d9
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 11:23:24 2012 -0300
+
+    go-outer-seq done
+
+ go/outer/seq/main.go    |  137 ++++++++++++++++++++++-------------------------
+ go/outer/seq/main.gold  |   19 ++++---
+ go/outer/seq/main.in    |   16 +++---
+ go/outer/seq/main.out   |   19 ++++---
+ go/outer/seq/main2.gold |    5 --
+ go/outer/seq/main2.in   |    9 ---
+ go/outer/seq/main2.out  |    5 --
+ go/outer/seq/main3.gold |    5 --
+ go/outer/seq/main3.in   |    9 ---
+ go/outer/seq/main3.out  |    5 --
+ go/outer/seq/main4.gold |    4 --
+ go/outer/seq/main4.in   |    9 ---
+ go/outer/seq/main4.out  |    4 --
+ go/outer/seq/makefile   |    6 --
+ 14 files changed, 98 insertions(+), 154 deletions(-)
+
+commit 1683957e7ae09159af024df153b444c0f7e45c95
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 11:23:24 2012 -0300
+
+    go-outer-seq done
+
+ go/outer/seq/main.go    |  137 ++++++++++++++++++++++-------------------------
+ go/outer/seq/main.gold  |   19 ++++---
+ go/outer/seq/main.in    |   16 +++---
+ go/outer/seq/main.out   |   19 ++++---
+ go/outer/seq/main2.gold |    5 --
+ go/outer/seq/main2.in   |    9 ---
+ go/outer/seq/main2.out  |    5 --
+ go/outer/seq/main3.gold |    5 --
+ go/outer/seq/main3.in   |    9 ---
+ go/outer/seq/main3.out  |    5 --
+ go/outer/seq/main4.gold |    4 --
+ go/outer/seq/main4.in   |    9 ---
+ go/outer/seq/main4.out  |    4 --
+ go/outer/seq/makefile   |    6 --
+ 14 files changed, 98 insertions(+), 154 deletions(-)
+
+commit 1bcf99a2bfbfc8d123992f2e9bbc84bdb191c14c
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 11:04:38 2012 -0300
+
+    go-outer-seq start
+
+ go/outer/seq/main.go    |  124 +++++++++++++++++++++++++++++++++++++++++++++++
+ go/outer/seq/main.gold  |    8 +++
+ go/outer/seq/main.in    |    9 +++
+ go/outer/seq/main.out   |    8 +++
+ go/outer/seq/main2.gold |    5 ++
+ go/outer/seq/main2.in   |    9 +++
+ go/outer/seq/main2.out  |    5 ++
+ go/outer/seq/main3.gold |    5 ++
+ go/outer/seq/main3.in   |    9 +++
+ go/outer/seq/main3.out  |    5 ++
+ go/outer/seq/main4.gold |    4 ++
+ go/outer/seq/main4.in   |    9 +++
+ go/outer/seq/main4.out  |    4 ++
+ go/outer/seq/makefile   |   15 ++++++
+ 14 files changed, 219 insertions(+), 0 deletions(-)
+
+commit c0e5878ef63824518fccfde22c2ce4fb8d2d369c
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 11:02:59 2012 -0300
+
+    erlang-outer-par done
+
+ erlang/outer/par/main.erl |   14 ++++++++++++--
+ 1 files changed, 12 insertions(+), 2 deletions(-)
+
+commit 8122bb2558c9b93c1caa45e50af690dccfc44d6c
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed May 2 10:47:07 2012 -0300
+
+    erlang-outer-par start
+
+ erlang/outer/par/main.erl  |   47 ++++++++++++++++++++++++++++++++++++++++++++
+ erlang/outer/par/main.gold |    2 +
+ erlang/outer/par/main.in   |   11 ++++++++++
+ erlang/outer/par/main.out  |    2 +
+ erlang/outer/par/makefile  |    6 +++++
+ 5 files changed, 68 insertions(+), 0 deletions(-)
+
+commit 7fa2ffd2f4def4c228c0fd94bce32efc8360c756
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 22:27:12 2012 -0300
+
+    erlang-outer-seq done
+
+ erlang/outer/seq/main.erl   |   72 +++++++++++++++++-------------------------
+ erlang/outer/seq/main.gold  |    2 +-
+ erlang/outer/seq/main.in    |   16 +++++----
+ erlang/outer/seq/main.out   |    2 +-
+ erlang/outer/seq/main2.gold |    2 -
+ erlang/outer/seq/main2.in   |    9 -----
+ erlang/outer/seq/main2.out  |    2 -
+ erlang/outer/seq/main3.gold |    2 -
+ erlang/outer/seq/main3.in   |    9 -----
+ erlang/outer/seq/main3.out  |    2 -
+ erlang/outer/seq/main4.gold |    2 -
+ erlang/outer/seq/main4.in   |    9 -----
+ erlang/outer/seq/main4.out  |    2 -
+ erlang/outer/seq/makefile   |    6 ---
+ 14 files changed, 40 insertions(+), 97 deletions(-)
+
+commit 687e24b2c417e7bbe8ba541eb525ce84f0faac51
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 22:02:46 2012 -0300
+
+    erlang-outer-seq start
+
+ erlang/outer/seq/main.erl   |   61 +++++++++++++++++++++++++++++++++++++++++++
+ erlang/outer/seq/main.gold  |    2 +
+ erlang/outer/seq/main.in    |    9 ++++++
+ erlang/outer/seq/main.out   |    2 +
+ erlang/outer/seq/main2.gold |    2 +
+ erlang/outer/seq/main2.in   |    9 ++++++
+ erlang/outer/seq/main2.out  |    2 +
+ erlang/outer/seq/main3.gold |    2 +
+ erlang/outer/seq/main3.in   |    9 ++++++
+ erlang/outer/seq/main3.out  |    2 +
+ erlang/outer/seq/main4.gold |    2 +
+ erlang/outer/seq/main4.in   |    9 ++++++
+ erlang/outer/seq/main4.out  |    2 +
+ erlang/outer/seq/makefile   |   12 ++++++++
+ 14 files changed, 125 insertions(+), 0 deletions(-)
+
+commit 7a26122ee1a249c27db7184dd36d3f0291b0ef26
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 22:02:02 2012 -0300
+
+    cilk-outer-par done
+
+ cilk/outer/par/main.cilk |   54 ++++++++++++++++++++++++++++++++++------------
+ 1 files changed, 40 insertions(+), 14 deletions(-)
+
+commit e7a5285ec63e7ac614c631c35a693fabc3900b5a
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 21:55:56 2012 -0300
+
+    cilk-outer-par start
+
+ cilk/outer/par/main.cilk |  113 ++++++++++++++++++++++++++++++++++++++++++++++
+ cilk/outer/par/main.gold |   13 +++++
+ cilk/outer/par/main.in   |   11 +++++
+ cilk/outer/par/main.out  |   13 +++++
+ cilk/outer/par/makefile  |    6 +++
+ 5 files changed, 156 insertions(+), 0 deletions(-)
+
+commit 656db9d106a7a7104bb9ca6caefd36a0fc94a611
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 21:54:59 2012 -0300
+
+    cilk-outer-seq done
+
+ cilk/outer/seq/main.cilk  |  125 +++++++++++++++++++++++---------------------
+ cilk/outer/seq/main.gold  |   19 ++++---
+ cilk/outer/seq/main.in    |   16 +++---
+ cilk/outer/seq/main.out   |   19 ++++---
+ cilk/outer/seq/main2.gold |    5 --
+ cilk/outer/seq/main2.in   |    9 ---
+ cilk/outer/seq/main2.out  |    5 --
+ cilk/outer/seq/main3.gold |    5 --
+ cilk/outer/seq/main3.in   |    9 ---
+ cilk/outer/seq/main3.out  |    5 --
+ cilk/outer/seq/main4.gold |    4 --
+ cilk/outer/seq/main4.in   |    9 ---
+ cilk/outer/seq/main4.out  |    4 --
+ cilk/outer/seq/makefile   |    6 --
+ 14 files changed, 98 insertions(+), 142 deletions(-)
+
+commit dee02fd7296e35899cacb59159bdfc589d678bd9
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 21:38:20 2012 -0300
+
+    cilk-outer-seq start
+
+ cilk/outer/seq/main.cilk  |  108 +++++++++++++++++++++++++++++++++++++++++++++
+ cilk/outer/seq/main.gold  |    8 +++
+ cilk/outer/seq/main.in    |    9 ++++
+ cilk/outer/seq/main.out   |    8 +++
+ cilk/outer/seq/main2.gold |    5 ++
+ cilk/outer/seq/main2.in   |    9 ++++
+ cilk/outer/seq/main2.out  |    5 ++
+ cilk/outer/seq/main3.gold |    5 ++
+ cilk/outer/seq/main3.in   |    9 ++++
+ cilk/outer/seq/main3.out  |    5 ++
+ cilk/outer/seq/main4.gold |    4 ++
+ cilk/outer/seq/main4.in   |    9 ++++
+ cilk/outer/seq/main4.out  |    4 ++
+ cilk/outer/seq/makefile   |   12 +++++
+ 14 files changed, 200 insertions(+), 0 deletions(-)
+
+commit 85614f5dd0f8fc36a25cc2594fac9de624859aca
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 21:37:17 2012 -0300
+
+    chapel-outer-par done
+
+ chapel/outer/par/main.chpl |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 12e0696580b3e12995dcda62f6a4fb85f85aa2b2
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 21:36:17 2012 -0300
+
+    chapel-outer-par start
+
+ chapel/outer/par/main.chpl |   76 ++++++++++++++++++++++++++++++++++++++++++++
+ chapel/outer/par/main.gold |   13 +++++++
+ chapel/outer/par/main.in   |   11 ++++++
+ chapel/outer/par/main.out  |   13 +++++++
+ chapel/outer/par/makefile  |    6 +++
+ 5 files changed, 119 insertions(+), 0 deletions(-)
+
+commit 3717980ed9124d67191871a1fc988915b531b051
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 21:35:12 2012 -0300
+
+    chapel-outer-seq done
+
+ chapel/outer/seq/main.chpl |  104 ++++++++++++++++++++------------------------
+ chapel/outer/seq/main.gold |   13 ++++++
+ chapel/outer/seq/main.out  |   13 ++++++
+ chapel/outer/seq/makefile  |    6 +--
+ 4 files changed, 75 insertions(+), 61 deletions(-)
+
+commit c26abec33dbd4e9b92740ffec1646b111d1c4e76
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 21:16:27 2012 -0300
+
+    chapel-outer-seq start
+
+ chapel/outer/seq/main.chpl |   86 ++++++++++++++++++++++++++++++++++++++++++++
+ chapel/outer/seq/main.in   |   11 ++++++
+ chapel/outer/seq/makefile  |    8 ++++
+ 3 files changed, 105 insertions(+), 0 deletions(-)
+
+commit 72f9ba5983eed4e471835053152f4977e501d01b
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 21:14:07 2012 -0300
+
+    cpp-outer done
+
+ cpp/outer/main.cc   |   77 +++++++++++++++++++++++++++++++++++---------------
+ cpp/outer/main.gold |   13 ++++++++
+ cpp/outer/main.in   |   12 +++++++-
+ cpp/outer/main.out  |   13 ++++++++
+ cpp/outer/makefile  |    3 +-
+ 5 files changed, 93 insertions(+), 25 deletions(-)
+
+commit 4c2fd8be280c746371182052f1fe39bf67b1ec16
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 20:47:54 2012 -0300
+
+    cpp-outer start
+
+ cpp/outer/main.cc  |   50 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ cpp/outer/main.in  |    1 +
+ cpp/outer/makefile |    2 ++
+ 3 files changed, 53 insertions(+), 0 deletions(-)
+
+commit b14d104d88641cd1c38e1c22b420a5719926d4a7
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 19:54:08 2012 -0300
+
+    tbb-winnow-par done
+
+ tbb/winnow/par/main.cc |   47 ++++++++++++++++++++++++++++++++++-------------
+ 1 files changed, 34 insertions(+), 13 deletions(-)
+
+commit e85db2a29fcc3aa88afe714655c4fb39786ea7dd
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 19:42:33 2012 -0300
+
+    tbb-winnow-par start
+
+ tbb/winnow/par/main.cc    |   79 +++++++++++++++++++++++++++++++++++++++++++++
+ tbb/winnow/par/main.gold  |    8 ++++
+ tbb/winnow/par/main.in    |    9 +++++
+ tbb/winnow/par/main.out   |    8 ++++
+ tbb/winnow/par/main2.gold |    5 +++
+ tbb/winnow/par/main2.in   |    9 +++++
+ tbb/winnow/par/main2.out  |    5 +++
+ tbb/winnow/par/main3.gold |    5 +++
+ tbb/winnow/par/main3.in   |    9 +++++
+ tbb/winnow/par/main3.out  |    5 +++
+ tbb/winnow/par/main4.gold |    4 ++
+ tbb/winnow/par/main4.in   |    9 +++++
+ tbb/winnow/par/main4.out  |    4 ++
+ tbb/winnow/par/makefile   |   13 +++++++
+ 14 files changed, 172 insertions(+), 0 deletions(-)
+
+commit 66021653e9cf78da791a310c610eb923a79fbcb0
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 19:41:50 2012 -0300
+
+    tbb-winnow-seq done
+
+ tbb/winnow/seq/main.out  |    8 ++++++++
+ tbb/winnow/seq/main2.out |    5 +++++
+ tbb/winnow/seq/main3.out |    5 +++++
+ tbb/winnow/seq/main4.out |    4 ++++
+ tbb/winnow/seq/makefile  |   16 ++++++++++++----
+ 5 files changed, 34 insertions(+), 4 deletions(-)
+
+commit 3678d2d41164d150ac3b3fc1479da3d64e1ddeda
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 19:39:26 2012 -0300
+
+    tbb-winnow-seq start
+
+ tbb/winnow/seq/main.cc    |   79 +++++++++++++++++++++++++++++++++++++++++++++
+ tbb/winnow/seq/main.gold  |    8 ++++
+ tbb/winnow/seq/main.in    |    9 +++++
+ tbb/winnow/seq/main2.gold |    5 +++
+ tbb/winnow/seq/main2.in   |    9 +++++
+ tbb/winnow/seq/main3.gold |    5 +++
+ tbb/winnow/seq/main3.in   |    9 +++++
+ tbb/winnow/seq/main4.gold |    4 ++
+ tbb/winnow/seq/main4.in   |    9 +++++
+ tbb/winnow/seq/makefile   |    5 +++
+ 10 files changed, 142 insertions(+), 0 deletions(-)
+
+commit 7e69b9b841f53d75d39568a206e0cdd0dcedf9eb
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 19:04:05 2012 -0300
+
+    scoop-winnow-par done
+
+ scoop/winnow/par/main.ecf |   15 +++++++++++++++
+ scoop/winnow/par/main.out |    4 ++++
+ 2 files changed, 19 insertions(+), 0 deletions(-)
+
+commit e770f33805fadb7e15c30b8c7998242f91fab0b5
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 18:43:19 2012 -0300
+
+    scoop-winnow-par quit parallel sort
+
+ scoop/winnow/par/main.out                |   27 +++++--
+ scoop/winnow/par/parfor_aggregator.e     |    3 -
+ scoop/winnow/par/tuple_sort_aggregator.e |   38 ++++++++++
+ scoop/winnow/par/tuple_sort_reader.e     |   16 ++++
+ scoop/winnow/par/tuple_sorter.e          |  113 +++++++++++++++++++++++------
+ 5 files changed, 162 insertions(+), 35 deletions(-)
+
+commit 77ef471710bab6a198922bd72866f32fe73d8e32
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 17:54:07 2012 -0300
+
+    scoop-winnow-par almost parallel sort
+
+ scoop/winnow/par/comparator.e        |   26 -------------
+ scoop/winnow/par/main.e              |   31 +++++++++++----
+ scoop/winnow/par/makefile            |    2 +-
+ scoop/winnow/par/parfor_aggregator.e |    4 +-
+ scoop/winnow/par/parfor_reader.e     |    2 +-
+ scoop/winnow/par/parfor_worker.e     |    2 +-
+ scoop/winnow/par/tuple_comparator.e  |   26 +++++++++++++
+ scoop/winnow/par/tuple_sorter.e      |   69 ++++++++++++++++++++++++++++++++--
+ 8 files changed, 118 insertions(+), 44 deletions(-)
+
+commit 151d90b02b97829a0449ff174cb4319b9dc36566
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 16:47:34 2012 -0300
+
+    scoop-winnow-par tuple_sorter
+
+ scoop/winnow/par/main.e         |    2 +-
+ scoop/winnow/par/makefile       |    2 +-
+ scoop/winnow/par/tuple_sorter.e |   55 +++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 57 insertions(+), 2 deletions(-)
+
+commit 45c065e3b51da602973a7c377195fd4b6f51c40d
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 16:33:58 2012 -0300
+
+    scoop-winnow-par parfor
+
+ scoop/winnow/par/main.e              |   46 +++++++++++++++++++++++---------
+ scoop/winnow/par/makefile            |    3 +-
+ scoop/winnow/par/parfor_aggregator.e |   40 +++++++++++++++++++++++++++
+ scoop/winnow/par/parfor_reader.e     |   16 +++++++++++
+ scoop/winnow/par/parfor_worker.e     |   49 ++++++++++++++++++++++++++++++++++
+ 5 files changed, 140 insertions(+), 14 deletions(-)
+
+commit 12aab4e0136ef60ab80c4e2d9260fb0d86cc0e18
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 16:04:40 2012 -0300
+
+    scoop-winnow-par using separate
+
+ scoop/winnow/par/main.e |   43 +++++++++++++++++++++++++++++--------------
+ 1 files changed, 29 insertions(+), 14 deletions(-)
+
+commit fe6e5840c051049cf58427974375dcee6088629f
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 15:53:45 2012 -0300
+
+    scoop-winnow-par start
+
+ scoop/winnow/par/comparator.e |   26 ++++++++++
+ scoop/winnow/par/main.e       |  104 +++++++++++++++++++++++++++++++++++++++++
+ scoop/winnow/par/main.gold    |    8 +++
+ scoop/winnow/par/main.in      |    9 ++++
+ scoop/winnow/par/main.out     |    8 +++
+ scoop/winnow/par/main2.gold   |    5 ++
+ scoop/winnow/par/main2.in     |    9 ++++
+ scoop/winnow/par/main2.out    |    5 ++
+ scoop/winnow/par/main3.gold   |    5 ++
+ scoop/winnow/par/main3.in     |    9 ++++
+ scoop/winnow/par/main3.out    |    5 ++
+ scoop/winnow/par/main4.gold   |    4 ++
+ scoop/winnow/par/main4.in     |    9 ++++
+ scoop/winnow/par/main4.out    |    4 ++
+ scoop/winnow/par/main5.in     |    4 ++
+ scoop/winnow/par/makefile     |   13 +++++
+ 16 files changed, 227 insertions(+), 0 deletions(-)
+
+commit e5642d0d292626c1d4cffd6bfa6b7851fb608801
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 15:51:15 2012 -0300
+
+    scoop-winnow-seq done
+
+ scoop/winnow/seq/comparator.e |   26 ++++++++
+ scoop/winnow/seq/main.e       |  127 +++++++++++++++++++++++++----------------
+ scoop/winnow/seq/main.gold    |    8 +++
+ scoop/winnow/seq/main.in      |   11 +++-
+ scoop/winnow/seq/main.out     |    8 +++
+ scoop/winnow/seq/main2.gold   |    5 ++
+ scoop/winnow/seq/main2.in     |   11 +++-
+ scoop/winnow/seq/main2.out    |    5 ++
+ scoop/winnow/seq/main3.gold   |    5 ++
+ scoop/winnow/seq/main3.in     |   11 +++-
+ scoop/winnow/seq/main3.out    |    5 ++
+ scoop/winnow/seq/main4.gold   |    4 +
+ scoop/winnow/seq/main4.in     |    9 ++-
+ scoop/winnow/seq/main4.out    |    4 +
+ scoop/winnow/seq/makefile     |   15 +++--
+ 15 files changed, 187 insertions(+), 67 deletions(-)
+
+commit 1f34dd1c6adc200a0981f213821c6f8232ea04a9
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 14:40:03 2012 -0300
+
+    scoop-winnow-seq start
+
+ scoop/winnow/seq/main.e   |   77 +++++++++++++++++++++++++++++++++++++++++++++
+ scoop/winnow/seq/main.in  |    4 ++
+ scoop/winnow/seq/main2.in |    4 ++
+ scoop/winnow/seq/main3.in |    4 ++
+ scoop/winnow/seq/main4.in |    4 ++
+ scoop/winnow/seq/main5.in |    4 ++
+ scoop/winnow/seq/makefile |   10 ++++++
+ 7 files changed, 107 insertions(+), 0 deletions(-)
+
+commit e0d17d9589cc0563ea757ccb9ca7c8a2ca19970c
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 14:38:08 2012 -0300
+
+    go-winnow-par done
+
+ go/winnow/par/main.go |  115 +++++++++++++++++++++++++++++++++++++++++--------
+ 1 files changed, 96 insertions(+), 19 deletions(-)
+
+commit 74b9b97fc470e82da26c8eed22f52ffd3a1619df
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 14:04:39 2012 -0300
+
+    go-winnow-par start
+
+ go/winnow/par/main.go    |  124 ++++++++++++++++++++++++++++++++++++++++++++++
+ go/winnow/par/main.gold  |    8 +++
+ go/winnow/par/main.in    |    9 +++
+ go/winnow/par/main.out   |    8 +++
+ go/winnow/par/main2.gold |    5 ++
+ go/winnow/par/main2.in   |    9 +++
+ go/winnow/par/main2.out  |    5 ++
+ go/winnow/par/main3.gold |    5 ++
+ go/winnow/par/main3.in   |    9 +++
+ go/winnow/par/main3.out  |    5 ++
+ go/winnow/par/main4.gold |    4 ++
+ go/winnow/par/main4.in   |    9 +++
+ go/winnow/par/main4.out  |    4 ++
+ go/winnow/par/makefile   |   15 ++++++
+ 14 files changed, 219 insertions(+), 0 deletions(-)
+
+commit 05c133b873d6ea04a618a44411bda881ac4243c1
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 13:59:50 2012 -0300
+
+    go-winnow-seq done
+
+ go/winnow/seq/main.go    |  111 ++++++++++++++++++++++++++++++++++++++-------
+ go/winnow/seq/main.gold  |    8 +++
+ go/winnow/seq/main.in    |    9 ++++
+ go/winnow/seq/main.out   |    8 +++
+ go/winnow/seq/main2.gold |    5 ++
+ go/winnow/seq/main2.in   |    9 ++++
+ go/winnow/seq/main2.out  |    5 ++
+ go/winnow/seq/main3.gold |    5 ++
+ go/winnow/seq/main3.in   |    9 ++++
+ go/winnow/seq/main3.out  |    5 ++
+ go/winnow/seq/main4.gold |    4 ++
+ go/winnow/seq/main4.in   |    9 ++++
+ go/winnow/seq/main4.out  |    4 ++
+ go/winnow/seq/makefile   |   13 +++--
+ 14 files changed, 181 insertions(+), 23 deletions(-)
+
+commit eea5d44578d100b0b9698c10fd759788fbd908a4
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue May 1 13:12:12 2012 -0300
+
+    go-winnow-seq start
+
+ go/winnow/seq/main.go  |   49 ++++++++++++++++++++++++++++++++++++++++++++++++
+ go/winnow/seq/makefile |   12 +++++++++++
+ 2 files changed, 61 insertions(+), 0 deletions(-)
+
+commit c36dad4e7519f9545b7034bf496b3494ed08ef3d
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 30 18:06:28 2012 -0300
+
+    erlang-winnow-par done
+
+ erlang/winnow/par/main.erl |   14 --------------
+ erlang/winnow/par/makefile |    1 -
+ 2 files changed, 0 insertions(+), 15 deletions(-)
+
+commit 9e0980b4ba4dd62b01219518e3a29b9f904c6dc9
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 30 18:02:51 2012 -0300
+
+    erlang-winnow-par parsort
+
+ erlang/winnow/par/main.erl |   13 ++++++++++++-
+ 1 files changed, 12 insertions(+), 1 deletions(-)
+
+commit e2840ecfd8d9013f521275ca273774be944d0d3e
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 30 17:48:53 2012 -0300
+
+    erlang-winnow-par parfor
+
+ erlang/winnow/par/main.erl |   41 +++++++++++++++++++++++++++++++++++++----
+ erlang/winnow/par/makefile |    1 +
+ 2 files changed, 38 insertions(+), 4 deletions(-)
+
+commit b470a1473d913c423578b3da3a60fb7abf455d3f
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 30 16:55:15 2012 -0300
+
+    erlang-winnow-par start
+
+ erlang/winnow/par/main.erl   |   61 ++++++++++++++++++++++++++++++++++++++++++
+ erlang/winnow/par/main.gold  |    2 +
+ erlang/winnow/par/main.in    |    9 ++++++
+ erlang/winnow/par/main.out   |    2 +
+ erlang/winnow/par/main2.gold |    2 +
+ erlang/winnow/par/main2.in   |    9 ++++++
+ erlang/winnow/par/main2.out  |    2 +
+ erlang/winnow/par/main3.gold |    2 +
+ erlang/winnow/par/main3.in   |    9 ++++++
+ erlang/winnow/par/main3.out  |    2 +
+ erlang/winnow/par/main4.gold |    2 +
+ erlang/winnow/par/main4.in   |    9 ++++++
+ erlang/winnow/par/main4.out  |    2 +
+ erlang/winnow/par/makefile   |   12 ++++++++
+ 14 files changed, 125 insertions(+), 0 deletions(-)
+
+commit e91aa3e057cb1ae4a14e218915d2f323c9c0f47f
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 30 16:54:08 2012 -0300
+
+    erlang-winnow-seq done
+
+ erlang/winnow/seq/main.erl   |   57 +++++++++++++++++++++++++++++++++---------
+ erlang/winnow/seq/main.gold  |    2 +
+ erlang/winnow/seq/main.in    |   10 ++++++-
+ erlang/winnow/seq/main.out   |    2 +
+ erlang/winnow/seq/main2.gold |    2 +
+ erlang/winnow/seq/main2.in   |    9 ++++++
+ erlang/winnow/seq/main2.out  |    2 +
+ erlang/winnow/seq/main3.gold |    2 +
+ erlang/winnow/seq/main3.in   |    9 ++++++
+ erlang/winnow/seq/main3.out  |    2 +
+ erlang/winnow/seq/main4.gold |    2 +
+ erlang/winnow/seq/main4.in   |    9 ++++++
+ erlang/winnow/seq/main4.out  |    2 +
+ erlang/winnow/seq/makefile   |   13 ++++++---
+ 14 files changed, 105 insertions(+), 18 deletions(-)
+
+commit b6de96dd782675a8f4dedd52ba276fd4ed690e97
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 30 16:14:12 2012 -0300
+
+    erlang-winnow-seq start
+
+ erlang/winnow/seq/main.erl |   28 ++++++++++++++++++++++++++++
+ erlang/winnow/seq/main.in  |    1 +
+ erlang/winnow/seq/makefile |    9 +++++++++
+ 3 files changed, 38 insertions(+), 0 deletions(-)
+
+commit 7fb1c36555e4c19032ad148fcbfa6ca20e12f303
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 30 15:52:32 2012 -0300
+
+    cilk-winnow-par done
+
+ cilk/winnow/par/main.cilk |   19 ++++++++++++++-----
+ 1 files changed, 14 insertions(+), 5 deletions(-)
+
+commit 47ad41d3ae804144ad3101287f4b7a0760ba039a
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 30 15:47:01 2012 -0300
+
+    cilk-winnow-par parallel_sort
+
+ cilk/winnow/par/main.cilk |   49 +++++++++++++++++++++++++++++++++++++++++---
+ 1 files changed, 45 insertions(+), 4 deletions(-)
+
+commit 67e20a02c79bc65428223a6d4bfbd3a1773b041a
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 30 15:22:38 2012 -0300
+
+    cilk-winnow-par fill_values
+
+ cilk/winnow/par/main.cilk |   59 ++++++++++++++++++++++++++++++++++++--------
+ 1 files changed, 48 insertions(+), 11 deletions(-)
+
+commit 9807e51cd4e8a052f2f7a4800b247aad305c54c0
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 30 14:43:35 2012 -0300
+
+    cilk-winnow-par using reduce2d
+
+ cilk/winnow/par/main.cilk |   80 ++++++++++++++++++++++++++++++++++++++++----
+ 1 files changed, 72 insertions(+), 8 deletions(-)
+
+commit f5eeb0c8e5a141af76ebd4ec05a51750c40c4cef
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 30 14:38:18 2012 -0300
+
+    cilk-winnow-par start
+
+ cilk/winnow/par/main.cilk  |  108 ++++++++++++++++++++++++++++++++++++++++++++
+ cilk/winnow/par/main.gold  |    8 +++
+ cilk/winnow/par/main.in    |    9 ++++
+ cilk/winnow/par/main.out   |    8 +++
+ cilk/winnow/par/main2.gold |    5 ++
+ cilk/winnow/par/main2.in   |    9 ++++
+ cilk/winnow/par/main2.out  |    5 ++
+ cilk/winnow/par/main3.gold |    5 ++
+ cilk/winnow/par/main3.in   |    9 ++++
+ cilk/winnow/par/main3.out  |    5 ++
+ cilk/winnow/par/main4.gold |    4 ++
+ cilk/winnow/par/main4.in   |    9 ++++
+ cilk/winnow/par/main4.out  |    4 ++
+ cilk/winnow/par/makefile   |   12 +++++
+ 14 files changed, 200 insertions(+), 0 deletions(-)
+
+commit 8d60b8505850b45d88449cdfa27206089b128d7a
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 30 14:37:29 2012 -0300
+
+    cilk-winnow-seq done
+
+ cilk/winnow/seq/main.cilk  |   98 ++++++++++++++++++++++++++++++++++---------
+ cilk/winnow/seq/main.gold  |    8 ++++
+ cilk/winnow/seq/main.in    |   10 ++++-
+ cilk/winnow/seq/main.out   |    8 ++++
+ cilk/winnow/seq/main2.gold |    5 ++
+ cilk/winnow/seq/main2.in   |    9 ++++
+ cilk/winnow/seq/main2.out  |    5 ++
+ cilk/winnow/seq/main3.gold |    5 ++
+ cilk/winnow/seq/main3.in   |    9 ++++
+ cilk/winnow/seq/main3.out  |    5 ++
+ cilk/winnow/seq/main4.gold |    4 ++
+ cilk/winnow/seq/main4.in   |    9 ++++
+ cilk/winnow/seq/main4.out  |    4 ++
+ cilk/winnow/seq/makefile   |   13 ++++--
+ cpp/winnow/main.gold       |    8 ++++
+ cpp/winnow/main2.gold      |    5 ++
+ cpp/winnow/main3.gold      |    5 ++
+ cpp/winnow/main4.gold      |    4 ++
+ cpp/winnow/makefile        |    8 ++--
+ 19 files changed, 191 insertions(+), 31 deletions(-)
+
+commit ce8da3d1fc5101b9a60d2cf3d2976bf1cc69854e
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 30 14:18:02 2012 -0300
+
+    cilk-winnow-seq start
+
+ cilk/winnow/seq/main.cilk |   52 +++++++++++++++++++++++++++++++++++++++++++++
+ cilk/winnow/seq/main.in   |    1 +
+ cilk/winnow/seq/makefile  |    9 +++++++
+ 3 files changed, 62 insertions(+), 0 deletions(-)
+
+commit e98084ddb6cd64828d321fdb4361305561852174
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 30 14:16:18 2012 -0300
+
+    chapel-winnow-par done
+
+ chapel/winnow/par/main.chpl |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+commit 3b6c9d9b9b2ab09cc50f803009f14fa341914b80
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 30 14:13:05 2012 -0300
+
+    chapl-winnow-par sequential_sort
+
+ chapel/winnow/par/main.chpl  |   57 +++++++++++++++++++++++++++++++-----------
+ chapel/winnow/par/main.gold  |    8 ++++++
+ chapel/winnow/par/main.out   |    8 ++++++
+ chapel/winnow/par/main2.gold |    5 +++
+ chapel/winnow/par/main2.out  |    5 +++
+ chapel/winnow/par/main3.gold |    5 +++
+ chapel/winnow/par/main3.out  |    5 +++
+ chapel/winnow/par/main4.gold |    4 +++
+ chapel/winnow/par/main4.out  |    4 +++
+ chapel/winnow/par/makefile   |   12 ++++++---
+ 10 files changed, 94 insertions(+), 19 deletions(-)
+
+commit 519fb3fa4342d236a3d0376b0248afe8831c216b
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 30 13:25:58 2012 -0300
+
+    chapel-winnow-par start
+
+ chapel/winnow/par/main.chpl |   86 +++++++++++++++++++++++++++++++++++++++++++
+ chapel/winnow/par/main.in   |    9 ++++
+ chapel/winnow/par/main2.in  |    9 ++++
+ chapel/winnow/par/main3.in  |    9 ++++
+ chapel/winnow/par/main4.in  |    9 ++++
+ chapel/winnow/par/makefile  |    8 ++++
+ 6 files changed, 130 insertions(+), 0 deletions(-)
+
+commit cc49103c498dbc655baf353813183c43835b7aa6
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 30 13:24:42 2012 -0300
+
+    chapel-winnow-seq done
+
+ chapel/winnow/seq/main.chpl |   79 ++++++++++++++++++++++++++++++++----------
+ chapel/winnow/seq/main.in   |    9 ++++-
+ chapel/winnow/seq/main2.in  |    9 +++++
+ chapel/winnow/seq/main3.in  |    9 +++++
+ chapel/winnow/seq/main4.in  |    9 +++++
+ chapel/winnow/seq/makefile  |    3 ++
+ 6 files changed, 98 insertions(+), 20 deletions(-)
+
+commit 7e0cf1b7985dd09f88a277a774951fbf6beece24
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 30 13:03:50 2012 -0300
+
+    chapel-winnow-seq start
+
+ chapel/winnow/seq/main.chpl |   45 +++++++++++++++++++++++++++++++++++++++++++
+ chapel/winnow/seq/main.in   |    2 +
+ chapel/winnow/seq/makefile  |    5 ++++
+ 3 files changed, 52 insertions(+), 0 deletions(-)
+
+commit 25c5dd3ea81f0f98b616f66f132672951d87b1ac
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 30 13:02:18 2012 -0300
+
+    cpp-window done
+
+ cpp/winnow/main.cc  |   73 +++++++++++++++++++++++++++++++++++---------------
+ cpp/winnow/main.in  |   10 ++++++-
+ cpp/winnow/main2.in |    9 ++++++
+ cpp/winnow/main3.in |    9 ++++++
+ cpp/winnow/main4.in |    9 ++++++
+ cpp/winnow/makefile |    3 ++
+ 6 files changed, 90 insertions(+), 23 deletions(-)
+
+commit 15c1c15e4e7c79592c00270989ec7f70c2c1e393
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 30 12:40:05 2012 -0300
+
+    cpp-winnow start
+
+ cpp/winnow/main.cc  |   50 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ cpp/winnow/main.in  |    1 +
+ cpp/winnow/makefile |    2 ++
+ 3 files changed, 53 insertions(+), 0 deletions(-)
+
+commit 9d599370cccc528ca11ca404a7f051903220d04f
+Merge: 3d51e34 81f2d21
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Fri Apr 20 16:14:19 2012 -0300
+
+    Merge branch 'scoop-thresh-par'
+
+commit 81f2d21ca826748f9c8dd882f9e4d7c9d7d42a02
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Fri Apr 20 16:13:59 2012 -0300
+
+    scoop-thresh-par done
+
+ scoop/thresh/par/main.e |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit 45e1252fec53bdc1e9fc0ce5308de291ac35c075
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Fri Apr 20 16:13:04 2012 -0300
+
+    scoop-thresh-par pause
+
+ scoop/thresh/par/main.e                |   85 ++++++++++++++++++++------------
+ scoop/thresh/par/makefile              |    5 ++-
+ scoop/thresh/par/parfor_aggregator.e   |   30 +++++++++++
+ scoop/thresh/par/parfor_reader.e       |   14 +++++
+ scoop/thresh/par/parfor_worker.e       |   52 +++++++++++++++++++
+ scoop/thresh/par/reduce2d_aggregator.e |    6 ++-
+ scoop/thresh/par/reduce2d_worker.e     |    8 ++--
+ 7 files changed, 162 insertions(+), 38 deletions(-)
+
+commit 83e299c3b7ea2c42e1f28483ba2fb7899db6c6c1
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Fri Apr 20 15:12:53 2012 -0300
+
+    scoop-thresh-par refac
+
+ scoop/thresh/par/main.e |   33 ++++++++++++++-------------------
+ 1 files changed, 14 insertions(+), 19 deletions(-)
+
+commit 867a92b23202c807bef48b0e3e71a6d739b0b926
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Fri Apr 20 15:07:42 2012 -0300
+
+    scoop-thresh-par with_filter
+
+ scoop/thresh/par/main.e                |   52 +++++++++++++++++++++++++------
+ scoop/thresh/par/makefile              |    2 +-
+ scoop/thresh/par/reduce2d_aggregator.e |   14 +++++++--
+ scoop/thresh/par/reduce2d_operator.e   |   10 ++++++
+ scoop/thresh/par/reduce2d_worker.e     |   47 ++++++++++++++++++++++++++--
+ 5 files changed, 107 insertions(+), 18 deletions(-)
+
+commit ba3be12b81a6aa1b113638b796ffdf0bcb574ce2
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Fri Apr 20 13:54:14 2012 -0300
+
+    scoop-thresh-par using across
+
+ scoop/thresh/par/main.e |   58 ++++++++++++++++++----------------------------
+ 1 files changed, 23 insertions(+), 35 deletions(-)
+
+commit 9c9906f2f523bb585bbf3072abf5f3922e6a145b
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Fri Apr 20 13:14:03 2012 -0300
+
+    scoop-thresh-par restart
+
+ scoop/thresh/par/makefile |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 3d51e34b0f0fdee9f6dfb1346d852e65d19aa95f
+Merge: f761db0 738b72c
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Fri Apr 20 11:41:59 2012 -0300
+
+    Merge branch 'scoop-thresh-par'
+
+commit f761db0922418f0f3f0185504bc0dd3a248521f0
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Fri Apr 20 11:41:07 2012 -0300
+
+    tbb-thresh-par done
+
+ tbb/thresh/par/main.cc |   24 +++++++++++++++---------
+ 1 files changed, 15 insertions(+), 9 deletions(-)
+
+commit a3bb1e0b62cd43140ac9f26e16117f2726ca477c
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Fri Apr 20 11:37:15 2012 -0300
+
+    tbb-thresh-par parallel_scan
+
+ tbb/thresh/par/main.cc |   42 ++++++++++++++++++++++++++++++++++--------
+ 1 files changed, 34 insertions(+), 8 deletions(-)
+
+commit e08f8a8d5341e8d0d119f4b2d15d80c22149d701
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Fri Apr 20 11:07:02 2012 -0300
+
+    tbb-thresh-par restart
+
+ tbb/thresh/par/main.cc |   16 ++--------------
+ 1 files changed, 2 insertions(+), 14 deletions(-)
+
+commit 738b72ccaf86d1488bb11c34f1f06c837a4f3aa5
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu Apr 19 16:58:56 2012 -0300
+
+    scoop-thresh-par pause
+
+ scoop/thresh/par/main.e                |   19 +++++++++++--------
+ scoop/thresh/par/main7.in              |    1 +
+ scoop/thresh/par/makefile              |    2 +-
+ scoop/thresh/par/reduce2d_aggregator.e |    7 +------
+ scoop/thresh/par/reduce2d_reader.e     |   15 +++++++++++++++
+ scoop/thresh/par/reduce2d_worker.e     |   11 -----------
+ 6 files changed, 29 insertions(+), 26 deletions(-)
+
+commit 6afb6c135d487c3591c90b3d6cd27d35171e2cc5
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu Apr 19 16:01:20 2012 -0300
+
+    scoop-thresh-par restart
+
+ scoop/thresh/par/ex.e     |   22 ----------------------
+ scoop/thresh/par/main.e   |    8 +++++---
+ scoop/thresh/par/main.ecf |    3 +++
+ 3 files changed, 8 insertions(+), 25 deletions(-)
+
+commit 780b8c209e2faad3a133cbcb079888f5779a8416
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed Apr 18 16:07:26 2012 -0300
+
+    tbb-thresh-par pause
+
+ tbb/thresh/par/main.cc |   57 ++++++++++++++++++++++++++++++++++-------------
+ 1 files changed, 41 insertions(+), 16 deletions(-)
+
+commit 09300ee39757c14e58641e03f6de656a7c376434
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed Apr 18 15:19:47 2012 -0300
+
+    tbb-thresh-par reduce2d
+
+ tbb/thresh/par/main.cc  |   86 ++++++++++++++++++++--------------------------
+ tbb/thresh/par/makefile |    1 +
+ 2 files changed, 38 insertions(+), 49 deletions(-)
+
+commit 6af84a1f607f4eb4689b3682343e37cd55f4e10c
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed Apr 18 14:20:10 2012 -0300
+
+    tbb-thresh-par restart
+
+ tbb/thresh/par/main.cc  |    2 +-
+ tbb/thresh/par/makefile |    1 +
+ 2 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 93ca1ed956d97d54e78160077f15341fce19bdfd
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed Apr 18 13:28:53 2012 -0300
+
+    scoop-thresh-par pause
+
+ scoop/thresh/par/ex.e                  |   22 ++++++++
+ scoop/thresh/par/main.e                |   87 +++++++++++++++++--------------
+ scoop/thresh/par/makefile              |    4 +-
+ scoop/thresh/par/reduce2d_aggregator.e |   45 ++++++++++++++++
+ scoop/thresh/par/reduce2d_worker.e     |   24 ++++++---
+ 5 files changed, 134 insertions(+), 48 deletions(-)
+
+commit 1dcf6814b04b28ec676c5ed90ff431c2dbd325f7
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed Apr 18 12:37:22 2012 -0300
+
+    scoop-thresh-par matrix as array of array
+
+ scoop/thresh/par/main.e            |   37 ++++++++++++++++++++++++++---------
+ scoop/thresh/par/reduce2d_worker.e |   17 ++++++---------
+ 2 files changed, 34 insertions(+), 20 deletions(-)
+
+commit f3b260f9ffd7bf6d49add9436819c408406abe4f
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed Apr 18 12:14:25 2012 -0300
+
+    scoop-thresh-par restart
+
+ scoop/thresh/par/main.e |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 233ef9b1ec56c0109df273ede17c8fec0d773369
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue Apr 17 19:24:16 2012 -0300
+
+    scoop-thresh-par pause
+
+ scoop/thresh/par/main.e            |    3 +-
+ scoop/thresh/par/main7.in          |  903 +-----------------------------------
+ scoop/thresh/par/reduce2d_worker.e |   40 ++-
+ 3 files changed, 30 insertions(+), 916 deletions(-)
+
+commit 897cfd5ded9356ea5d8c9066a0ec48b001a911a6
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue Apr 17 15:29:46 2012 -0300
+
+    scoop-thresh-par asynchrony
+
+ scoop/thresh/par/dining_philosophers.e |   58 -----------------
+ scoop/thresh/par/fork.e                |   34 ----------
+ scoop/thresh/par/main.e                |   38 ++++++++---
+ scoop/thresh/par/makefile              |    6 +--
+ scoop/thresh/par/philosopher.e         |  110 --------------------------------
+ 5 files changed, 28 insertions(+), 218 deletions(-)
+
+commit d75260616f02438b14a4c12f4dc9ba9500dd3d3e
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Tue Apr 17 15:07:49 2012 -0300
+
+    scoop-thresh-par restart
+
+ scoop/thresh/par/dining_philosophers |  Bin 23084111 -> 0 bytes
+ scoop/thresh/par/main.ecf            |   10 ++++++++++
+ 2 files changed, 10 insertions(+), 0 deletions(-)
+
+commit d3c7359d45d3e9361622123553b1fc8cda75fefb
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 16 20:39:38 2012 -0300
+
+    tbb-thresh-par pause
+
+ tbb/thresh/par/main.cc  |   37 ++++++++++++++++++++++++++++++----
+ tbb/thresh/par/main.cpp |   50 -----------------------------------------------
+ tbb/thresh/par/makefile |    1 +
+ 3 files changed, 33 insertions(+), 55 deletions(-)
+
+commit 187c342ab69a46222372568e7c2f8c7e22bc73de
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 16 20:19:38 2012 -0300
+
+    tbb-thresh-par start
+
+ tbb/thresh/par/main.cc  |   99 +++++++++++++++++++++++++++++++++++++++++++++++
+ tbb/thresh/par/main.cpp |   50 ++++++++++++++++++++++++
+ tbb/thresh/par/main.in  |    4 ++
+ tbb/thresh/par/main2.in |    4 ++
+ tbb/thresh/par/main3.in |    4 ++
+ tbb/thresh/par/main4.in |    4 ++
+ tbb/thresh/par/main5.in |    4 ++
+ tbb/thresh/par/main6.in |    4 ++
+ tbb/thresh/par/makefile |    7 +++
+ 9 files changed, 180 insertions(+), 0 deletions(-)
+
+commit 15fd42777819a8b5be39f5e125c45007c8fab5a9
+Merge: e26072e 2fa25ac
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 16 20:18:43 2012 -0300
+
+    Merge branch 'master' into scoop-thresh-par
+
+commit 2fa25ac9d46dc412cc866b5c10e07713d5006968
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 16 20:18:00 2012 -0300
+
+    tbb-thresh-seq done
+
+ tbb/thresh/seq/main.cc  |   99 +++++++++++++++++++++++++++++++++++++++++++++++
+ tbb/thresh/seq/main.in  |    4 ++
+ tbb/thresh/seq/main2.in |    4 ++
+ tbb/thresh/seq/main3.in |    4 ++
+ tbb/thresh/seq/main4.in |    4 ++
+ tbb/thresh/seq/main5.in |    4 ++
+ tbb/thresh/seq/main6.in |    4 ++
+ tbb/thresh/seq/makefile |   14 +++----
+ 8 files changed, 129 insertions(+), 8 deletions(-)
+
+commit 0ab500d46eb9bb97e6e0c441a4d534d0c5b534a2
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 16 20:17:24 2012 -0300
+
+    tbb-thresh-seq start
+
+ tbb/thresh/seq/main.cpp |   50 +++++++++++++++++++++++++++++++++++++++++++++++
+ tbb/thresh/seq/makefile |    9 ++++++++
+ 2 files changed, 59 insertions(+), 0 deletions(-)
+
+commit e26072e093cbd42affb773daa57a2c9f291db81a
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 16 20:11:33 2012 -0300
+
+    scoop-thresh-par pause
+
+ scoop/thresh/par/dining_philosophers   |  Bin 0 -> 23084111 bytes
+ scoop/thresh/par/dining_philosophers.e |   58 +++++++++++++++++
+ scoop/thresh/par/fork.e                |   34 ++++++++++
+ scoop/thresh/par/makefile              |    5 +-
+ scoop/thresh/par/philosopher.e         |  110 ++++++++++++++++++++++++++++++++
+ 5 files changed, 206 insertions(+), 1 deletions(-)
+
+commit 08aec053bec5953e156007de071d7dce9e9b0d14
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 16 20:07:17 2012 -0300
+
+    scoop-thresh-par still_synchronous
+
+ scoop/thresh/par/main.e            |    3 ++-
+ scoop/thresh/par/reduce2d_worker.e |   15 ++++++++-------
+ 2 files changed, 10 insertions(+), 8 deletions(-)
+
+commit 3fbb00d64fc09e5546e1a86bd6b4d6da306b875a
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 16 19:55:56 2012 -0300
+
+    scoop-thresh-par testing assynchrony
+
+ scoop/thresh/par/main.e            |   41 ++-
+ scoop/thresh/par/main7.in          | 1002 ++++++++++++++++++++++++++++++++++++
+ scoop/thresh/par/makefile          |    3 +-
+ scoop/thresh/par/reduce2d_worker.e |   30 ++
+ 4 files changed, 1067 insertions(+), 9 deletions(-)
+
+commit 954b279bf2d719d9add2cfcfe850c6534e25eebd
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 16 19:00:44 2012 -0300
+
+    scoop-thresh-par start
+
+ scoop/thresh/par/main.e   |   99 +++++++++++++++++++++++++++++++++++++++++++++
+ scoop/thresh/par/main.in  |    4 ++
+ scoop/thresh/par/main2.in |    4 ++
+ scoop/thresh/par/main3.in |    4 ++
+ scoop/thresh/par/main4.in |    4 ++
+ scoop/thresh/par/main5.in |    4 ++
+ scoop/thresh/par/main6.in |    4 ++
+ scoop/thresh/par/makefile |   11 +++++
+ 8 files changed, 134 insertions(+), 0 deletions(-)
+
+commit fcdf3c470e605b57fec02c6d80833ecfe9241165
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 16 17:00:57 2012 -0300
+
+    scoop-thresh-seq done
+
+ scoop/thresh/seq/main.e |   35 +++++++++++++++++++++++++++++++----
+ 1 files changed, 31 insertions(+), 4 deletions(-)
+
+commit 1bf6cddc8947181405db1e08d653d132738be9e5
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 16 16:22:53 2012 -0300
+
+    scoop-thresh-seq read_integer
+
+ scoop/thresh/seq/main.e   |   79 +++++++++++++++++++++------------------------
+ scoop/thresh/seq/main.in  |    8 ++--
+ scoop/thresh/seq/main2.in |    8 ++--
+ scoop/thresh/seq/main3.in |    8 ++--
+ scoop/thresh/seq/main4.in |    8 ++--
+ scoop/thresh/seq/main5.in |    8 ++--
+ scoop/thresh/seq/main6.in |    4 ++
+ scoop/thresh/seq/makefile |   11 +++---
+ 8 files changed, 67 insertions(+), 67 deletions(-)
+
+commit e1b24f7006765cbd7824c1030c5f4bb814462def
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 16 15:07:48 2012 -0300
+
+    scoop-thresh-seq start
+
+ scoop/thresh/seq/main.e   |   77 +++++++++++++++++++++++++++++++++++++++++++++
+ scoop/thresh/seq/main.in  |    4 ++
+ scoop/thresh/seq/main2.in |    4 ++
+ scoop/thresh/seq/main3.in |    4 ++
+ scoop/thresh/seq/main4.in |    4 ++
+ scoop/thresh/seq/main5.in |    4 ++
+ scoop/thresh/seq/makefile |   10 ++++++
+ 7 files changed, 107 insertions(+), 0 deletions(-)
+
+commit a398bc92666cafe78f6574b930b461a1aa704ea4
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 16 14:17:33 2012 -0300
+
+    go-thresh-par done
+
+ go/thresh/par/main.go |   20 ++++++++++++--------
+ 1 files changed, 12 insertions(+), 8 deletions(-)
+
+commit 0693ab554557032643a2eef1ca05cf3d8fe5284b
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 16 14:05:25 2012 -0300
+
+    git-thresh-par split
+
+ go/thresh/par/main.go |   59 +++++++++++++++++++++++++++++-------------------
+ 1 files changed, 36 insertions(+), 23 deletions(-)
+
+commit c9c09109088a31881d270d0c31c0b0dcf3f5c3cb
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 16 13:21:15 2012 -0300
+
+    go-thresh-par reduce2d with aggregator
+
+ go/thresh/par/main.go |   28 ++++++++++++++++++++++++----
+ 1 files changed, 24 insertions(+), 4 deletions(-)
+
+commit de17dbf51e347dfd8e0a8b4b390232f5a4279015
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 16 13:11:31 2012 -0300
+
+    go-thresh-par reduce2d with aggregator
+
+ go/thresh/par/main.go |   22 ++++++++++------------
+ 1 files changed, 10 insertions(+), 12 deletions(-)
+
+commit 313aa65576fd8d09b61225a3ffc240589e368ee1
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 16 13:03:24 2012 -0300
+
+    go-thresh-par reduce2d
+
+ go/thresh/par/main.go |   53 +++++++++++++++++++++++++++++++++---------------
+ 1 files changed, 36 insertions(+), 17 deletions(-)
+
+commit 2392abd58470438c48716f8a36b8d51a78830d9c
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 16 12:29:50 2012 -0300
+
+    go-thresh-par start
+
+ go/thresh/par/main.go  |   98 ++++++++++++++++++++++++++++++++++++++++++++++++
+ go/thresh/par/main.in  |    4 ++
+ go/thresh/par/main2.in |    4 ++
+ go/thresh/par/main3.in |    4 ++
+ go/thresh/par/main4.in |    4 ++
+ go/thresh/par/main5.in |    4 ++
+ go/thresh/par/main6.in |    4 ++
+ go/thresh/par/makefile |   13 ++++++
+ 8 files changed, 135 insertions(+), 0 deletions(-)
+
+commit d0927e017e40564bbfa6729208d538806e5c0f9b
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 16 12:28:15 2012 -0300
+
+    go-thresh-seq done
+
+ go/thresh/seq/main.go  |   81 ++++++++++++++++++++++++++++++++++++++---------
+ go/thresh/seq/main.in  |    4 ++
+ go/thresh/seq/main2.in |    4 ++
+ go/thresh/seq/main3.in |    4 ++
+ go/thresh/seq/main4.in |    4 ++
+ go/thresh/seq/main5.in |    4 ++
+ go/thresh/seq/main6.in |    4 ++
+ go/thresh/seq/makefile |   11 +++---
+ 8 files changed, 95 insertions(+), 21 deletions(-)
+
+commit 2c26e7f7008874a88a139971dc9cafeb781d7241
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Mon Apr 16 12:08:10 2012 -0300
+
+    go-thresh-seq start
+
+ go/thresh/seq/main.go  |   49 ++++++++++++++++++++++++++++++++++++++++++++++++
+ go/thresh/seq/makefile |   12 +++++++++++
+ 2 files changed, 61 insertions(+), 0 deletions(-)
+
+commit a33531b745619df60a8f13ab9bcf24c388adc3f6
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sun Apr 15 21:09:39 2012 -0300
+
+    erlang-thresh-par done
+
+ erlang/thresh/par/main.erl |   15 ++++++---------
+ 1 files changed, 6 insertions(+), 9 deletions(-)
+
+commit 85191d73f4a021ea407680b2373cfc74a3dc2d4e
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sun Apr 15 20:16:50 2012 -0300
+
+    erlang-thresh-par reduce2d_with_filter
+
+ erlang/thresh/par/main.erl |   18 ++++++++++--------
+ 1 files changed, 10 insertions(+), 8 deletions(-)
+
+commit ec3fe0f6528ed08398681b8b22fc959fe09fb9c7
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sun Apr 15 20:03:30 2012 -0300
+
+    erlang-thresh-par reduce2d
+
+ erlang/thresh/par/main.erl |   20 +++++++++++++++-----
+ 1 files changed, 15 insertions(+), 5 deletions(-)
+
+commit cff9fdeee17f62b868c0d471c366c81932e446cf
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sun Apr 15 18:44:27 2012 -0300
+
+    erlang-thresh-par start
+
+ erlang/thresh/par/main.erl |   63 ++++++++++++++++++++++++++++++++++++++++++++
+ erlang/thresh/par/main.in  |    4 +++
+ erlang/thresh/par/main2.in |    4 +++
+ erlang/thresh/par/main3.in |    4 +++
+ erlang/thresh/par/main4.in |    4 +++
+ erlang/thresh/par/main5.in |    4 +++
+ erlang/thresh/par/main6.in |    4 +++
+ erlang/thresh/par/makefile |   10 +++++++
+ 8 files changed, 97 insertions(+), 0 deletions(-)
+
+commit 98d1984090e7b1808d96273f8c957f160d8d7a8a
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sun Apr 15 18:40:47 2012 -0300
+
+    erlang-thresh-seq done
+
+ erlang/thresh/seq/main.erl |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 15e9801821a76c9457ff976708c12a5619e7d8e6
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sun Apr 15 18:35:26 2012 -0300
+
+    erlang-thresh-seq get_threshold
+
+ erlang/thresh/seq/main.erl |    8 ++++++--
+ 1 files changed, 6 insertions(+), 2 deletions(-)
+
+commit 0025d396d9ea25f8be402503a1c842c96771c8f1
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sun Apr 15 18:29:49 2012 -0300
+
+    erlang-thresh-seq fill_histogram
+
+ erlang/thresh/seq/main.erl |   24 ++++++++++++++----------
+ 1 files changed, 14 insertions(+), 10 deletions(-)
+
+commit 90419520ff6212f0e0a3a591d9c4c9e545ab9de1
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sun Apr 15 17:54:51 2012 -0300
+
+    erlang-thresh-seq max_matrix
+
+ erlang/thresh/seq/main.erl |   26 +++++++++++++++++++++++++-
+ 1 files changed, 25 insertions(+), 1 deletions(-)
+
+commit dcf77b7c919d2d0b04b0b2972af4bbd183a7df86
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sun Apr 15 17:28:20 2012 -0300
+
+    erlang-thresh-seq read_matrix
+
+ erlang/thresh/seq/main.erl |   27 +++++++++++++++------------
+ erlang/thresh/seq/main.in  |    5 ++++-
+ erlang/thresh/seq/main2.in |    4 ++++
+ erlang/thresh/seq/main3.in |    4 ++++
+ erlang/thresh/seq/main4.in |    4 ++++
+ erlang/thresh/seq/main5.in |    4 ++++
+ erlang/thresh/seq/main6.in |    4 ++++
+ erlang/thresh/seq/makefile |    9 +++++----
+ 8 files changed, 44 insertions(+), 17 deletions(-)
+
+commit 0f6c6419ab5d02589740d2ea6972f7d30091f0cb
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sun Apr 15 17:17:47 2012 -0300
+
+    erlang-thresh-seq start
+
+ erlang/thresh/seq/main.erl |   28 ++++++++++++++++++++++++++++
+ erlang/thresh/seq/main.in  |    1 +
+ erlang/thresh/seq/makefile |    9 +++++++++
+ 3 files changed, 38 insertions(+), 0 deletions(-)
+
+commit 7fa4d657375490c68809ad41be6b28d5bbb44932
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat Apr 14 23:02:25 2012 -0300
+
+    cilk-thresh-par done
+
+ cilk/thresh/par/main.cilk |   56 +++++++++++++++++++++++++--------------------
+ 1 files changed, 31 insertions(+), 25 deletions(-)
+
+commit d5f3c137c9428a508a3bcaed1f19f5265150d3d6
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat Apr 14 22:40:41 2012 -0300
+
+    cillk-thresh-par ReduceState
+
+ cilk/thresh/par/main.cilk |   48 +++++++++++++++++++++++---------------------
+ 1 files changed, 25 insertions(+), 23 deletions(-)
+
+commit ee4d53b5583455ab31484983c7c7524c0a4a72f1
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat Apr 14 22:16:06 2012 -0300
+
+    cilk-thresh-par fill_mask
+
+ cilk/thresh/par/main.cilk |   60 ++++++++++++++++++++++++--------------------
+ 1 files changed, 33 insertions(+), 27 deletions(-)
+
+commit b1a95163d9466a37ee7ab151919da5de07fd6bf4
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat Apr 14 21:48:15 2012 -0300
+
+    cilk-thresh-par binary_search
+
+ cilk/thresh/par/main.cilk |   22 +++++++++++++++++++++-
+ 1 files changed, 21 insertions(+), 1 deletions(-)
+
+commit 808cb5fdf4a418dd53e955e6151266b5034ff249
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat Apr 14 21:39:34 2012 -0300
+
+    cilk-thresh-par prefixsum
+
+ cilk/thresh/par/main.cilk |   42 +++++++++++++++++++++++++++++++++++++++---
+ 1 files changed, 39 insertions(+), 3 deletions(-)
+
+commit 7212ae8b5f95a654bc879dcedb4bc3fec300efb1
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat Apr 14 21:21:10 2012 -0300
+
+    cilk-thresh-par resume
+
+ cilk/thresh/par/main.cilk |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit c6511b9f9acd7c47a97dc9abf500cd63a5112d7b
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat Apr 14 20:34:14 2012 -0300
+
+    cilk-thresh-par pause
+
+ cilk/thresh/par/main.cilk |   12 ------------
+ 1 files changed, 0 insertions(+), 12 deletions(-)
+
+commit d6fa8e2618eef72c005fa7ea4e97aad3711aafbb
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat Apr 14 20:27:08 2012 -0300
+
+    cilk-thresh-par fill_histogram
+
+ cilk/thresh/par/main.cilk |   77 +++++++++++++++++++++++++++++++++++++++------
+ 1 files changed, 67 insertions(+), 10 deletions(-)
+
+commit 4b6e8723d38f8f67a1e331a863f139a8d12e6bf2
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat Apr 14 19:52:39 2012 -0300
+
+    cilk-thresh-par reduce2d max
+
+ cilk/thresh/par/main.cilk |   57 +++++++++++++++++++++++++++++++++++++--------
+ 1 files changed, 47 insertions(+), 10 deletions(-)
+
+commit 16cc6f5c55e4c45cf4cc8da42d041165615a7c67
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat Apr 14 18:44:28 2012 -0300
+
+    cilk-thresh-par start
+
+ cilk/thresh/par/main.cilk |  105 +++++++++++++++++++++++++++++++++++++++++++++
+ cilk/thresh/par/main.in   |    4 ++
+ cilk/thresh/par/main2.in  |    4 ++
+ cilk/thresh/par/main3.in  |    4 ++
+ cilk/thresh/par/main4.in  |    4 ++
+ cilk/thresh/par/main5.in  |    4 ++
+ cilk/thresh/par/main6.in  |    4 ++
+ cilk/thresh/par/makefile  |   10 ++++
+ 8 files changed, 139 insertions(+), 0 deletions(-)
+
+commit ef4611d1986357005806e6f8d704327463dedc48
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat Apr 14 18:38:14 2012 -0300
+
+    cilk-thresh-seq done
+
+ cilk/thresh/seq/main.cilk |   81 +++++++++++++++++++++++++++++++++++++--------
+ cilk/thresh/seq/main.in   |    5 ++-
+ cilk/thresh/seq/main2.in  |    4 ++
+ cilk/thresh/seq/main3.in  |    4 ++
+ cilk/thresh/seq/main4.in  |    4 ++
+ cilk/thresh/seq/main5.in  |    4 ++
+ cilk/thresh/seq/main6.in  |    4 ++
+ cilk/thresh/seq/makefile  |    9 +++--
+ 8 files changed, 96 insertions(+), 19 deletions(-)
+
+commit 9c9f87d8bea5df12a87c977e243aeb3e0493ad23
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat Apr 14 18:14:34 2012 -0300
+
+    cilk-thresh-seq start
+
+ cilk/thresh/seq/main.cilk |   52 +++++++++++++++++++++++++++++++++++++++++++++
+ cilk/thresh/seq/main.in   |    1 +
+ cilk/thresh/seq/makefile  |    9 +++++++
+ 3 files changed, 62 insertions(+), 0 deletions(-)
+
+commit a18d6d87db181453b98f20ca1c120d0d174958b9
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat Apr 14 18:07:32 2012 -0300
+
+    chapel-thresh-par done
+
+ chapel/thresh/par/main.chpl |   35 ++++++++++++++---------------------
+ 1 files changed, 14 insertions(+), 21 deletions(-)
+
+commit 3593dde58d1bb018631caad7057efb5b0bb8e139
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat Apr 14 17:03:00 2012 -0300
+
+    chapel-thresh-par start
+
+ chapel/thresh/par/main.chpl |   77 +++++++++++++++++++++++++++++++++++++++++++
+ chapel/thresh/par/main.in   |    4 ++
+ chapel/thresh/par/main2.in  |    4 ++
+ chapel/thresh/par/main3.in  |    4 ++
+ chapel/thresh/par/main4.in  |    4 ++
+ chapel/thresh/par/main5.in  |    4 ++
+ chapel/thresh/par/main6.in  |    4 ++
+ chapel/thresh/par/makefile  |   10 +++++
+ 8 files changed, 111 insertions(+), 0 deletions(-)
+
+commit 84e8d62e02f9c7fca9411eebbdbb2c0a74d8e9b3
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat Apr 14 16:59:38 2012 -0300
+
+    chapel-thresh-seq done
+
+ chapel/thresh/seq/main.chpl |   58 +++++++++++++++++++++++++++++++++---------
+ chapel/thresh/seq/main.in   |    6 +++-
+ chapel/thresh/seq/main2.in  |    4 +++
+ chapel/thresh/seq/main3.in  |    4 +++
+ chapel/thresh/seq/main4.in  |    4 +++
+ chapel/thresh/seq/main5.in  |    4 +++
+ chapel/thresh/seq/main6.in  |    4 +++
+ chapel/thresh/seq/makefile  |    5 +++
+ 8 files changed, 74 insertions(+), 15 deletions(-)
+
+commit 782b9f48add1ccca47a09f00dfffab21b32299ea
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat Apr 14 16:35:06 2012 -0300
+
+    chapel-thresh-seq start
+
+ chapel/thresh/seq/main.chpl |   45 +++++++++++++++++++++++++++++++++++++++++++
+ chapel/thresh/seq/main.in   |    2 +
+ chapel/thresh/seq/makefile  |    5 ++++
+ 3 files changed, 52 insertions(+), 0 deletions(-)
+
+commit 7f028004d6e5bcb43386c3eb5baa55ca440f0b3a
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat Apr 14 16:28:17 2012 -0300
+
+    cpp-thresh done
+
+ cpp/thresh/main.cc  |   69 +++++++++++++++++++++++++++++++++++++++++++-------
+ cpp/thresh/main.in  |    5 +++-
+ cpp/thresh/main2.in |    4 +++
+ cpp/thresh/main3.in |    4 +++
+ cpp/thresh/main4.in |    4 +++
+ cpp/thresh/main5.in |    4 +++
+ cpp/thresh/main6.in |    4 +++
+ cpp/thresh/makefile |    5 +++
+ 8 files changed, 88 insertions(+), 11 deletions(-)
+
+commit d8838f4f3cdbb5aec12a62c037d3d3c24fe24ad9
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat Apr 14 15:58:19 2012 -0300
+
+    cpp-thresh start
+
+ cpp/thresh/main.cc  |   50 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ cpp/thresh/main.in  |    1 +
+ cpp/thresh/makefile |    2 ++
+ 3 files changed, 53 insertions(+), 0 deletions(-)
+
+commit 3aec74a36bfb30629ed27b86c23a05998678deb6
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sun Mar 25 20:43:27 2012 -0300
+
+    tbb-randmat-par done
+
+ tbb/randmat/par/main.cpp |   42 +++++++++++++++++++++++++++++++++++++-----
+ 1 files changed, 37 insertions(+), 5 deletions(-)
+
+commit 0959dc67e3bdb763c63caaf0624c779936f51ddf
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sun Mar 25 20:25:26 2012 -0300
+
+    tbb-randmat-par start
+
+ tbb/randmat/par/main.cpp |   50 ++++++++++++++++++++++++++++++++++++++++++++++
+ tbb/randmat/par/makefile |    9 ++++++++
+ 2 files changed, 59 insertions(+), 0 deletions(-)
+
+commit 1592b34526e2027eef7a5436df95cd0d3057470a
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sun Mar 25 20:03:45 2012 -0300
+
+    tbb-randmat-seq done
+
+ tbb/randmat/seq/main.cpp                     |   50 +++++++++++++
+ tbb/randmat/seq/makefile                     |    9 +++
+ tbb/randmat/seq/sub_string_finder_pretty.cpp |   98 --------------------------
+ 3 files changed, 59 insertions(+), 98 deletions(-)
+
+commit 264b16ac02de2ae32d24a7026242554901397243
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sun Mar 25 19:57:24 2012 -0300
+
+    tbb-randmat-seq start
+
+ tbb/randmat/seq/sub_string_finder_pretty.cpp |   98 ++++++++++++++++++++++++++
+ 1 files changed, 98 insertions(+), 0 deletions(-)
+
+commit 0f846faa0c609bc53043c0165c75a790f03306ea
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sun Mar 25 19:25:11 2012 -0300
+
+    scoop-randmat-par done
+
+ .gitignore                 |    1 +
+ scoop/randmat/par/main.e   |   20 +++++----------
+ scoop/randmat/par/main.in  |    4 +++
+ scoop/randmat/par/makefile |    2 +-
+ scoop/randmat/par/worker.e |   54 ++++++++++++++++++++++++++++++++++++++++++++
+ 5 files changed, 67 insertions(+), 14 deletions(-)
+
+commit 665a0b290646c8d6abb095828539cf9598019726
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sun Mar 25 18:14:21 2012 -0300
+
+    scoop-randmat-par start
+
+ scoop/randmat/par/main.e   |   77 ++++++++++++++++++++++++++++++++++++++++++++
+ scoop/randmat/par/main.in  |    4 ++
+ scoop/randmat/par/main2.in |    4 ++
+ scoop/randmat/par/main3.in |    4 ++
+ scoop/randmat/par/main4.in |    4 ++
+ scoop/randmat/par/main5.in |    4 ++
+ scoop/randmat/par/makefile |   10 ++++++
+ 7 files changed, 107 insertions(+), 0 deletions(-)
+
+commit 57c737d1bbeee8ecff5a2043b820346d978d277f
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat Mar 24 23:05:34 2012 -0300
+
+    scoop-randmat-seq done
+
+ .gitignore                 |    1 +
+ scoop/randmat/seq/hello.e  |   16 ---------
+ scoop/randmat/seq/main.e   |   77 ++++++++++++++++++++++++++++++++++++++++++++
+ scoop/randmat/seq/main.in  |    4 ++
+ scoop/randmat/seq/main2.in |    4 ++
+ scoop/randmat/seq/main3.in |    4 ++
+ scoop/randmat/seq/main4.in |    4 ++
+ scoop/randmat/seq/main5.in |    4 ++
+ scoop/randmat/seq/makefile |   10 ++++++
+ 9 files changed, 108 insertions(+), 16 deletions(-)
+
+commit cf7862cd4b46cbb2b6080af3611bca8d9173bedc
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat Mar 24 21:51:09 2012 -0300
+
+    scoop-randmat-seq start
+
+ scoop/randmat/seq/hello.e |   16 ++++++++++++++++
+ 1 files changed, 16 insertions(+), 0 deletions(-)
+
+commit d13bd692e6699ddf495ee353bfc0b2a2ca632b2b
+Merge: 4902481 9a36f86
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat Mar 24 21:14:37 2012 -0300
+
+    Merge branch 'go-randmat-seq'
+
+commit 9a36f86defac651edc91bfb061d0df88ee15edfb
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat Mar 24 21:14:28 2012 -0300
+
+    go-randmat-seq restart-done add missing files
+
+ go/randmat/seq/main.go  |   49 +++++++++++++++++++++++++++++++++++++++++++++++
+ go/randmat/seq/makefile |   12 +++++++++++
+ 2 files changed, 61 insertions(+), 0 deletions(-)
+
+commit 4902481b108eb9b8b062765f6cc85515e4021407
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat Mar 24 21:12:21 2012 -0300
+
+    go-randmat-par done
+
+ go/randmat/par/main.go |   15 ++++++++++++---
+ 1 files changed, 12 insertions(+), 3 deletions(-)
+
+commit 7633646719006a8331828d15ed16db1c4357f5d5
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat Mar 24 20:55:19 2012 -0300
+
+    go-randmat-par start
+
+ go/randmat/par/main.go  |   49 +++++++++++++++++++++++++++++++++++++++++++++++
+ go/randmat/par/makefile |   12 +++++++++++
+ 2 files changed, 61 insertions(+), 0 deletions(-)
+
+commit ff8905fba03d0e27ddbcee5d162e4391b1376b0c
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat Mar 24 20:53:44 2012 -0300
+
+    go-randmat-seq done
+
+ .gitignore             |    1 +
+ go/randmat/seq/hello.8 |  Bin 5840 -> 0 bytes
+ 2 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 425cf815b469fe84faa2301a79d16a4218858d48
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Sat Mar 24 20:28:39 2012 -0300
+
+    go-randmat-seq start
+
+ go/randmat/seq/hello.8 |  Bin 0 -> 5840 bytes
+ 1 files changed, 0 insertions(+), 0 deletions(-)
+
+commit c4583512177b90fdb24cd6a01c52dfad0906dcc6
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu Mar 22 21:58:35 2012 -0300
+
+    erlang-randmat-par done
+
+ erlang/randmat/par/main.erl |   42 +++++++++++++++++++++++++++++++++++-------
+ 1 files changed, 35 insertions(+), 7 deletions(-)
+
+commit d3c0305dc4a8202e810d7dc567aff2f5250115d8
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu Mar 22 20:37:04 2012 -0300
+
+    erlang-randmat-par start
+
+ erlang/randmat/par/main.erl |   28 ++++++++++++++++++++++++++++
+ erlang/randmat/par/main.in  |    1 +
+ erlang/randmat/par/makefile |    9 +++++++++
+ 3 files changed, 38 insertions(+), 0 deletions(-)
+
+commit 83af411fc41637267c4e3e6def2d4ff05dbaa8f0
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu Mar 22 20:34:26 2012 -0300
+
+    erlang-randmat-seq done
+
+ .gitignore                  |    2 ++
+ erlang/randmat/seq/main.erl |   28 ++++++++++++++++++++++++++++
+ erlang/randmat/seq/main.in  |    1 +
+ erlang/randmat/seq/makefile |    9 +++++++++
+ erlang/randmat/seq/test.erl |    9 ---------
+ 5 files changed, 40 insertions(+), 9 deletions(-)
+
+commit c858773b75316c4879b9edd80227b7527f930222
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu Mar 22 19:51:45 2012 -0300
+
+    erlang-randmat-seq start
+
+ erlang/randmat/seq/test.erl |    9 +++++++++
+ 1 files changed, 9 insertions(+), 0 deletions(-)
+
+commit 2d8fae3ae325dfb4fa54b43583f535e386a2e0a7
+Merge: 042c662 f243a3f
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu Mar 22 18:37:15 2012 -0300
+
+    Merge branch 'cilk-randmat-seq'
+
+commit f243a3fec8b733b733b9c1bb4e5302bbee7bd8b4
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu Mar 22 18:37:05 2012 -0300
+
+    cilk-randmat-seq done free matrix
+
+ cilk/randmat/seq/main.cilk |    5 ++++-
+ cilk/randmat/seq/makefile  |    4 ++++
+ 2 files changed, 8 insertions(+), 1 deletions(-)
+
+commit 4a91a0c360cc72764d9bff35d5d5c5fa15cec2a0
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu Mar 22 18:34:51 2012 -0300
+
+    cilk-randmat-seq restart
+
+ cilk/randmat/seq/main.cilk |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 042c662b21e157d9a29eac95dc3b7afebbe81c8d
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu Mar 22 18:33:50 2012 -0300
+
+    cilk-randmat-par done
+
+ cilk/randmat/par/main.cilk |   13 +++++++++----
+ 1 files changed, 9 insertions(+), 4 deletions(-)
+
+commit b7a33e684f5a9763eeb02cf1c8f90da4fad82b7c
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu Mar 22 18:20:50 2012 -0300
+
+    cilk-randmat-par working split
+
+ cilk/randmat/par/main.cilk |   27 +++++++++++++--------------
+ 1 files changed, 13 insertions(+), 14 deletions(-)
+
+commit 1f8ea01ac4c3e9722558851b94255deaf972c819
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu Mar 22 18:10:07 2012 -0300
+
+    cilk-randmat-par working
+
+ cilk/randmat/par/main.cilk |   36 +++++++++++++++++++++++++++---------
+ cilk/randmat/par/makefile  |    5 +++++
+ 2 files changed, 32 insertions(+), 9 deletions(-)
+
+commit 44343ff21704c926101feee9b37f81e09a536846
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu Mar 22 17:40:45 2012 -0300
+
+    cilk-randmat-par start
+
+ cilk/randmat/par/main.cilk |   47 ++++++++++++++++++++++++++++++++++++++++++++
+ cilk/randmat/par/main.in   |    1 +
+ cilk/randmat/par/makefile  |    5 ++++
+ 3 files changed, 53 insertions(+), 0 deletions(-)
+
+commit df730b5e9a8db77ae3dc4817ccdff4a65c866a7c
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu Mar 22 17:29:47 2012 -0300
+
+    cilk-randmat-seq done
+
+ cilk/randmat/seq/fib.cilk  |   55 --------------------------------------------
+ cilk/randmat/seq/main.cilk |   47 +++++++++++++++++++++++++++++++++++++
+ cilk/randmat/seq/main.in   |    1 +
+ cilk/randmat/seq/makefile  |    5 ++++
+ 4 files changed, 53 insertions(+), 55 deletions(-)
+
+commit ccd4ddaa6375b704c25dd94ed78cfe9ea0c6cf07
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Thu Mar 22 17:14:13 2012 -0300
+
+    cilk-randmat-seq start
+
+ cilk/randmat/seq/fib.cilk |   55 +++++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 55 insertions(+), 0 deletions(-)
+
+commit ba25cc0d2ab8aaead508af3e442cdb229bffcc83
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed Mar 21 21:59:53 2012 -0300
+
+    chapel-randmat-par done
+
+ chapel/randmat/par/main.chpl |    6 ++----
+ chapel/randmat/par/main.in   |    2 ++
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 60822b2235f4fb2121125ddd37e387d131a98abb
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed Mar 21 21:55:46 2012 -0300
+
+    chapel-randmat-par start
+
+ chapel/randmat/par/main.chpl |   45 ++++++++++++++++++++++++++++++++++++++++++
+ chapel/randmat/par/makefile  |    5 ++++
+ 2 files changed, 50 insertions(+), 0 deletions(-)
+
+commit 650285e033d20ebf32e07ee9c0f64ec226c3d725
+Merge: 314f202 9a9717a
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed Mar 21 21:39:46 2012 -0300
+
+    Merge branch 'chapel-randmat-seq'
+
+commit 314f202548d37941a779d8098de1f89f08b4d54d
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed Mar 21 21:39:22 2012 -0300
+
+    cpp-randmat done
+
+ cpp/randmat/main.cc  |   33 ++++++++++++++++++++++++++-------
+ cpp/randmat/main.in  |    1 +
+ cpp/randmat/makefile |    2 +-
+ 3 files changed, 28 insertions(+), 8 deletions(-)
+
+commit efb745f14ab33edd7768208dcfcc8c783270c16b
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed Mar 21 21:30:29 2012 -0300
+
+    cpp-randmad restart
+
+ cpp/randmat/main.cc |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 9a9717ad401bb7fefef7fb21f5e1c7e1f1c73bd2
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed Mar 21 21:28:53 2012 -0300
+
+    chapel-randmat-seq done
+
+ chapel/randmat/seq/main.chpl |   23 +++++++++++++++++------
+ 1 files changed, 17 insertions(+), 6 deletions(-)
+
+commit 7d3e5d264c57d8e3937a8269dbd065336b4a275d
+Merge: f555ae9 6b9233f
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed Mar 21 21:11:31 2012 -0300
+
+    Merge branch 'master' into chapel-randmat-seq
+
+commit 6b9233f529d943b1ada97083486e935bfd24e73e
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed Mar 21 21:11:15 2012 -0300
+
+    ignoring .*.swp
+
+ .gitignore |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit f555ae93511abd4c109aba36563edb805fb94ec4
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed Mar 21 21:10:31 2012 -0300
+
+    chapel-randmat-seq working
+
+ chapel/randmat/seq/hello.chpl |    1 -
+ chapel/randmat/seq/main.chpl  |   34 ++++++++++++++++++++++++++++++++++
+ chapel/randmat/seq/main.in    |    2 ++
+ chapel/randmat/seq/makefile   |    5 +++++
+ 4 files changed, 41 insertions(+), 1 deletions(-)
+
+commit 21c4a7f14464b5b013860e1021a1713214afef6b
+Merge: 58df9f2 a5e815d
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed Mar 21 20:32:38 2012 -0300
+
+    Merge branch 'master' into chapel-randmat-seq
+
+commit a5e815dcef14b3bf64ca026229a101e8c41d32bf
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed Mar 21 20:32:04 2012 -0300
+
+    ignoring .fuse_hidden*
+
+ .gitignore |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 58df9f26cf44eadc2075bd8e7bcd26e94f4b1add
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed Mar 21 20:31:14 2012 -0300
+
+    chapel-randmat-seq started
+
+ chapel/randmat/seq/hello.chpl |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 1fcc5faaee6c3962ff4f3f3982961a7ba04ffcaa
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed Mar 21 20:19:50 2012 -0300
+
+    randmat done
+
+ .gitignore           |    2 ++
+ cpp/randmat/main.cc  |   29 +++++++++++++++++++++++++++++
+ cpp/randmat/makefile |    2 ++
+ 3 files changed, 33 insertions(+), 0 deletions(-)
+
+commit 655106f6592f93592bb77f4f4db1b35f0ac98a2b
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed Mar 21 20:10:34 2012 -0300
+
+    start
+
+ 0 files changed, 0 insertions(+), 0 deletions(-)
+
+commit 92543f7fed5af357bd03a9aca96b3d5a216b36fa
+Author: Kauê Soares da Silveira <silveira.kaue@gmail.com>
+Date:   Wed Mar 21 09:45:40 2012 -0300
+
+    first commit
+
+ 0 files changed, 0 insertions(+), 0 deletions(-)
