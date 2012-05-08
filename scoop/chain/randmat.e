@@ -7,7 +7,7 @@
 -- output:
 --   matrix: a nrows by ncols integer matrix
 
-class MAIN create
+class RANDMAT create
   make
 
 feature
@@ -68,5 +68,5 @@ feature
     end
   end
 
-end -- class MAIN 
+end -- class RANDMAT 
 

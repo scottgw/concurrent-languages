@@ -10,7 +10,7 @@
 -- output:
 --   points: a vector of (x, y) points
 
-class MAIN
+class WINNOW
 inherit ARGUMENTS
 create make
 feature
@@ -151,4 +151,4 @@ feature {NONE}
   in: PLAIN_TEXT_FILE
   parfor_aggregator: separate PARFOR_AGGREGATOR
 
-end -- class MAIN 
+end -- class WINNOW

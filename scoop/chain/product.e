@@ -8,7 +8,7 @@
 -- output:
 --   res: a real vector, whose values are the result of the product
 
-class MAIN
+class PRODUCT
 inherit ARGUMENTS
 create make
 feature
@@ -133,5 +133,5 @@ feature {NONE}
   in: PLAIN_TEXT_FILE
   parfor_aggregator: PARFOR_AGGREGATOR
 
-end -- class MAIN 
+end -- class PRODUCT
 

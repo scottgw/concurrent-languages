@@ -8,7 +8,7 @@
 -- output:
 --   mask: a boolean matrix filled with true for cells kept
 
-class MAIN
+class THRESH
 inherit ARGUMENTS
 create make
 feature
@@ -189,5 +189,5 @@ feature {NONE}
   do
     worker.live
   end
-end -- class MAIN 
+end -- class THRESH
 

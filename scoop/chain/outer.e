@@ -10,7 +10,7 @@
 --   vector: a real vector, whose values are filled with origin-to-point
 --     distances
 
-class MAIN
+class OUTER
 inherit ARGUMENTS
 create make
 feature
@@ -148,5 +148,5 @@ feature {NONE}
   in: PLAIN_TEXT_FILE
   parfor_aggregator: PARFOR_AGGREGATOR
 
-end -- class MAIN 
+end -- class OUTER
 
