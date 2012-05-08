@@ -12,51 +12,9 @@
 
 class WINNOW
 inherit ARGUMENTS
-create make, make_empty
+create make_empty
 feature
   make_empty do end
-
-  make
-  local
-    nrows, ncols, nelts: INTEGER
-    matrix, mask: ARRAY[separate ARRAY[INTEGER]]
-    points: ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
-  do
-    create in.make_open_read(separate_character_option_value('i'))
-
-    nrows := read_integer
-    ncols := read_integer
-    create matrix.make_empty
-    read_matrix(nrows, ncols, matrix)
-    create mask.make_empty
-    read_matrix(nrows, ncols, mask)
-    nelts := read_integer
-
-    points := winnow(nrows, ncols, matrix, mask, nelts)
-
-    print(nelts.out + "%N");
-    across 1 |..| nelts as ic loop
-      print(points.item(ic.item).integer_32_item(2).out + " " +
-          points.item(ic.item).integer_32_item(3).out + "%N");
-    end
-    print("%N");
-  end
-
-  read_integer(): INTEGER
-  do
-    in.read_integer
-    Result := in.last_integer
-  end
-
-  read_matrix(nrows, ncols: INTEGER; matrix: ARRAY[separate ARRAY[INTEGER]])
-  do
-    across 1 |..| nrows as ic loop
-      matrix.force(create_array(), ic.item)
-      across 1 |..| ncols as jc loop
-        put(matrix.item(ic.item), read_integer, jc.item)
-      end
-    end
-  end
 
   create_array(): separate ARRAY[INTEGER]
   do
@@ -150,7 +108,6 @@ feature
   end
 
 feature {NONE}
-  in: PLAIN_TEXT_FILE
   parfor_aggregator: separate WINNOW_PARFOR_AGGREGATOR
 
 end -- class WINNOW

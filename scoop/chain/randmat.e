@@ -7,16 +7,10 @@
 -- output:
 --   matrix: a nrows by ncols integer matrix
 
-class RANDMAT create
-  make, make_empty
-
+class RANDMAT
+create make_empty
 feature
-
   make_empty do end
-
-  make
-  do
-  end
 
   randmat(nrows, ncols, s: INTEGER; matrix: ARRAY[separate ARRAY[INTEGER]])
   do

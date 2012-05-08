@@ -10,52 +10,9 @@
 
 class THRESH
 inherit ARGUMENTS
-create make, make_empty
+create make_empty
 feature
   make_empty do end
-
-  make
-  local
-    nrows, ncols, percent: INTEGER
-    matrix, mask: ARRAY[separate ARRAY[INTEGER]]
-    in: PLAIN_TEXT_FILE
-  do
-    create in.make_open_read(separate_character_option_value('i'))
-
-    in.read_integer
-    nrows := in.last_integer
-
-    in.read_integer
-    ncols := in.last_integer
-
-    create matrix.make_empty
-    read_matrix(nrows, ncols, matrix, in)
-
-    in.read_integer
-    percent := in.last_integer
-
-    create mask.make_empty
-    thresh(nrows, ncols, matrix, percent, mask)
-
-    across 1 |..| nrows as ic loop
-      across 1 |..| ncols as jc loop
-        print(item(mask.item(ic.item), jc.item).out + " ")
-      end
-      print("%N")
-    end
-  end
-
-  read_matrix(nrows, ncols: INTEGER; matrix: ARRAY[separate ARRAY[INTEGER]];
-      in: PLAIN_TEXT_FILE)
-  do
-    across 1 |..| nrows as ic loop
-      matrix.force(create_array(), ic.item)
-      across 1 |..| ncols as jc loop
-        in.read_integer
-        put(matrix.item(ic.item), in.last_integer, jc.item)
-      end
-    end
-  end
 
   create_array(): separate ARRAY[INTEGER]
   do

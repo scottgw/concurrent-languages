@@ -12,67 +12,13 @@
 
 class OUTER
 inherit ARGUMENTS
-create make, make_empty
+create make_empty
 feature
   make_empty do end
-
-  make
-  local
-    nelts: INTEGER
-    points: ARRAY[TUPLE[INTEGER, INTEGER]]
-    matrix: ARRAY[separate ARRAY[DOUBLE]]
-    vector: ARRAY[DOUBLE]
-    file_name: STRING
-  do
-    file_name := separate_character_option_value('i')
-    create in.make_open_read(separate_character_option_value('i'))
-
-    nelts := read_integer
-    points := read_vector_of_points(nelts)
-    create matrix.make_empty
-    across 1 |..| nelts as ic loop
-      matrix.force(create_array(), ic.item)
-    end
-    create vector.make_filled(0.0, 1, nelts)
-
-    outer(nelts, points, matrix, vector)
-
-    print(nelts.out + " " + nelts.out + "%N");
-    across 1 |..| nelts as ic loop
-      across 1 |..| nelts as jc loop
-        print(item(matrix.item(ic.item), jc.item).out + " ");
-      end
-      print("%N");
-    end
-    print("%N");
-
-    print(nelts.out + "%N");
-    across 1 |..| nelts as ic loop
-      print(vector[ic.item].out + " ");
-    end
-    print("%N");
-  end
 
   create_array(): separate ARRAY[DOUBLE]
   do
     create {separate ARRAY[DOUBLE]} Result.make_empty
-  end
-
-  read_integer(): INTEGER
-  do
-    in.read_integer
-    Result := in.last_integer
-  end
-
-  read_vector_of_points(nelts: INTEGER): ARRAY[TUPLE[INTEGER, INTEGER]]
-  local
-    vector: ARRAY[TUPLE[INTEGER, INTEGER]]
-  do
-    create vector.make_filled([0, 0], 1, nelts)
-    across 1 |..| nelts as ic loop
-      vector.put([read_integer, read_integer], ic.item)
-    end
-    Result := vector
   end
 
   outer(nelts: INTEGER; points: ARRAY[TUPLE[INTEGER, INTEGER]];
@@ -153,7 +99,6 @@ feature
   end
 
 feature {NONE}
-  in: PLAIN_TEXT_FILE
   parfor_aggregator: OUTER_PARFOR_AGGREGATOR
 
 end -- class OUTER

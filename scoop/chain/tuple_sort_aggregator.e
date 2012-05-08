@@ -13,7 +13,8 @@ feature
   put(v: separate TUPLE[INTEGER, INTEGER, INTEGER];
     index: INTEGER)
   do
-    res.force([v.integer_32_item(1), v.integer_32_item(2), v.integer_32_item(3)], index)
+    res.force([v.integer_32_item(1), v.integer_32_item(2),
+        v.integer_32_item(3)], index)
   end
 
   done()
