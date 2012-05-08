@@ -12,8 +12,10 @@
 
 class OUTER
 inherit ARGUMENTS
-create make
+create make, make_empty
 feature
+  make_empty do end
+
   make
   local
     nelts: INTEGER
@@ -88,9 +90,9 @@ feature
   parfor(nelts: INTEGER; points: ARRAY[TUPLE[INTEGER, INTEGER]];
       matrix: ARRAY[separate ARRAY[DOUBLE]]; vector: ARRAY[DOUBLE])
   local
-    worker: separate PARFOR_WORKER
-    workers: LINKED_LIST[separate PARFOR_WORKER]
-    reader: separate PARFOR_READER
+    worker: separate OUTER_PARFOR_WORKER
+    workers: LINKED_LIST[separate OUTER_PARFOR_WORKER]
+    reader: separate OUTER_PARFOR_READER
   do
     create workers.make
     create reader.make
@@ -110,19 +112,25 @@ feature
   local
     res: separate ARRAY[TUPLE[INTEGER, INTEGER]]
   do
-    create res.make_empty
+    create res.make_filled([0, 0], 1, nelts)
     across 1 |..| nelts as ic loop
-      res.force(points.item(ic.item), ic.item);
+      put(res, points.item(ic.item), ic.item)
     end
     Result := res
   end
 
-  launch_parfor_worker(worker: separate PARFOR_WORKER)
+  put(vector: separate ARRAY[TUPLE[INTEGER, INTEGER]];
+    value: TUPLE[INTEGER, INTEGER]; index: INTEGER)
+  do
+    vector.put(value, index)
+  end
+
+  launch_parfor_worker(worker: separate OUTER_PARFOR_WORKER)
   do
     worker.live
   end
 
-  parfor_result(reader: separate PARFOR_READER)
+  parfor_result(reader: separate OUTER_PARFOR_READER)
   do
     reader.get_result(parfor_aggregator)
   end
@@ -146,7 +154,7 @@ feature
 
 feature {NONE}
   in: PLAIN_TEXT_FILE
-  parfor_aggregator: PARFOR_AGGREGATOR
+  parfor_aggregator: OUTER_PARFOR_AGGREGATOR
 
 end -- class OUTER
 

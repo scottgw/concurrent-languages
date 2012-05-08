@@ -8,65 +8,61 @@
 --   matrix: a nrows by ncols integer matrix
 
 class RANDMAT create
-  make
+  make, make_empty
 
 feature
 
+  make_empty do end
+
   make
-    -- Print a simple message.
-  local
-    nrows, ncols, s: INTEGER
-    matrix: separate ARRAY2[INTEGER]
-    i, j: INTEGER
   do
-    io.read_integer
-    nrows := io.last_integer
-
-    io.read_integer
-    ncols := io.last_integer
-
-    io.read_integer
-    s := io.last_integer
-
-    create matrix.make(nrows, ncols)
-
-    randmat(nrows, ncols, s, matrix)
-
-    from
-      i := 1
-    until
-      i > nrows
-    loop
-      from
-        j := 1
-      until
-        j > ncols
-      loop
-        print(matrix.item(i, j).out + " ")
-        j := j + 1
-      end
-      print("%N")
-      i := i + 1
-    end
   end
 
-  randmat(nrows, ncols, s: INTEGER; matrix: separate ARRAY2[INTEGER])
-  local
-    i, j: INTEGER
-    worker: ARRAY[separate WORKER]
+  randmat(nrows, ncols, s: INTEGER; matrix: ARRAY[separate ARRAY[INTEGER]])
   do
-    create worker.make_empty
+    -- parallel for on matrix
+    parfor(nrows, ncols, s, matrix)
+  end
+
+  -- parallel for on matrix
+  parfor(nrows, ncols, seed: INTEGER;
+    matrix: ARRAY[separate ARRAY[INTEGER]])
+  local
+    worker: separate RANDMAT_PARFOR_WORKER
+    workers: LINKED_LIST[separate RANDMAT_PARFOR_WORKER]
+    reader: separate RANDMAT_PARFOR_READER
+  do
+    create workers.make
+    create reader.make
+    create parfor_aggregator.make(nrows)
+    across 1 |..| nrows as ic loop
+      matrix.force(create_array(), ic.item)
+      create worker.make(nrows, ncols, seed, matrix.item(ic.item),
+          parfor_aggregator)
+      workers.extend(worker)
+    end
     -- parallel for on rows
-    from
-      i := 1
-    until
-      i > nrows
-    loop
-      worker.force(create {WORKER}.make_with_matrix(matrix, ncols, s, i), i)
-      worker.item(i).fill
-      i := i + 1
-    end
+    workers.do_all(agent launch_parfor_worker)
+    parfor_result(reader)
   end
+
+  parfor_result(reader: separate RANDMAT_PARFOR_READER)
+  do
+    reader.get_result(parfor_aggregator)
+  end
+
+  launch_parfor_worker(worker: separate RANDMAT_PARFOR_WORKER)
+  do
+    worker.live
+  end
+
+  create_array(): separate ARRAY[INTEGER]
+  do
+    create {separate ARRAY[INTEGER]} Result.make_empty
+  end
+
+feature {NONE}
+  parfor_aggregator: RANDMAT_PARFOR_AGGREGATOR
 
 end -- class RANDMAT 
 

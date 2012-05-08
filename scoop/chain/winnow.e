@@ -12,8 +12,10 @@
 
 class WINNOW
 inherit ARGUMENTS
-create make
+create make, make_empty
 feature
+  make_empty do end
+
   make
   local
     nrows, ncols, nelts: INTEGER
@@ -104,9 +106,9 @@ feature
       matrix, mask: ARRAY[separate ARRAY[INTEGER]])
       : ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
   local
-    worker: separate PARFOR_WORKER
-    workers: LINKED_LIST[separate PARFOR_WORKER]
-    reader: separate PARFOR_READER
+    worker: separate WINNOW_PARFOR_WORKER
+    workers: LINKED_LIST[separate WINNOW_PARFOR_WORKER]
+    reader: separate WINNOW_PARFOR_READER
   do
     create workers.make
     create reader.make
@@ -121,12 +123,12 @@ feature
     Result := parfor_result(reader)
   end
 
-  launch_parfor_worker(worker: separate PARFOR_WORKER)
+  launch_parfor_worker(worker: separate WINNOW_PARFOR_WORKER)
   do
     worker.live
   end
 
-  parfor_result(reader: separate PARFOR_READER)
+  parfor_result(reader: separate WINNOW_PARFOR_READER)
       : ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
   do
     Result := to_local_values(reader.get_result(parfor_aggregator))
@@ -149,6 +151,6 @@ feature
 
 feature {NONE}
   in: PLAIN_TEXT_FILE
-  parfor_aggregator: separate PARFOR_AGGREGATOR
+  parfor_aggregator: separate WINNOW_PARFOR_AGGREGATOR
 
 end -- class WINNOW

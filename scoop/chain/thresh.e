@@ -10,16 +10,16 @@
 
 class THRESH
 inherit ARGUMENTS
-create make
+create make, make_empty
 feature
+  make_empty do end
+
   make
   local
     nrows, ncols, percent: INTEGER
     matrix, mask: ARRAY[separate ARRAY[INTEGER]]
     in: PLAIN_TEXT_FILE
-    file_name: STRING
   do
-    file_name := separate_character_option_value('i')
     create in.make_open_read(separate_character_option_value('i'))
 
     in.read_integer
@@ -110,14 +110,14 @@ feature
       : INTEGER
   do
     Result := reduce2d_impl(nrows, ncols, matrix, 0,
-      {REDUCE2D_OPERATOR}.max, {REDUCE2D_OPERATOR}.max)
+      {THRESH_REDUCE2D_OPERATOR}.max, {THRESH_REDUCE2D_OPERATOR}.max)
   end
 
   reduce2d_with_filter(nrows, ncols: INTEGER;
       matrix: ARRAY[separate ARRAY[INTEGER]]; value: INTEGER): INTEGER
   do
     Result := reduce2d_impl(nrows, ncols, matrix, value,
-      {REDUCE2D_OPERATOR}.sum, {REDUCE2D_OPERATOR}.filter)
+      {THRESH_REDUCE2D_OPERATOR}.sum, {THRESH_REDUCE2D_OPERATOR}.filter)
   end
 
   reduce2d_impl(nrows, ncols: INTEGER;
@@ -126,9 +126,9 @@ feature
       op_aggregator: INTEGER;
       op: INTEGER): INTEGER
   local
-    worker: separate REDUCE2D_WORKER
-    workers: LINKED_LIST [separate REDUCE2D_WORKER]
-    reader: separate REDUCE2D_READER
+    worker: separate THRESH_REDUCE2D_WORKER
+    workers: LINKED_LIST [separate THRESH_REDUCE2D_WORKER]
+    reader: separate THRESH_REDUCE2D_READER
   do
     create workers.make
     create reader.make
@@ -143,7 +143,7 @@ feature
     Result := reduce2d_result(reader)
   end
 
-  reduce2d_result(reader: separate REDUCE2D_READER): INTEGER
+  reduce2d_result(reader: separate THRESH_REDUCE2D_READER): INTEGER
   do
     Result := reader.get_result(reduce2d_aggregator)
   end
@@ -153,9 +153,9 @@ feature
     matrix, mask: ARRAY[separate ARRAY[INTEGER]];
     threshold: INTEGER)
   local
-    worker: separate PARFOR_WORKER
-    workers: LINKED_LIST[separate PARFOR_WORKER]
-    reader: separate PARFOR_READER
+    worker: separate THRESH_PARFOR_WORKER
+    workers: LINKED_LIST[separate THRESH_PARFOR_WORKER]
+    reader: separate THRESH_PARFOR_READER
   do
     create workers.make
     create reader.make
@@ -171,21 +171,21 @@ feature
     parfor_result(reader)
   end
 
-  parfor_result(reader: separate PARFOR_READER)
+  parfor_result(reader: separate THRESH_PARFOR_READER)
   do
     reader.get_result(parfor_aggregator)
   end
 
 feature {NONE}
-  reduce2d_aggregator: separate REDUCE2D_AGGREGATOR
-  parfor_aggregator: separate PARFOR_AGGREGATOR
+  reduce2d_aggregator: separate THRESH_REDUCE2D_AGGREGATOR
+  parfor_aggregator: separate THRESH_PARFOR_AGGREGATOR
 
-  launch_reduce2d_worker(worker: separate REDUCE2D_WORKER)
+  launch_reduce2d_worker(worker: separate THRESH_REDUCE2D_WORKER)
   do
     worker.live
   end
 
-  launch_parfor_worker(worker: separate PARFOR_WORKER)
+  launch_parfor_worker(worker: separate THRESH_PARFOR_WORKER)
   do
     worker.live
   end

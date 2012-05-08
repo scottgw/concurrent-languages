@@ -10,8 +10,10 @@
 
 class PRODUCT
 inherit ARGUMENTS
-create make
+create make, make_empty
 feature
+  make_empty do end
+
   make
   local
     nelts: INTEGER
@@ -75,9 +77,9 @@ feature
     : ARRAY[DOUBLE]
   local
     res: separate ARRAY[DOUBLE]
-    worker: separate PARFOR_WORKER
-    workers: LINKED_LIST[separate PARFOR_WORKER]
-    reader: separate PARFOR_READER
+    worker: separate PRODUCT_PARFOR_WORKER
+    workers: LINKED_LIST[separate PRODUCT_PARFOR_WORKER]
+    reader: separate PRODUCT_PARFOR_READER
   do
     res := create_array()
     create workers.make
@@ -99,9 +101,9 @@ feature
   local
     res: separate ARRAY[DOUBLE]
   do
-    create res.make_empty
+    create res.make_filled(0.0, 1, nelts)
     across 1 |..| nelts as ic loop
-      res.force(vector.item(ic.item), ic.item);
+      put(res, vector.item(ic.item), ic.item)
     end
     Result := res
   end
@@ -118,12 +120,12 @@ feature
     Result := res
   end
 
-  launch_parfor_worker(worker: separate PARFOR_WORKER)
+  launch_parfor_worker(worker: separate PRODUCT_PARFOR_WORKER)
   do
     worker.live
   end
 
-  parfor_result(reader: separate PARFOR_READER)
+  parfor_result(reader: separate PRODUCT_PARFOR_READER)
   do
     reader.get_result(parfor_aggregator)
   end
@@ -131,7 +133,7 @@ feature
 
 feature {NONE}
   in: PLAIN_TEXT_FILE
-  parfor_aggregator: PARFOR_AGGREGATOR
+  parfor_aggregator: PRODUCT_PARFOR_AGGREGATOR
 
 end -- class PRODUCT
 
