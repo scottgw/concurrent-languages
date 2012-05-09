@@ -2,6 +2,8 @@
 
 from datetime import datetime
 import sys
+import subprocess
+import os
 
 start_actions = set(["start", "started", "restart", "resume"])
 other_actions = set(["commit", ".fuse_hidden*", "branch", "working", ".*.swp", "restart-done", "reduce2d", "fill_histogram", "prefixsum", "binary_search", "fill_mask", "ReduceState", "read_matrix", "max_matrix", "get_threshold", "reduce2d_with_filter", "split", "read_integer", "testing", "still_synchronous", "asynchrony", "matrix", "parallel_scan", "using", "with_filter", "refac", "sequential_sort", "fill_values", "parallel_sort", "parfor", "parsort", "tuple_sorter", "almost", "quit", "merged", "compiles", "files"])
@@ -57,7 +59,7 @@ assert(len(start_times) == 0)
 
 problems = set()
 languages = set()
-variations = set()
+variations = ["seq", "par"]
 result = {}
 
 #print total_times
@@ -85,7 +87,6 @@ for key, value in total_times.iteritems():
 
   problems.add(problem)
   languages.add(language)
-  variations.add(variation)
 
   if language not in result:
     result[language] = {}
@@ -97,14 +98,21 @@ for key, value in total_times.iteritems():
 
   result[language][problem][variation] = value
 
+for problem in problems:
+  if problem != "chain":
+    result["tbb"][problem]["seq"] += result["cpp"][problem]["seq"]
+
 #print result
 #print problems
 #print languages
 
-########## first table ###############
+old_stdout = sys.stdout
+
+########## time tables ###############
 
 for variation in variations:
-  sys.stdout = open("table-" + variation + ".tex", "w")
+  sys.stdout = open("../../../ufrgs/meu/chapters/table-" + variation +
+      ".tex", "w")
 
   first = True
   print " & ",
@@ -129,3 +137,53 @@ for variation in variations:
           if not (problem == "chain" and variation == "seq"):
             print " & ---",
     print " \\\\"
+
+extensions = { "chapel" : "chpl", "cilk" : "cilk", "erlang" : "erl",
+    "go" : "go", "scoop" : "e", "tbb" : "cc" }
+
+########## LoC tables ###############
+
+for variation in variations:
+  sys.stdout = open("../../../ufrgs/meu/chapters/table-loc-" + variation +
+      ".tex", "w")
+
+  first = True
+  print " & ",
+  for problem in sorted(problems):
+    if not (problem == "chain" and variation == "seq"):
+      if not first:
+        print " & ", 
+      #print problem, "-", variation,
+      print problem,
+      first = False;
+  print " \\\\ \\hline"
+
+  for language in sorted(languages):
+    if language == "cpp":
+      continue
+    extension = extensions[language]
+    print language,
+    for problem in sorted(problems):
+      if problem == "chain" and variation == "seq":
+        continue
+      cmd = "find ../../%s/%s/%s/ | grep \"\\.%s$\" | xargs cat | wc -l > wc.out" % (
+          language, problem, variation, extension)
+      if problem == "chain" and variation == "par":
+        cmd = "find ../../%s/%s/ | grep \"\\.%s$\" | xargs cat | wc -l > wc.out" % (
+            language, problem, extension)
+      #print cmd
+      #output = os([cmd], stdout=subprocess.PIPE).communicate()[0]
+      os.system(cmd)
+      value = open("wc.out", "r").read()
+      print " & ", value,
+      #print output
+        #if variation in result[language][problem]:
+          #print " & ",
+          #print("%.2f" % result[language][problem][variation])
+        #else:
+          #if not (problem == "chain" and variation == "seq"):
+            #print " & ---",
+    print " \\\\"
+
+sys.stdout = old_stdout
+
