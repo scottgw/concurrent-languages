@@ -91,48 +91,14 @@ for problem in problems:
   if problem != "chain":
     result["tbb"][problem]["seq"] += result["cpp"][problem]["seq"]
 
-old_stdout = sys.stdout
+########## tables ###############
 
-# TODO refac tables
+def create_table(table_name, output_value, extra):
+  old_stdout = sys.stdout
 
-########## time tables ###############
-
-for variation in variations:
-  sys.stdout = open("../../../ufrgs/meu/chapters/table-time-" + variation +
-      ".tex", "w")
-
-  first = True
-  print " & ",
-  for problem in sorted(problems):
-    if not (problem == "chain" and variation == "seq"):
-      if not first:
-        print " & ", 
-      print problem,
-      first = False;
-  print " \\\\ \\hline"
-
-  for language in sorted(languages):
-    if language == "cpp":
-      continue
-    print language,
-    for problem in sorted(problems):
-      if problem == "chain" and variation == "seq":
-        continue
-      assert(variation in result[language][problem])
-      print " & ",
-      print("%.2f" % result[language][problem][variation])
-    print " \\\\"
-
-########## LoC-NoW-NoC tables ###############
-
-extensions = { "chapel" : "chpl", "cilk" : "cilk", "erlang" : "erl",
-    "go" : "go", "scoop" : "e", "tbb" : "cc" }
-
-table_types = {"loc" : "-l", "now" : "-w", "noc" : "-c"}
-
-for table_name, table_flag in table_types.iteritems():
   for variation in variations:
-    sys.stdout = open("../../../ufrgs/meu/chapters/table-%s-%s.tex" % (table_name, variation), "w")
+    sys.stdout = open("../../../ufrgs/meu/chapters/table-%s-%s.tex" % (
+      table_name, variation), "w")
 
     first = True
     print " & ",
@@ -147,20 +113,43 @@ for table_name, table_flag in table_types.iteritems():
     for language in sorted(languages):
       if language == "cpp":
         continue
-      extension = extensions[language]
       print language,
       for problem in sorted(problems):
         if problem == "chain" and variation == "seq":
           continue
-        cmd = "find ../../%s/%s/%s/ | grep \"\\.%s$\" | xargs cat | wc %s > wc.out" % (
-            language, problem, variation, extension, table_flag)
-        if problem == "chain" and variation == "par":
-          cmd = "find ../../%s/%s/ | grep \"\\.%s$\" | xargs cat | wc %s > wc.out" % (
-              language, problem, extension, table_flag)
-        os.system(cmd)
-        value = open("wc.out", "r").read()
-        print " & ", value,
+        output_value(language, problem, variation, extra)
       print " \\\\"
 
-sys.stdout = old_stdout
+  sys.stdout = old_stdout
+
+########## time tables ###############
+
+def time_table_output(language, problem, variation, extra):
+  assert(variation in result[language][problem])
+  print " & ",
+  print("%.2f" % result[language][problem][variation])
+
+create_table("time", time_table_output, None)
+
+########## LoC-NoW-NoC tables ###############
+
+extensions = { "chapel" : "chpl", "cilk" : "cilk", "erlang" : "erl",
+    "go" : "go", "scoop" : "e", "tbb" : "cc" }
+
+table_types = {"loc" : "-l", "now" : "-w", "noc" : "-c"}
+
+def wc_table_output(language, problem, variation, extra):
+  extension = extensions[language]
+  table_flag = extra["table_flag"]
+  cmd = "find ../../%s/%s/%s/ | grep \"\\.%s$\" | xargs cat | wc %s > wc.out" % (
+      language, problem, variation, extension, table_flag)
+  if problem == "chain" and variation == "par":
+    cmd = "find ../../%s/%s/ | grep \"\\.%s$\" | xargs cat | wc %s > wc.out" % (
+        language, problem, extension, table_flag)
+  os.system(cmd)
+  value = open("wc.out", "r").read()
+  print " & ", value,
+
+for table_name, table_flag in table_types.iteritems():
+  create_table(table_name,  wc_table_output, {"table_flag": table_flag})
 
