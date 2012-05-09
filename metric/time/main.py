@@ -95,6 +95,11 @@ def load_data():
     if problem != "chain":
       result["tbb"][problem]["seq"] += result["cpp"][problem]["seq"]
 
+  for language in languages:
+    for problem in problems:
+      if problem != "chain":
+        result[language][problem]["par"] += result[language][problem]["seq"]
+
 def output_tables():
   def create_table(table_name, output_value, extra):
     old_stdout = sys.stdout
@@ -203,7 +208,7 @@ xscale=1
 
   pretty_names = {"time" : "time to code", "loc" : "LoC", "noc" : "NoC",
       "now" : "NoW"}
-  create_graph("time", result, 35, pretty_names["time"])
+  create_graph("time", result, 10, pretty_names["time"])
   for table_name in table_types:
     pretty_name = pretty_names[table_name]
     create_graph(table_name, wc_result[table_name], 8, pretty_name)
