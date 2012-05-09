@@ -141,7 +141,9 @@ for variation in variations:
 extensions = { "chapel" : "chpl", "cilk" : "cilk", "erlang" : "erl",
     "go" : "go", "scoop" : "e", "tbb" : "cc" }
 
-########## LoC tables ###############
+########## LoC-NoW-NoC tables ###############
+
+# TODO refact locnownoc
 
 for variation in variations:
   sys.stdout = open("../../../ufrgs/meu/chapters/table-loc-" + variation +
@@ -170,6 +172,98 @@ for variation in variations:
           language, problem, variation, extension)
       if problem == "chain" and variation == "par":
         cmd = "find ../../%s/%s/ | grep \"\\.%s$\" | xargs cat | wc -l > wc.out" % (
+            language, problem, extension)
+      #print cmd
+      #output = os([cmd], stdout=subprocess.PIPE).communicate()[0]
+      os.system(cmd)
+      value = open("wc.out", "r").read()
+      print " & ", value,
+      #print output
+        #if variation in result[language][problem]:
+          #print " & ",
+          #print("%.2f" % result[language][problem][variation])
+        #else:
+          #if not (problem == "chain" and variation == "seq"):
+            #print " & ---",
+    print " \\\\"
+
+sys.stdout = old_stdout
+
+########## NoW tables ###############
+
+for variation in variations:
+  sys.stdout = open("../../../ufrgs/meu/chapters/table-now-" + variation +
+      ".tex", "w")
+
+  first = True
+  print " & ",
+  for problem in sorted(problems):
+    if not (problem == "chain" and variation == "seq"):
+      if not first:
+        print " & ", 
+      #print problem, "-", variation,
+      print problem,
+      first = False;
+  print " \\\\ \\hline"
+
+  for language in sorted(languages):
+    if language == "cpp":
+      continue
+    extension = extensions[language]
+    print language,
+    for problem in sorted(problems):
+      if problem == "chain" and variation == "seq":
+        continue
+      cmd = "find ../../%s/%s/%s/ | grep \"\\.%s$\" | xargs cat | wc -w > wc.out" % (
+          language, problem, variation, extension)
+      if problem == "chain" and variation == "par":
+        cmd = "find ../../%s/%s/ | grep \"\\.%s$\" | xargs cat | wc -w > wc.out" % (
+            language, problem, extension)
+      #print cmd
+      #output = os([cmd], stdout=subprocess.PIPE).communicate()[0]
+      os.system(cmd)
+      value = open("wc.out", "r").read()
+      print " & ", value,
+      #print output
+        #if variation in result[language][problem]:
+          #print " & ",
+          #print("%.2f" % result[language][problem][variation])
+        #else:
+          #if not (problem == "chain" and variation == "seq"):
+            #print " & ---",
+    print " \\\\"
+
+sys.stdout = old_stdout
+
+########## NoC tables ###############
+
+for variation in variations:
+  sys.stdout = open("../../../ufrgs/meu/chapters/table-noc-" + variation +
+      ".tex", "w")
+
+  first = True
+  print " & ",
+  for problem in sorted(problems):
+    if not (problem == "chain" and variation == "seq"):
+      if not first:
+        print " & ", 
+      #print problem, "-", variation,
+      print problem,
+      first = False;
+  print " \\\\ \\hline"
+
+  for language in sorted(languages):
+    if language == "cpp":
+      continue
+    extension = extensions[language]
+    print language,
+    for problem in sorted(problems):
+      if problem == "chain" and variation == "seq":
+        continue
+      cmd = "find ../../%s/%s/%s/ | grep \"\\.%s$\" | xargs cat | wc -c > wc.out" % (
+          language, problem, variation, extension)
+      if problem == "chain" and variation == "par":
+        cmd = "find ../../%s/%s/ | grep \"\\.%s$\" | xargs cat | wc -c > wc.out" % (
             language, problem, extension)
       #print cmd
       #output = os([cmd], stdout=subprocess.PIPE).communicate()[0]
