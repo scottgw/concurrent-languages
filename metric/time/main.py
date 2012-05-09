@@ -76,7 +76,8 @@ def load_data():
     variation = words[2]
 
     problems.add(problem)
-    languages.add(language)
+    if language != "cpp":
+      languages.add(language)
 
     if language not in result:
       result[language] = {}
@@ -111,8 +112,6 @@ def output_tables():
       print " \\\\ \\hline"
 
       for language in sorted(languages):
-        if language == "cpp":
-          continue
         print language,
         for problem in sorted(problems):
           if problem == "chain" and variation == "seq":
@@ -153,10 +152,50 @@ def output_tables():
   for table_name, table_flag in table_types.iteritems():
     create_table(table_name,  wc_table_output, {"table_flag": table_flag})
 
+def output_graphs():
+  def create_graph(graph_name):
+    old_stdout = sys.stdout
+
+    variation_names = {"seq" : "Sequential", "par" : "Parallel"}
+    for variation in variations:
+      sys.stdout = open("../../../ufrgs/meu/images/graph-%s-%s.perf" % (
+        graph_name, variation), "w")
+
+      sys.stdout.write("=cluster")
+      for language in sorted(languages):
+        sys.stdout.write(";" + language)
+      print '''
+colors=black,yellow,red,med_blue,light_green,cyan
+=table
+yformat=%g
+max=35
+=norotate
+xscale=1
+'''
+      variation_name = variation_names[variation]
+      print "ylabel=%s %s versus fastest" % (variation_name, graph_name)
+      for problem in sorted(problems):
+        if problem == "chain" and variation == "seq":
+          continue
+        print problem,
+        nmin = min(
+            float(
+              result[language][problem][variation]) for language in sorted(
+                languages))
+        for language in sorted(languages):
+          print("%.2f" % (
+            float(result[language][problem][variation]) / nmin)),
+        print ""
+
+    sys.stdout = old_stdout
+
+  create_graph("time")
 
 def main():
   load_data()
-  output_tables()
+  #output_tables()
+  output_graphs()
+  print "done"
 
 if __name__ == "__main__":
   main()
