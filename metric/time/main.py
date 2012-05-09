@@ -98,7 +98,7 @@ old_stdout = sys.stdout
 ########## time tables ###############
 
 for variation in variations:
-  sys.stdout = open("../../../ufrgs/meu/chapters/table-" + variation +
+  sys.stdout = open("../../../ufrgs/meu/chapters/table-time-" + variation +
       ".tex", "w")
 
   first = True
