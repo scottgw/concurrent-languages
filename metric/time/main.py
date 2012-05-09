@@ -16,6 +16,8 @@ problems = set()
 languages = set()
 variations = ["seq", "par"]
 result = {}
+wc_result = {}
+table_types = {"loc" : "-l", "now" : "-w", "noc" : "-c"}
 
 def load_data():
   f = open("log_reverse.txt", "r")
@@ -135,25 +137,35 @@ def output_tables():
   extensions = { "chapel" : "chpl", "cilk" : "cilk", "erlang" : "erl",
       "go" : "go", "scoop" : "e", "tbb" : "cc" }
 
-  table_types = {"loc" : "-l", "now" : "-w", "noc" : "-c"}
-
   def wc_table_output(language, problem, variation, extra):
     extension = extensions[language]
     table_flag = extra["table_flag"]
+    table_type = extra["table_type"]
     cmd = "find ../../%s/%s/%s/ | grep \"\\.%s$\" | xargs cat | wc %s > wc.out" % (
         language, problem, variation, extension, table_flag)
     if problem == "chain" and variation == "par":
       cmd = "find ../../%s/%s/ | grep \"\\.%s$\" | xargs cat | wc %s > wc.out" % (
           language, problem, extension, table_flag)
     os.system(cmd)
+
+    if table_type not in wc_result:
+      wc_result[table_type] = {}
+    if language not in wc_result[table_type]:
+      wc_result[table_type][language] = {}
+    if problem not in wc_result[table_type][language]:
+      wc_result[table_type][language][problem] = {}
+    assert(variation not in wc_result[table_type][language][problem])
     value = open("wc.out", "r").read()
+
+    wc_result[table_type][language][problem][variation] = value
     print " & ", value,
 
   for table_name, table_flag in table_types.iteritems():
-    create_table(table_name,  wc_table_output, {"table_flag": table_flag})
+    create_table(table_name,  wc_table_output, {"table_flag": table_flag,
+      "table_type" : table_name})
 
 def output_graphs():
-  def create_graph(graph_name):
+  def create_graph(graph_name, values, max_value, pretty_name):
     old_stdout = sys.stdout
 
     variation_names = {"seq" : "Sequential", "par" : "Parallel"}
@@ -168,32 +180,37 @@ def output_graphs():
 colors=black,yellow,red,med_blue,light_green,cyan
 =table
 yformat=%g
-max=35
 =norotate
 xscale=1
 '''
       variation_name = variation_names[variation]
-      print "ylabel=%s %s versus fastest" % (variation_name, graph_name)
+      print "max=%d" % max_value
+      print "ylabel=%s %s versus smallest" % (variation_name, pretty_name)
       for problem in sorted(problems):
         if problem == "chain" and variation == "seq":
           continue
         print problem,
         nmin = min(
             float(
-              result[language][problem][variation]) for language in sorted(
+              values[language][problem][variation]) for language in sorted(
                 languages))
         for language in sorted(languages):
           print("%.2f" % (
-            float(result[language][problem][variation]) / nmin)),
+            float(values[language][problem][variation]) / nmin)),
         print ""
 
     sys.stdout = old_stdout
 
-  create_graph("time")
+  pretty_names = {"time" : "time to code", "loc" : "LoC", "noc" : "NoC",
+      "now" : "NoW"}
+  create_graph("time", result, 35, pretty_names["time"])
+  for table_name in table_types:
+    pretty_name = pretty_names[table_name]
+    create_graph(table_name, wc_result[table_name], 8, pretty_name)
 
 def main():
   load_data()
-  #output_tables()
+  output_tables()
   output_graphs()
   print "done"
 
