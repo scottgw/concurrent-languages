@@ -12,144 +12,151 @@ end_actions = set(["done", "pause"])
 start_times = {}
 total_times = {}
 
-f = open("log_reverse.txt", "r")
-for line in f:
-  bad_string = " -0300 "
-  bad_string_index = line.find(bad_string)
-  time_string = line[:bad_string_index]
-  fmt = "%a %b %d %H:%M:%S %Y"
-  parsed_date = datetime.strptime(time_string, fmt)
-  commit = line[bad_string_index + len(bad_string):]
-  words = commit.split()
-
-  if len(words) > 1:
-    index = words[0]
-    action = words[1]
-    if action in start_actions:
-      assert(index not in start_times);
-      start_times[index] = parsed_date
-    elif action in end_actions:
-      assert (index in start_times)
-      end_time = parsed_date
-      diff = end_time - start_times[index]
-      del start_times[index]
-      assert(diff.days == 0)
-      diff = diff.seconds / 60.0
-      if index in total_times:
-        total_times[index] += diff
-      else:
-        total_times[index] = diff
-    elif action in other_actions:
-      pass
-    else:
-      print action
-      print line
-      assert(False)
-
-assert(len(start_times) == 0)
-
 problems = set()
 languages = set()
 variations = ["seq", "par"]
 result = {}
 
-for key, value in total_times.iteritems():
-  words = key.split("-")
-  assert (len(words) == 2 or len(words) == 3)
-  language = words[0]
-  problem = words[1]
-  if language == "cpp":
-    assert (len(words) == 2)
-    words.append("seq")
-  if problem == "refac":
-    assert(False)
-    continue
-  if problem == "chain":
-    if language != "cpp":
-      words.append("par")
+def load_data():
+  f = open("log_reverse.txt", "r")
+  for line in f:
+    bad_string = " -0300 "
+    bad_string_index = line.find(bad_string)
+    time_string = line[:bad_string_index]
+    fmt = "%a %b %d %H:%M:%S %Y"
+    parsed_date = datetime.strptime(time_string, fmt)
+    commit = line[bad_string_index + len(bad_string):]
+    words = commit.split()
 
-  if len(words) != 3:
-    print words
-    assert(False)
+    if len(words) > 1:
+      index = words[0]
+      action = words[1]
+      if action in start_actions:
+        assert(index not in start_times);
+        start_times[index] = parsed_date
+      elif action in end_actions:
+        assert (index in start_times)
+        end_time = parsed_date
+        diff = end_time - start_times[index]
+        del start_times[index]
+        assert(diff.days == 0)
+        diff = diff.seconds / 60.0
+        if index in total_times:
+          total_times[index] += diff
+        else:
+          total_times[index] = diff
+      elif action in other_actions:
+        pass
+      else:
+        print action
+        print line
+        assert(False)
 
-  variation = words[2]
+  assert(len(start_times) == 0)
 
-  problems.add(problem)
-  languages.add(language)
+  for key, value in total_times.iteritems():
+    words = key.split("-")
+    assert (len(words) == 2 or len(words) == 3)
+    language = words[0]
+    problem = words[1]
+    if language == "cpp":
+      assert (len(words) == 2)
+      words.append("seq")
+    if problem == "refac":
+      assert(False)
+      continue
+    if problem == "chain":
+      if language != "cpp":
+        words.append("par")
 
-  if language not in result:
-    result[language] = {}
+    if len(words) != 3:
+      print words
+      assert(False)
 
-  if problem not in result[language]:
-    result[language][problem] = {}
+    variation = words[2]
 
-  assert (variation not in result[language][problem])
+    problems.add(problem)
+    languages.add(language)
 
-  result[language][problem][variation] = value
+    if language not in result:
+      result[language] = {}
 
-for problem in problems:
-  if problem != "chain":
-    result["tbb"][problem]["seq"] += result["cpp"][problem]["seq"]
+    if problem not in result[language]:
+      result[language][problem] = {}
 
-########## tables ###############
+    assert (variation not in result[language][problem])
 
-def create_table(table_name, output_value, extra):
-  old_stdout = sys.stdout
+    result[language][problem][variation] = value
 
-  for variation in variations:
-    sys.stdout = open("../../../ufrgs/meu/chapters/table-%s-%s.tex" % (
-      table_name, variation), "w")
+  for problem in problems:
+    if problem != "chain":
+      result["tbb"][problem]["seq"] += result["cpp"][problem]["seq"]
 
-    first = True
-    print " & ",
-    for problem in sorted(problems):
-      if not (problem == "chain" and variation == "seq"):
-        if not first:
-          print " & ", 
-        print problem,
-        first = False;
-    print " \\\\ \\hline"
+def output_tables():
+  def create_table(table_name, output_value, extra):
+    old_stdout = sys.stdout
 
-    for language in sorted(languages):
-      if language == "cpp":
-        continue
-      print language,
+    for variation in variations:
+      sys.stdout = open("../../../ufrgs/meu/chapters/table-%s-%s.tex" % (
+        table_name, variation), "w")
+
+      first = True
+      print " & ",
       for problem in sorted(problems):
-        if problem == "chain" and variation == "seq":
+        if not (problem == "chain" and variation == "seq"):
+          if not first:
+            print " & ", 
+          print problem,
+          first = False;
+      print " \\\\ \\hline"
+
+      for language in sorted(languages):
+        if language == "cpp":
           continue
-        output_value(language, problem, variation, extra)
-      print " \\\\"
+        print language,
+        for problem in sorted(problems):
+          if problem == "chain" and variation == "seq":
+            continue
+          output_value(language, problem, variation, extra)
+        print " \\\\"
 
-  sys.stdout = old_stdout
+    sys.stdout = old_stdout
 
-########## time tables ###############
+  ########## time tables ###############
 
-def time_table_output(language, problem, variation, extra):
-  assert(variation in result[language][problem])
-  print " & ",
-  print("%.2f" % result[language][problem][variation])
+  def time_table_output(language, problem, variation, extra):
+    assert(variation in result[language][problem])
+    print " & ",
+    print("%.2f" % result[language][problem][variation])
 
-create_table("time", time_table_output, None)
+  create_table("time", time_table_output, None)
 
-########## LoC-NoW-NoC tables ###############
+  ########## LoC-NoW-NoC tables ###############
 
-extensions = { "chapel" : "chpl", "cilk" : "cilk", "erlang" : "erl",
-    "go" : "go", "scoop" : "e", "tbb" : "cc" }
+  extensions = { "chapel" : "chpl", "cilk" : "cilk", "erlang" : "erl",
+      "go" : "go", "scoop" : "e", "tbb" : "cc" }
 
-table_types = {"loc" : "-l", "now" : "-w", "noc" : "-c"}
+  table_types = {"loc" : "-l", "now" : "-w", "noc" : "-c"}
 
-def wc_table_output(language, problem, variation, extra):
-  extension = extensions[language]
-  table_flag = extra["table_flag"]
-  cmd = "find ../../%s/%s/%s/ | grep \"\\.%s$\" | xargs cat | wc %s > wc.out" % (
-      language, problem, variation, extension, table_flag)
-  if problem == "chain" and variation == "par":
-    cmd = "find ../../%s/%s/ | grep \"\\.%s$\" | xargs cat | wc %s > wc.out" % (
-        language, problem, extension, table_flag)
-  os.system(cmd)
-  value = open("wc.out", "r").read()
-  print " & ", value,
+  def wc_table_output(language, problem, variation, extra):
+    extension = extensions[language]
+    table_flag = extra["table_flag"]
+    cmd = "find ../../%s/%s/%s/ | grep \"\\.%s$\" | xargs cat | wc %s > wc.out" % (
+        language, problem, variation, extension, table_flag)
+    if problem == "chain" and variation == "par":
+      cmd = "find ../../%s/%s/ | grep \"\\.%s$\" | xargs cat | wc %s > wc.out" % (
+          language, problem, extension, table_flag)
+    os.system(cmd)
+    value = open("wc.out", "r").read()
+    print " & ", value,
 
-for table_name, table_flag in table_types.iteritems():
-  create_table(table_name,  wc_table_output, {"table_flag": table_flag})
+  for table_name, table_flag in table_types.iteritems():
+    create_table(table_name,  wc_table_output, {"table_flag": table_flag})
 
+
+def main():
+  load_data()
+  output_tables()
+
+if __name__ == "__main__":
+  main()
