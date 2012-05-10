@@ -19,6 +19,8 @@ result = {}
 wc_result = {}
 table_types = {"loc" : "-l", "now" : "-w", "noc" : "-c"}
 
+total_lines = 0
+
 def load_data():
   f = open("log_reverse.txt", "r")
   for line in f:
@@ -163,6 +165,9 @@ def output_tables():
     value = open("wc.out", "r").read()
 
     wc_result[table_type][language][problem][variation] = value
+    if table_type == "loc":
+      global total_lines
+      total_lines += int(value)
     print " & ", value,
 
   for table_name, table_flag in table_types.iteritems():
@@ -217,6 +222,8 @@ def main():
   load_data()
   output_tables()
   output_graphs()
+  global total_lines
+  print "total lines: %d" % total_lines
   print "done"
 
 if __name__ == "__main__":
