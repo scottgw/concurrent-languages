@@ -62,7 +62,8 @@ int main(int argc, char** argv) {
 
   outer(nelts, points, &matrix, &vec);
 
-  printf("%d %d\n", nelts, nelts);
+  //printf("%d %d\n", nelts, nelts);
+  printf("%d\n", nelts);
   for (int i = 0; i < nelts; i++) {
     for (int j = 0; j < nelts; j++) {
       printf("%g ", matrix[i][j]);
@@ -71,7 +72,7 @@ int main(int argc, char** argv) {
   }
   printf("\n");
 
-  printf("%d\n", nelts);
+  //printf("%d\n", nelts);
   for (int i = 0; i < nelts; i++) {
     printf("%g ", vec[i]);
   }

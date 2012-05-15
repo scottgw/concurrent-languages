@@ -21,29 +21,45 @@ def create_inputs():
   inputs = ["100 100 666", "1000 1000 777"] #, "10000 10000 888"]
   input_thresh = ["66", "77"] #, "88"]
   input_winnow = ["100", "1000"] #, "10000"]
+
   for i in range(len(inputs)):
     cur = inputs[i]
     file_name = "%s%d.in" % (problems[0], i)
     f = open(file_name, "w")
     f.write(cur + "\n")
     f.close()
+
   for i in range(len(problems) - 1):
     problem = problems[i]
+    next_problem = problems[i + 1]
     print problem
     for j in range(len(inputs)):
-      input_file_name = "%s%d.in" % (problems[i], j)
-      if problem == "thresh":
-        f = open(input_file_name, "a")
-        f.write(input_thresh[j] + "\n")
-        f.close()
-      output_file_name = "%s%d.in" % (problems[i + 1], j)
+      input_file = "%s%d.in" % (problem, j)
+      output_file = "%s%d.out" % (problem, j)
+      next_input_file = "%s%d.in" % (next_problem, j)
       cmd = "cd ../../%s/%s && ./main < ../../metric/perf/%s > ../../metric/perf/%s" % (
-          "cpp", problem, input_file_name, output_file_name);
-      if problem == "winnow":
-        f = open(input_file_name, "a")
-
+          "cpp", problem, input_file, output_file);
       print cmd
       os.system(cmd)
+      cmd = "cp %s %s" % (output_file, next_input_file)
+      print cmd
+      os.system(cmd)
+      if next_problem == "thresh":
+        f = open(next_input_file, "a")
+        f.write(input_thresh[j] + "\n")
+        f.close()
+      if next_problem == "winnow":
+        cmd = "cp randmat%d.out %s" % (j, next_input_file)
+        print cmd
+        os.system(cmd)
+        output = open(next_input_file, "a")
+        f = open(output_file, "r")
+        f.readline()
+        output.write("\n")
+        output.write(f.read() + "\n")
+        output.write(input_winnow[j] + "\n")
+        f.close()
+        output.close()
 
 def run_all():
   # chapel: works!
