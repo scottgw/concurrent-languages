@@ -15,7 +15,7 @@ void randmat(int nrows, int ncols, int s, int** matrix) {
   srand(s);
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
-      matrix[i][j] = rand();
+      matrix[i][j] = rand() % 1000;
     }
   }
 }

@@ -10,11 +10,40 @@ def make_all():
       if problem == "chain" and variant == "seq":
         continue
       for language in sorted(languages):
-        cmd = "cd ../../%s/%s/%s && make" % (language, problem, variant);
+        cmd = "cd ../../%s/%s/%s && make -B" % (language, problem, variant);
         if problem == "chain":
-          cmd = "cd ../../%s/%s && make" % (language, problem);
+          cmd = "cd ../../%s/%s && make -B" % (language, problem);
         print cmd
         os.system(cmd)
+
+def create_inputs():
+  problems = ["randmat", "thresh", "winnow", "outer", "product", "final"]
+  inputs = ["100 100 666", "1000 1000 777"] #, "10000 10000 888"]
+  input_thresh = ["66", "77"] #, "88"]
+  input_winnow = ["100", "1000"] #, "10000"]
+  for i in range(len(inputs)):
+    cur = inputs[i]
+    file_name = "%s%d.in" % (problems[0], i)
+    f = open(file_name, "w")
+    f.write(cur + "\n")
+    f.close()
+  for i in range(len(problems) - 1):
+    problem = problems[i]
+    print problem
+    for j in range(len(inputs)):
+      input_file_name = "%s%d.in" % (problems[i], j)
+      if problem == "thresh":
+        f = open(input_file_name, "a")
+        f.write(input_thresh[j] + "\n")
+        f.close()
+      output_file_name = "%s%d.in" % (problems[i + 1], j)
+      cmd = "cd ../../%s/%s && ./main < ../../metric/perf/%s > ../../metric/perf/%s" % (
+          "cpp", problem, input_file_name, output_file_name);
+      if problem == "winnow":
+        f = open(input_file_name, "a")
+
+      print cmd
+      os.system(cmd)
 
 def run_all():
   # chapel: works!
@@ -54,4 +83,5 @@ def run_all():
     break
 
 #make_all()
-run_all()
+create_inputs()
+#run_all()
