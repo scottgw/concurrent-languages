@@ -5,6 +5,25 @@ languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
 problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 variations = ["seq", "par"]
 
+def generate_erlang_main():
+  language = "erlang"
+  for problem in sorted(problems):
+    for variation in sorted(variations):
+      if problem == "chain" and variation == "seq":
+        continue
+      directory = "../../%s/%s" % (language, problem);
+      if problem != "chain":
+        directory += "/%s" % variation;
+      output = directory + "/main.sh"
+      print output
+      f = open(output, "w")
+      f.write("""
+#!/bin/sh
+cd ~/tudo/tcc/apmc/lucia/metric/perf/%s
+erl -noshell -s main main -s init stop
+""" % directory)
+      f.close()
+
 def make_all():
   # TODO: make go chain
   # TODO: make scoop
@@ -13,9 +32,10 @@ def make_all():
       if problem == "chain" and variation == "seq":
         continue
       for language in sorted(languages):
-        cmd = "cd ../../%s/%s/%s && make -B" % (language, problem, variation);
-        if problem == "chain":
-          cmd = "cd ../../%s/%s && make -B" % (language, problem);
+        cmd = "cd ../../%s/%s" % (language, problem);
+        if problem != "chain":
+          cmd += "/%s" % variation;
+        cmd += " && make -B"
         print cmd
         os.system(cmd)
   cmd = "cp ../../go/chain/src/main/main ../../go/chain/main"
@@ -194,8 +214,9 @@ xscale=1
 
   create_graph("exec-time", results, 60, "pretty_name_time")
 
+#generate_erlang_main()
 #make_all()
-#create_inputs()
+create_inputs()
 #run_all()
-get_results()
-output_graphs()
+#get_results()
+#output_graphs()
