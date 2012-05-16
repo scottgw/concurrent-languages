@@ -16,12 +16,12 @@ def make_all():
         print cmd
         os.system(cmd)
 
+inputs = ["10 10 55", "100 100 666", "100 250 777"] #, "10000 10000 888"]
+input_thresh = ["55", "66", "77", "88"]
+input_winnow = ["10", "100", "250", "10000"]
+
 def create_inputs():
   problems = ["randmat", "thresh", "winnow", "outer", "product", "final"]
-  inputs = ["100 100 666", "1000 1000 777"] #, "10000 10000 888"]
-  input_thresh = ["66", "77"] #, "88"]
-  input_winnow = ["100", "1000"] #, "10000"]
-
   for i in range(len(inputs)):
     cur = inputs[i]
     file_name = "%s%d.in" % (problems[0], i)
@@ -37,7 +37,7 @@ def create_inputs():
       input_file = "%s%d.in" % (problem, j)
       output_file = "%s%d.out" % (problem, j)
       next_input_file = "%s%d.in" % (next_problem, j)
-      cmd = "cd ../../%s/%s && ./main < ../../metric/perf/%s > ../../metric/perf/%s" % (
+      cmd = "../../%s/%s/main < %s > %s" % (
           "cpp", problem, input_file, output_file);
       print cmd
       os.system(cmd)
@@ -69,35 +69,79 @@ def run_all():
   # scoop: exception
   # tbb: 
   for problem in sorted(problems):
-    problem = "thresh"
+    if problem == "chain": # TODO
+      continue
     for variant in sorted(variants):
       if problem == "chain" and variant == "seq":
         continue
       for language in sorted(languages):
-        language = "erlang"
-        time_output = "time-%s-%s-%s.out" % (language, problem, variant)
-        cmd = ""
-        cmd += "GOMAXPROCS=4 "
-        cmd += "time -a -f %%e -o %s ../../%s/%s/" % (
-            time_output, language, problem)
-        if problem != "chain":
-          cmd += "%s/" % variant
-        cmd += "main.sh"
-        #cmd += "main"
-        cmd += " < %s.in" % problem
-        #cmd += "./main.sh < %s.in > /dev/null 1>&0 2>&0" % (
-        #cmd += "main < %s.in > /dev/null 1>&0 2>&0" % (
-        #cmd += "main --nproc 2 < %s.in > /dev/null 1>&0 2>&0" % (
-        #cmd += "main < %s.in" % (
-            #problem);
-        print cmd
-        os.system(cmd)
-        f = open(time_output, "r")
-        value = f.read()
-        print value
-        break
-    break
+        if language == "erlang" or language == "scoop": # TODO
+          continue
+        for i in range(len(inputs)):
+          time_output = "time-%s-%s-%s-%d.out" % (
+              language, problem, variant, i)
+          print time_output
+          cmd = ""
+          #cmd += "GOMAXPROCS=4 "
+          cmd += "time -a -f %%e -o %s ../../%s/%s/" % (
+              time_output, language, problem)
+          if problem != "chain":
+            cmd += "%s/" % variant
+          if language == "erlang":
+            cmd += "main.sh"
+          elif language == "scoop":
+            cmd += "main -i"
+          else:
+            cmd += "main"
+          cmd += " < %s%d.in > %s-%s-%s-%d.out" % (
+              problem, i, language, problem, variant, i)
+          #cmd += "./main.sh < %s.in > /dev/null 1>&0 2>&0" % (
+          #cmd += "main < %s.in > /dev/null 1>&0 2>&0" % (
+          #cmd += "main --nproc 2 < %s.in > /dev/null 1>&0 2>&0" % (
+          #cmd += "main < %s.in" % (
+              #problem);
+          #print cmd
+          os.system(cmd)
+          f = open(time_output, "r")
+          value = f.read()
+          print value
+
+results = {}
+
+def get_results():
+  for problem in sorted(problems):
+    if problem == "chain": # TODO
+      continue
+    results[problem] = {}
+    for variant in sorted(variants):
+      if problem == "chain" and variant == "seq":
+        continue
+      results[problem][variant] = {}
+      for language in sorted(languages):
+        if language == "erlang" or language == "scoop": # TODO
+          continue
+        results[problem][variant][language] = {}
+        for i in range(len(inputs)):
+          results[problem][variant][language][i] = 0
+          cur = []
+          time_output = "time-%s-%s-%s-%d.out" % (
+              language, problem, variant, i)
+          print time_output
+          f = open(time_output, "r")
+          for line in f:
+            value = float(line)
+            cur.append(value)
+          f.close()
+
+          total = 0.0
+          for i in range(len(cur)):
+            total += cur[i]
+          avg = total / len(cur)
+          print avg
+          results[problem][variant][language][i] = avg
+  print results
 
 #make_all()
 create_inputs()
-#run_all()
+run_all()
+get_results()

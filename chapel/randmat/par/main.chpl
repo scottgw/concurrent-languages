@@ -15,7 +15,7 @@ proc randmat(nrows: int, ncols: int, s: int,
   const INT_MAX: int = 2147483647;
 
   var rand = new RandomStream(2 * s + 1); // s must be odd
-  coforall m in matrix {
+  forall m in matrix {
     m = floor(rand.getNext() * INT_MAX) : int;
   }
 }
