@@ -39,9 +39,9 @@ def make_all():
         print cmd
         assert(os.system(cmd) == 0)
 
-inputs = ["10 10 55", "100 100 666", "100 250 777"] #, "10000 10000 888"]
-input_thresh = ["55", "66", "77", "88"]
-input_winnow = ["10", "100", "250", "10000"]
+inputs = ["10 10 55", "100 100 666", "100 250 777", "100 1000 888"]
+input_thresh = ["55", "66", "77", "40"]
+input_winnow = ["10", "100", "250", "250"]
 
 def create_inputs():
   problems = ["randmat", "thresh", "winnow", "outer", "product", "final"]
@@ -71,10 +71,10 @@ def create_inputs():
       next_input_file = "%s%d.in" % (next_problem, j)
       cmd = "../../%s/%s/main < %s > %s" % (
           "cpp", problem, input_file, output_file);
-      print cmd
+      #print cmd
       assert(os.system(cmd) == 0)
       cmd = "cp %s %s" % (output_file, next_input_file)
-      print cmd
+      #print cmd
       assert(os.system(cmd) == 0)
       if next_problem == "thresh":
         f = open(next_input_file, "a")
@@ -82,7 +82,7 @@ def create_inputs():
         f.close()
       if next_problem == "winnow":
         cmd = "cp randmat%d.out %s" % (j, next_input_file)
-        print cmd
+        #print cmd
         assert(os.system(cmd) == 0)
         output = open(next_input_file, "a")
         f = open(output_file, "r")
@@ -98,7 +98,7 @@ def create_inputs():
     for j in range(len(inputs)):
       output_file = "%s%d.out" % (problem, j)
       cmd = "rm %s" % output_file
-      print cmd
+      #print cmd
       assert(os.system(cmd) == 0)
 
 def run_all():
@@ -132,6 +132,12 @@ def run_all():
             cmd += "main -i"
           else:
             cmd += "main"
+
+          if language == "chapel":
+            cmd += " --numLocales=1 --numThreadsPerLocale=16"
+          elif language == "cilk":
+            cmd += " --nproc=4"
+
           cmd += " < %s%d.in > %s-%s-%s-%d.out" % (
               problem, i, language, problem, variation, i)
           #cmd += "./main.sh < %s.in > /dev/null 1>&0 2>&0" % (
@@ -222,7 +228,7 @@ xscale=1
 
 #generate_erlang_main()
 #make_all()
-#create_inputs()
+create_inputs()
 run_all()
-#get_results()
-#output_graphs()
+get_results()
+output_graphs()
