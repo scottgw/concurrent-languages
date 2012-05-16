@@ -39,7 +39,7 @@ def make_all():
         print cmd
         assert(os.system(cmd) == 0)
 
-inputs = ["10 10 55", "100 100 666", "100 250 777", "100 1000 888"]
+inputs = ["10 10 55"]#, "100 100 666", "100 250 777"] #, "100 1000 888"]
 input_thresh = ["55", "66", "77", "40"]
 input_winnow = ["10", "100", "250", "250"]
 
@@ -110,10 +110,13 @@ def run_all():
   # tbb: 
   # TODO: check processor usage
   for problem in sorted(problems):
+    problem = "randmat"
     for variation in sorted(variations):
+      variation = "seq"
       if problem == "chain" and variation == "seq":
         continue
       for language in sorted(languages):
+        language = "erlang"
         if language == "scoop": # TODO: run scoop
           continue
         for i in range(len(inputs)):
@@ -150,8 +153,12 @@ def run_all():
           f = open(time_output, "r")
           value = f.read()
           print value
+        break
+      break
+    break
 
 results = {}
+INVALID = 999
 
 def get_results():
   for problem in sorted(problems):
@@ -164,9 +171,9 @@ def get_results():
         results[problem][variation][language] = {}
         for i in range(len(inputs)):
           if language == "scoop": # TODO
-            results[problem][variation][language][i] = 999
+            results[problem][variation][language][i] = INVALID
             continue
-          results[problem][variation][language][i] = 999
+          results[problem][variation][language][i] = INVALID
           cur = []
           time_output = "time-%s-%s-%s-%d.out" % (
               language, problem, variation, i)
@@ -182,53 +189,65 @@ def get_results():
             total += cur[j]
           avg = total / len(cur)
           print problem, variation, language, i, avg
+          if language == "erlang": # IMPORTANT !!!
+            assert(avg > 1)
+            avg -= 1
           results[problem][variation][language][i] = avg
-  print results
+  #print results
 
 def output_graphs():
   def create_graph(graph_name, values, max_value, pretty_name):
     old_stdout = sys.stdout
 
     variation_names = {"seq" : "Sequential", "par" : "Parallel"}
-    for variation in variations:
-      sys.stdout = open("../../../ufrgs/meu/images/graph-%s-%s.perf" % (
-        graph_name, variation), "w")
+    for i in range(len(inputs)):
+      for variation in variations:
+        nmax = 0
+        for language in sorted(languages):
+          for problem in sorted(problems):
+            if problem == "chain" and variation == "seq":
+              continue
+            cur = values[problem][variation][language][i]
+            if cur == INVALID:
+              continue
+            if cur > nmax:
+              nmax = cur
+        sys.stdout = open("../../../ufrgs/meu/images/graph-%s-%s-%d.perf" % (
+          graph_name, variation, i), "w")
 
-      sys.stdout.write("=cluster")
-      for language in sorted(languages):
-        sys.stdout.write(";" + language)
-      print '''
+        sys.stdout.write("=cluster")
+        for language in sorted(languages):
+          if language == "scoop": # TODO: fix scoop
+            continue
+          sys.stdout.write(";" + language)
+        print '''
 colors=black,yellow,red,med_blue,light_green,cyan
 =table
 yformat=%g
 =norotate
 xscale=1
 '''
-      variation_name = variation_names[variation]
-      print "max=%d" % max_value
-      print "ylabel=%s %s execution time" % (variation_name, pretty_name)
-      for problem in sorted(problems):
-        if problem == "chain" and variation == "seq":
-          continue
-        print problem,
-        #nmin = min(
-            #float(
-              #values[problem][language][variation]) for language in sorted(
-                #languages))
-        for language in sorted(languages):
-          #print("%.2f" % (
-            #float(values[problem][language][variation]) / nmin)),
-          print("%.2f" % (
-            float(values[problem][variation][language][len(inputs) - 1]))),
-        print ""
+        variation_name = variation_names[variation]
+        print "max=%f" % (nmax * 1.5)
+        print "ylabel=%s %sexecution time in seconds for input %d" % (variation_name, pretty_name, i)
+        for problem in sorted(problems):
+          if problem == "chain" and variation == "seq":
+            continue
+          print problem,
+          for language in sorted(languages):
+            if language == "scoop": # TODO: fix scoop
+              continue
+            print("%.2f" % (
+              float(values[problem][variation][language][i]))),
+          print ""
 
     sys.stdout = old_stdout
 
-  create_graph("exec-time", results, 60, "pretty_name_time")
+  create_graph("exec-time", results, 60, "")
 
 #generate_erlang_main()
 #make_all()
-create_inputs()
+#create_inputs()
 run_all()
 get_results()
 output_graphs()
