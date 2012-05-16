@@ -37,10 +37,10 @@ def make_all():
           cmd += "/%s" % variation;
         cmd += " && make -B"
         print cmd
-        os.system(cmd)
+        assert(os.system(cmd) == 0)
   cmd = "cp ../../go/chain/src/main/main ../../go/chain/main"
   print cmd
-  os.system(cmd)
+  assert(os.system(cmd) == 0)
 
 inputs = ["10 10 55", "100 100 666", "100 250 777"] #, "10000 10000 888"]
 input_thresh = ["55", "66", "77", "88"]
@@ -75,10 +75,10 @@ def create_inputs():
       cmd = "../../%s/%s/main < %s > %s" % (
           "cpp", problem, input_file, output_file);
       print cmd
-      os.system(cmd)
+      assert(os.system(cmd) == 0)
       cmd = "cp %s %s" % (output_file, next_input_file)
       print cmd
-      os.system(cmd)
+      assert(os.system(cmd) == 0)
       if next_problem == "thresh":
         f = open(next_input_file, "a")
         f.write(input_thresh[j] + "\n")
@@ -86,7 +86,7 @@ def create_inputs():
       if next_problem == "winnow":
         cmd = "cp randmat%d.out %s" % (j, next_input_file)
         print cmd
-        os.system(cmd)
+        assert(os.system(cmd) == 0)
         output = open(next_input_file, "a")
         f = open(output_file, "r")
         f.readline()
@@ -95,6 +95,14 @@ def create_inputs():
         output.write(input_winnow[j] + "\n")
         f.close()
         output.close()
+
+  for i in range(len(problems) - 1):
+    problem = problems[i]
+    for j in range(len(inputs)):
+      output_file = "%s%d.out" % (problem, j)
+      cmd = "rm %s" % output_file
+      print cmd
+      assert(os.system(cmd) == 0)
 
 def run_all():
   # chapel: works!
@@ -108,6 +116,7 @@ def run_all():
       if problem == "chain" and variation == "seq":
         continue
       for language in sorted(languages):
+        language = "erlang"
         if language == "scoop": # TODO
           continue
         for i in range(len(inputs)):
@@ -133,11 +142,12 @@ def run_all():
           #cmd += "main --nproc 2 < %s.in > /dev/null 1>&0 2>&0" % (
           #cmd += "main < %s.in" % (
               #problem);
-          #print cmd
-          os.system(cmd)
+          print cmd
+          assert(os.system(cmd) == 0)
           f = open(time_output, "r")
           value = f.read()
           print value
+        break
 
 results = {}
 

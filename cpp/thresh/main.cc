@@ -79,7 +79,8 @@ int main(int argc, char** argv) {
   printf("%d %d\n", nrows, ncols);
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
-      printf("%d ", mask[i][j]);
+      if (j) printf(" ");
+      printf("%d", mask[i][j]);
     }
     printf("\n");
   }
