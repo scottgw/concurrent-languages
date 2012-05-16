@@ -6,6 +6,8 @@ problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 variations = ["seq", "par"]
 
 def make_all():
+  # TODO: make go chain
+  # TODO: make scoop
   for problem in sorted(problems):
     for variation in sorted(variations):
       if problem == "chain" and variation == "seq":
@@ -16,6 +18,9 @@ def make_all():
           cmd = "cd ../../%s/%s && make -B" % (language, problem);
         print cmd
         os.system(cmd)
+  cmd = "cp ../../go/chain/src/main/main ../../go/chain/main"
+  print cmd
+  os.system(cmd)
 
 inputs = ["10 10 55", "100 100 666", "100 250 777"] #, "10000 10000 888"]
 input_thresh = ["55", "66", "77", "88"]
@@ -28,6 +33,15 @@ def create_inputs():
     file_name = "%s%d.in" % (problems[0], i)
     f = open(file_name, "w")
     f.write(cur + "\n")
+    f.close()
+
+  for i in range(len(inputs)):
+    cur = inputs[i]
+    file_name = "chain%d.in" % i
+    f = open(file_name, "w")
+    data = inputs[i].split()
+    f.write("%s\n%s\n%s\n%s\n" % (
+      data[1], data[2], input_thresh[i], input_winnow[i]))
     f.close()
 
   for i in range(len(problems) - 1):
@@ -70,8 +84,6 @@ def run_all():
   # scoop: exception
   # tbb: 
   for problem in sorted(problems):
-    if problem == "chain": # TODO
-      continue
     for variation in sorted(variations):
       if problem == "chain" and variation == "seq":
         continue
@@ -119,10 +131,10 @@ def get_results():
       for language in sorted(languages):
         results[problem][variation][language] = {}
         for i in range(len(inputs)):
-          if problem == "chain" or language == "erlang" or language == "scoop": # TODO
-            results[problem][variation][language][i] = 10
+          if language == "erlang" or language == "scoop": # TODO
+            results[problem][variation][language][i] = 999
             continue
-          results[problem][variation][language][i] = 10
+          results[problem][variation][language][i] = 999
           cur = []
           time_output = "time-%s-%s-%s-%d.out" % (
               language, problem, variation, i)
@@ -180,10 +192,10 @@ xscale=1
 
     sys.stdout = old_stdout
 
-  create_graph("exec-time", results, 10, "pretty_name_time")
+  create_graph("exec-time", results, 60, "pretty_name_time")
 
 #make_all()
-create_inputs()
+#create_inputs()
 #run_all()
-#get_results()
-#output_graphs()
+get_results()
+output_graphs()
