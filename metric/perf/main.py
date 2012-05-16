@@ -39,7 +39,7 @@ def make_all():
         print cmd
         assert(os.system(cmd) == 0)
 
-inputs = ["10 10 55"]#, "100 100 666", "100 250 777"] #, "100 1000 888"]
+inputs = ["10 10 55", "100 100 666"] #, "100 250 777"] #, "100 1000 888"]
 input_thresh = ["55", "66", "77", "40"]
 input_winnow = ["10", "100", "250", "250"]
 
@@ -110,13 +110,13 @@ def run_all():
   # tbb: 
   # TODO: check processor usage
   for problem in sorted(problems):
-    problem = "randmat"
+    #problem = "randmat"
     for variation in sorted(variations):
-      variation = "seq"
+      #variation = "seq"
       if problem == "chain" and variation == "seq":
         continue
       for language in sorted(languages):
-        language = "erlang"
+        #language = "erlang"
         if language == "scoop": # TODO: run scoop
           continue
         for i in range(len(inputs)):
@@ -153,9 +153,9 @@ def run_all():
           f = open(time_output, "r")
           value = f.read()
           print value
-        break
-      break
-    break
+        #break
+      #break
+    #break
 
 results = {}
 INVALID = 999
@@ -201,10 +201,10 @@ def output_graphs():
 
     variation_names = {"seq" : "Sequential", "par" : "Parallel"}
     for i in range(len(inputs)):
-      for variation in variations:
-        nmax = 0
-        for language in sorted(languages):
-          for problem in sorted(problems):
+      nmax = 0
+      for language in sorted(languages):
+        for problem in sorted(problems):
+          for variation in variations:
             if problem == "chain" and variation == "seq":
               continue
             cur = values[problem][variation][language][i]
@@ -212,6 +212,7 @@ def output_graphs():
               continue
             if cur > nmax:
               nmax = cur
+      for variation in variations:
         sys.stdout = open("../../../ufrgs/meu/images/graph-%s-%s-%d.perf" % (
           graph_name, variation, i), "w")
 
