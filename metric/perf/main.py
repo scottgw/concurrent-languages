@@ -88,7 +88,7 @@ def run_all():
       if problem == "chain" and variation == "seq":
         continue
       for language in sorted(languages):
-        if language == "erlang" or language == "scoop": # TODO
+        if language == "scoop": # TODO
           continue
         for i in range(len(inputs)):
           time_output = "time-%s-%s-%s-%d.out" % (
@@ -131,7 +131,7 @@ def get_results():
       for language in sorted(languages):
         results[problem][variation][language] = {}
         for i in range(len(inputs)):
-          if language == "erlang" or language == "scoop": # TODO
+          if language == "scoop": # TODO
             results[problem][variation][language][i] = 999
             continue
           results[problem][variation][language][i] = 999
