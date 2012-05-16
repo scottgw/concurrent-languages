@@ -25,22 +25,19 @@ erl -noshell -s main main -s init stop
       f.close()
 
 def make_all():
-  # TODO: make go chain
-  # TODO: make scoop
   for problem in sorted(problems):
     for variation in sorted(variations):
       if problem == "chain" and variation == "seq":
         continue
       for language in sorted(languages):
+        if language == "scoop": # TODO: make scoop
+          continue
         cmd = "cd ../../%s/%s" % (language, problem);
         if problem != "chain":
           cmd += "/%s" % variation;
-        cmd += " && make -B"
+        cmd += " && make main"
         print cmd
         assert(os.system(cmd) == 0)
-  cmd = "cp ../../go/chain/src/main/main ../../go/chain/main"
-  print cmd
-  assert(os.system(cmd) == 0)
 
 inputs = ["10 10 55", "100 100 666", "100 250 777"] #, "10000 10000 888"]
 input_thresh = ["55", "66", "77", "88"]
@@ -111,13 +108,13 @@ def run_all():
   # go: GOMAXPROCS=4
   # scoop: exception
   # tbb: 
+  # TODO: check processor usage
   for problem in sorted(problems):
     for variation in sorted(variations):
       if problem == "chain" and variation == "seq":
         continue
       for language in sorted(languages):
-        language = "erlang"
-        if language == "scoop": # TODO
+        if language == "scoop": # TODO: run scoop
           continue
         for i in range(len(inputs)):
           time_output = "time-%s-%s-%s-%d.out" % (
@@ -147,7 +144,6 @@ def run_all():
           f = open(time_output, "r")
           value = f.read()
           print value
-        break
 
 results = {}
 
@@ -226,7 +222,7 @@ xscale=1
 
 #generate_erlang_main()
 #make_all()
-create_inputs()
-#run_all()
+#create_inputs()
+run_all()
 #get_results()
 #output_graphs()
