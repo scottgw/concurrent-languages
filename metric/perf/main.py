@@ -39,9 +39,9 @@ def make_all():
         print cmd
         assert(os.system(cmd) == 0)
 
-inputs = ["10 10 55", "100 100 666"] #, "100 250 777"] #, "100 1000 888"]
+inputs = ["10 10 55", "100 100 666", "100 250 777"] #, "100 1000 888"]
 input_thresh = ["55", "66", "77", "40"]
-input_winnow = ["10", "100", "250", "250"]
+input_winnow = ["10", "100", "125", "250"]
 
 def create_inputs():
   problems = ["randmat", "thresh", "winnow", "outer", "product", "final"]
@@ -110,7 +110,7 @@ def run_all():
   # tbb: 
   # TODO: check processor usage
   for problem in sorted(problems):
-    #problem = "randmat"
+    #problem = "product"
     for variation in sorted(variations):
       #variation = "seq"
       if problem == "chain" and variation == "seq":
@@ -248,7 +248,7 @@ xscale=1
 
 #generate_erlang_main()
 #make_all()
-#create_inputs()
+create_inputs()
 run_all()
 get_results()
 output_graphs()
