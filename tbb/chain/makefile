@@ -1,5 +1,6 @@
 all: main
-	./$< < $<.in
+	./$< < $<.in > main.out
+	diff main.out main.gold
 
 main: randmat.o thresh.o winnow.o outer.o product.o
 

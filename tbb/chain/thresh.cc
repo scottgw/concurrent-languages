@@ -36,16 +36,11 @@ int reduce2d_with_filter(int nrows, int ncols,
       [=](range r, int partial_value)->int {
         int result = partial_value;
         for (size_t i = r.begin(); i != r.end(); i++) {
-          result = aggregator(result, parallel_reduce(
-            range(0, ncols), 0,
-            [=](range r, int partial_value)->int {
-              int result = partial_value;
-              for (size_t j = r.begin(); j != r.end(); j++) {
-                result = op(result, matrix[i][j]);
-              }
-              return result;
-            },
-            aggregator));
+          int temp = 0;
+          for (int j = 0; j < ncols; j++) {
+            temp = op(temp, matrix[i][j]);
+          }
+          result = aggregator(result, temp);
         }
         return result;
       },
@@ -114,13 +109,9 @@ void thresh(int nrows, int ncols, const vector<vector<int>>& matrix,
       range(0, nrows),
       [&](range r) {
         for (size_t i = r.begin(); i != r.end(); ++i) {
-          parallel_for(
-            range(0, ncols),
-            [&](range s) {
-              for (size_t j = s.begin(); j != s.end(); ++j) {
-                (*mask)[i][j] = matrix[i][j] >= threshold;
-              }
-            });
+          for (int j = 0; j < ncols; j++) {
+            (*mask)[i][j] = matrix[i][j] >= threshold;
+          }
         }
       });
 }

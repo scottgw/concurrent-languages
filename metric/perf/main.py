@@ -110,13 +110,13 @@ def run_all():
   # tbb: 
   # TODO: check processor usage
   for problem in sorted(problems):
-    #problem = "product"
+    #problem = "thresh"
     for variation in sorted(variations):
-      #variation = "seq"
+      #variation = "par"
       if problem == "chain" and variation == "seq":
         continue
       for language in sorted(languages):
-        #language = "erlang"
+        #language = "tbb"
         if language == "scoop": # TODO: run scoop
           continue
         for i in range(len(inputs)):
