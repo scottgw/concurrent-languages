@@ -80,11 +80,17 @@ cilk int reduce2d_identity_filter(int col, ReduceState state) {
 }
 
 cilk int reduce2d_start_cols(int row, ReduceState state) {
-  int res;
+  int res, j, temp;
+  GenericReduceFunction f;
   state.row = row;
-  // parallel reduce on cols
-  res = spawn generic_reduce(0, state.ncols, state.op, state.filter, state);
+  f = state.filter;
+  res = spawn f(0, state);
   sync;
+  // linear reduce on cols
+  for (j = 1; j < state.ncols; j++) {
+    temp = spawn f(j, state);
+    res = state.op(res, temp);
+  }
   return res;
 }
 

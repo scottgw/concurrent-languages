@@ -110,19 +110,19 @@ def run_all():
   # tbb: 
   # TODO: check processor usage
   for problem in sorted(problems):
-    #problem = "thresh"
+    problem = "chain"
     for variation in sorted(variations):
-      #variation = "par"
+      variation = "par"
       if problem == "chain" and variation == "seq":
         continue
       for language in sorted(languages):
-        #language = "tbb"
+        language = "cilk"
         if language == "scoop": # TODO: run scoop
           continue
         for i in range(len(inputs)):
           time_output = "time-%s-%s-%s-%d.out" % (
               language, problem, variation, i)
-          print time_output
+          #print time_output
           cmd = ""
           #cmd += "GOMAXPROCS=4 "
           cmd += "time -a -f %%e -o %s ../../%s/%s/" % (
@@ -153,9 +153,9 @@ def run_all():
           f = open(time_output, "r")
           value = f.read()
           print value
-        #break
-      #break
-    #break
+        break
+      break
+    break
 
 results = {}
 INVALID = 999
@@ -177,7 +177,7 @@ def get_results():
           cur = []
           time_output = "time-%s-%s-%s-%d.out" % (
               language, problem, variation, i)
-          print time_output
+          #print time_output
           f = open(time_output, "r")
           for line in f:
             value = float(line)
