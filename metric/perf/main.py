@@ -1,8 +1,10 @@
 import os
 import sys
 
-languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
-problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
+#languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
+languages = ["chapel"]
+#problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
+problems = ["randmat"]
 variations = ["seq", "par"]
 
 def generate_erlang_main():
@@ -39,12 +41,19 @@ def make_all():
         print cmd
         assert(os.system(cmd) == 0)
 
-inputs = ["10 10 55", "100 100 666", "100 250 777", "100 1000 888"] #, "100 1000 888"]
-input_thresh = ["55", "66", "77", "55"]
-input_winnow = ["10", "100", "125", "250"]
+# ===== general =====
+#inputs = ["10 10 55", "100 100 666", "100 250 777"] #, "100 1000 888"] #, "100 1000 888"]
+#input_thresh = ["55", "66", "77", "55"]
+#input_winnow = ["10", "100", "125", "250"]
+
+# ===== chapel =====
+inputs = ["10000 10000 888"]
+input_thresh = ["55"]
+input_winnow = ["250"]
 
 def create_inputs():
-  problems = ["randmat", "thresh", "winnow", "outer", "product", "final"]
+  #problems = ["randmat", "thresh", "winnow", "outer", "product", "final"]
+  problems = ["randmat", "final"]
   for i in range(len(inputs)):
     cur = inputs[i]
     file_name = "%s%d.in" % (problems[0], i)
@@ -110,13 +119,11 @@ def run_all():
   # tbb: 
   # TODO: check processor usage
   for problem in sorted(problems):
-    problem = "chain"
     for variation in sorted(variations):
       variation = "par"
       if problem == "chain" and variation == "seq":
         continue
       for language in sorted(languages):
-        language = "go"
         if language == "scoop" or language == "erlang": # TODO: run scoop
           continue
         for i in range(len(inputs)):
@@ -138,25 +145,23 @@ def run_all():
             cmd += "main"
 
           if language == "chapel":
-            cmd += " --numLocales=1 --numThreadsPerLocale=16"
+            cmd += " --numLocales=1 --numThreadsPerLocale=2 "
           elif language == "cilk":
-            cmd += " --nproc=4"
+            cmd += " --nproc=4 "
 
-          cmd += " < %s%d.in > %s-%s-%s-%d.out 2> 2.out 3> 3.out" % (
-              problem, i, language, problem, variation, i)
-          #cmd += "./main.sh < %s.in > /dev/null 1>&0 2>&0" % (
+          #cmd += " < %s%d.in > %s-%s-%s-%d.out 2> 2.out 3> 3.out" % (
+              #problem, i, language, problem, variation, i)
+          cmd += " < %s%d.in > /dev/null 1>&0 2>&0" % (
           #cmd += "main < %s.in > /dev/null 1>&0 2>&0" % (
           #cmd += "main --nproc 2 < %s.in > /dev/null 1>&0 2>&0" % (
           #cmd += "main < %s.in" % (
-              #problem);
+              problem, i);
           print cmd
           assert(os.system(cmd) == 0)
           f = open(time_output, "r")
           value = f.read()
           print value
-        break
       break
-    break
 
 results = {}
 INVALID = 999
@@ -249,7 +254,7 @@ xscale=1
 
 #generate_erlang_main()
 #make_all()
-create_inputs()
+#create_inputs()
 run_all()
 get_results()
 output_graphs()

@@ -14,7 +14,7 @@ proc randmat(nrows: int, ncols: int, s: int,
     matrix: [1..nrows, 1..ncols] int) {
   const INT_MAX: int = 2147483647;
 
-  var rand = new RandomStream(2 * s + 1); // s must be odd
+  var rand = new RandomStream(2 * s + 1, false); // s must be odd
   forall m in matrix {
     m = floor(rand.getNext() * INT_MAX) : int;
   }
@@ -31,6 +31,7 @@ proc main() {
 
   randmat(nrows, ncols, s, matrix);
 
+  /*
   writeln(nrows, " ", ncols);
 
   for i in 1..nrows do {
@@ -39,5 +40,5 @@ proc main() {
     }
     writeln();
   }
-  writeln();
+  writeln();//*/
 }
