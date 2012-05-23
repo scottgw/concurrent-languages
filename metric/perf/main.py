@@ -39,8 +39,8 @@ def make_all():
         print cmd
         assert(os.system(cmd) == 0)
 
-inputs = ["10 10 55", "100 100 666", "100 250 777"] #, "100 1000 888"]
-input_thresh = ["55", "66", "77", "40"]
+inputs = ["10 10 55", "100 100 666", "100 250 777", "100 1000 888"] #, "100 1000 888"]
+input_thresh = ["55", "66", "77", "55"]
 input_winnow = ["10", "100", "125", "250"]
 
 def create_inputs():
@@ -116,15 +116,16 @@ def run_all():
       if problem == "chain" and variation == "seq":
         continue
       for language in sorted(languages):
-        language = "cilk"
-        if language == "scoop": # TODO: run scoop
+        language = "go"
+        if language == "scoop" or language == "erlang": # TODO: run scoop
           continue
         for i in range(len(inputs)):
           time_output = "time-%s-%s-%s-%d.out" % (
               language, problem, variation, i)
           #print time_output
           cmd = ""
-          #cmd += "GOMAXPROCS=4 "
+          if language == "go":
+            cmd += "GOMAXPROCS=1 "
           cmd += "time -a -f %%e -o %s ../../%s/%s/" % (
               time_output, language, problem)
           if problem != "chain":
@@ -141,7 +142,7 @@ def run_all():
           elif language == "cilk":
             cmd += " --nproc=4"
 
-          cmd += " < %s%d.in > %s-%s-%s-%d.out" % (
+          cmd += " < %s%d.in > %s-%s-%s-%d.out 2> 2.out 3> 3.out" % (
               problem, i, language, problem, variation, i)
           #cmd += "./main.sh < %s.in > /dev/null 1>&0 2>&0" % (
           #cmd += "main < %s.in > /dev/null 1>&0 2>&0" % (
@@ -170,7 +171,7 @@ def get_results():
       for language in sorted(languages):
         results[problem][variation][language] = {}
         for i in range(len(inputs)):
-          if language == "scoop": # TODO
+          if language == "scoop" or language == "erlang": # TODO
             results[problem][variation][language][i] = INVALID
             continue
           results[problem][variation][language][i] = INVALID
@@ -218,7 +219,7 @@ def output_graphs():
 
         sys.stdout.write("=cluster")
         for language in sorted(languages):
-          if language == "scoop": # TODO: fix scoop
+          if language == "scoop" or language == "erlang": # TODO: fix scoop
             continue
           sys.stdout.write(";" + language)
         print '''
@@ -236,7 +237,7 @@ xscale=1
             continue
           print problem,
           for language in sorted(languages):
-            if language == "scoop": # TODO: fix scoop
+            if language == "scoop" or language == "erlang": # TODO: fix scoop
               continue
             print("%.2f" % (
               float(values[problem][variation][language][i]))),
