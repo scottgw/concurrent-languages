@@ -6,4 +6,4 @@ all: main
 	echo "2 5 9" | ./main
 
 main: main.cilk
-	cilkc -o main main.cilk
+	cilkc -O2 -o main main.cilk

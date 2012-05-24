@@ -13,7 +13,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-void randmat(int nrows, int ncols, int s, int** matrix) {
+static char matrix[10000][100000];
+
+void randmat(int nrows, int ncols, int s) {
   int i, j;
   srand(s);
   for (i = 0; i < nrows; i++) {
@@ -24,17 +26,12 @@ void randmat(int nrows, int ncols, int s, int** matrix) {
 }
 
 int main(int argc, char *argv[]) {
-  int nrows, ncols, s, i, j;
-  int **matrix;
+  int nrows, ncols, s;
   scanf("%d%d%d", &nrows, &ncols, &s);
 
-  matrix = (int **) malloc(sizeof(int *) * nrows);
-  for (i =  0; i < nrows; i++) {
-    matrix[i] = (int *) malloc(sizeof(int) * ncols);
-  }
+  randmat(nrows, ncols, s);
 
-  randmat(nrows, ncols, s, matrix);
-
+  /*
   for (i = 0; i < nrows; i++) {
     for (j = 0; j < ncols; j++) {
       printf("%d ", matrix[i][j]);
@@ -46,7 +43,7 @@ int main(int argc, char *argv[]) {
   for (i = 0; i < nrows; i++) {
     free(matrix[i]);
   }
-  free(matrix);
+  free(matrix);//*/
 
   return 0;
 }

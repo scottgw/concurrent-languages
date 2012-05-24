@@ -2,7 +2,7 @@ import os
 import sys
 
 #languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
-languages = ["chapel"]
+languages = ["cilk"]
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 problems = ["randmat"]
 variations = ["seq", "par"]
@@ -47,7 +47,12 @@ def make_all():
 #input_winnow = ["10", "100", "125", "250"]
 
 # ===== chapel =====
-inputs = ["10000 10000 888"]
+#inputs = ["10000 10000 888"]
+#input_thresh = ["55"]
+#input_winnow = ["250"]
+
+# ===== cilk =====
+inputs = ["10000 100000 888"]
 input_thresh = ["55"]
 input_winnow = ["250"]
 
@@ -112,7 +117,7 @@ def create_inputs():
 
 def run_all():
   # chapel: works!
-  # cilk: --nproc 4
+  # cilk: --nproc 4  NO EQUAL SIGN!!!
   # erlang: main.sh
   # go: GOMAXPROCS=4
   # scoop: exception
@@ -120,7 +125,7 @@ def run_all():
   # TODO: check processor usage
   for problem in sorted(problems):
     for variation in sorted(variations):
-      variation = "par"
+      #variation = "par"
       if problem == "chain" and variation == "seq":
         continue
       for language in sorted(languages):
@@ -147,11 +152,13 @@ def run_all():
           if language == "chapel":
             cmd += " --numLocales=1 --numThreadsPerLocale=2 "
           elif language == "cilk":
-            cmd += " --nproc=4 "
+            cmd += " --nproc 4 "
 
           #cmd += " < %s%d.in > %s-%s-%s-%d.out 2> 2.out 3> 3.out" % (
               #problem, i, language, problem, variation, i)
-          cmd += " < %s%d.in > /dev/null 1>&0 2>&0" % (
+          #cmd += " < %s%d.in > /dev/null 1>&0 2>&0" % (
+          cmd += " < %s%d.in" % (
+          #cmd += " < %s%d.in > 1.out 1>2.out 2>3.out" % (
           #cmd += "main < %s.in > /dev/null 1>&0 2>&0" % (
           #cmd += "main --nproc 2 < %s.in > /dev/null 1>&0 2>&0" % (
           #cmd += "main < %s.in" % (
@@ -161,7 +168,7 @@ def run_all():
           f = open(time_output, "r")
           value = f.read()
           print value
-      break
+      #break
 
 results = {}
 INVALID = 999

@@ -5,6 +5,6 @@ all: main
 	echo "2 5 8" | ./main --nproc 4
 	echo "2 5 9" | ./main --nproc 4
 
-# flags: --cilk-profile, --cilk-span
+# flags: -cilk-profile, -cilk-span -nproc 4
 main: main.cilk
-	cilkc -o main main.cilk
+	cilkc -O2 -o main main.cilk
