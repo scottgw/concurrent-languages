@@ -11,7 +11,9 @@
 #include <cstdio>
 #include <cstdlib>
 
-void randmat(int nrows, int ncols, int s, int** matrix) {
+static char matrix[10000][100000];
+
+void randmat(int nrows, int ncols, int s) {
   srand(s);
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
@@ -25,13 +27,9 @@ int main(int argc, char** argv) {
 
   scanf("%d%d%d", &nrows, &ncols, &s);
 
-  int** matrix = new int* [nrows];
-  for (int i = 0; i < nrows; i++) {
-    matrix[i] = new int[ncols];
-  }
+  randmat(nrows, ncols, s);
 
-  randmat(nrows, ncols, s, matrix);
-
+  /*
   printf("%d %d\n", nrows, ncols);
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
@@ -39,12 +37,7 @@ int main(int argc, char** argv) {
     }
     printf("\n");
   }
-  printf("\n");
-
-  for (int i = 0; i < nrows; i++) {
-    delete[] matrix[i];
-  }
-  delete[] matrix;
+  printf("\n");//*/
 
   return 0;
 }

@@ -2,7 +2,7 @@ import os
 import sys
 
 #languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
-languages = ["cilk"]
+languages = ["tbb"]
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 problems = ["randmat"]
 variations = ["seq", "par"]
@@ -55,6 +55,12 @@ def make_all():
 inputs = ["10000 100000 888"]
 input_thresh = ["55"]
 input_winnow = ["250"]
+
+# ===== tbb =====
+inputs = ["10000 100000 888"]
+input_thresh = ["55"]
+input_winnow = ["250"]
+
 
 def create_inputs():
   #problems = ["randmat", "thresh", "winnow", "outer", "product", "final"]
@@ -156,8 +162,8 @@ def run_all():
 
           #cmd += " < %s%d.in > %s-%s-%s-%d.out 2> 2.out 3> 3.out" % (
               #problem, i, language, problem, variation, i)
-          #cmd += " < %s%d.in > /dev/null 1>&0 2>&0" % (
-          cmd += " < %s%d.in" % (
+          cmd += " < %s%d.in > /dev/null 1>&0 2>&0" % (
+          #cmd += " < %s%d.in" % (
           #cmd += " < %s%d.in > 1.out 1>2.out 2>3.out" % (
           #cmd += "main < %s.in > /dev/null 1>&0 2>&0" % (
           #cmd += "main --nproc 2 < %s.in > /dev/null 1>&0 2>&0" % (
