@@ -16,29 +16,24 @@ import (
   "rand"
 )
 
-func randvec(vector []int, n int, done chan bool) {
+func randvec(vector []int, n int, r *rand.Rand, done chan bool) {
   for i := 0; i < n; i++ {
-    vector[i] = rand.Int();
+    vector[i] = r.Int();
   }
   done <- true;
 }
 
-func randmat(nrows, ncols, s int) [][]int {
-  var matrix [][]int;
-  matrix = make([][]int, nrows);
-  for i := 0; i < nrows; i++ {
-    matrix[i] = make([]int, ncols);
-  }
-  rand.Seed(int64(s));
+func randmat(nrows, ncols, s int, matrix [][]int) {
+  //rand.Seed(int64(s));
   done := make(chan bool);
   // parallel for on rows
   for i := 0; i < nrows; i++ {
-    go randvec(matrix[i], ncols, done);
+    r := rand.New(rand.NewSource(int64(s + i)));
+    go randvec(matrix[i], ncols, r, done);
   }
   for i := 0; i < nrows; i++ {
     <-done;
   }
-  return matrix;
 }
 
 func main() {
@@ -47,13 +42,19 @@ func main() {
 
   fmt.Scanf("%d%d%d", &nrows, &ncols, &s);
 
-  matrix = randmat(nrows, ncols, s);
+  matrix = make([][]int, nrows);
+  for i := 0; i < nrows; i++ {
+    matrix[i] = make([]int, ncols);
+  }
 
+  randmat(nrows, ncols, s, matrix);
+
+  /*
   for i := 0; i < nrows; i++ {
     for j := 0; j < ncols; j++ {
       fmt.Printf("%d ", matrix[i][j]);
     }
     fmt.Printf("\n");
   }
-  fmt.Printf("\n");
+  fmt.Printf("\n");//*/
 }

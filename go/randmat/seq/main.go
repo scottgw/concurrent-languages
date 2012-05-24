@@ -16,12 +16,7 @@ import (
   "rand"
 )
 
-func randmat(nrows, ncols, s int) [][]int {
-  var matrix [][]int;
-  matrix = make([][]int, nrows);
-  for i := 0; i < nrows; i++ {
-    matrix[i] = make([]int, ncols);
-  }
+func randmat(nrows, ncols, s int, matrix [][]int) [][]int {
   rand.Seed(int64(s));
   for i := 0; i < nrows; i++ {
     for j := 0; j < ncols; j++ {
@@ -37,13 +32,19 @@ func main() {
 
   fmt.Scanf("%d%d%d", &nrows, &ncols, &s);
 
-  matrix = randmat(nrows, ncols, s);
+  matrix = make([][]int, nrows);
+  for i := 0; i < nrows; i++ {
+    matrix[i] = make([]int, ncols);
+  }
 
+  randmat(nrows, ncols, s, matrix);
+
+  /*
   for i := 0; i < nrows; i++ {
     for j := 0; j < ncols; j++ {
       fmt.Printf("%d ", matrix[i][j]);
     }
     fmt.Printf("\n");
   }
-  fmt.Printf("\n");
+  fmt.Printf("\n");//*/
 }
