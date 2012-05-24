@@ -2,7 +2,7 @@ import os
 import sys
 
 #languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
-languages = ["go"]
+languages = ["erlang"]
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 problems = ["randmat"]
 variations = ["seq", "par"]
@@ -65,6 +65,11 @@ def make_all():
 #inputs = ["10000 10000 888"]
 #input_thresh = ["55"]
 #input_winnow = ["250"]
+
+# ===== erlang =====
+inputs = ["10000 1000 888"]
+input_thresh = ["55"]
+input_winnow = ["250"]
 
 def create_inputs():
   #problems = ["randmat", "thresh", "winnow", "outer", "product", "final"]
@@ -139,7 +144,7 @@ def run_all():
       if problem == "chain" and variation == "seq":
         continue
       for language in sorted(languages):
-        if language == "scoop" or language == "erlang": # TODO: run scoop
+        if language == "scoop": # TODO: run scoop
           continue
         for i in range(len(inputs)):
           time_output = "time-%s-%s-%s-%d.out" % (
@@ -193,7 +198,7 @@ def get_results():
       for language in sorted(languages):
         results[problem][variation][language] = {}
         for i in range(len(inputs)):
-          if language == "scoop" or language == "erlang": # TODO
+          if language == "scoop": # TODO
             results[problem][variation][language][i] = INVALID
             continue
           results[problem][variation][language][i] = INVALID
@@ -241,7 +246,7 @@ def output_graphs():
 
         sys.stdout.write("=cluster")
         for language in sorted(languages):
-          if language == "scoop" or language == "erlang": # TODO: fix scoop
+          if language == "scoop": # TODO: fix scoop
             continue
           sys.stdout.write(";" + language)
         print '''
@@ -259,7 +264,7 @@ xscale=1
             continue
           print problem,
           for language in sorted(languages):
-            if language == "scoop" or language == "erlang": # TODO: fix scoop
+            if language == "scoop": # TODO: fix scoop
               continue
             print("%.2f" % (
               float(values[problem][variation][language][i]))),
@@ -271,7 +276,7 @@ xscale=1
 
 #generate_erlang_main()
 #make_all()
-#create_inputs()
+create_inputs()
 run_all()
 get_results()
 output_graphs()
