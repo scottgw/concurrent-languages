@@ -58,6 +58,7 @@ proc main() {
 
   thresh(nrows, ncols, matrix, percent, mask);
 
+  /*
   writeln(nrows, " ", ncols);
 
   for i in 1..nrows do {
@@ -66,5 +67,5 @@ proc main() {
     }
     writeln();
   }
-  writeln();
+  writeln();//*/
 }

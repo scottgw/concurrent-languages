@@ -2,9 +2,10 @@ import os
 import sys
 
 #languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
-languages = ["scoop"]
+languages = ["chapel"]
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
-problems = ["randmat"]
+#problems = ["randmat", "thresh"]
+problems = ["thresh"]
 variations = ["seq", "par"]
 
 def generate_erlang_main():
@@ -45,9 +46,9 @@ def make_all():
 #input_winnow = ["10", "100", "125", "250"]
 
 # ===== chapel =====
-#inputs = ["10000 10000 888"]
-#input_thresh = ["55"]
-#input_winnow = ["250"]
+inputs = ["10000 10000 888"]
+input_thresh = ["55"]
+input_winnow = ["250"]
 
 # ===== cilk =====
 #inputs = ["10000 100000 888"]
@@ -70,9 +71,9 @@ def make_all():
 #input_winnow = ["250"]
 
 # ===== scoop =====
-inputs = ["4 25000 888"]
-input_thresh = ["55"]
-input_winnow = ["250"]
+#inputs = ["4 25000 888"]
+#input_thresh = ["55"]
+#input_winnow = ["250"]
 
 def create_inputs():
   #problems = ["randmat", "thresh", "winnow", "outer", "product", "final"]
@@ -273,7 +274,7 @@ xscale=1
 
 #generate_erlang_main()
 #make_all()
-create_inputs()
+#create_inputs()
 run_all()
 get_results()
 output_graphs()
