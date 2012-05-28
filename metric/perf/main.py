@@ -2,7 +2,7 @@ import os
 import sys
 
 #languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
-languages = ["erlang"]
+languages = ["scoop"]
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 problems = ["randmat"]
 variations = ["seq", "par"]
@@ -32,8 +32,6 @@ def make_all():
       if problem == "chain" and variation == "seq":
         continue
       for language in sorted(languages):
-        if language == "scoop": # TODO: make scoop
-          continue
         cmd = "cd ../../%s/%s" % (language, problem);
         if problem != "chain":
           cmd += "/%s" % variation;
@@ -67,7 +65,12 @@ def make_all():
 #input_winnow = ["250"]
 
 # ===== erlang =====
-inputs = ["10000 1000 888"]
+#inputs = ["10000 1000 888"]
+#input_thresh = ["55"]
+#input_winnow = ["250"]
+
+# ===== scoop =====
+inputs = ["4 25000 888"]
 input_thresh = ["55"]
 input_winnow = ["250"]
 
@@ -144,8 +147,6 @@ def run_all():
       if problem == "chain" and variation == "seq":
         continue
       for language in sorted(languages):
-        if language == "scoop": # TODO: run scoop
-          continue
         for i in range(len(inputs)):
           time_output = "time-%s-%s-%s-%d.out" % (
               language, problem, variation, i)
@@ -169,10 +170,13 @@ def run_all():
           elif language == "cilk":
             cmd += " --nproc 4 "
 
+          if language != "scoop":
+            cmd += " <";
+
           #cmd += " < %s%d.in > %s-%s-%s-%d.out 2> 2.out 3> 3.out" % (
               #problem, i, language, problem, variation, i)
-          #cmd += " < %s%d.in > /dev/null 1>&0 2>&0" % (
-          cmd += " < %s%d.in" % (
+          cmd += " %s%d.in > /dev/null 1>&0 2>&0" % (
+          #cmd += " %s%d.in" % (
           #cmd += " < %s%d.in > 1.out 1>2.out 2>3.out" % (
           #cmd += "main < %s.in > /dev/null 1>&0 2>&0" % (
           #cmd += "main --nproc 2 < %s.in > /dev/null 1>&0 2>&0" % (
@@ -198,9 +202,6 @@ def get_results():
       for language in sorted(languages):
         results[problem][variation][language] = {}
         for i in range(len(inputs)):
-          if language == "scoop": # TODO
-            results[problem][variation][language][i] = INVALID
-            continue
           results[problem][variation][language][i] = INVALID
           cur = []
           time_output = "time-%s-%s-%s-%d.out" % (
@@ -246,8 +247,6 @@ def output_graphs():
 
         sys.stdout.write("=cluster")
         for language in sorted(languages):
-          if language == "scoop": # TODO: fix scoop
-            continue
           sys.stdout.write(";" + language)
         print '''
 colors=black,yellow,red,med_blue,light_green,cyan
@@ -264,8 +263,6 @@ xscale=1
             continue
           print problem,
           for language in sorted(languages):
-            if language == "scoop": # TODO: fix scoop
-              continue
             print("%.2f" % (
               float(values[problem][variation][language][i]))),
           print ""

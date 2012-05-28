@@ -1,10 +1,12 @@
-all: main
-	./main < main.in
-	./main < main2.in
-	./main < main3.in
-	./main < main4.in
-	./main < main5.in
+SRC =  main.e randmat_parfor_worker.e randmat_parfor_aggregator.e
 
-main: main.e worker.e
+all: main
+	./main -i main.in
+	./main -i main2.in
+	./main -i main3.in
+	./main -i main4.in
+	./main -i main5.in
+
+main: main.e $(SRC)
 	ec main.e
 

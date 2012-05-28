@@ -7,26 +7,25 @@
 -- output:
 --   matrix: a nrows by ncols integer matrix
 
-class MAIN create
-  make
+class MAIN
+inherit ARGUMENTS
+create make
 
 feature
-
   make
-    -- Print a simple message.
   local
     nrows, ncols, s: INTEGER
     matrix: ARRAY2[INTEGER]
     i, j: INTEGER
   do
-    io.read_integer
-    nrows := io.last_integer
+    create in.make_open_read(separate_character_option_value('i'))
 
-    io.read_integer
-    ncols := io.last_integer
+    nrows := read_integer
+    ncols := read_integer
+    s := read_integer
 
-    io.read_integer
-    s := io.last_integer
+    --print("nrows: " + nrows.out + ", ncols: " + ncols.out + ", s: " +
+        --s.out + "%N")
 
     create matrix.make(nrows, ncols)
 
@@ -42,12 +41,18 @@ feature
       until
         j > ncols
       loop
-        print(matrix.item(i, j).out + " ")
+        --print(matrix.item(i, j).out + " ")
         j := j + 1
       end
-      print("%N")
+      --print("%N")
       i := i + 1
     end
+  end
+
+  read_integer(): INTEGER
+  do
+    in.read_integer
+    Result := in.last_integer
   end
 
   randmat(nrows, ncols, s: INTEGER; matrix: ARRAY2[INTEGER])
@@ -73,5 +78,8 @@ feature
       i := i + 1
     end
   end
+
+feature {NONE}
+  in: PLAIN_TEXT_FILE
 
 end -- class MAIN 
