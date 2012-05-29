@@ -81,13 +81,17 @@ inputs = []
 
 class Problem(object):
   def __init__(self):
-    self.name = "Problem"
+    self.name = "problem"
 
   def input_file_name(self, data):
     return self.file_name(data) + ".in"
 
   def output_file_name(self, data):
     return self.file_name(data) + ".out"
+
+  def file_name(self, data):
+    return "%s_%d_%d_%d_%d_%d" % (self.name, data.nrows, data.ncols,
+        data.seed, data.percent, data.nelts)
 
 class RandmatProblem(Problem):
   def __init__(self):
@@ -129,6 +133,16 @@ class OuterProblem(Problem):
   def get_input(self, data):
     return "%d\n" % (data.nelts)
 
+class ProductProblem(Problem):
+  def __init__(self):
+      self.name = "product"
+
+  def file_name(self, data):
+    return "%s_%d" % (self.name, data.nelts)
+
+  def get_input(self, data):
+    return "%d\n" % (data.nelts)
+
 class ChainProblem(Problem):
   def __init__(self):
       self.name = "chain"
@@ -147,6 +161,13 @@ class DumbProblem(Problem):
 
   def file_name(self, data):
     return "dumb_file_name"
+
+problem_classes = [RandmatProblem(), ThreshProblem(), WinnowProblem(),
+    OuterProblem(), ProductProblem(), ChainProblem(), Problem()]
+
+problem_map = {}
+for p in problem_classes:
+  problem_map[p.name] = p
 
 class ProblemInput(object):
   def __init__(self, nrows, ncols, seed, percent, nelts):
@@ -218,7 +239,7 @@ def create_inputs(problems):
             directory, input_file, output_file);
         #print cmd
         system(cmd)
-      if problem.name != "outer":
+      if problem.name != "product":
         next_input_file = next_problem.input_file_name(cur)
         if not file_exists(next_input_file):
           cmd = "cp %s %s" % (output_file, next_input_file)
@@ -265,15 +286,9 @@ def run_all():
       if language != "scoop":
         cmd += " <";
 
-      #cmd += " < %s%d.in > %s-%s-%s-%d.out 2> 2.out 3> 3.out" % (
-          #problem, i, language, problem, variation, i)
-      cmd += " %s%d.in > /dev/null 1>&0 2>&0" % (
-      #cmd += " %s%d.in" % (
-      #cmd += " < %s%d.in > 1.out 1>2.out 2>3.out" % (
-      #cmd += "main < %s.in > /dev/null 1>&0 2>&0" % (
-      #cmd += "main --nproc 2 < %s.in > /dev/null 1>&0 2>&0" % (
-      #cmd += "main < %s.in" % (
-          problem, i);
+      cmd += " %s > /dev/null 1>&0 2>&0" % (
+          problem_map[problem].input_file_name(inputs[i]));
+
       print cmd
       system(cmd)
       value = read_from_file(time_output)

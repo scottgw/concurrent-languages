@@ -54,15 +54,19 @@ class testMain(unittest.TestCase):
     main.file_exists('winnow_10_15_40.out').AndReturn(False)
     main.file_exists('outer_40.in').AndReturn(False)
     main.file_exists('outer_40.out').AndReturn(False)
+    main.file_exists('product_40.in').AndReturn(False)
+    main.file_exists('product_40.out').AndReturn(False)
 
     m.StubOutWithMock(main, 'get_directory')
     main.get_directory('cpp', 'randmat').AndReturn('dir_randmat')
     main.get_directory('cpp', 'thresh').AndReturn('dir_thresh')
     main.get_directory('cpp', 'winnow').AndReturn('dir_winnow')
     main.get_directory('cpp', 'outer').AndReturn('dir_outer')
+    main.get_directory('cpp', 'product').AndReturn('dir_product')
 
     problems = [main.RandmatProblem(), main.ThreshProblem(),
-        main.WinnowProblem(), main.OuterProblem(), main.DumbProblem()]
+        main.WinnowProblem(), main.OuterProblem(), main.ProductProblem(),
+        main.DumbProblem()]
     main.inputs = [main.ProblemInput(10, 15, 20, 30, 40)]
     main.write_to_file('randmat_10_15_20.in', '10 15 20\n')
     main.write_to_file('chain_10_20_30_40.in', '10\n20\n30\n40\n')
@@ -82,6 +86,9 @@ class testMain(unittest.TestCase):
     main.system('cp winnow_10_15_40.out outer_40.in')
     main.system(
         'dir_outer/main < outer_40.in > outer_40.out')
+    main.system('cp outer_40.out product_40.in')
+    main.system(
+        'dir_product/main < product_40.in > product_40.out')
 
     m.ReplayAll()
     main.create_inputs(problems)
@@ -103,15 +110,19 @@ class testMain(unittest.TestCase):
     main.file_exists('winnow_10_15_40.out').AndReturn(True)
     main.file_exists('outer_40.in').AndReturn(True)
     main.file_exists('outer_40.out').AndReturn(True)
+    main.file_exists('product_40.in').AndReturn(True)
+    main.file_exists('product_40.out').AndReturn(True)
 
     m.StubOutWithMock(main, 'get_directory')
     main.get_directory('cpp', 'randmat').AndReturn('dir_randmat')
     main.get_directory('cpp', 'thresh').AndReturn('dir_thresh')
     main.get_directory('cpp', 'winnow').AndReturn('dir_winnow')
     main.get_directory('cpp', 'outer').AndReturn('dir_outer')
+    main.get_directory('cpp', 'product').AndReturn('dir_outer')
 
     problems = [main.RandmatProblem(), main.ThreshProblem(),
-        main.WinnowProblem(), main.OuterProblem(), main.DumbProblem()]
+        main.WinnowProblem(), main.OuterProblem(), main.ProductProblem(),
+        main.DumbProblem()]
     main.inputs = [main.ProblemInput(10, 15, 20, 30, 40)]
     main.write_to_file('randmat_10_15_20.in', '10 15 20\n')
     main.write_to_file('chain_10_20_30_40.in', '10\n20\n30\n40\n')
@@ -134,9 +145,10 @@ class testMain(unittest.TestCase):
 
     main.get_all().AndReturn([('language', 'problem', 'variation')])
 
+    main.inputs = [main.ProblemInput(10, 15, 20, 30, 40)]
     main.system(('time -a -f %e -o time-language-problem-variation-0.out '
                  'directory/main < '
-                 'problem0.in > /dev/null 1>&0 2>&0'))
+                 'problem_10_15_20_30_40.in > /dev/null 1>&0 2>&0'))
     main.read_from_file('time-language-problem-variation-0.out')
 
     m.ReplayAll()
