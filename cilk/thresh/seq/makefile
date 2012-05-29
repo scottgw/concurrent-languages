@@ -7,4 +7,4 @@ all: main
 	./main < main6.in
 
 main: main.cilk
-	cilkc -o main main.cilk
+	cilkc -O2 -o main main.cilk

@@ -12,4 +12,4 @@ all: main
 	./$< < $<6.in > main6.out
 	diff main6.out main6.gold
 main: main.cilk
-	cilkc -o main main.cilk
+	cilkc -O2 -o main main.cilk

@@ -251,6 +251,7 @@ cilk int main(int argc, char *argv[]) {
   spawn thresh(nrows, ncols, matrix, percent, mask);
   sync;
 
+  /*
   printf("%d %d\n", nrows, ncols);
   for (i = 0; i < nrows; i++) {
     for (j = 0; j < ncols; j++) {
@@ -268,7 +269,7 @@ cilk int main(int argc, char *argv[]) {
   for (i = 0; i < nrows; i++) {
     free(mask[i]);
   }
-  free(mask);
+  free(mask);//*/
 
   return 0;
 }

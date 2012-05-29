@@ -15,7 +15,7 @@
 
 typedef cilk void (*Function)(int, int);
 
-static char matrix[10000][100000];
+static unsigned char matrix[10000][100000];
 
 // parallel for on [begin, end), calling f()
 cilk void split(int begin, int end, int extra, Function f) {

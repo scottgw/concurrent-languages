@@ -2,7 +2,7 @@ import os
 import sys
 
 #languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
-languages = ["chapel"]
+languages = ["cilk"]
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
 problems = ["thresh"]
@@ -46,9 +46,9 @@ def make_all():
 #input_winnow = ["10", "100", "125", "250"]
 
 # ===== chapel =====
-inputs = ["10000 10000 888"]
-input_thresh = ["55"]
-input_winnow = ["250"]
+#inputs = ["10000 10000 888"]
+#input_thresh = ["55"]
+#input_winnow = ["250"]
 
 # ===== cilk =====
 #inputs = ["10000 100000 888"]
@@ -77,7 +77,7 @@ input_winnow = ["250"]
 
 def create_inputs():
   #problems = ["randmat", "thresh", "winnow", "outer", "product", "final"]
-  problems = ["randmat", "final"]
+  problems = ["randmat", "thresh", "final"]
   for i in range(len(inputs)):
     cur = inputs[i]
     file_name = "%s%d.in" % (problems[0], i)
