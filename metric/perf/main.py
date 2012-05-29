@@ -30,6 +30,14 @@ def read_from_file_skipping_first_line(file_name):
     content = f.read()
   return content
 
+def read_file_values(file_name):
+  result = []
+  with open(file_name, 'r') as f:
+    for line in f:
+      value = float(line)
+      result.append(value)
+  return result
+
 def get_directory(language, problem, variation=""):
   directory = "../../%s/%s" % (language, problem);
   if problem != "chain" and language != "cpp":
@@ -148,6 +156,7 @@ def create_inputs(problems):
   for i in range(len(problems) - 1):
     problem = problems[i]
     for j in range(len(inputs)):
+      #TODO: get output file name
       output_file = "%s%d.out" % (problem, j)
       cmd = "rm %s" % output_file
       #print cmd
@@ -157,6 +166,7 @@ def run_all():
   # TODO: check processor usage
   for (language, problem, variation) in get_all():
     for i in range(len(inputs)):
+      #TODO: get time output file name
       time_output = "time-%s-%s-%s-%d.out" % (
           language, problem, variation, i)
       # TODO: refactor variations
@@ -200,45 +210,33 @@ results = {}
 INVALID = 999
 
 def get_results():
-  #for (language, problem, variation) in get_all():
-    #if not results[problem]:
-      #results[problem] = {}
-    #if not results[problem][variation]:
-      #results[problem][variation] = {}
-    #if not results[problem][variation][language]:
-      #results[problem][variation][language] = {}
-
-  for problem in sorted(problems):
-    results[problem] = {}
-    for variation in sorted(variations):
-      if problem == "chain" and variation == "seq":
-        continue
+  for (language, problem, variation) in get_all():
+    if problem not in results:
+      results[problem] = {}
+    if variation not in results[problem]:
       results[problem][variation] = {}
-      for language in sorted(languages):
-        results[problem][variation][language] = {}
-        for i in range(len(inputs)):
-          results[problem][variation][language][i] = INVALID
-          cur = []
-          time_output = "time-%s-%s-%s-%d.out" % (
-              language, problem, variation, i)
-          #print time_output
-          f = open(time_output, "r")
-          for line in f:
-            value = float(line)
-            cur.append(value)
-          f.close()
+    if language not in results[problem][variation]:
+      results[problem][variation][language] = {}
 
-          total = 0.0
-          for j in range(len(cur)):
-            total += cur[j]
-          avg = total / len(cur)
-          print problem, variation, language, i, avg
-          if language == "erlang": # IMPORTANT !!!
-            assert(avg > 1)
-            avg -= 1
-          results[problem][variation][language][i] = avg
+    for i in range(len(inputs)):
+      results[problem][variation][language][i] = INVALID
+      time_output = "time-%s-%s-%s-%d.out" % (
+          language, problem, variation, i)
+      #print time_output
+      cur = read_file_values(time_output)
+
+      total = 0.0
+      for j in range(len(cur)):
+        total += cur[j]
+      avg = total / len(cur)
+      print problem, variation, language, i, avg
+      if language == "erlang": # IMPORTANT !!!
+        assert(avg > 1)
+        avg -= 1
+      results[problem][variation][language][i] = avg
   #print results
 
+# TODO: test and refactor
 def output_graphs():
   def create_graph(graph_name, values, max_value, pretty_name):
     old_stdout = sys.stdout

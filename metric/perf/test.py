@@ -89,5 +89,22 @@ class testMain(unittest.TestCase):
     m.VerifyAll()
     m.UnsetStubs()
 
+  def testGetResults(self):
+    m = mox.Mox()
+
+    m.StubOutWithMock(main, 'get_all')
+    main.get_all().AndReturn([('language', 'problem', 'variation')])
+
+    m.StubOutWithMock(main, 'read_file_values')
+    main.read_file_values(
+        'time-language-problem-variation-0.out').AndReturn([1, 2])
+
+    m.ReplayAll()
+    main.get_results()
+    self.assertEqual(main.results['problem']['variation']['language'][0],
+        (1 + 2) / 2.)
+    m.VerifyAll()
+    m.UnsetStubs()
+
 if __name__ == '__main__':
   unittest.main()
