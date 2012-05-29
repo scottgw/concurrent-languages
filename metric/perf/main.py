@@ -8,24 +8,34 @@ languages = ["cilk"]
 problems = ["thresh"]
 variations = ["seq", "par"]
 
-def generate_erlang_main():
-  language = "erlang"
+def write_to_file(output, content):
+  f = open(output, 'w')
+  f.write(content)
+  f.close()
+
+def get_directory(language, problem, variation):
+  directory = "../../%s/%s" % (language, problem);
+  if problem != "chain":
+    directory += "/%s" % variation;
+  return directory
+
+def get_problems_with_variations():
   for problem in sorted(problems):
     for variation in sorted(variations):
       if problem == "chain" and variation == "seq":
         continue
-      directory = "../../%s/%s" % (language, problem);
-      if problem != "chain":
-        directory += "/%s" % variation;
-      output = directory + "/main.sh"
-      print output
-      f = open(output, "w")
-      f.write("""
-#!/bin/sh
-cd ~/tudo/tcc/apmc/lucia/metric/perf/%s
-erl -noshell -s main main -s init stop
-""" % directory)
-      f.close()
+      yield (problem, variation)
+
+ERLANG_MAIN = ("#!/bin/sh\n"
+               "cd ~/tudo/tcc/apmc/lucia/metric/perf/%s\n"
+               "erl -noshell -s main main -s init stop\n")
+
+def generate_erlang_main():
+  for (problem, variation) in get_problems_with_variations():
+    directory = get_directory("erlang", problem, variation)
+    output = directory + "/main.sh"
+    print output
+    write_to_file(output, ERLANG_MAIN % directory)
 
 def make_all():
   for problem in sorted(problems):
@@ -39,6 +49,10 @@ def make_all():
         cmd += " && make main"
         print cmd
         assert(os.system(cmd) == 0)
+
+inputs = []
+input_thresh = []
+input_winnow = []
 
 # ===== general =====
 #inputs = ["10 10 55", "100 100 666", "100 250 777"] #, "100 1000 888"] #, "100 1000 888"]
@@ -272,9 +286,13 @@ xscale=1
 
   create_graph("exec-time", results, 60, "")
 
+def main():
 #generate_erlang_main()
 #make_all()
 #create_inputs()
-run_all()
-get_results()
-output_graphs()
+  run_all()
+  get_results()
+  output_graphs()
+
+if __name__ == '__main__':
+  main()
