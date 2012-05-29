@@ -38,6 +38,9 @@ def read_file_values(file_name):
       result.append(value)
   return result
 
+def file_exists(file_name):
+  return os.path.isfile(file_name)
+
 def get_directory(language, problem, variation=""):
   directory = "../../%s/%s" % (language, problem);
   if problem != "chain" and language != "cpp":
@@ -189,7 +192,6 @@ class ProblemInput(object):
 #input_winnow = ["250"]
 
 def create_inputs(problems):
-  # TODO: cache input files
   randmat_problem = RandmatProblem()
   chain_problem = ChainProblem()
   for i in range(len(inputs)):
@@ -210,26 +212,28 @@ def create_inputs(problems):
       cur = inputs[j]
       input_file = problem.input_file_name(cur)
       output_file = problem.output_file_name(cur)
-      next_input_file = next_problem.input_file_name(cur)
       directory = get_directory("cpp", problem.name)
-      cmd = "%s/main < %s > %s" % (
-          directory, input_file, output_file);
-      #print cmd
-      system(cmd)
+      if not file_exists(output_file):
+        cmd = "%s/main < %s > %s" % (
+            directory, input_file, output_file);
+        #print cmd
+        system(cmd)
       if problem.name != "outer":
-        cmd = "cp %s %s" % (output_file, next_input_file)
-        #print cmd
-        system(cmd)
-      if next_problem.name == "thresh":
-        append_to_file(next_input_file, "%d\n" % cur.percent)
-      if next_problem.name == "winnow":
-        randmat_input = randmat_problem.output_file_name(cur)
-        cmd = "cp %s %s" % (randmat_input, next_input_file)
-        #print cmd
-        system(cmd)
-        content = read_from_file_skipping_first_line(output_file)
-        append_to_file(next_input_file, "\n%s\n%s\n" % (
-            content, cur.nelts))
+        next_input_file = next_problem.input_file_name(cur)
+        if not file_exists(next_input_file):
+          cmd = "cp %s %s" % (output_file, next_input_file)
+          #print cmd
+          system(cmd)
+          if next_problem.name == "thresh":
+            append_to_file(next_input_file, "%d\n" % cur.percent)
+          if next_problem.name == "winnow":
+            randmat_input = randmat_problem.output_file_name(cur)
+            cmd = "cp %s %s" % (randmat_input, next_input_file)
+            #print cmd
+            system(cmd)
+            content = read_from_file_skipping_first_line(output_file)
+            append_to_file(next_input_file, "\n%s\n%s\n" % (
+                content, cur.nelts))
 
 def run_all():
   # TODO: check processor usage

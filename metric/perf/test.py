@@ -46,6 +46,14 @@ class testMain(unittest.TestCase):
     m.StubOutWithMock(main, 'write_to_file')
     m.StubOutWithMock(main, 'append_to_file')
     m.StubOutWithMock(main, 'read_from_file_skipping_first_line')
+    m.StubOutWithMock(main, 'file_exists')
+    main.file_exists('randmat_10_15_20.out').AndReturn(False)
+    main.file_exists('thresh_10_15_30.in').AndReturn(False)
+    main.file_exists('thresh_10_15_30.out').AndReturn(False)
+    main.file_exists('winnow_10_15_40.in').AndReturn(False)
+    main.file_exists('winnow_10_15_40.out').AndReturn(False)
+    main.file_exists('outer_40.in').AndReturn(False)
+    main.file_exists('outer_40.out').AndReturn(False)
 
     m.StubOutWithMock(main, 'get_directory')
     main.get_directory('cpp', 'randmat').AndReturn('dir_randmat')
@@ -74,6 +82,39 @@ class testMain(unittest.TestCase):
     main.system('cp winnow_10_15_40.out outer_40.in')
     main.system(
         'dir_outer/main < outer_40.in > outer_40.out')
+
+    m.ReplayAll()
+    main.create_inputs(problems)
+    m.VerifyAll()
+    m.UnsetStubs()
+
+  def testCreateInputsFileExists(self):
+    m = mox.Mox()
+
+    m.StubOutWithMock(main, 'system')
+    m.StubOutWithMock(main, 'write_to_file')
+    m.StubOutWithMock(main, 'append_to_file')
+    m.StubOutWithMock(main, 'read_from_file_skipping_first_line')
+    m.StubOutWithMock(main, 'file_exists')
+    main.file_exists('randmat_10_15_20.out').AndReturn(True)
+    main.file_exists('thresh_10_15_30.in').AndReturn(True)
+    main.file_exists('thresh_10_15_30.out').AndReturn(True)
+    main.file_exists('winnow_10_15_40.in').AndReturn(True)
+    main.file_exists('winnow_10_15_40.out').AndReturn(True)
+    main.file_exists('outer_40.in').AndReturn(True)
+    main.file_exists('outer_40.out').AndReturn(True)
+
+    m.StubOutWithMock(main, 'get_directory')
+    main.get_directory('cpp', 'randmat').AndReturn('dir_randmat')
+    main.get_directory('cpp', 'thresh').AndReturn('dir_thresh')
+    main.get_directory('cpp', 'winnow').AndReturn('dir_winnow')
+    main.get_directory('cpp', 'outer').AndReturn('dir_outer')
+
+    problems = [main.RandmatProblem(), main.ThreshProblem(),
+        main.WinnowProblem(), main.OuterProblem(), main.DumbProblem()]
+    main.inputs = [main.ProblemInput(10, 15, 20, 30, 40)]
+    main.write_to_file('randmat_10_15_20.in', '10 15 20\n')
+    main.write_to_file('chain_10_20_30_40.in', '10\n20\n30\n40\n')
 
     m.ReplayAll()
     main.create_inputs(problems)
