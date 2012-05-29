@@ -25,5 +25,19 @@ class testMain(unittest.TestCase):
     m.VerifyAll()
     m.UnsetStubs()
 
+  def testMakeAll(self):
+    m = mox.Mox()
+
+    m.StubOutWithMock(main, 'system')
+    main.system('cd ../../language/problem/variation && make main')
+
+    m.StubOutWithMock(main, 'get_all')
+    main.get_all().AndReturn([('language', 'problem', 'variation')])
+
+    m.ReplayAll()
+    main.make_all()
+    m.VerifyAll()
+    m.UnsetStubs()
+
 if __name__ == '__main__':
   unittest.main()

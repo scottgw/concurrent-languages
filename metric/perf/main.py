@@ -37,18 +37,20 @@ def generate_erlang_main():
     print output
     write_to_file(output, ERLANG_MAIN % directory)
 
+def system(cmd):
+  assert(os.system(cmd) == 0)
+
+def get_all():
+  for (problem, variation) in get_problems_with_variations():
+    for language in sorted(languages):
+      yield (language, problem, variation)
+
 def make_all():
-  for problem in sorted(problems):
-    for variation in sorted(variations):
-      if problem == "chain" and variation == "seq":
-        continue
-      for language in sorted(languages):
-        cmd = "cd ../../%s/%s" % (language, problem);
-        if problem != "chain":
-          cmd += "/%s" % variation;
-        cmd += " && make main"
-        print cmd
-        assert(os.system(cmd) == 0)
+  for (language, problem, variation) in get_all():
+    directory = get_directory(language, problem, variation)
+    cmd = "cd %s && make main" % directory
+    print cmd
+    system(cmd)
 
 inputs = []
 input_thresh = []
