@@ -75,8 +75,6 @@ def make_all():
     system(cmd)
 
 inputs = []
-input_thresh = []
-input_winnow = []
 
 class Problem(object):
   def __init__(self):
@@ -108,6 +106,26 @@ class ThreshProblem(Problem):
   def get_input(self, data):
     return "%d %d %d\n" % (data.nrows, data.ncols, data.percent)
 
+class WinnowProblem(Problem):
+  def __init__(self):
+      self.name = "winnow"
+
+  def file_name(self, data):
+    return "%s_%d_%d_%d" % (self.name, data.nrows, data.ncols, data.nelts)
+
+  def get_input(self, data):
+    return "%d %d %d\n" % (data.nrows, data.ncols, data.nelts)
+
+class OuterProblem(Problem):
+  def __init__(self):
+      self.name = "outer"
+
+  def file_name(self, data):
+    return "%s_%d" % (self.name, data.nelts)
+
+  def get_input(self, data):
+    return "%d\n" % (data.nelts)
+
 class ChainProblem(Problem):
   def __init__(self):
       self.name = "chain"
@@ -119,6 +137,13 @@ class ChainProblem(Problem):
   def get_input(self, data):
     return "%d\n%d\n%d\n%d\n" % (data.nrows, data.seed, data.percent,
         data.nelts)
+
+class DumbProblem(Problem):
+  def __init__(self):
+    self.name = "dumb"
+
+  def file_name(self, data):
+    return "dumb_file_name"
 
 class ProblemInput(object):
   def __init__(self, nrows, ncols, seed, percent, nelts):
@@ -191,18 +216,20 @@ def create_inputs(problems):
           directory, input_file, output_file);
       #print cmd
       system(cmd)
-      cmd = "cp %s %s" % (output_file, next_input_file)
-      #print cmd
-      system(cmd)
+      if problem.name != "outer":
+        cmd = "cp %s %s" % (output_file, next_input_file)
+        #print cmd
+        system(cmd)
       if next_problem.name == "thresh":
         append_to_file(next_input_file, "%d\n" % cur.percent)
       if next_problem.name == "winnow":
-        cmd = "cp randmat%d.out %s" % (j, next_input_file)
+        randmat_input = randmat_problem.output_file_name(cur)
+        cmd = "cp %s %s" % (randmat_input, next_input_file)
         #print cmd
         system(cmd)
         content = read_from_file_skipping_first_line(output_file)
         append_to_file(next_input_file, "\n%s\n%s\n" % (
-            content, input_winnow))
+            content, cur.nelts))
 
 def run_all():
   # TODO: check processor usage
