@@ -8,14 +8,26 @@ languages = ["cilk"]
 problems = ["thresh"]
 variations = ["seq", "par"]
 
-def write_to_file(output, content):
-  f = open(output, 'w')
-  f.write(content)
-  f.close()
+def system(cmd):
+  assert(os.system(cmd) == 0)
 
-def get_directory(language, problem, variation):
+def write_to_file(output, content):
+  with open(output, 'w') as f:
+    f.write(content)
+
+def append_to_file(output, content):
+  with open(output, 'a') as f:
+    f.write(content)
+
+def read_from_file_skipping_first_line(file_name):
+  with open(file_name, "r") as f:
+    f.readline()
+    content = f.read()
+  return content
+
+def get_directory(language, problem, variation=""):
   directory = "../../%s/%s" % (language, problem);
-  if problem != "chain":
+  if problem != "chain" and language != "cpp":
     directory += "/%s" % variation;
   return directory
 
@@ -30,20 +42,17 @@ ERLANG_MAIN = ("#!/bin/sh\n"
                "cd ~/tudo/tcc/apmc/lucia/metric/perf/%s\n"
                "erl -noshell -s main main -s init stop\n")
 
+def get_all():
+  for (problem, variation) in get_problems_with_variations():
+    for language in sorted(languages):
+      yield (language, problem, variation)
+
 def generate_erlang_main():
   for (problem, variation) in get_problems_with_variations():
     directory = get_directory("erlang", problem, variation)
     output = directory + "/main.sh"
     print output
     write_to_file(output, ERLANG_MAIN % directory)
-
-def system(cmd):
-  assert(os.system(cmd) == 0)
-
-def get_all():
-  for (problem, variation) in get_problems_with_variations():
-    for language in sorted(languages):
-      yield (language, problem, variation)
 
 def make_all():
   for (language, problem, variation) in get_all():
@@ -91,24 +100,18 @@ input_winnow = []
 #input_thresh = ["55"]
 #input_winnow = ["250"]
 
-def create_inputs():
-  #problems = ["randmat", "thresh", "winnow", "outer", "product", "final"]
-  problems = ["randmat", "thresh", "final"]
+def create_inputs(problems):
   for i in range(len(inputs)):
     cur = inputs[i]
     file_name = "%s%d.in" % (problems[0], i)
-    f = open(file_name, "w")
-    f.write(cur + "\n")
-    f.close()
+    write_to_file(file_name, cur + "\n")
 
   for i in range(len(inputs)):
     cur = inputs[i]
-    file_name = "chain%d.in" % i
-    f = open(file_name, "w")
     data = inputs[i].split()
-    f.write("%s\n%s\n%s\n%s\n" % (
+    file_name = "chain%d.in" % i
+    write_to_file(file_name, "%s\n%s\n%s\n%s\n" % (
       data[1], data[2], input_thresh[i], input_winnow[i]))
-    f.close()
 
   for i in range(len(problems) - 1):
     problem = problems[i]
@@ -118,29 +121,23 @@ def create_inputs():
       input_file = "%s%d.in" % (problem, j)
       output_file = "%s%d.out" % (problem, j)
       next_input_file = "%s%d.in" % (next_problem, j)
-      cmd = "../../%s/%s/main < %s > %s" % (
-          "cpp", problem, input_file, output_file);
+      directory = get_directory("cpp", problem)
+      cmd = "%s/main < %s > %s" % (
+          directory, input_file, output_file);
       #print cmd
-      assert(os.system(cmd) == 0)
+      system(cmd)
       cmd = "cp %s %s" % (output_file, next_input_file)
       #print cmd
-      assert(os.system(cmd) == 0)
+      system(cmd)
       if next_problem == "thresh":
-        f = open(next_input_file, "a")
-        f.write(input_thresh[j] + "\n")
-        f.close()
+        append_to_file(next_input_file, input_thresh[j] + "\n")
       if next_problem == "winnow":
         cmd = "cp randmat%d.out %s" % (j, next_input_file)
         #print cmd
-        assert(os.system(cmd) == 0)
-        output = open(next_input_file, "a")
-        f = open(output_file, "r")
-        f.readline()
-        output.write("\n")
-        output.write(f.read() + "\n")
-        output.write(input_winnow[j] + "\n")
-        f.close()
-        output.close()
+        system(cmd)
+        content = read_from_file_skipping_first_line(output_file)
+        append_to_file(next_input_file, "\n%s\n%s\n" % (
+            content, input_winnow))
 
   for i in range(len(problems) - 1):
     problem = problems[i]
@@ -148,7 +145,7 @@ def create_inputs():
       output_file = "%s%d.out" % (problem, j)
       cmd = "rm %s" % output_file
       #print cmd
-      assert(os.system(cmd) == 0)
+      system(cmd)
 
 def run_all():
   # chapel: works!
@@ -291,7 +288,9 @@ xscale=1
 def main():
 #generate_erlang_main()
 #make_all()
-#create_inputs()
+  #problems = ["randmat", "thresh", "winnow", "outer", "product", "final"]
+  problems = ["randmat", "thresh", "final"]
+#create_inputs(problems)
   run_all()
   get_results()
   output_graphs()

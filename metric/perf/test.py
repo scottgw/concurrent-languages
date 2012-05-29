@@ -39,5 +39,29 @@ class testMain(unittest.TestCase):
     m.VerifyAll()
     m.UnsetStubs()
 
+  def testCreateInputs(self):
+    m = mox.Mox()
+
+    m.StubOutWithMock(main, 'system')
+    m.StubOutWithMock(main, 'write_to_file')
+    m.StubOutWithMock(main, 'append_to_file')
+    m.StubOutWithMock(main, 'read_from_file_skipping_first_line')
+
+    problems = ['randmat', 'thresh']
+    main.inputs = ['a b c']
+    main.input_thresh = ['thresh']
+    main.input_winnow = ['winnow']
+    main.write_to_file('randmat0.in', 'a b c\n')
+    main.write_to_file('chain0.in', 'b\nc\nthresh\nwinnow\n')
+    main.system('../../cpp/randmat/main < randmat0.in > randmat0.out')
+    main.system('cp randmat0.out thresh0.in')
+    main.append_to_file('thresh0.in', 'thresh\n')
+    main.system('rm randmat0.out')
+
+    m.ReplayAll()
+    main.create_inputs(problems)
+    m.VerifyAll()
+    m.UnsetStubs()
+
 if __name__ == '__main__':
   unittest.main()
