@@ -79,6 +79,9 @@ input_thresh = []
 input_winnow = []
 
 class Problem(object):
+  def __init__(self):
+    self.name = "Problem"
+
   def input_file_name(self, data):
     return self.file_name(data) + ".in"
 
@@ -86,15 +89,31 @@ class Problem(object):
     return self.file_name(data) + ".out"
 
 class RandmatProblem(Problem):
+  def __init__(self):
+    self.name = "randmat"
+
   def file_name(self, data):
-    return "%s_%d_%d_%d" % ("randmat", data.nrows, data.ncols, data.seed)
+    return "%s_%d_%d_%d" % (self.name, data.nrows, data.ncols, data.seed)
 
   def get_input(self, data):
     return "%d %d %d\n" % (data.nrows, data.ncols, data.seed)
 
-class ChainProblem(Problem):
+class ThreshProblem(Problem):
+  def __init__(self):
+      self.name = "thresh"
+
   def file_name(self, data):
-    return "%s_%d_%d_%d_%d" % ("chain", data.nrows, data.seed,
+    return "%s_%d_%d_%d" % (self.name, data.nrows, data.ncols, data.percent)
+
+  def get_input(self, data):
+    return "%d %d %d\n" % (data.nrows, data.ncols, data.percent)
+
+class ChainProblem(Problem):
+  def __init__(self):
+      self.name = "chain"
+
+  def file_name(self, data):
+    return "%s_%d_%d_%d_%d" % (self.name, data.nrows, data.seed,
         data.percent, data.nelts)
 
   def get_input(self, data):
@@ -161,12 +180,13 @@ def create_inputs(problems):
   for i in range(len(problems) - 1):
     problem = problems[i]
     next_problem = problems[i + 1]
-    print problem
+    print problem.name
     for j in range(len(inputs)):
-      input_file = "%s%d.in" % (problem, j)
-      output_file = "%s%d.out" % (problem, j)
-      next_input_file = "%s%d.in" % (next_problem, j)
-      directory = get_directory("cpp", problem)
+      cur = inputs[j]
+      input_file = problem.input_file_name(cur)
+      output_file = problem.output_file_name(cur)
+      next_input_file = next_problem.input_file_name(cur)
+      directory = get_directory("cpp", problem.name)
       cmd = "%s/main < %s > %s" % (
           directory, input_file, output_file);
       #print cmd
@@ -174,25 +194,15 @@ def create_inputs(problems):
       cmd = "cp %s %s" % (output_file, next_input_file)
       #print cmd
       system(cmd)
-      if next_problem == "thresh":
-        append_to_file(next_input_file, input_thresh[j] + "\n")
-      if next_problem == "winnow":
+      if next_problem.name == "thresh":
+        append_to_file(next_input_file, "%d\n" % cur.percent)
+      if next_problem.name == "winnow":
         cmd = "cp randmat%d.out %s" % (j, next_input_file)
         #print cmd
         system(cmd)
         content = read_from_file_skipping_first_line(output_file)
         append_to_file(next_input_file, "\n%s\n%s\n" % (
             content, input_winnow))
-
-  for i in range(len(problems) - 1):
-    problem = problems[i]
-    for j in range(len(inputs)):
-      #TODO: get output file name
-      #TODO: stop removing for cache to work
-      output_file = "%s%d.out" % (problem, j)
-      cmd = "rm %s" % output_file
-      #print cmd
-      system(cmd)
 
 def run_all():
   # TODO: check processor usage
