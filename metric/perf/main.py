@@ -19,6 +19,11 @@ def append_to_file(output, content):
   with open(output, 'a') as f:
     f.write(content)
 
+def read_from_file(file_name):
+  with open(file_name, 'r') as f:
+    content = f.read()
+  return content
+
 def read_from_file_skipping_first_line(file_name):
   with open(file_name, "r") as f:
     f.readline()
@@ -101,6 +106,7 @@ input_winnow = []
 #input_winnow = ["250"]
 
 def create_inputs(problems):
+  # TODO: cache input files
   for i in range(len(inputs)):
     cur = inputs[i]
     file_name = "%s%d.in" % (problems[0], i)
@@ -148,65 +154,60 @@ def create_inputs(problems):
       system(cmd)
 
 def run_all():
-  # chapel: works!
-  # cilk: --nproc 4  NO EQUAL SIGN!!!
-  # erlang: main.sh
-  # go: GOMAXPROCS=4
-  # scoop: exception
-  # tbb: 
   # TODO: check processor usage
-  for problem in sorted(problems):
-    for variation in sorted(variations):
-      #variation = "par"
-      if problem == "chain" and variation == "seq":
-        continue
-      for language in sorted(languages):
-        for i in range(len(inputs)):
-          time_output = "time-%s-%s-%s-%d.out" % (
-              language, problem, variation, i)
-          #print time_output
-          cmd = ""
-          if language == "go":
-            cmd += "GOMAXPROCS=4 "
-          cmd += "time -a -f %%e -o %s ../../%s/%s/" % (
-              time_output, language, problem)
-          if problem != "chain":
-            cmd += "%s/" % variation
-          if language == "erlang":
-            cmd += "main.sh"
-          elif language == "scoop":
-            cmd += "main -i"
-          else:
-            cmd += "main"
+  for (language, problem, variation) in get_all():
+    for i in range(len(inputs)):
+      time_output = "time-%s-%s-%s-%d.out" % (
+          language, problem, variation, i)
+      # TODO: refactor variations
+      #print time_output
+      cmd = ""
+      if language == "go":
+        cmd += "GOMAXPROCS=4 "
+      directory = get_directory(language, problem, variation)
+      cmd += "time -a -f %%e -o %s %s/" % (time_output, directory)
 
-          if language == "chapel":
-            cmd += " --numLocales=1 --numThreadsPerLocale=2 "
-          elif language == "cilk":
-            cmd += " --nproc 4 "
+      if language == "erlang":
+        cmd += "main.sh"
+      elif language == "scoop":
+        cmd += "main -i"
+      else:
+        cmd += "main"
 
-          if language != "scoop":
-            cmd += " <";
+      if language == "chapel":
+        cmd += " --numLocales=1 --numThreadsPerLocale=2 "
+      elif language == "cilk":
+        cmd += " --nproc 4 "
 
-          #cmd += " < %s%d.in > %s-%s-%s-%d.out 2> 2.out 3> 3.out" % (
-              #problem, i, language, problem, variation, i)
-          cmd += " %s%d.in > /dev/null 1>&0 2>&0" % (
-          #cmd += " %s%d.in" % (
-          #cmd += " < %s%d.in > 1.out 1>2.out 2>3.out" % (
-          #cmd += "main < %s.in > /dev/null 1>&0 2>&0" % (
-          #cmd += "main --nproc 2 < %s.in > /dev/null 1>&0 2>&0" % (
-          #cmd += "main < %s.in" % (
-              problem, i);
-          print cmd
-          assert(os.system(cmd) == 0)
-          f = open(time_output, "r")
-          value = f.read()
-          print value
-      #break
+      if language != "scoop":
+        cmd += " <";
+
+      #cmd += " < %s%d.in > %s-%s-%s-%d.out 2> 2.out 3> 3.out" % (
+          #problem, i, language, problem, variation, i)
+      cmd += " %s%d.in > /dev/null 1>&0 2>&0" % (
+      #cmd += " %s%d.in" % (
+      #cmd += " < %s%d.in > 1.out 1>2.out 2>3.out" % (
+      #cmd += "main < %s.in > /dev/null 1>&0 2>&0" % (
+      #cmd += "main --nproc 2 < %s.in > /dev/null 1>&0 2>&0" % (
+      #cmd += "main < %s.in" % (
+          problem, i);
+      print cmd
+      system(cmd)
+      value = read_from_file(time_output)
+      print value
 
 results = {}
 INVALID = 999
 
 def get_results():
+  #for (language, problem, variation) in get_all():
+    #if not results[problem]:
+      #results[problem] = {}
+    #if not results[problem][variation]:
+      #results[problem][variation] = {}
+    #if not results[problem][variation][language]:
+      #results[problem][variation][language] = {}
+
   for problem in sorted(problems):
     results[problem] = {}
     for variation in sorted(variations):

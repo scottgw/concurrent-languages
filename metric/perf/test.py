@@ -47,19 +47,45 @@ class testMain(unittest.TestCase):
     m.StubOutWithMock(main, 'append_to_file')
     m.StubOutWithMock(main, 'read_from_file_skipping_first_line')
 
+    m.StubOutWithMock(main, 'get_directory')
+    main.get_directory('cpp', 'randmat').AndReturn('directory')
+
     problems = ['randmat', 'thresh']
     main.inputs = ['a b c']
     main.input_thresh = ['thresh']
     main.input_winnow = ['winnow']
     main.write_to_file('randmat0.in', 'a b c\n')
     main.write_to_file('chain0.in', 'b\nc\nthresh\nwinnow\n')
-    main.system('../../cpp/randmat/main < randmat0.in > randmat0.out')
+    main.system('directory/main < randmat0.in > randmat0.out')
     main.system('cp randmat0.out thresh0.in')
     main.append_to_file('thresh0.in', 'thresh\n')
     main.system('rm randmat0.out')
 
     m.ReplayAll()
     main.create_inputs(problems)
+    m.VerifyAll()
+    m.UnsetStubs()
+
+  def testRunAll(self):
+    m = mox.Mox()
+
+    m.StubOutWithMock(main, 'system')
+    m.StubOutWithMock(main, 'read_from_file')
+    m.StubOutWithMock(main, 'get_all')
+
+    m.StubOutWithMock(main, 'get_directory')
+    main.get_directory('language', 'problem', 'variation').AndReturn(
+        'directory')
+
+    main.get_all().AndReturn([('language', 'problem', 'variation')])
+
+    main.system(('time -a -f %e -o time-language-problem-variation-0.out '
+                 'directory/main < '
+                 'problem0.in > /dev/null 1>&0 2>&0'))
+    main.read_from_file('time-language-problem-variation-0.out')
+
+    m.ReplayAll()
+    main.run_all()
     m.VerifyAll()
     m.UnsetStubs()
 
