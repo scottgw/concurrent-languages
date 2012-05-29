@@ -78,6 +78,37 @@ inputs = []
 input_thresh = []
 input_winnow = []
 
+class Problem(object):
+  def input_file_name(self, data):
+    return self.file_name(data) + ".in"
+
+  def output_file_name(self, data):
+    return self.file_name(data) + ".out"
+
+class RandmatProblem(Problem):
+  def file_name(self, data):
+    return "%s_%d_%d_%d" % ("randmat", data.nrows, data.ncols, data.seed)
+
+  def get_input(self, data):
+    return "%d %d %d\n" % (data.nrows, data.ncols, data.seed)
+
+class ChainProblem(Problem):
+  def file_name(self, data):
+    return "%s_%d_%d_%d_%d" % ("chain", data.nrows, data.seed,
+        data.percent, data.nelts)
+
+  def get_input(self, data):
+    return "%d\n%d\n%d\n%d\n" % (data.nrows, data.seed, data.percent,
+        data.nelts)
+
+class ProblemInput(object):
+  def __init__(self, nrows, ncols, seed, percent, nelts):
+    self.nrows = nrows
+    self.ncols = ncols
+    self.seed = seed
+    self.percent = percent
+    self.nelts = nelts
+
 # ===== general =====
 #inputs = ["10 10 55", "100 100 666", "100 250 777"] #, "100 1000 888"] #, "100 1000 888"]
 #input_thresh = ["55", "66", "77", "55"]
@@ -115,17 +146,17 @@ input_winnow = []
 
 def create_inputs(problems):
   # TODO: cache input files
+  randmat_problem = RandmatProblem()
+  chain_problem = ChainProblem()
   for i in range(len(inputs)):
     cur = inputs[i]
-    file_name = "%s%d.in" % (problems[0], i)
-    write_to_file(file_name, cur + "\n")
+    file_name = randmat_problem.input_file_name(cur)
+    write_to_file(file_name, randmat_problem.get_input(cur))
 
   for i in range(len(inputs)):
     cur = inputs[i]
-    data = inputs[i].split()
-    file_name = "chain%d.in" % i
-    write_to_file(file_name, "%s\n%s\n%s\n%s\n" % (
-      data[1], data[2], input_thresh[i], input_winnow[i]))
+    file_name = chain_problem.input_file_name(cur)
+    write_to_file(file_name, chain_problem.get_input(cur))
 
   for i in range(len(problems) - 1):
     problem = problems[i]
@@ -157,6 +188,7 @@ def create_inputs(problems):
     problem = problems[i]
     for j in range(len(inputs)):
       #TODO: get output file name
+      #TODO: stop removing for cache to work
       output_file = "%s%d.out" % (problem, j)
       cmd = "rm %s" % output_file
       #print cmd

@@ -51,11 +51,11 @@ class testMain(unittest.TestCase):
     main.get_directory('cpp', 'randmat').AndReturn('directory')
 
     problems = ['randmat', 'thresh']
-    main.inputs = ['a b c']
+    main.inputs = [main.ProblemInput(10, 15, 20, 30, 40)]
     main.input_thresh = ['thresh']
     main.input_winnow = ['winnow']
-    main.write_to_file('randmat0.in', 'a b c\n')
-    main.write_to_file('chain0.in', 'b\nc\nthresh\nwinnow\n')
+    main.write_to_file('randmat_10_15_20.in', '10 15 20\n')
+    main.write_to_file('chain_10_20_30_40.in', '10\n20\n30\n40\n')
     main.system('directory/main < randmat0.in > randmat0.out')
     main.system('cp randmat0.out thresh0.in')
     main.append_to_file('thresh0.in', 'thresh\n')
