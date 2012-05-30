@@ -1,8 +1,8 @@
 import os
 
-languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
+#languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
 #languages = set(["chapel", "cilk", "erlang", "go", "tbb"])
-#languages = ["cilk"]
+languages = ["chapel"]
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 problems = ["randmat"]
 variations = ["seq", "par"]
@@ -184,6 +184,8 @@ inputs = [ProblemInput(100, 100, 666, 50, 100),
     ProblemInput(1000, 1000, 666, 50, 1000),
     ProblemInput(10000, 10000, 666, 50, 10000)]
 
+threads = [1, 2, 3, 4, 5, 6, 7, 8]
+
 # ===== general =====
 #inputs = ["10 10 55", "100 100 666", "100 250 777"] #, "100 1000 888"] #, "100 1000 888"]
 #input_thresh = ["55", "66", "77", "55"]
@@ -263,156 +265,215 @@ def create_inputs():
             append_to_file(next_input_file, "\n%s\n%s\n" % (
                 content, cur.nelts))
 
-TIMEOUT = 10
+TIMEOUT = 1
+
+def get_time_output(language, problem, variation, i, nthreads):
+  return "time-%s-%s-%s-%d-%d.out" % (
+      language, problem, variation, i, nthreads)
 
 def run_all(redirect_output=True):
   # TODO: check processor usage
-  for (language, problem, variation) in get_all():
-    for i in range(len(inputs)):
-      #TODO: get time output file name
-      time_output = "time-%s-%s-%s-%d.out" % (
-          language, problem, variation, i)
-      # TODO: refactor variations
-      #print time_output
-      cmd = ""
-      if language == "go":
-        cmd += "GOMAXPROCS=4 "
+  for nthreads in threads:
+    for (language, problem, variation) in get_all():
+      if variation == 'seq' and nthreads != threads[0]: continue
+      for i in range(len(inputs)):
+        #TODO: get time output file name
+        time_output = get_time_output(
+            language, problem, variation, i, nthreads)
+        # TODO: refactor variations
+        #print time_output
+        cmd = ""
+        if language == "go":
+          cmd += "GOMAXPROCS=%d " % nthreads
 
-      cmd += "timeout %d " % (TIMEOUT)
+        cmd += "timeout %d " % (TIMEOUT)
 
-      directory = get_directory(language, problem, variation)
-      cmd += "time -a -f %%e -o %s %s/" % (time_output, directory)
+        directory = get_directory(language, problem, variation)
+        cmd += "time -a -f %%e -o %s %s/" % (time_output, directory)
 
-      if language == "erlang":
-        cmd += "main.sh"
-      elif language == "scoop":
-        cmd += "main -i"
-      else:
-        cmd += "main"
+        if language == "erlang":
+          cmd += "main.sh"
+        elif language == "scoop":
+          cmd += "main -i"
+        else:
+          cmd += "main"
 
-      if language == "chapel":
-        cmd += " --numLocales=1 --numThreadsPerLocale=2 "
-      elif language == "cilk":
-        cmd += " --nproc 4 "
+        if language == "chapel":
+          cmd += " --numLocales=1 --numThreadsPerLocale=%d " % nthreads
+        elif language == "cilk":
+          cmd += " --nproc %d " % nthreads
 
-      if language != "scoop":
-        cmd += " <";
+        if language != "scoop":
+          cmd += " <";
 
-      if redirect_output:
-        cmd += " %s > /dev/null 1>&0 2>&0" % (
-            problem_map[problem].input_file_name(inputs[i]));
-      else:
-        cmd += " %s" % (
-            problem_map[problem].input_file_name(inputs[i]));
+        if redirect_output:
+          cmd += " %s > /dev/null 1>&0 2>&0" % (
+              problem_map[problem].input_file_name(inputs[i]));
+        else:
+          cmd += " %s" % (
+              problem_map[problem].input_file_name(inputs[i]));
 
-      print cmd
-      system(cmd, timeout=True)
-      value = read_from_file(time_output)
-      print value
+        print cmd
+        system(cmd, timeout=True)
+        value = read_from_file(time_output)
+        print value
 
 results = {}
 INVALID = 999
 
 def get_results():
-  for (language, problem, variation) in get_all():
-    if problem not in results:
-      results[problem] = {}
-    if variation not in results[problem]:
-      results[problem][variation] = {}
-    if language not in results[problem][variation]:
-      results[problem][variation][language] = {}
+  for nthreads in threads:
+    if nthreads not in results:
+      results[nthreads] = {}
+    for (language, problem, variation) in get_all():
+      if variation == 'seq' and nthreads != threads[0]: continue
+      if problem not in results[nthreads]:
+        results[nthreads][problem] = {}
+      if variation not in results[nthreads][problem]:
+        results[nthreads][problem][variation] = {}
+      if language not in results[nthreads][problem][variation]:
+        results[nthreads][problem][variation][language] = {}
 
-    for i in range(len(inputs)):
-      results[problem][variation][language][i] = INVALID
-      time_output = "time-%s-%s-%s-%d.out" % (
-          language, problem, variation, i)
-      #print time_output
-      cur = read_file_values(time_output)
+      for i in range(len(inputs)):
+        results[nthreads][problem][variation][language][i] = INVALID
+        time_output = get_time_output(
+            language, problem, variation, i, nthreads)
+        #print time_output
+        cur = read_file_values(time_output)
 
-      if (len(cur) == 0):
-        continue
+        if (len(cur) == 0):
+          continue
 
-      total = 0.0
-      for j in range(len(cur)):
-        total += cur[j]
-      avg = total / len(cur)
-      print problem, variation, language, i, avg
-      if language == "erlang": # IMPORTANT !!!
-        assert(avg > 1)
-        avg -= 1
-      results[problem][variation][language][i] = avg
+        total = 0.0
+        for j in range(len(cur)):
+          total += cur[j]
+        avg = total / len(cur)
+        print nthreads, problem, variation, language, i, avg
+        if language == "erlang": # IMPORTANT !!!
+          assert(avg > 1)
+          avg -= 1
+        results[nthreads][problem][variation][language][i] = avg
   #print results
 
 GRAPH_SIZE = 700
 
-def output_graphs():
-  def create_graph(graph_name, values, pretty_name):
-    variation_names = {"seq" : "Sequential", "par" : "Parallel"}
-    for i in range(len(inputs)):
-      nmax = 0
-      for (language, problem, variation) in get_all():
-        cur = values[problem][variation][language][i]
-        if cur == INVALID: continue
-        if cur > nmax: nmax = cur
+output_dir = "../../../ufrgs/meu"
 
-      latex_out = []
-      output_dir = "../../../ufrgs/meu"
-      for variation in variations:
-        out = []
-        out.append("=cluster")
+def create_graph(graph_name, values, pretty_name):
+  variation_names = {"seq" : "Sequential", "par" : "Parallel"}
+  for i in range(len(inputs)):
+    nmax = 0
+    for (language, problem, variation) in get_all():
+      cur = values[problem][variation][language][i]
+      if cur == INVALID: continue
+      if cur > nmax: nmax = cur
+
+    latex_out = []
+    for variation in variations:
+      out = []
+      out.append("=cluster")
+      for language in sorted(languages):
+        out.append(";" + language)
+      out.append((
+          "\n"
+          "colors=black,yellow,red,med_blue,light_green,cyan\n"
+          "=table\n"
+          "yformat=%g\n"
+          "=norotate\n"
+          "xscale=1\n"))
+      variation_name = variation_names[variation]
+      if nmax == 0: nmax = 1
+      out.append("max=%f\n" % (nmax * 1.5))
+      out.append(
+          "ylabel=%s %sexecution time in seconds for input %d\n" % (
+              variation_name, pretty_name, i))
+      for problem in sorted(problems):
+        if problem == "chain" and variation == "seq":
+          continue
+        out.append(problem)
         for language in sorted(languages):
-          out.append(";" + language)
-        out.append((
-            "\n"
-            "colors=black,yellow,red,med_blue,light_green,cyan\n"
-            "=table\n"
-            "yformat=%g\n"
-            "=norotate\n"
-            "xscale=1\n"))
-        variation_name = variation_names[variation]
-        out.append("max=%f\n" % (nmax * 1.5))
-        out.append(
-            "ylabel=%s %sexecution time in seconds for input %d\n" % (
-                variation_name, pretty_name, i))
-        for problem in sorted(problems):
-          if problem == "chain" and variation == "seq":
-            continue
-          out.append(problem)
-          for language in sorted(languages):
-            out.append(" %.2f" % (
-              float(values[problem][variation][language][i])))
-          out.append("\n")
+          out.append(" %.2f" % (
+            float(values[problem][variation][language][i])))
+        out.append("\n")
 
-        output_file_name = "graph-%s-%s-%d" % (graph_name, variation, i)
-        output_file = "%s/images/%s" % (
-                output_dir, output_file_name)
-        write_to_file("%s.perf" % (output_file), ''.join(out))
+      output_file_name = "graph-%s-%s-%d" % (graph_name, variation, i)
+      output_file = "%s/images/%s" % (
+              output_dir, output_file_name)
+      write_to_file("%s.perf" % (output_file), ''.join(out))
 
-        cmd = (
-            "%s/bargraph.pl -fig %s.perf | fig2dev -L ppm -m 4 > %s.ppm" % (
-                output_dir, output_file, output_file))
-        system(cmd)
-        cmd = ("mogrify -reverse -flatten %s.ppm" % output_file)
-        system(cmd)
-        cmd = ("mogrify -resize %dx%d -format png %s.ppm" % (
-            GRAPH_SIZE, GRAPH_SIZE, output_file))
-        system(cmd)
+      cmd = (
+          "%s/bargraph.pl -fig %s.perf | fig2dev -L ppm -m 4 > %s.ppm" % (
+              output_dir, output_file, output_file))
+      print cmd
+      system(cmd)
+      cmd = ("mogrify -reverse -flatten %s.ppm" % output_file)
+      system(cmd)
+      cmd = ("mogrify -resize %dx%d -format png %s.ppm" % (
+          GRAPH_SIZE, GRAPH_SIZE, output_file))
+      system(cmd)
 
-        caption = "%s Execution Time for Input %d" % (variation_name, i)
-        label = "fig:exec:time:%s:%d" % (variation, i)
-        latex_out.append((
-            "\\begin{figure}[htbp]\n"
-            "  %%\\centering\n"
-            "  \\includegraphics[width=125mm]{images/%s.png}\n"
-            "  \\caption{%s}\n"
-            "  \\label{%s}\n"
-            "\\end{figure}\n") % (output_file_name, caption, label))
+      caption = "%s Execution Time for Input %d" % (variation_name, i)
+      label = "fig:exec:time:%s:%d" % (variation, i)
+      latex_out.append((
+          "\\begin{figure}[htbp]\n"
+          "  %%\\centering\n"
+          "  \\includegraphics[width=125mm]{images/%s.png}\n"
+          "  \\caption{%s}\n"
+          "  \\label{%s}\n"
+          "\\end{figure}\n") % (output_file_name, caption, label))
 
       latex_file_name = "%s/chapters/graph-%s-%d.tex" % (
           output_dir, graph_name, i)
       write_to_file(latex_file_name, ''.join(latex_out))
 
-  create_graph("exec-time", results, "")
+def create_speedup_graph(graph_name, values):
+  """
+
+plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title 'actual speedup' w lp, 'plot.dat' using 1:6 title "ideal efficiency" w lp, 'plot.dat' using 1:5 title "actual efficiency" w lp
+
+  """
+  for i in range(len(inputs)):
+    out = []
+    for nthreads in threads:
+      for (language, problem, variation) in get_all():
+        if variation == "seq": continue
+        tseq = values[threads[0]][problem]["seq"][language][i]
+        cur = values[nthreads][problem][variation][language][i]
+        if cur == INVALID: continue
+        out.append("%d\t%.2f\t%.2f\t%d\t%.2f\t1\n" % (
+            nthreads, cur, tseq / cur, nthreads, tseq / (nthreads * cur)))
+
+    output_file_name = "graph-%s-%d" % (graph_name, i)
+    output_file = "%s/images/%s" % (output_dir, output_file_name)
+    write_to_file("%s.dat" % output_file, ''.join(out))
+    cmd = "cp %s.dat plot.dat" % (output_file)
+    system(cmd)
+    print cmd
+    cmd = "gnuplot %s/plot.script" % (output_dir)
+    system(cmd)
+    cmd = "mv plot.png %s/images/%s.png" % (output_dir, output_file_name)
+    system(cmd)
+    cmd = "rm plot.dat"
+    system(cmd)
+
+    latex_out = []
+    caption = "Speedup and Efficiency for Input %d" % (i)
+    label = "fig:exec:spd:%d" % (i)
+    latex_out.append((
+        "\\begin{figure}[htbp]\n"
+        "  %%\\centering\n"
+        "  \\includegraphics[width=125mm]{images/%s.png}\n"
+        "  \\caption{%s}\n"
+        "  \\label{%s}\n"
+        "\\end{figure}\n") % (output_file_name, caption, label))
+
+    latex_file_name = "%s/chapters/graph-%s-%d.tex" % (
+        output_dir, graph_name, i)
+    write_to_file(latex_file_name, ''.join(latex_out))
+
+def output_graphs():
+  create_graph("exec-time", results[threads[0]], "")
+  create_speedup_graph("speedup", results)
 
 """
 SIZE=700

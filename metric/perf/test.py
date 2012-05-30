@@ -147,12 +147,13 @@ class testMain(unittest.TestCase):
 
     main.inputs = [main.ProblemInput(10, 15, 20, 30, 40)]
     main.TIMEOUT = 99
+    main.threads = [999]
     main.system(('timeout 99 time -a -f %e -o '
-                 'time-language-problem-variation-0.out '
+                 'time-language-problem-variation-0-999.out '
                  'directory/main < '
                  'problem_10_15_20_30_40.in > /dev/null 1>&0 2>&0'),
                  timeout=True)
-    main.read_from_file('time-language-problem-variation-0.out')
+    main.read_from_file('time-language-problem-variation-0-999.out')
 
     m.ReplayAll()
     main.run_all()
@@ -167,16 +168,19 @@ class testMain(unittest.TestCase):
 
     m.StubOutWithMock(main, 'read_file_values')
     main.read_file_values(
-        'time-language-problem-variation-0.out').AndReturn([1, 2])
+        'time-language-problem-variation-0-999.out').AndReturn([1, 2])
+
+    main.threads = [999]
 
     m.ReplayAll()
     main.get_results()
-    self.assertEqual(main.results['problem']['variation']['language'][0],
+    self.assertEqual(
+        main.results[999]['problem']['variation']['language'][0],
         (1 + 2) / 2.)
     m.VerifyAll()
     m.UnsetStubs()
 
-  def testOutputGraphs(self):
+  def testOutputExecTimeGraphs(self):
     m = mox.Mox()
 
     m.StubOutWithMock(main, 'write_to_file')
@@ -186,8 +190,10 @@ class testMain(unittest.TestCase):
     main.variations = ['seq']
     main.languages = ['language']
 
-    main.results['problem']['seq'] = { 'language' : {
-        0 : 100 }}
+    main.threads = [999]
+    main.results = {
+        999: {'problem': {
+            'seq': {'language': {0: 100}}}}}
 
     main.write_to_file('../../../ufrgs/meu/images/graph-exec-time-seq-0.perf', '=cluster;language\ncolors=black,yellow,red,med_blue,light_green,cyan\n=table\nyformat=%g\n=norotate\nxscale=1\nmax=150.000000\nylabel=Sequential execution time in seconds for input 0\nproblem 100.00\n')
     main.system('../../../ufrgs/meu/bargraph.pl -fig ../../../ufrgs/meu/images/graph-exec-time-seq-0.perf | fig2dev -L ppm -m 4 > ../../../ufrgs/meu/images/graph-exec-time-seq-0.ppm')
@@ -197,7 +203,41 @@ class testMain(unittest.TestCase):
         '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=125mm]{images/graph-exec-time-seq-0.png}\n  \\caption{Sequential Execution Time for Input 0}\n  \\label{fig:exec:time:seq:0}\n\\end{figure}\n')
 
     m.ReplayAll()
-    main.output_graphs()
+    main.create_graph("exec-time", main.results[999], '')
+    m.VerifyAll()
+    m.UnsetStubs()
+
+  def testOutputSpeedupGraphs(self):
+    m = mox.Mox()
+
+    m.StubOutWithMock(main, 'write_to_file')
+    m.StubOutWithMock(main, 'system')
+
+    main.problems = ['problem']
+    main.variations = ['seq', 'par']
+    main.languages = ['language']
+
+    main.threads = [2, 4]
+    main.results = {
+        2: {'problem': {
+            'seq': {'language': {0: 100}},
+            'par': {'language': {0: 50}}}},
+        4: {'problem': {
+            'par': {'language': {0: 25}}}}}
+
+    main.write_to_file('../../../ufrgs/meu/images/graph-speedup-0.dat', (
+        '2\t50.00\t2.00\t2\t1.00\t1\n'
+        '4\t25.00\t4.00\t4\t1.00\t1\n'))
+
+    main.system('cp ../../../ufrgs/meu/images/graph-speedup-0.dat plot.dat')
+    main.system('gnuplot ../../../ufrgs/meu/plot.script')
+    main.system('mv plot.png ../../../ufrgs/meu/images/graph-speedup-0.png')
+    main.system('rm plot.dat')
+    main.write_to_file('../../../ufrgs/meu/chapters/graph-speedup-0.tex',
+         '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=125mm]{images/graph-speedup-0.png}\n  \\caption{Speedup and Efficiency for Input 0}\n  \\label{fig:exec:spd:0}\n\\end{figure}\n')
+
+    m.ReplayAll()
+    main.create_speedup_graph("speedup", main.results)
     m.VerifyAll()
     m.UnsetStubs()
 
