@@ -146,9 +146,12 @@ class testMain(unittest.TestCase):
     main.get_all().AndReturn([('language', 'problem', 'variation')])
 
     main.inputs = [main.ProblemInput(10, 15, 20, 30, 40)]
-    main.system(('time -a -f %e -o time-language-problem-variation-0.out '
+    main.TIMEOUT = 99
+    main.system(('timeout 99 time -a -f %e -o '
+                 'time-language-problem-variation-0.out '
                  'directory/main < '
-                 'problem_10_15_20_30_40.in > /dev/null 1>&0 2>&0'))
+                 'problem_10_15_20_30_40.in > /dev/null 1>&0 2>&0'),
+                 timeout=True)
     main.read_from_file('time-language-problem-variation-0.out')
 
     m.ReplayAll()

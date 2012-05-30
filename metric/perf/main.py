@@ -7,8 +7,11 @@ languages = set(["chapel", "cilk", "erlang", "go", "tbb"])
 problems = ["randmat"]
 variations = ["seq", "par"]
 
-def system(cmd):
-  assert(os.system(cmd) == 0)
+def system(cmd, timeout=False):
+  ret = os.system(cmd)
+  if ret != 0 and not timeout:
+    print cmd
+    assert(False)
 
 def write_to_file(output, content):
   with open(output, 'w') as f:
@@ -174,7 +177,9 @@ class ProblemInput(object):
     self.percent = percent
     self.nelts = nelts
 
-inputs = [ProblemInput(10000, 1000, 666, 50, 10)]
+inputs = [ProblemInput(100, 100, 666, 50, 100),
+    ProblemInput(1000, 1000, 666, 50, 1000),
+    ProblemInput(10000, 10000, 666, 50, 10000)]
 
 # ===== general =====
 #inputs = ["10 10 55", "100 100 666", "100 250 777"] #, "100 1000 888"] #, "100 1000 888"]
@@ -255,6 +260,8 @@ def create_inputs():
             append_to_file(next_input_file, "\n%s\n%s\n" % (
                 content, cur.nelts))
 
+TIMEOUT = 10
+
 def run_all(redirect_output=True):
   # TODO: check processor usage
   for (language, problem, variation) in get_all():
@@ -267,6 +274,9 @@ def run_all(redirect_output=True):
       cmd = ""
       if language == "go":
         cmd += "GOMAXPROCS=4 "
+
+      cmd += "timeout %d " % (TIMEOUT)
+
       directory = get_directory(language, problem, variation)
       cmd += "time -a -f %%e -o %s %s/" % (time_output, directory)
 
@@ -293,7 +303,7 @@ def run_all(redirect_output=True):
             problem_map[problem].input_file_name(inputs[i]));
 
       print cmd
-      system(cmd)
+      system(cmd, timeout=True)
       value = read_from_file(time_output)
       print value
 
@@ -315,6 +325,9 @@ def get_results():
           language, problem, variation, i)
       #print time_output
       cur = read_file_values(time_output)
+
+      if (len(cur) == 0):
+        continue
 
       total = 0.0
       for j in range(len(cur)):
