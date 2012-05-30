@@ -59,6 +59,7 @@ cilk int reduce2d_start_cols(int row, ReduceState state) {
   // linear reduce on cols
   for (j = 1; j < state.ncols; j++) {
     temp = spawn f(j, state);
+    sync;
     res = state.op(res, temp);
   }
   return res;
@@ -79,6 +80,7 @@ cilk int reduce2d(int nrows, int ncols, int** matrix, Operator op) {
   int res;
   res = spawn reduce2d_with_filter(nrows, ncols, matrix, op,
       reduce2d_identity_filter, 0);
+  sync;
   return res;
 }
 
@@ -147,11 +149,16 @@ cilk int main() {
   product_result = (double*) malloc(sizeof(double) * winnow_nelts);
 
   spawn randmat(nelts, nelts, randmat_seed, randmat_matrix);
+  sync;
   spawn thresh(nelts, nelts, randmat_matrix, thresh_percent, thresh_mask);
+  sync;
   spawn winnow(nelts, nelts, randmat_matrix, thresh_mask, winnow_nelts,
       winnow_points);
+  sync;
   spawn outer(winnow_nelts, winnow_points, outer_matrix, outer_vector);
+  sync;
   spawn product(winnow_nelts, outer_matrix, outer_vector, product_result);
+  sync;
 
   printf("%d\n", winnow_nelts);
   for (i = 0; i < winnow_nelts; i++) {

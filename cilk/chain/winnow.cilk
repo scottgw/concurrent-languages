@@ -86,6 +86,7 @@ cilk void sort_impl(int start, int end, Point* values,
 
 cilk void sort(int n, Point* values, CompareFunction is_less) {
   spawn sort_impl(0, n, values, is_less, 0);
+  sync;
 }
 
 cilk void fill_point(int i, SplitState state) {

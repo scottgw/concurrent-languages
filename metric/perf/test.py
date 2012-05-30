@@ -64,7 +64,7 @@ class testMain(unittest.TestCase):
     main.get_directory('cpp', 'outer').AndReturn('dir_outer')
     main.get_directory('cpp', 'product').AndReturn('dir_product')
 
-    problems = [main.RandmatProblem(), main.ThreshProblem(),
+    main.problem_classes = [main.RandmatProblem(), main.ThreshProblem(),
         main.WinnowProblem(), main.OuterProblem(), main.ProductProblem(),
         main.DumbProblem()]
     main.inputs = [main.ProblemInput(10, 15, 20, 30, 40)]
@@ -91,7 +91,7 @@ class testMain(unittest.TestCase):
         'dir_product/main < product_40.in > product_40.out')
 
     m.ReplayAll()
-    main.create_inputs(problems)
+    main.create_inputs()
     m.VerifyAll()
     m.UnsetStubs()
 
@@ -120,7 +120,7 @@ class testMain(unittest.TestCase):
     main.get_directory('cpp', 'outer').AndReturn('dir_outer')
     main.get_directory('cpp', 'product').AndReturn('dir_outer')
 
-    problems = [main.RandmatProblem(), main.ThreshProblem(),
+    main.problem_classes = [main.RandmatProblem(), main.ThreshProblem(),
         main.WinnowProblem(), main.OuterProblem(), main.ProductProblem(),
         main.DumbProblem()]
     main.inputs = [main.ProblemInput(10, 15, 20, 30, 40)]
@@ -128,7 +128,7 @@ class testMain(unittest.TestCase):
     main.write_to_file('chain_10_20_30_40.in', '10\n20\n30\n40\n')
 
     m.ReplayAll()
-    main.create_inputs(problems)
+    main.create_inputs()
     m.VerifyAll()
     m.UnsetStubs()
 

@@ -24,10 +24,8 @@ feature
   local
     worker: separate RANDMAT_PARFOR_WORKER
     workers: LINKED_LIST[separate RANDMAT_PARFOR_WORKER]
-    reader: separate RANDMAT_PARFOR_READER
   do
     create workers.make
-    create reader.make
     create parfor_aggregator.make(nrows)
     across 1 |..| nrows as ic loop
       matrix.force(create_array(), ic.item)
@@ -37,12 +35,13 @@ feature
     end
     -- parallel for on rows
     workers.do_all(agent launch_parfor_worker)
-    parfor_result(reader)
+    parfor_result(parfor_aggregator)
   end
 
-  parfor_result(reader: separate RANDMAT_PARFOR_READER)
+  parfor_result(aggregator: separate RANDMAT_PARFOR_AGGREGATOR)
+  require
+    aggregator.is_all_done
   do
-    reader.get_result(parfor_aggregator)
   end
 
   launch_parfor_worker(worker: separate RANDMAT_PARFOR_WORKER)
@@ -56,7 +55,7 @@ feature
   end
 
 feature {NONE}
-  parfor_aggregator: RANDMAT_PARFOR_AGGREGATOR
+  parfor_aggregator: separate RANDMAT_PARFOR_AGGREGATOR
 
 end -- class RANDMAT 
 

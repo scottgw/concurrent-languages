@@ -1,3 +1,3 @@
 all:
 	python test.py
-	#pychecker main.py
+	pychecker main.py

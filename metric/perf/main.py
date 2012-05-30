@@ -2,10 +2,11 @@ import os
 import sys
 
 #languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
-languages = ["cilk"]
-#problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
+languages = set(["chapel", "cilk", "erlang", "go", "tbb"])
+#languages = ["cilk"]
+problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
-problems = ["thresh"]
+#problems = ["thresh"]
 variations = ["seq", "par"]
 
 def system(cmd):
@@ -76,8 +77,6 @@ def make_all():
     cmd = "cd %s && make main" % directory
     print cmd
     system(cmd)
-
-inputs = []
 
 class Problem(object):
   def __init__(self):
@@ -163,9 +162,9 @@ class DumbProblem(Problem):
     return "dumb_file_name"
 
 problem_classes = [RandmatProblem(), ThreshProblem(), WinnowProblem(),
-    OuterProblem(), ProductProblem(), ChainProblem(), Problem()]
+    OuterProblem(), ProductProblem(), ChainProblem()]
 
-problem_map = {}
+problem_map = { Problem().name: Problem() }
 for p in problem_classes:
   problem_map[p.name] = p
 
@@ -176,6 +175,8 @@ class ProblemInput(object):
     self.seed = seed
     self.percent = percent
     self.nelts = nelts
+
+inputs = [ProblemInput(10, 10, 666, 50, 10)]
 
 # ===== general =====
 #inputs = ["10 10 55", "100 100 666", "100 250 777"] #, "100 1000 888"] #, "100 1000 888"]
@@ -212,7 +213,7 @@ class ProblemInput(object):
 #input_thresh = ["55"]
 #input_winnow = ["250"]
 
-def create_inputs(problems):
+def create_inputs():
   randmat_problem = RandmatProblem()
   chain_problem = ChainProblem()
   for i in range(len(inputs)):
@@ -225,9 +226,9 @@ def create_inputs(problems):
     file_name = chain_problem.input_file_name(cur)
     write_to_file(file_name, chain_problem.get_input(cur))
 
-  for i in range(len(problems) - 1):
-    problem = problems[i]
-    next_problem = problems[i + 1]
+  for i in range(len(problem_classes) - 1):
+    problem = problem_classes[i]
+    next_problem = problem_classes[i + 1]
     print problem.name
     for j in range(len(inputs)):
       cur = inputs[j]
@@ -286,7 +287,8 @@ def run_all():
       if language != "scoop":
         cmd += " <";
 
-      cmd += " %s > /dev/null 1>&0 2>&0" % (
+      #cmd += " %s > /dev/null 1>&0 2>&0" % (
+      cmd += " %s" % (
           problem_map[problem].input_file_name(inputs[i]));
 
       print cmd
@@ -326,7 +328,7 @@ def get_results():
 
 # TODO: test and refactor
 def output_graphs():
-  def create_graph(graph_name, values, max_value, pretty_name):
+  def create_graph(graph_name, values, pretty_name):
     old_stdout = sys.stdout
 
     variation_names = {"seq" : "Sequential", "par" : "Parallel"}
@@ -370,14 +372,12 @@ xscale=1
 
     sys.stdout = old_stdout
 
-  create_graph("exec-time", results, 60, "")
+  create_graph("exec-time", results, "")
 
 def main():
-#generate_erlang_main()
-#make_all()
-  #problems = ["randmat", "thresh", "winnow", "outer", "product", "final"]
-  problems = ["randmat", "thresh", "final"]
-#create_inputs(problems)
+  generate_erlang_main()
+  make_all()
+  create_inputs()
   run_all()
   get_results()
   output_graphs()

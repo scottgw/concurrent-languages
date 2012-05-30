@@ -85,10 +85,8 @@ feature
   local
     worker: separate THRESH_REDUCE2D_WORKER
     workers: LINKED_LIST [separate THRESH_REDUCE2D_WORKER]
-    reader: separate THRESH_REDUCE2D_READER
   do
     create workers.make
-    create reader.make
     create reduce2d_aggregator.make(nrows, op_aggregator)
     across 1 |..| nrows as ic loop
       create worker.make_with_filter(nrows, ncols, matrix.item(ic.item), 
@@ -97,12 +95,14 @@ feature
     end
     -- parallel for on rows
     workers.do_all(agent launch_reduce2d_worker)
-    Result := reduce2d_result(reader)
+    Result := reduce2d_result(reduce2d_aggregator)
   end
 
-  reduce2d_result(reader: separate THRESH_REDUCE2D_READER): INTEGER
+  reduce2d_result(aggregator: separate THRESH_REDUCE2D_AGGREGATOR): INTEGER
+  require
+    aggregator.is_all_done
   do
-    Result := reader.get_result(reduce2d_aggregator)
+    Result := aggregator.get_result
   end
 
   -- parallel for on matrix
@@ -112,10 +112,8 @@ feature
   local
     worker: separate THRESH_PARFOR_WORKER
     workers: LINKED_LIST[separate THRESH_PARFOR_WORKER]
-    reader: separate THRESH_PARFOR_READER
   do
     create workers.make
-    create reader.make
     create parfor_aggregator.make(nrows)
     across 1 |..| nrows as ic loop
       mask.force(create_array(), ic.item)
@@ -125,12 +123,13 @@ feature
     end
     -- parallel for on rows
     workers.do_all(agent launch_parfor_worker)
-    parfor_result(reader)
+    parfor_result(parfor_aggregator)
   end
 
-  parfor_result(reader: separate THRESH_PARFOR_READER)
+  parfor_result(aggregator: separate THRESH_PARFOR_AGGREGATOR)
+  require
+    aggregator.is_all_done
   do
-    reader.get_result(parfor_aggregator)
   end
 
 feature {NONE}
