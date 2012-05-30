@@ -220,9 +220,9 @@ class testMain(unittest.TestCase):
     main.threads = [2, 4]
     main.results = {
         2: {'problem': {
-            'seq': {'language': {0: 100}},
             'par': {'language': {0: 50}}}},
         4: {'problem': {
+            'seq': {'language': {0: 100}},
             'par': {'language': {0: 25}}}}}
 
     main.write_to_file(

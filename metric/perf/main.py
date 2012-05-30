@@ -1,7 +1,7 @@
 import os
 
-#languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
-languages = set(["chapel", "cilk", "erlang", "go", "tbb"])
+languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
+#languages = set(["chapel", "cilk", "erlang", "go", "tbb"])
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 problems = ["randmat"]
 variations = ["seq", "par"]
