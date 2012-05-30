@@ -1,11 +1,11 @@
 import os
 
-languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
+#languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
 #languages = set(["chapel", "cilk", "erlang", "go", "tbb"])
 #languages = set(["chapel", "cilk", "erlang"])
-#languages = ["cilk"]
-problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
-#problems = ["randmat", "thresh"]
+languages = ["chapel", "cilk"]
+#problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
+problems = ["randmat"]
 variations = ["seq", "par"]
 
 def system(cmd, timeout=False):
@@ -183,15 +183,17 @@ class ProblemInput(object):
 
 inputs = [
     #ProblemInput(100, 100, 666, 50, 100),
-    ProblemInput(250, 250, 666, 50, 125),
-    ProblemInput(500, 500, 666, 50, 250),
+    #ProblemInput(250, 250, 666, 50, 125),
+    #ProblemInput(500, 500, 666, 50, 250),
     #ProblemInput(1000, 1000, 666, 50, 1000),
+    ProblemInput(2000, 2000, 666, 50, 2000),
+    ProblemInput(3000, 3000, 666, 50, 3000),
     #ProblemInput(10000, 10000, 666, 50, 10000)
   ]
 
 #threads = [1, 2, 3, 4, 5, 6, 7, 8]
-#threads = [1, 2, 3, 4]
-threads = [2, 4]
+threads = [1, 2, 3, 4]
+#threads = [2, 4]
 
 # ===== general =====
 #inputs = ["10 10 55", "100 100 666", "100 250 777"] #, "100 1000 888"] #, "100 1000 888"]
@@ -272,7 +274,7 @@ def create_inputs():
             append_to_file(next_input_file, "\n%s\n%s\n" % (
                 content, cur.nelts))
 
-TIMEOUT = 2
+TIMEOUT = 5
 
 def get_time_output(language, problem, variation, i, nthreads):
   return "time-%s-%s-%s-%d-%d.out" % (
@@ -497,10 +499,72 @@ plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title
       output_dir, graph_name)
   write_to_file(latex_all_file_name, ''.join(latex_all))
 
+def create_merged_speedup_graph(graph_name, speedup_graph_name):
+  """
+plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title 'actual speedup' w lp, 'plot.dat' using 1:6 title "ideal efficiency" w lp, 'plot.dat' using 1:5 title "actual efficiency" w lp
+  """
+  latex_all = []
+  for i in range(len(inputs)):
+    for problem in sorted(problems):
+      out = []
+      out.append('''
+set xrange [0:8]
+set yrange [0:8]
+set xlabel "threads"
+set terminal png
+set output "plot.png"
+set key top center
+''')
+      out.append("plot ")
+      first = True
+      for language in sorted(languages):
+        output_file_name = "graph-%s-%s-%s-%d" % (
+            speedup_graph_name, language, problem, i)
+        output_file = "%s/images/%s" % (output_dir, output_file_name)
+        if first:
+          first = False
+          out.append("'%s.dat' using 1:4 title 'ideal speedup' w lp" % (
+              output_file))
+        out.append(", ")
+        out.append("'%s.dat' using 1:3 title '%s speedup' w lp" % (
+            output_file, language))
+    output_file_name = "graph-%s-%s-%d" % (graph_name, problem, i)
+    script_name = 'other.script'
+    write_to_file(script_name, ''.join(out))
+    system('gnuplot %s' % script_name)
+    cmd = "mv plot.png %s/images/%s.png" % (output_dir, output_file_name)
+    system(cmd)
+    cmd = 'rm %s' % script_name
+    system(cmd)
+
+    latex_out = []
+    caption = ("Speedup for Problem %s Input %d" % (problem, i))
+    label = "fig:exec:spd:%s:%d" % (problem, i)
+    latex_out.append((
+        "\\begin{figure}[htbp]\n"
+        "  %%\\centering\n"
+        "  \\includegraphics[width=125mm]{images/%s.png}\n"
+        "  \\caption{%s}\n"
+        "  \\label{%s}\n"
+        "\\end{figure}\n") % (output_file_name, caption, label))
+
+    latex_file_name = "%s/chapters/%s.tex" % (
+        output_dir, output_file_name)
+    write_to_file(latex_file_name, ''.join(latex_out))
+
+    latex_all.append("\input{chapters/%s.tex}\n" % output_file_name)
+    if len(latex_all) % 6 == 0:
+      latex_all.append("\clearpage\n")
+
+  latex_all_file_name = "%s/chapters/graph-%s.tex" % (
+    output_dir, graph_name)
+  write_to_file(latex_all_file_name, ''.join(latex_all))
 
 def output_graphs():
   create_graph("exec-time", results[threads[-1]], "")
-  create_speedup_graph("speedup", results)
+  speedup_graph_name = 'speedup'
+  create_speedup_graph(speedup_graph_name, results)
+  create_merged_speedup_graph("problem-speedup", speedup_graph_name)
 
 """
 SIZE=700
@@ -528,6 +592,7 @@ def main():
   get_results()
   output_graphs()
   system('xmessage " ALL DONE " -nearmouse -timeout 1')
+  system('cd %s && make' % output_dir)
 
 if __name__ == '__main__':
   main()
