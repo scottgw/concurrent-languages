@@ -257,7 +257,7 @@ def create_inputs():
             append_to_file(next_input_file, "\n%s\n%s\n" % (
                 content, cur.nelts))
 
-def run_all():
+def run_all(redirect_output=True):
   # TODO: check processor usage
   for (language, problem, variation) in get_all():
     for i in range(len(inputs)):
@@ -287,9 +287,12 @@ def run_all():
       if language != "scoop":
         cmd += " <";
 
-      #cmd += " %s > /dev/null 1>&0 2>&0" % (
-      cmd += " %s" % (
-          problem_map[problem].input_file_name(inputs[i]));
+      if redirect_output:
+        cmd += " %s > /dev/null 1>&0 2>&0" % (
+            problem_map[problem].input_file_name(inputs[i]));
+      else:
+        cmd += " %s" % (
+            problem_map[problem].input_file_name(inputs[i]));
 
       print cmd
       system(cmd)
@@ -378,7 +381,7 @@ def main():
   generate_erlang_main()
   make_all()
   create_inputs()
-  run_all()
+  run_all(redirect_output=False)
   get_results()
   output_graphs()
 
