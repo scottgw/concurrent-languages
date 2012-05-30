@@ -1,7 +1,7 @@
 import os
 
-#languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
-languages = set(["chapel", "cilk", "erlang", "go", "tbb"])
+languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
+#languages = set(["chapel", "cilk", "erlang", "go", "tbb"])
 #languages = ["cilk"]
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 problems = ["randmat"]
@@ -36,8 +36,11 @@ def read_file_values(file_name):
   result = []
   with open(file_name, 'r') as f:
     for line in f:
-      value = float(line)
-      result.append(value)
+      try:
+        value = float(line)
+        result.append(value)
+      except ValueError:
+        return []
   return result
 
 def file_exists(file_name):
