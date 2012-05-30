@@ -177,6 +177,7 @@ class testMain(unittest.TestCase):
     m = mox.Mox()
 
     m.StubOutWithMock(main, 'write_to_file')
+    m.StubOutWithMock(main, 'system')
 
     main.problems = ['problem']
     main.variations = ['seq']
@@ -186,6 +187,9 @@ class testMain(unittest.TestCase):
         0 : 100 }}
 
     main.write_to_file('../../../ufrgs/meu/images/graph-exec-time-seq-0.perf', '=cluster;language\ncolors=black,yellow,red,med_blue,light_green,cyan\n=table\nyformat=%g\n=norotate\nxscale=1\nmax=150.000000\nylabel=Sequential execution time in seconds for input 0\nproblem 100.00\n')
+    main.system('../../../ufrgs/meu/bargraph.pl -fig ../../../ufrgs/meu/images/graph-exec-time-seq-0.perf | fig2dev -L ppm -m 4 > ../../../ufrgs/meu/images/graph-exec-time-seq-0.ppm')
+    main.system('mogrify -reverse -flatten ../../../ufrgs/meu/images/graph-exec-time-seq-0.ppm')
+    main.system('mogrify -resize 700x700 -format png ../../../ufrgs/meu/images/graph-exec-time-seq-0.ppm')
 
     m.ReplayAll()
     main.output_graphs()

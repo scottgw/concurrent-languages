@@ -1,7 +1,7 @@
 import os
 
-languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
-#languages = set(["chapel", "cilk", "erlang", "go", "tbb"])
+#languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
+languages = set(["chapel", "cilk", "erlang", "go", "tbb"])
 #languages = ["cilk"]
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 problems = ["randmat"]
@@ -327,6 +327,8 @@ def get_results():
       results[problem][variation][language][i] = avg
   #print results
 
+GRAPH_SIZE = 700
+
 # TODO: test and refactor
 def output_graphs():
   def create_graph(graph_name, values, pretty_name):
@@ -364,10 +366,30 @@ xscale=1
               float(values[problem][variation][language][i])))
           out.append("\n")
 
-        write_to_file("../../../ufrgs/meu/images/graph-%s-%s-%d.perf" % (
-                graph_name, variation, i), ''.join(out))
+        output_dir = "../../../ufrgs/meu"
+        output_file = "%s/images/graph-%s-%s-%d" % (
+                output_dir, graph_name, variation, i)
+        write_to_file("%s.perf" % (output_file), ''.join(out))
+
+        cmd = (
+            "%s/bargraph.pl -fig %s.perf | fig2dev -L ppm -m 4 > %s.ppm" % (
+                output_dir, output_file, output_file))
+        system(cmd)
+        cmd = ("mogrify -reverse -flatten %s.ppm" % output_file)
+        system(cmd)
+        cmd = ("mogrify -resize %dx%d -format png %s.ppm" % (
+            GRAPH_SIZE, GRAPH_SIZE, output_file))
+        system(cmd)
 
   create_graph("exec-time", results, "")
+
+"""
+SIZE=700
+images/%.png: images/%.ppm
+	mogrify -reverse -flatten $<
+	mogrify -resize ${SIZE}x${SIZE} -format png $<
+images/%.ppm: images/%.perf
+	./bargraph.pl -fig $< | fig2dev -L ppm -m 4 > $@"""
 
 def main():
   generate_erlang_main()
