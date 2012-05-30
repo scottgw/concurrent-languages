@@ -2,9 +2,10 @@ import os
 
 languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
 #languages = set(["chapel", "cilk", "erlang", "go", "tbb"])
+#languages = set(["chapel", "cilk", "erlang"])
 #languages = ["cilk"]
-#problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
-problems = ["randmat", "thresh"]
+problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
+#problems = ["randmat", "thresh"]
 variations = ["seq", "par"]
 
 def system(cmd, timeout=False):
@@ -182,11 +183,15 @@ class ProblemInput(object):
 
 inputs = [
     #ProblemInput(100, 100, 666, 50, 100),
-    ProblemInput(1000, 1000, 666, 50, 1000),
-    ProblemInput(10000, 10000, 666, 50, 10000)]
+    ProblemInput(250, 250, 666, 50, 125),
+    ProblemInput(500, 500, 666, 50, 250),
+    #ProblemInput(1000, 1000, 666, 50, 1000),
+    #ProblemInput(10000, 10000, 666, 50, 10000)
+  ]
 
 #threads = [1, 2, 3, 4, 5, 6, 7, 8]
-threads = [1, 2, 3, 4]
+#threads = [1, 2, 3, 4]
+threads = [2, 4]
 
 # ===== general =====
 #inputs = ["10 10 55", "100 100 666", "100 250 777"] #, "100 1000 888"] #, "100 1000 888"]
@@ -267,7 +272,7 @@ def create_inputs():
             append_to_file(next_input_file, "\n%s\n%s\n" % (
                 content, cur.nelts))
 
-TIMEOUT = 1
+TIMEOUT = 2
 
 def get_time_output(language, problem, variation, i, nthreads):
   return "time-%s-%s-%s-%d-%d.out" % (
@@ -355,9 +360,9 @@ def get_results():
           total += cur[j]
         avg = total / len(cur)
         print nthreads, problem, variation, language, i, avg
-        if language == "erlang": # IMPORTANT !!!
-          assert(avg > 1)
-          avg -= 1
+        #if language == "erlang": # IMPORTANT !!!
+          #assert(avg > 1)
+          #avg -= 1
         results[nthreads][problem][variation][language][i] = avg
   #print results
 
@@ -446,9 +451,10 @@ plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title
           #for (a_language, a_problem, variation) in get_all():
             #if variation == "seq" or language != a_language or (
                 #a_problem != problem): continue
+            if "seq" not in values[threads[-1]][problem]: continue
             tseq = values[threads[-1]][problem]["seq"][language][i]
             cur = values[nthreads][problem][variation][language][i]
-            if cur == INVALID: continue
+            if cur == INVALID or cur == 0: continue
             out.append("%d\t%.10f\t%.10f\t%d\t%.10f\t1\n" % (
                 nthreads, cur, tseq / cur, nthreads,
                 tseq / (nthreads * cur)))
@@ -504,14 +510,14 @@ images/%.png: images/%.ppm
 images/%.ppm: images/%.perf
 	./bargraph.pl -fig $< | fig2dev -L ppm -m 4 > $@"""
 
-TOTAL_EXECUTIONS = 3
+TOTAL_EXECUTIONS = 1
 
 def main():
-  #generate_erlang_main()
-  #make_all()
-  #create_inputs()
-  #for _ in range(TOTAL_EXECUTIONS):
-    #run_all(redirect_output=False)
+  generate_erlang_main()
+  make_all()
+  create_inputs()
+  for _ in range(TOTAL_EXECUTIONS):
+    run_all(redirect_output=True)  # TODO: remove outputs
   get_results()
   output_graphs()
 
