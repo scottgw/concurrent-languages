@@ -226,14 +226,14 @@ class testMain(unittest.TestCase):
             'par': {'language': {0: 25}}}}}
 
     main.write_to_file(
-        '../../../ufrgs/meu/images/graph-speedup-language-0.dat', '2\t50.0000000000\t2.0000000000\t2\t1.0000000000\t1\n4\t25.0000000000\t4.0000000000\t4\t1.0000000000\t1\n')
+        '../../../ufrgs/meu/images/graph-speedup-language-problem-0.dat', '2\t50.0000000000\t2.0000000000\t2\t1.0000000000\t1\n4\t25.0000000000\t4.0000000000\t4\t1.0000000000\t1\n')
 
-    main.system('cp ../../../ufrgs/meu/images/graph-speedup-language-0.dat plot.dat')
+    main.system('cp ../../../ufrgs/meu/images/graph-speedup-language-problem-0.dat plot.dat')
     main.system('gnuplot ../../../ufrgs/meu/plot.script')
-    main.system('mv plot.png ../../../ufrgs/meu/images/graph-speedup-language-0.png')
+    main.system('mv plot.png ../../../ufrgs/meu/images/graph-speedup-language-problem-0.png')
     main.system('rm plot.dat')
-    main.write_to_file('../../../ufrgs/meu/chapters/graph-speedup-language-0.tex',
-        '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=125mm]{images/graph-speedup-language-0.png}\n  \\caption{Speedup and Efficiency for Language language Input 0}\n  \\label{fig:exec:spd:language:0}\n\\end{figure}\n')
+    main.write_to_file('../../../ufrgs/meu/chapters/graph-speedup-language-problem-0.tex',
+        '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=125mm]{images/graph-speedup-language-problem-0.png}\n  \\caption{Speedup and Efficiency for Language language Problem problem Input 0}\n  \\label{fig:exec:spd:language:problem:0}\n\\end{figure}\n')
 
     m.ReplayAll()
     main.create_speedup_graph("speedup", main.results)

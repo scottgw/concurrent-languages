@@ -145,12 +145,14 @@ func main() {
   fmt.Scanf("%d", &percent);
 
   mask := thresh(nrows, ncols, matrix, percent);
+  mask = mask
 
+/*
   for i := 0; i < nrows; i++ {
     for j := 0; j < ncols; j++ {
       fmt.Printf("%d ", mask[i][j]);
     }
     fmt.Printf("\n");
   }
-  fmt.Printf("\n");
+  fmt.Printf("\n");//*/
 }

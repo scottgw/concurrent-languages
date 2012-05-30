@@ -45,14 +45,14 @@ feature
     create mask.make(nrows, ncols)
     thresh(nrows, ncols, matrix, percent, mask)
 
-    from i := 1 until i > nrows loop
-      from j := 1 until j > ncols loop
-        print(mask.item(i, j).out + " ")
-        j := j + 1
-      end
-      print("%N")
-      i := i + 1
-    end
+    --from i := 1 until i > nrows loop
+      --from j := 1 until j > ncols loop
+        --print(mask.item(i, j).out + " ")
+        --j := j + 1
+      --end
+      --print("%N")
+      --i := i + 1
+    --end
   end
 
   thresh(nrows, ncols: INTEGER; matrix: ARRAY2[INTEGER]; percent: INTEGER;

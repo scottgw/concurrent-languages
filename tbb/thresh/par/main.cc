@@ -137,6 +137,7 @@ int main(int argc, char** argv) {
 
   thresh(nrows, ncols, matrix, percent, &mask);
 
+/*
   printf("%d %d\n", nrows, ncols);
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
@@ -145,6 +146,7 @@ int main(int argc, char** argv) {
     printf("\n");
   }
   printf("\n");
+//*/
 
   return 0;
 }

@@ -37,12 +37,12 @@ feature
     create mask.make_empty
     thresh(nrows, ncols, matrix, percent, mask)
 
-    across 1 |..| nrows as ic loop
-      across 1 |..| ncols as jc loop
-        print(item(mask.item(ic.item), jc.item).out + " ")
-      end
-      print("%N")
-    end
+    --across 1 |..| nrows as ic loop
+      --across 1 |..| ncols as jc loop
+        --print(item(mask.item(ic.item), jc.item).out + " ")
+      --end
+      --print("%N")
+    --end
   end
 
   read_matrix(nrows, ncols: INTEGER; matrix: ARRAY[separate ARRAY[INTEGER]];

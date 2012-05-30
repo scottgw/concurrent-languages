@@ -4,7 +4,7 @@ languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
 #languages = set(["chapel", "cilk", "erlang", "go", "tbb"])
 #languages = ["cilk"]
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
-problems = ["randmat"]
+problems = ["randmat", "thresh"]
 variations = ["seq", "par"]
 
 def system(cmd, timeout=False):
@@ -437,45 +437,51 @@ def create_speedup_graph(graph_name, values):
 plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title 'actual speedup' w lp, 'plot.dat' using 1:6 title "ideal efficiency" w lp, 'plot.dat' using 1:5 title "actual efficiency" w lp
   """
   for language in sorted(languages):
-    for i in range(len(inputs)):
-      out = []
-      for nthreads in threads:
-        for (a_language, problem, variation) in get_all():
-          if variation == "seq" or language != a_language: continue
-          tseq = values[threads[-1]][problem]["seq"][language][i]
-          cur = values[nthreads][problem][variation][language][i]
-          if cur == INVALID: continue
-          out.append("%d\t%.10f\t%.10f\t%d\t%.10f\t1\n" % (
-              nthreads, cur, tseq / cur, nthreads, tseq / (nthreads * cur)))
+    for problem in sorted(problems):
+      for i in range(len(inputs)):
+        out = []
+        for nthreads in threads:
+            variation = "par"
+          #for (a_language, a_problem, variation) in get_all():
+            #if variation == "seq" or language != a_language or (
+                #a_problem != problem): continue
+            tseq = values[threads[-1]][problem]["seq"][language][i]
+            cur = values[nthreads][problem][variation][language][i]
+            if cur == INVALID: continue
+            out.append("%d\t%.10f\t%.10f\t%d\t%.10f\t1\n" % (
+                nthreads, cur, tseq / cur, nthreads,
+                tseq / (nthreads * cur)))
 
-      output_file_name = "graph-%s-%s-%d" % (graph_name, language, i)
-      output_file = "%s/images/%s" % (output_dir, output_file_name)
-      write_to_file("%s.dat" % output_file, ''.join(out))
-      cmd = "cp %s.dat plot.dat" % (output_file)
-      system(cmd)
-      print cmd
-      cmd = "gnuplot %s/plot.script" % (output_dir)
-      system(cmd)
-      cmd = "mv plot.png %s/images/%s.png" % (output_dir, output_file_name)
-      system(cmd)
-      cmd = "rm plot.dat"
-      system(cmd)
+        output_file_name = "graph-%s-%s-%s-%d" % (
+            graph_name, language, problem, i)
+        output_file = "%s/images/%s" % (output_dir, output_file_name)
+        write_to_file("%s.dat" % output_file, ''.join(out))
+        cmd = "cp %s.dat plot.dat" % (output_file)
+        system(cmd)
+        print cmd
+        cmd = "gnuplot %s/plot.script" % (output_dir)
+        system(cmd)
+        cmd = "mv plot.png %s/images/%s.png" % (output_dir, output_file_name)
+        system(cmd)
+        cmd = "rm plot.dat"
+        system(cmd)
 
-      latex_out = []
-      caption = "Speedup and Efficiency for Language %s Input %d" % (
-          language, i)
-      label = "fig:exec:spd:%s:%d" % (language, i)
-      latex_out.append((
-          "\\begin{figure}[htbp]\n"
-          "  %%\\centering\n"
-          "  \\includegraphics[width=125mm]{images/%s.png}\n"
-          "  \\caption{%s}\n"
-          "  \\label{%s}\n"
-          "\\end{figure}\n") % (output_file_name, caption, label))
+        latex_out = []
+        caption = (
+            "Speedup and Efficiency for Language %s Problem %s Input %d" % (
+            language, problem, i))
+        label = "fig:exec:spd:%s:%s:%d" % (language, problem, i)
+        latex_out.append((
+            "\\begin{figure}[htbp]\n"
+            "  %%\\centering\n"
+            "  \\includegraphics[width=125mm]{images/%s.png}\n"
+            "  \\caption{%s}\n"
+            "  \\label{%s}\n"
+            "\\end{figure}\n") % (output_file_name, caption, label))
 
-      latex_file_name = "%s/chapters/%s.tex" % (
-          output_dir, output_file_name)
-      write_to_file(latex_file_name, ''.join(latex_out))
+        latex_file_name = "%s/chapters/%s.tex" % (
+            output_dir, output_file_name)
+        write_to_file(latex_file_name, ''.join(latex_out))
 
 def output_graphs():
   create_graph("exec-time", results[threads[-1]], "")
@@ -492,9 +498,9 @@ images/%.ppm: images/%.perf
 TOTAL_EXECUTIONS = 3
 
 def main():
-  #generate_erlang_main()
-  #make_all()
-  #create_inputs()
+  generate_erlang_main()
+  make_all()
+  create_inputs()
   for _ in range(TOTAL_EXECUTIONS):
     run_all(redirect_output=False)
   get_results()
