@@ -513,6 +513,13 @@ images/%.ppm: images/%.perf
 TOTAL_EXECUTIONS = 1
 
 def main():
+  total_time = (
+      len(languages) * len(problems) * TOTAL_EXECUTIONS * len(threads) *
+      TIMEOUT * len(inputs))
+  print "%fs or %fm or %fh or %fd\n" % (
+      total_time, total_time / 60., total_time / (
+          60. * 60), total_time / (60. * 60 * 24))
+  raw_input()
   generate_erlang_main()
   make_all()
   create_inputs()
