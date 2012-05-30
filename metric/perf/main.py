@@ -5,7 +5,7 @@ import os
 #languages = set(["chapel", "cilk", "erlang"])
 languages = ["chapel", "cilk"]
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
-problems = ["randmat"]
+problems = ["randmat", "thresh"]
 variations = ["seq", "par"]
 
 def system(cmd, timeout=False):
@@ -274,7 +274,7 @@ def create_inputs():
             append_to_file(next_input_file, "\n%s\n%s\n" % (
                 content, cur.nelts))
 
-TIMEOUT = 5
+TIMEOUT = 10
 
 def get_time_output(language, problem, variation, i, nthreads):
   return "time-%s-%s-%s-%d-%d.out" % (
@@ -504,8 +504,8 @@ def create_merged_speedup_graph(graph_name, speedup_graph_name):
 plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title 'actual speedup' w lp, 'plot.dat' using 1:6 title "ideal efficiency" w lp, 'plot.dat' using 1:5 title "actual efficiency" w lp
   """
   latex_all = []
-  for i in range(len(inputs)):
-    for problem in sorted(problems):
+  for problem in sorted(problems):
+    for i in range(len(inputs)):
       out = []
       out.append('''
 set xrange [0:8]
@@ -528,33 +528,33 @@ set key top center
         out.append(", ")
         out.append("'%s.dat' using 1:3 title '%s speedup' w lp" % (
             output_file, language))
-    output_file_name = "graph-%s-%s-%d" % (graph_name, problem, i)
-    script_name = 'other.script'
-    write_to_file(script_name, ''.join(out))
-    system('gnuplot %s' % script_name)
-    cmd = "mv plot.png %s/images/%s.png" % (output_dir, output_file_name)
-    system(cmd)
-    cmd = 'rm %s' % script_name
-    system(cmd)
+      output_file_name = "graph-%s-%s-%d" % (graph_name, problem, i)
+      script_name = 'other.script'
+      write_to_file(script_name, ''.join(out))
+      system('gnuplot %s' % script_name)
+      cmd = "mv plot.png %s/images/%s.png" % (output_dir, output_file_name)
+      system(cmd)
+      cmd = 'rm %s' % script_name
+      system(cmd)
 
-    latex_out = []
-    caption = ("Speedup for Problem %s Input %d" % (problem, i))
-    label = "fig:exec:spd:%s:%d" % (problem, i)
-    latex_out.append((
-        "\\begin{figure}[htbp]\n"
-        "  %%\\centering\n"
-        "  \\includegraphics[width=125mm]{images/%s.png}\n"
-        "  \\caption{%s}\n"
-        "  \\label{%s}\n"
-        "\\end{figure}\n") % (output_file_name, caption, label))
+      latex_out = []
+      caption = ("Speedup for Problem %s Input %d" % (problem, i))
+      label = "fig:exec:spd:%s:%d" % (problem, i)
+      latex_out.append((
+          "\\begin{figure}[htbp]\n"
+          "  %%\\centering\n"
+          "  \\includegraphics[width=125mm]{images/%s.png}\n"
+          "  \\caption{%s}\n"
+          "  \\label{%s}\n"
+          "\\end{figure}\n") % (output_file_name, caption, label))
 
-    latex_file_name = "%s/chapters/%s.tex" % (
-        output_dir, output_file_name)
-    write_to_file(latex_file_name, ''.join(latex_out))
+      latex_file_name = "%s/chapters/%s.tex" % (
+          output_dir, output_file_name)
+      write_to_file(latex_file_name, ''.join(latex_out))
 
-    latex_all.append("\input{chapters/%s.tex}\n" % output_file_name)
-    if len(latex_all) % 6 == 0:
-      latex_all.append("\clearpage\n")
+      latex_all.append("\input{chapters/%s.tex}\n" % output_file_name)
+      if len(latex_all) % 6 == 0:
+        latex_all.append("\clearpage\n")
 
   latex_all_file_name = "%s/chapters/graph-%s.tex" % (
     output_dir, graph_name)
