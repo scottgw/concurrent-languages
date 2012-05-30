@@ -190,6 +190,8 @@ class testMain(unittest.TestCase):
     main.system('../../../ufrgs/meu/bargraph.pl -fig ../../../ufrgs/meu/images/graph-exec-time-seq-0.perf | fig2dev -L ppm -m 4 > ../../../ufrgs/meu/images/graph-exec-time-seq-0.ppm')
     main.system('mogrify -reverse -flatten ../../../ufrgs/meu/images/graph-exec-time-seq-0.ppm')
     main.system('mogrify -resize 700x700 -format png ../../../ufrgs/meu/images/graph-exec-time-seq-0.ppm')
+    main.write_to_file('../../../ufrgs/meu/chapters/graph-exec-time-0.tex',
+        '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=125mm]{images/graph-exec-time-seq-0.png}\n  \\caption{Sequential Execution Time for Input 0}\n  \\label{fig:exec:time:seq:0}\n\\end{figure}\n')
 
     m.ReplayAll()
     main.output_graphs()

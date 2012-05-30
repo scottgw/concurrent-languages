@@ -329,7 +329,6 @@ def get_results():
 
 GRAPH_SIZE = 700
 
-# TODO: test and refactor
 def output_graphs():
   def create_graph(graph_name, values, pretty_name):
     variation_names = {"seq" : "Sequential", "par" : "Parallel"}
@@ -340,18 +339,20 @@ def output_graphs():
         if cur == INVALID: continue
         if cur > nmax: nmax = cur
 
+      latex_out = []
+      output_dir = "../../../ufrgs/meu"
       for variation in variations:
         out = []
         out.append("=cluster")
         for language in sorted(languages):
           out.append(";" + language)
-        out.append('''
-colors=black,yellow,red,med_blue,light_green,cyan
-=table
-yformat=%g
-=norotate
-xscale=1
-''')
+        out.append((
+            "\n"
+            "colors=black,yellow,red,med_blue,light_green,cyan\n"
+            "=table\n"
+            "yformat=%g\n"
+            "=norotate\n"
+            "xscale=1\n"))
         variation_name = variation_names[variation]
         out.append("max=%f\n" % (nmax * 1.5))
         out.append(
@@ -366,9 +367,9 @@ xscale=1
               float(values[problem][variation][language][i])))
           out.append("\n")
 
-        output_dir = "../../../ufrgs/meu"
-        output_file = "%s/images/graph-%s-%s-%d" % (
-                output_dir, graph_name, variation, i)
+        output_file_name = "graph-%s-%s-%d" % (graph_name, variation, i)
+        output_file = "%s/images/%s" % (
+                output_dir, output_file_name)
         write_to_file("%s.perf" % (output_file), ''.join(out))
 
         cmd = (
@@ -380,6 +381,20 @@ xscale=1
         cmd = ("mogrify -resize %dx%d -format png %s.ppm" % (
             GRAPH_SIZE, GRAPH_SIZE, output_file))
         system(cmd)
+
+        caption = "%s Execution Time for Input %d" % (variation_name, i)
+        label = "fig:exec:time:%s:%d" % (variation, i)
+        latex_out.append((
+            "\\begin{figure}[htbp]\n"
+            "  %%\\centering\n"
+            "  \\includegraphics[width=125mm]{images/%s.png}\n"
+            "  \\caption{%s}\n"
+            "  \\label{%s}\n"
+            "\\end{figure}\n") % (output_file_name, caption, label))
+
+      latex_file_name = "%s/chapters/graph-%s-%d.tex" % (
+          output_dir, graph_name, i)
+      write_to_file(latex_file_name, ''.join(latex_out))
 
   create_graph("exec-time", results, "")
 
