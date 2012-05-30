@@ -31,22 +31,22 @@ feature
 
     randmat(nrows, ncols, s, matrix)
 
-    from
-      i := 1
-    until
-      i > nrows
-    loop
-      from
-        j := 1
-      until
-        j > ncols
-      loop
+    --from
+      --i := 1
+    --until
+      --i > nrows
+    --loop
+      --from
+        --j := 1
+      --until
+        --j > ncols
+      --loop
         --print(matrix.item(i, j).out + " ")
-        j := j + 1
-      end
+        --j := j + 1
+      --end
       --print("%N")
-      i := i + 1
-    end
+      --i := i + 1
+    --end
   end
 
   read_integer(): INTEGER

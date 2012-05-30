@@ -173,5 +173,24 @@ class testMain(unittest.TestCase):
     m.VerifyAll()
     m.UnsetStubs()
 
+  def testOutputGraphs(self):
+    m = mox.Mox()
+
+    m.StubOutWithMock(main, 'write_to_file')
+
+    main.problems = ['problem']
+    main.variations = ['seq']
+    main.languages = ['language']
+
+    main.results['problem']['seq'] = { 'language' : {
+        0 : 100 }}
+
+    main.write_to_file('../../../ufrgs/meu/images/graph-exec-time-seq-0.perf', '=cluster;language\ncolors=black,yellow,red,med_blue,light_green,cyan\n=table\nyformat=%g\n=norotate\nxscale=1\nmax=150.000000\nylabel=Sequential execution time in seconds for input 0\nproblem 100.00\n')
+
+    m.ReplayAll()
+    main.output_graphs()
+    m.VerifyAll()
+    m.UnsetStubs()
+
 if __name__ == '__main__':
   unittest.main()

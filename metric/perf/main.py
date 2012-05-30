@@ -1,12 +1,10 @@
 import os
-import sys
 
-#languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
-languages = set(["chapel", "cilk", "erlang", "go", "tbb"])
+languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
+#languages = set(["chapel", "cilk", "erlang", "go", "tbb"])
 #languages = ["cilk"]
-problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
-#problems = ["randmat", "thresh"]
-#problems = ["thresh"]
+#problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
+problems = ["randmat"]
 variations = ["seq", "par"]
 
 def system(cmd):
@@ -176,7 +174,7 @@ class ProblemInput(object):
     self.percent = percent
     self.nelts = nelts
 
-inputs = [ProblemInput(10, 10, 666, 50, 10)]
+inputs = [ProblemInput(10000, 1000, 666, 50, 10)]
 
 # ===== general =====
 #inputs = ["10 10 55", "100 100 666", "100 250 777"] #, "100 1000 888"] #, "100 1000 888"]
@@ -332,48 +330,42 @@ def get_results():
 # TODO: test and refactor
 def output_graphs():
   def create_graph(graph_name, values, pretty_name):
-    old_stdout = sys.stdout
-
     variation_names = {"seq" : "Sequential", "par" : "Parallel"}
     for i in range(len(inputs)):
       nmax = 0
-      for language in sorted(languages):
-        for problem in sorted(problems):
-          for variation in variations:
-            if problem == "chain" and variation == "seq":
-              continue
-            cur = values[problem][variation][language][i]
-            if cur == INVALID:
-              continue
-            if cur > nmax:
-              nmax = cur
-      for variation in variations:
-        sys.stdout = open("../../../ufrgs/meu/images/graph-%s-%s-%d.perf" % (
-          graph_name, variation, i), "w")
+      for (language, problem, variation) in get_all():
+        cur = values[problem][variation][language][i]
+        if cur == INVALID: continue
+        if cur > nmax: nmax = cur
 
-        sys.stdout.write("=cluster")
+      for variation in variations:
+        out = []
+        out.append("=cluster")
         for language in sorted(languages):
-          sys.stdout.write(";" + language)
-        print '''
+          out.append(";" + language)
+        out.append('''
 colors=black,yellow,red,med_blue,light_green,cyan
 =table
 yformat=%g
 =norotate
 xscale=1
-'''
+''')
         variation_name = variation_names[variation]
-        print "max=%f" % (nmax * 1.5)
-        print "ylabel=%s %sexecution time in seconds for input %d" % (variation_name, pretty_name, i)
+        out.append("max=%f\n" % (nmax * 1.5))
+        out.append(
+            "ylabel=%s %sexecution time in seconds for input %d\n" % (
+                variation_name, pretty_name, i))
         for problem in sorted(problems):
           if problem == "chain" and variation == "seq":
             continue
-          print problem,
+          out.append(problem)
           for language in sorted(languages):
-            print("%.2f" % (
-              float(values[problem][variation][language][i]))),
-          print ""
+            out.append(" %.2f" % (
+              float(values[problem][variation][language][i])))
+          out.append("\n")
 
-    sys.stdout = old_stdout
+        write_to_file("../../../ufrgs/meu/images/graph-%s-%s-%d.perf" % (
+                graph_name, variation, i), ''.join(out))
 
   create_graph("exec-time", results, "")
 
