@@ -527,6 +527,7 @@ def main():
     run_all(redirect_output=True)  # TODO: remove outputs
   get_results()
   output_graphs()
+  system('xmessage " ALL DONE " -nearmouse -timeout 1')
 
 if __name__ == '__main__':
   main()
