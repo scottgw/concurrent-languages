@@ -234,6 +234,7 @@ class testMain(unittest.TestCase):
     main.system('rm plot.dat')
     main.write_to_file('../../../ufrgs/meu/chapters/graph-speedup-language-problem-0.tex',
         '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=125mm]{images/graph-speedup-language-problem-0.png}\n  \\caption{Speedup and Efficiency for Language language Problem problem Input 0}\n  \\label{fig:exec:spd:language:problem:0}\n\\end{figure}\n')
+    main.write_to_file('../../../ufrgs/meu/chapters/graph-speedup.tex', '\\input{chapters/graph-speedup-language-problem-0.tex}\n')
 
     m.ReplayAll()
     main.create_speedup_graph("speedup", main.results)
