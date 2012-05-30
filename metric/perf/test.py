@@ -241,7 +241,7 @@ class testMain(unittest.TestCase):
     m.VerifyAll()
     m.UnsetStubs()
 
-  def testOutputMergedSpeedupGraphs(self):
+  def testOutputProblemSpeedupGraphs(self):
     m = mox.Mox()
 
     m.StubOutWithMock(main, 'write_to_file')
@@ -267,7 +267,37 @@ class testMain(unittest.TestCase):
     main.write_to_file('../../../ufrgs/meu/chapters/graph-problem-speedup.tex',  '\\input{chapters/graph-problem-speedup-problem-0.tex}\n')
 
     m.ReplayAll()
-    main.create_merged_speedup_graph("problem-speedup", "speedup")
+    main.create_problem_speedup_graph("problem-speedup", "speedup")
+    m.VerifyAll()
+    m.UnsetStubs()
+
+  def testOutputLanguageSpeedupGraphs(self):
+    m = mox.Mox()
+
+    m.StubOutWithMock(main, 'write_to_file')
+    m.StubOutWithMock(main, 'system')
+
+    main.problems = ['problem']
+    main.variations = ['seq', 'par']
+    main.languages = ['language']
+
+    main.threads = [2, 4]
+    main.results = {
+        2: {'problem': {
+            'par': {'language': {0: 50}}}},
+        4: {'problem': {
+            'seq': {'language': {0: 100}},
+            'par': {'language': {0: 25}}}}}
+
+    main.write_to_file('other.script',   '\nset xrange [0:8]\nset yrange [0:8]\nset xlabel "threads"\nset terminal png\nset output "plot.png"\nset key top center\nplot \'../../../ufrgs/meu/images/graph-speedup-language-problem-0.dat\' using 1:4 title \'ideal speedup\' w lp, \'../../../ufrgs/meu/images/graph-speedup-language-problem-0.dat\' using 1:3 title \'problem speedup\' w lp')
+    main.system('gnuplot other.script')
+    main.system('mv plot.png ../../../ufrgs/meu/images/graph-language-speedup-language-0.png')
+    main.system('rm other.script')
+    main.write_to_file('../../../ufrgs/meu/chapters/graph-language-speedup-language-0.tex',  '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=125mm]{images/graph-language-speedup-language-0.png}\n  \\caption{Speedup for Language language Input 0}\n  \\label{fig:exec:spd:language:0}\n\\end{figure}\n')
+    main.write_to_file('../../../ufrgs/meu/chapters/graph-language-speedup.tex',  '\\input{chapters/graph-language-speedup-language-0.tex}\n')
+
+    m.ReplayAll()
+    main.create_language_speedup_graph("language-speedup", "speedup")
     m.VerifyAll()
     m.UnsetStubs()
 

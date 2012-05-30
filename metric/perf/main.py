@@ -499,7 +499,7 @@ plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title
       output_dir, graph_name)
   write_to_file(latex_all_file_name, ''.join(latex_all))
 
-def create_merged_speedup_graph(graph_name, speedup_graph_name):
+def create_problem_speedup_graph(graph_name, speedup_graph_name):
   """
 plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title 'actual speedup' w lp, 'plot.dat' using 1:6 title "ideal efficiency" w lp, 'plot.dat' using 1:5 title "actual efficiency" w lp
   """
@@ -560,11 +560,73 @@ set key top center
     output_dir, graph_name)
   write_to_file(latex_all_file_name, ''.join(latex_all))
 
+def create_language_speedup_graph(graph_name, speedup_graph_name):
+  """
+plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title 'actual speedup' w lp, 'plot.dat' using 1:6 title "ideal efficiency" w lp, 'plot.dat' using 1:5 title "actual efficiency" w lp
+  """
+  latex_all = []
+  for language in sorted(languages):
+    for i in range(len(inputs)):
+      out = []
+      out.append('''
+set xrange [0:8]
+set yrange [0:8]
+set xlabel "threads"
+set terminal png
+set output "plot.png"
+set key top center
+''')
+      out.append("plot ")
+      first = True
+      for problem in sorted(problems):
+        output_file_name = "graph-%s-%s-%s-%d" % (
+            speedup_graph_name, language, problem, i)
+        output_file = "%s/images/%s" % (output_dir, output_file_name)
+        if first:
+          first = False
+          out.append("'%s.dat' using 1:4 title 'ideal speedup' w lp" % (
+              output_file))
+        out.append(", ")
+        out.append("'%s.dat' using 1:3 title '%s speedup' w lp" % (
+            output_file, problem))
+      output_file_name = "graph-%s-%s-%d" % (graph_name, language, i)
+      script_name = 'other.script'
+      write_to_file(script_name, ''.join(out))
+      system('gnuplot %s' % script_name)
+      cmd = "mv plot.png %s/images/%s.png" % (output_dir, output_file_name)
+      system(cmd)
+      cmd = 'rm %s' % script_name
+      system(cmd)
+
+      latex_out = []
+      caption = ("Speedup for Language %s Input %d" % (language, i))
+      label = "fig:exec:spd:%s:%d" % (language, i)
+      latex_out.append((
+          "\\begin{figure}[htbp]\n"
+          "  %%\\centering\n"
+          "  \\includegraphics[width=125mm]{images/%s.png}\n"
+          "  \\caption{%s}\n"
+          "  \\label{%s}\n"
+          "\\end{figure}\n") % (output_file_name, caption, label))
+
+      latex_file_name = "%s/chapters/%s.tex" % (
+          output_dir, output_file_name)
+      write_to_file(latex_file_name, ''.join(latex_out))
+
+      latex_all.append("\input{chapters/%s.tex}\n" % output_file_name)
+      if len(latex_all) % 6 == 0:
+        latex_all.append("\clearpage\n")
+
+  latex_all_file_name = "%s/chapters/graph-%s.tex" % (
+    output_dir, graph_name)
+  write_to_file(latex_all_file_name, ''.join(latex_all))
+
 def output_graphs():
   create_graph("exec-time", results[threads[-1]], "")
   speedup_graph_name = 'speedup'
   create_speedup_graph(speedup_graph_name, results)
-  create_merged_speedup_graph("problem-speedup", speedup_graph_name)
+  create_problem_speedup_graph("problem-speedup", speedup_graph_name)
+  create_language_speedup_graph("language-speedup", speedup_graph_name)
 
 """
 SIZE=700
