@@ -2,6 +2,7 @@ import os
 
 languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
 #languages = set(["chapel", "cilk", "erlang", "go", "tbb"])
+#languages = ["cilk"]
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 problems = ["randmat"]
 variations = ["seq", "par"]
@@ -302,7 +303,11 @@ def run_all(redirect_output=True):
         if language == "chapel":
           cmd += " --numLocales=1 --numThreadsPerLocale=%d " % nthreads
         elif language == "cilk":
-          cmd += " --nproc %d " % nthreads
+          if variation == 'par':
+            cmd += " --nproc %d " % nthreads
+          else:
+            pass
+            #cmd += " --nproc 1 "
 
         if language != "scoop":
           cmd += " <";
@@ -393,7 +398,7 @@ def create_graph(graph_name, values, pretty_name):
           continue
         out.append(problem)
         for language in sorted(languages):
-          out.append(" %.2f" % (
+          out.append(" %.10f" % (
             float(values[problem][variation][language][i])))
         out.append("\n")
 
@@ -440,7 +445,7 @@ plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title
           tseq = values[threads[-1]][problem]["seq"][language][i]
           cur = values[nthreads][problem][variation][language][i]
           if cur == INVALID: continue
-          out.append("%d\t%.2f\t%.2f\t%d\t%.2f\t1\n" % (
+          out.append("%d\t%.10f\t%.10f\t%d\t%.10f\t1\n" % (
               nthreads, cur, tseq / cur, nthreads, tseq / (nthreads * cur)))
 
       output_file_name = "graph-%s-%s-%d" % (graph_name, language, i)
@@ -484,11 +489,14 @@ images/%.png: images/%.ppm
 images/%.ppm: images/%.perf
 	./bargraph.pl -fig $< | fig2dev -L ppm -m 4 > $@"""
 
+TOTAL_EXECUTIONS = 3
+
 def main():
-  generate_erlang_main()
-  make_all()
-  create_inputs()
-  run_all(redirect_output=False)
+  #generate_erlang_main()
+  #make_all()
+  #create_inputs()
+  for _ in range(TOTAL_EXECUTIONS):
+    run_all(redirect_output=False)
   get_results()
   output_graphs()
 

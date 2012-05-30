@@ -195,7 +195,7 @@ class testMain(unittest.TestCase):
         999: {'problem': {
             'seq': {'language': {0: 100}}}}}
 
-    main.write_to_file('../../../ufrgs/meu/images/graph-exec-time-seq-0.perf', '=cluster;language\ncolors=black,yellow,red,med_blue,light_green,cyan\n=table\nyformat=%g\n=norotate\nxscale=1\nmax=150.000000\nylabel=Sequential execution time in seconds for input 0\nproblem 100.00\n')
+    main.write_to_file('../../../ufrgs/meu/images/graph-exec-time-seq-0.perf', '=cluster;language\ncolors=black,yellow,red,med_blue,light_green,cyan\n=table\nyformat=%g\n=norotate\nxscale=1\nmax=150.000000\nylabel=Sequential execution time in seconds for input 0\nproblem 100.0000000000\n')
     main.system('../../../ufrgs/meu/bargraph.pl -fig ../../../ufrgs/meu/images/graph-exec-time-seq-0.perf | fig2dev -L ppm -m 4 > ../../../ufrgs/meu/images/graph-exec-time-seq-0.ppm')
     main.system('mogrify -reverse -flatten ../../../ufrgs/meu/images/graph-exec-time-seq-0.ppm')
     main.system('mogrify -resize 700x700 -format png ../../../ufrgs/meu/images/graph-exec-time-seq-0.ppm')
@@ -226,9 +226,7 @@ class testMain(unittest.TestCase):
             'par': {'language': {0: 25}}}}}
 
     main.write_to_file(
-        '../../../ufrgs/meu/images/graph-speedup-language-0.dat', (
-            '2\t50.00\t2.00\t2\t1.00\t1\n'
-            '4\t25.00\t4.00\t4\t1.00\t1\n'))
+        '../../../ufrgs/meu/images/graph-speedup-language-0.dat', '2\t50.0000000000\t2.0000000000\t2\t1.0000000000\t1\n4\t25.0000000000\t4.0000000000\t4\t1.0000000000\t1\n')
 
     main.system('cp ../../../ufrgs/meu/images/graph-speedup-language-0.dat plot.dat')
     main.system('gnuplot ../../../ufrgs/meu/plot.script')
