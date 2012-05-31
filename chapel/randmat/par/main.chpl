@@ -10,6 +10,8 @@
 
 use Random;
 
+config const is_bench = false;
+
 proc randmat(nrows: int, ncols: int, s: int,
     matrix: [1..nrows, 1..ncols] int) {
   const INT_MAX: int = 2147483647;
@@ -31,15 +33,15 @@ proc main() {
 
   randmat(nrows, ncols, s, matrix);
 
-  /*
-  writeln(nrows, " ", ncols);
+  if (!is_bench) {
+    writeln(nrows, " ", ncols);
 
-  for i in 1..nrows do {
-    for j in 1..ncols do {
-      write(matrix[i, j], " ");
+    for i in 1..nrows do {
+      for j in 1..ncols do {
+        write(matrix[i, j], " ");
+      }
+      writeln();
     }
     writeln();
   }
-  writeln();
-//*/
 }

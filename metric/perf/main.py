@@ -188,7 +188,9 @@ inputs = [
     #ProblemInput(250, 250, 666, 50, 125),
     #ProblemInput(500, 500, 666, 50, 250),
     #ProblemInput(1000, 1000, 666, 50, 1000),
+# chapel-randmat
     ProblemInput(2000, 2000, 666, 50, 2000),
+# chapel-randmat
     ProblemInput(3000, 3000, 666, 50, 3000),
     #ProblemInput(10000, 10000, 666, 50, 10000)
   ]
@@ -310,7 +312,8 @@ def run_all(redirect_output=True):
           cmd += "main"
 
         if language == "chapel":
-          cmd += " --numLocales=1 --numThreadsPerLocale=%d " % nthreads
+          cmd += " --numLocales=1 --numThreadsPerLocale=%d --is_bench" % (
+              nthreads)
         elif language == "cilk":
           if variation == 'par':
             cmd += " --nproc %d " % nthreads
