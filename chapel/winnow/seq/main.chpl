@@ -11,6 +11,8 @@
  *   points: a vector of (x, y) points
  */
 
+config const is_bench = false;
+
 proc winnow(nrows: int, ncols: int,
     matrix: [1..nrows, 1..ncols] int,
     mask: [1..nrows, 1..ncols] int,
@@ -19,22 +21,18 @@ proc winnow(nrows: int, ncols: int,
     ) {
 
   var n: int = 0;
-  for i in 1..nrows do {
-    for j in 1..ncols do {
-      if (mask[i, j] == 1) {
-        n = n + 1;
-      }
+  for m in mask do {
+    if (m == 1) {
+      n += 1;
     }
   }
 
-  var values: [1..n] (int, (int, int));
+  var values: [1..n] (int, (int, int));  // (value, (i, j))
   var count: int = 1;
-  for i in 1..nrows do {
-    for j in 1..ncols do {
-      if (mask[i, j] == 1) {
-        values[count] = (matrix[i, j], (i, j));
-        count = count + 1;
-      }
+  for i in matrix.domain {
+    if (mask[i] == 1) {
+      values[count] = (matrix[i], i);
+      count += 1;
     }
   }
 
@@ -76,11 +74,13 @@ proc main() {
 
   winnow(nrows, ncols, matrix, mask, nelts, points);
 
-  writeln(nelts);
+  if (!is_bench) {
+    writeln(nelts);
 
-  for i in 1..nelts do {
-    writeln(points[i]);
+    for i in 1..nelts do {
+      writeln(points[i]);
+    }
+
+    writeln();
   }
-
-  writeln();
 }

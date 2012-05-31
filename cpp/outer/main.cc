@@ -50,6 +50,8 @@ void read_vector_of_points(int nelts, vector<pair<int, int> >* vec) {
   }
 }
 
+vector<vector<double> >* matrix = NULL;
+
 int main(int argc, char** argv) {
   int nelts;
   scanf("%d", &nelts);
@@ -57,16 +59,16 @@ int main(int argc, char** argv) {
   vector<pair<int, int> > points(nelts);
   read_vector_of_points(nelts, &points);
 
-  vector<vector<double> > matrix(nelts, vector<double>(nelts));
+  matrix = new vector<vector<double> >(nelts, vector<double>(nelts));
   vector<double> vec(nelts);
 
-  outer(nelts, points, &matrix, &vec);
+  outer(nelts, points, matrix, &vec);
 
   printf("%d\n", nelts);
   for (int i = 0; i < nelts; i++) {
     for (int j = 0; j < nelts; j++) {
       if (j) printf(" ");
-      printf("%.5f", matrix[i][j]);
+      printf("%.5f", (*matrix)[i][j]);
     }
     printf("\n");
   }

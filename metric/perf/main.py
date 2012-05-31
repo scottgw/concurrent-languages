@@ -124,7 +124,8 @@ class WinnowProblem(Problem):
       self.name = "winnow"
 
   def file_name(self, data):
-    return "%s_%d_%d_%d" % (self.name, data.nrows, data.ncols, data.nelts)
+    return "%s_%d_%d_%d_%d" % (
+        self.name, data.nrows, data.ncols, data.percent, data.nelts)
 
   def get_input(self, data):
     return "%d %d %d\n" % (data.nrows, data.ncols, data.nelts)
@@ -186,12 +187,18 @@ class ProblemInput(object):
 inputs = [
     #ProblemInput(100, 100, 666, 50, 100),
     #ProblemInput(250, 250, 666, 50, 125),
+    #ProblemInput(250, 250, 666, 1, 250 * 250 / 100),
     #ProblemInput(500, 500, 666, 50, 250),
     #ProblemInput(1000, 1000, 666, 50, 1000),
-# chapel-randmat
-    ProblemInput(2000, 2000, 666, 50, 2000),
-# chapel-randmat
-    ProblemInput(3000, 3000, 666, 50, 3000),
+    #ProblemInput(500, 500, 666, 1, 500 * 500 / 100),
+# chapel-winnow
+    ProblemInput(1000, 1000, 666, 1, 1000 * 1000 / 100),
+# chapel-winnow
+    ProblemInput(2000, 2000, 666, 1, 2000 * 2000 / 100),
+# chapel-randmat, chapel-thresh
+    #ProblemInput(2000, 2000, 666, 50, 2000),
+# chapel-randmat, chapel-thresh
+    #ProblemInput(3000, 3000, 666, 50, 3000),
     #ProblemInput(10000, 10000, 666, 50, 10000)
   ]
 
@@ -651,10 +658,10 @@ def main():
   total_time = (
       len(languages) * len(problems) * TOTAL_EXECUTIONS * len(threads) *
       TIMEOUT * len(inputs))
-  print "%fs or %fm or %fh or %fd\n" % (
+  print "%fs or %fm or %fh or %fd" % (
       total_time, total_time / 60., total_time / (
           60. * 60), total_time / (60. * 60 * 24))
-  raw_input()
+  raw_input('press enter to start...')
   generate_erlang_main()
   make_all()
   create_inputs()
@@ -663,6 +670,7 @@ def main():
   get_results()
   output_graphs()
   system('xmessage " ALL DONE " -nearmouse -timeout 1')
+  raw_input("done! press enter to continue...")
   system('cd %s && make' % output_dir)
 
 if __name__ == '__main__':
