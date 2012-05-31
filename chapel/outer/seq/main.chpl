@@ -11,6 +11,8 @@
  *     distances
  */
 
+config const is_bench = false;
+
 proc sqr(x: real): real {
   return x * x;
 }
@@ -59,18 +61,20 @@ proc main() {
   var vector: [1..nelts] real;
   outer(nelts, points, matrix, vector);
 
-  writeln(nelts + " " + nelts);
-  for i in 1..nelts do {
-    for j in 1..nelts do {
-      write(matrix[i, j] + " ");
+  if (!is_bench) {
+    writeln(nelts + " " + nelts);
+    for i in 1..nelts do {
+      for j in 1..nelts do {
+        write(matrix[i, j] + " ");
+      }
+      writeln();
+    }
+    writeln();
+
+    writeln(nelts);
+    for i in 1..nelts do {
+      write(vector[i] + " ");
     }
     writeln();
   }
-  writeln();
-
-  writeln(nelts);
-  for i in 1..nelts do {
-    write(vector[i] + " ");
-  }
-  writeln();
 }
