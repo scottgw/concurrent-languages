@@ -186,13 +186,13 @@ class ProblemInput(object):
 
 inputs = [
     #ProblemInput(100, 100, 666, 50, 100),
-    #ProblemInput(250, 250, 666, 50, 125),
+    #roblemInput(250, 250, 666, 50, 125),
     #ProblemInput(250, 250, 666, 1, 25 * (2500 / 100.)),
     #ProblemInput(500, 500, 666, 50, 250),
     #ProblemInput(1000, 1000, 666, 50, 1000),
-# chapel-outer, chapel-product
+# chapel-outer, chapel-product, chapel-chain
     ProblemInput(500, 500, 666, 1, 500 * (500 / 100.)),
-# chapel-outer, chapel-product
+# chapel-outer, chapel-product, chapel-chain
     ProblemInput(500, 500, 666, 2, 2 * 500 * (500 / 100.)),
     #ProblemInput(1000, 1000, 666, 1, 500 * (1000 / 100.)),
 # chapel-winnow
@@ -290,7 +290,7 @@ def create_inputs():
             append_to_file(next_input_file, "\n%s\n%s\n" % (
                 content, cur.nelts))
 
-TIMEOUT = 10
+TIMEOUT = 60
 
 def get_time_output(language, problem, variation, i, nthreads):
   return "time-%s-%s-%s-%d-%d.out" % (
@@ -400,6 +400,8 @@ def create_graph(graph_name, values, pretty_name):
 
     latex_out = []
     for variation in variations:
+      if variation == 'seq' and ( # TODO: chain-seq
+          len(problems) == 1 and problems[0] == 'chain'): continue
       out = []
       out.append("=cluster")
       for language in sorted(languages):
@@ -467,11 +469,11 @@ plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title
         out = []
         for nthreads in threads:
             variation = "par"
-          #for (a_language, a_problem, variation) in get_all():
-            #if variation == "seq" or language != a_language or (
-                #a_problem != problem): continue
-            if "seq" not in values[threads[-1]][problem]: continue
-            tseq = values[threads[-1]][problem]["seq"][language][i]
+            if problem == "chain": #TODO chain-seq
+              tseq = values[threads[0]][problem]["par"][language][i]
+            else:
+              if "seq" not in values[threads[-1]][problem]: continue
+              tseq = values[threads[-1]][problem]["seq"][language][i]
             cur = values[nthreads][problem][variation][language][i]
             if cur == INVALID or cur == 0: continue
             out.append("%d\t%.10f\t%.10f\t%d\t%.10f\t1\n" % (
@@ -648,14 +650,6 @@ def output_graphs():
   create_speedup_graph(speedup_graph_name, results)
   create_problem_speedup_graph("problem-speedup", speedup_graph_name)
   create_language_speedup_graph("language-speedup", speedup_graph_name)
-
-"""
-SIZE=700
-images/%.png: images/%.ppm
-	mogrify -reverse -flatten $<
-	mogrify -resize ${SIZE}x${SIZE} -format png $<
-images/%.ppm: images/%.perf
-	./bargraph.pl -fig $< | fig2dev -L ppm -m 4 > $@"""
 
 TOTAL_EXECUTIONS = 1
 

@@ -9,7 +9,10 @@
  * output:
  *   result: a real vector, whose values are the result of the final product
  */
+
 use Randmat, Thresh, Winnow, Outer, Product;
+
+config const is_bench = false;
 
 proc main() {
   var nelts, randmat_seed, thresh_percent, winnow_nelts: int;
@@ -27,9 +30,11 @@ proc main() {
   outer(winnow_nelts, winnow_points, outer_matrix, outer_vector);
   product(winnow_nelts, outer_matrix, outer_vector, product_result);
 
-  writeln(winnow_nelts);
-  for i in 1..winnow_nelts do {
-    write(product_result[i], " ");
+  if (!is_bench) {
+    writeln(winnow_nelts);
+    for i in 1..winnow_nelts do {
+      write(product_result[i], " ");
+    }
+    writeln();
   }
-  writeln();
 }

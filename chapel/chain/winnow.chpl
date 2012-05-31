@@ -36,8 +36,10 @@ proc sort_impl(start: int, end: int, value: [?Dom]) {
   pivot_index = spot;
 
   cobegin {
-    sort_impl(start, pivot_index, value);
-    sort_impl(pivot_index + 1, end, value);
+    QuickSort(value[start..pivot_index]);
+    QuickSort(value[(pivot_index + 1)..end]);
+    //sort_impl(start, pivot_index, value);
+    //sort_impl(pivot_index + 1, end, value);
   }
 }
 
@@ -55,8 +57,8 @@ proc winnow(nrows: int, ncols: int,
   var n: int = 0;
   
   n = + reduce mask;
-  var values: [1..n] (int, (int, int));  // (value, (i, j))
   var can_go: sync bool = true;
+  var values: [1..n] (int, (int, int));  // (value, (i, j))
   var count: int = 1;
   forall i in matrix.domain {
     if (mask[i] == 1) {
