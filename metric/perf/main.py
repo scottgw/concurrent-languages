@@ -187,14 +187,14 @@ class ProblemInput(object):
 inputs = [
     #ProblemInput(100, 100, 666, 50, 100),
     #ProblemInput(250, 250, 666, 50, 125),
-    #ProblemInput(250, 250, 666, 1, 250 * 250 / 100),
+    #ProblemInput(250, 250, 666, 1, 25 * (2500 / 100)),
     #ProblemInput(500, 500, 666, 50, 250),
     #ProblemInput(1000, 1000, 666, 50, 1000),
-    #ProblemInput(500, 500, 666, 1, 500 * 500 / 100),
+    #ProblemInput(500, 500, 666, 1, 500 * (500 / 100)),
 # chapel-winnow
-    ProblemInput(1000, 1000, 666, 1, 1000 * 1000 / 100),
+    ProblemInput(1000, 1000, 666, 1, 1000 * (1000 / 100.)),
 # chapel-winnow
-    ProblemInput(2000, 2000, 666, 1, 2000 * 2000 / 100),
+    ProblemInput(2000, 2000, 666, 1, 2000 * (2000 / 100.)),
 # chapel-randmat, chapel-thresh
     #ProblemInput(2000, 2000, 666, 50, 2000),
 # chapel-randmat, chapel-thresh
