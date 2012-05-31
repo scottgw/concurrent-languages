@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-static unsigned char matrix[10000][100000];
+static unsigned char matrix[30000][30000];
 
 typedef cilk void (*Function)(int, int);
 

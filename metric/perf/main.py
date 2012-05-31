@@ -4,7 +4,7 @@ import os
 #languages = set(["chapel", "cilk", "erlang", "go", "tbb"])
 #languages = set(["chapel", "cilk", "erlang"])
 #languages = ["chapel", "cilk"]
-languages = ["chapel"]
+languages = ["cilk"]
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
 problems = ["randmat"]
@@ -210,11 +210,12 @@ inputs = [
 # chapel-randmat, chapel-thresh
     #ProblemInput(3000, 3000, 666, 50, 3000),
     #ProblemInput(10000, 10000, 666, 50, 10000)
-    ProblemInput(20000, 20000, 666, 1, 1)
+    #ProblemInput(20000, 20000, 666, 1, 1)
+    ProblemInput(30000, 30000, 666, 1, 1)
   ]
 
-#threads = [1, 2, 3, 4, 5, 6, 7, 8]
-threads = [1, 2, 3, 4]
+threads = [1, 2, 3, 4, 5, 6, 7, 8]
+#threads = [1, 2, 3, 4]
 #threads = [2, 4]
 
 # ===== general =====
@@ -657,7 +658,7 @@ def output_graphs():
   create_problem_speedup_graph("problem-speedup", speedup_graph_name)
   create_language_speedup_graph("language-speedup", speedup_graph_name)
 
-TOTAL_EXECUTIONS = 5
+TOTAL_EXECUTIONS = 10
 
 def main():
   total_time = (
@@ -667,7 +668,7 @@ def main():
       total_time, total_time / 60., total_time / (
           60. * 60), total_time / (60. * 60 * 24))
   raw_input('press enter to start...')
-  generate_erlang_main()
+  #generate_erlang_main()
   make_all()
   create_inputs()
   for _ in range(TOTAL_EXECUTIONS):
