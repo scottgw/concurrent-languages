@@ -9,6 +9,8 @@
  *    result: a real vector, whose values are the result of the product
  */
 
+config const is_bench = false;
+
 proc product(nelts: int,
     matrix: [1..nelts, 1..nelts] real,
     vector: [1..nelts] real,
@@ -41,9 +43,11 @@ proc main() {
 
   product(nelts, matrix, vector, result);
 
-  writeln(nelts);
-  for i in 1..nelts do {
-    write(result[i] + " ");
+  if (!is_bench) {
+    writeln(nelts);
+    for i in 1..nelts do {
+      write(result[i] + " ");
+    }
+    writeln();
   }
-  writeln();
 }
