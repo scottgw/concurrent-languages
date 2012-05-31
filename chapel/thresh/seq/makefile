@@ -11,6 +11,8 @@ all: main
 	diff main5.out main5.g
 	./main < main6.in > main6.out
 	diff main6.out main6.g
+	./main < main.in
+	./main --is_bench < main.in
 
 main: main.chpl
 	chpl main.chpl -o main

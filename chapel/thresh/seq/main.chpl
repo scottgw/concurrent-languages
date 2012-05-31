@@ -9,22 +9,20 @@
  *   mask: a boolean matrix filled with true for the cells to be kept
  */
 
+config const is_bench = false;
+
 proc thresh(nrows: int, ncols: int,
     matrix: [1..nrows, 1..ncols] int, percent: int,
     mask: [1..nrows, 1..ncols] int) {
   var nmax: int = 0;
-  for i in 1..nrows do {
-    for j in 1..ncols do {
-      nmax = max(nmax, matrix[i,j]);
-    }
+  for m in matrix do {
+    nmax = max(nmax, m);
   }
 
   var histogram: [0..nmax] int;
 
-  for i in 1..nrows do {
-    for j in 1..ncols do {
-      histogram[matrix[i, j]] += 1;
-    }
+  for m in matrix {
+    histogram[m] += 1;
   }
 
   var count: int = (nrows * ncols * percent) / 100;
@@ -38,10 +36,8 @@ proc thresh(nrows: int, ncols: int,
     threshold = nmax - i;
   }
 
-  for i in 1..nrows do {
-    for j in 1..ncols do {
-      mask[i, j] = matrix[i, j] >= threshold;
-    }
+  for i in matrix.domain {
+    mask[i] = matrix[i] >= threshold;
   }
 }
 
@@ -65,14 +61,15 @@ proc main() {
 
   thresh(nrows, ncols, matrix, percent, mask);
 
-  /*
-  writeln(nrows, " ", ncols);
+  if (!is_bench) {
+    writeln(nrows, " ", ncols);
 
-  for i in 1..nrows do {
-    for j in 1..ncols do {
-      write(mask[i, j], " ");
+    for i in 1..nrows do {
+      for j in 1..ncols do {
+        write(mask[i, j], " ");
+      }
+      writeln();
     }
     writeln();
   }
-  writeln();//*/
 }

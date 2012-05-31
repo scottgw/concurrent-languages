@@ -11,6 +11,8 @@
 
 use Search;
 
+config const is_bench = false;
+
 proc thresh(nrows: int, ncols: int,
     matrix: [1..nrows, 1..ncols] int, percent: int,
     mask: [1..nrows, 1..ncols] int) {
@@ -58,15 +60,15 @@ proc main() {
 
   thresh(nrows, ncols, matrix, percent, mask);
 
-  /*
-  writeln(nrows, " ", ncols);
+  if (!is_bench) {
+    writeln(nrows, " ", ncols);
 
-  for i in 1..nrows do {
-    for j in 1..ncols do {
-      write(mask[i, j], " ");
+    for i in 1..nrows do {
+      for j in 1..ncols do {
+        write(mask[i, j], " ");
+      }
+      writeln();
     }
     writeln();
   }
-  writeln();
-//*/
 }
