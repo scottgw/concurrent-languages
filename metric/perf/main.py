@@ -483,7 +483,7 @@ plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title
         latex_out.append((
             "\\begin{figure}[htbp]\n"
             "  %%\\centering\n"
-            "  \\includegraphics[width=125mm]{images/%s.png}\n"
+            "  \\includegraphics[width=100mm]{images/%s.png}\n"
             "  \\caption{%s}\n"
             "  \\label{%s}\n"
             "\\end{figure}\n") % (output_file_name, caption, label))
@@ -508,8 +508,10 @@ plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title
     for i in range(len(inputs)):
       out = []
       out.append('''
-set xrange [0:8]
-set yrange [0:8]
+set xrange [0:4]
+set xtics 1
+set yrange [0:4]
+set ytics 1
 set xlabel "threads"
 set terminal png
 set output "plot.png"
@@ -543,7 +545,7 @@ set key top center
       latex_out.append((
           "\\begin{figure}[htbp]\n"
           "  %%\\centering\n"
-          "  \\includegraphics[width=125mm]{images/%s.png}\n"
+          "  \\includegraphics[width=100mm]{images/%s.png}\n"
           "  \\caption{%s}\n"
           "  \\label{%s}\n"
           "\\end{figure}\n") % (output_file_name, caption, label))
@@ -569,8 +571,10 @@ plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title
     for i in range(len(inputs)):
       out = []
       out.append('''
-set xrange [0:8]
-set yrange [0:8]
+set xrange [0:4]
+set xtics 1
+set yrange [0:4]
+set ytics 1
 set xlabel "threads"
 set terminal png
 set output "plot.png"
@@ -604,7 +608,7 @@ set key top center
       latex_out.append((
           "\\begin{figure}[htbp]\n"
           "  %%\\centering\n"
-          "  \\includegraphics[width=125mm]{images/%s.png}\n"
+          "  \\includegraphics[width=100mm]{images/%s.png}\n"
           "  \\caption{%s}\n"
           "  \\label{%s}\n"
           "\\end{figure}\n") % (output_file_name, caption, label))
