@@ -7,7 +7,7 @@ import os
 languages = ["chapel"]
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
-problems = ["chain"]
+problems = ["randmat"]
 variations = ["seq", "par"]
 
 def system(cmd, timeout=False):
@@ -184,16 +184,21 @@ class ProblemInput(object):
     self.percent = percent
     self.nelts = nelts
 
+# histogram size is 256, so other input values should probably be bigger
 inputs = [
     #ProblemInput(100, 100, 666, 50, 100),
-    #roblemInput(250, 250, 666, 50, 125),
+    #ProblemInput(250, 250, 666, 50, 125),
     #ProblemInput(250, 250, 666, 1, 25 * (2500 / 100.)),
+# chapel-all
+    #ProblemInput(250, 250, 666, 10, 25 * (2500 / 100.)),
     #ProblemInput(500, 500, 666, 50, 250),
     #ProblemInput(1000, 1000, 666, 50, 1000),
+# chapel-all
+    #ProblemInput(500, 500, 666, 10, 500 * (500 / 100.)),
 # chapel-outer, chapel-product, chapel-chain
-    ProblemInput(500, 500, 666, 1, 500 * (500 / 100.)),
+    #ProblemInput(500, 500, 666, 1, 500 * (500 / 100.)),
 # chapel-outer, chapel-product, chapel-chain
-    ProblemInput(500, 500, 666, 2, 2 * 500 * (500 / 100.)),
+    #ProblemInput(500, 500, 666, 2, 2 * 500 * (500 / 100.)),
     #ProblemInput(1000, 1000, 666, 1, 500 * (1000 / 100.)),
 # chapel-winnow
     #ProblemInput(1000, 1000, 666, 1, 1000 * (1000 / 100.)),
@@ -205,6 +210,7 @@ inputs = [
 # chapel-randmat, chapel-thresh
     #ProblemInput(3000, 3000, 666, 50, 3000),
     #ProblemInput(10000, 10000, 666, 50, 10000)
+    ProblemInput(20000, 20000, 666, 1, 1)
   ]
 
 #threads = [1, 2, 3, 4, 5, 6, 7, 8]
@@ -290,7 +296,7 @@ def create_inputs():
             append_to_file(next_input_file, "\n%s\n%s\n" % (
                 content, cur.nelts))
 
-TIMEOUT = 60
+TIMEOUT = 10
 
 def get_time_output(language, problem, variation, i, nthreads):
   return "time-%s-%s-%s-%d-%d.out" % (
@@ -651,7 +657,7 @@ def output_graphs():
   create_problem_speedup_graph("problem-speedup", speedup_graph_name)
   create_language_speedup_graph("language-speedup", speedup_graph_name)
 
-TOTAL_EXECUTIONS = 1
+TOTAL_EXECUTIONS = 5
 
 def main():
   total_time = (
@@ -665,7 +671,7 @@ def main():
   make_all()
   create_inputs()
   for _ in range(TOTAL_EXECUTIONS):
-    run_all(redirect_output=True)  # TODO: remove outputs
+    run_all(redirect_output=False)  # TODO: remove outputs
   get_results()
   output_graphs()
   system('xmessage " ALL DONE " -nearmouse -timeout 1')
