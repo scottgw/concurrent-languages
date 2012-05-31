@@ -3,9 +3,11 @@ import os
 #languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
 #languages = set(["chapel", "cilk", "erlang", "go", "tbb"])
 #languages = set(["chapel", "cilk", "erlang"])
-languages = ["chapel", "cilk"]
+#languages = ["chapel", "cilk"]
+languages = ["chapel"]
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
-problems = ["randmat", "thresh"]
+#problems = ["randmat", "thresh"]
+problems = ["randmat"]
 variations = ["seq", "par"]
 
 def system(cmd, timeout=False):

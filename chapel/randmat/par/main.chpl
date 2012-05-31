@@ -40,5 +40,6 @@ proc main() {
     }
     writeln();
   }
-  writeln();//*/
+  writeln();
+//*/
 }
