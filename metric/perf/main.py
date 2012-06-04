@@ -17,33 +17,39 @@ def system(cmd, timeout=False):
     assert(False)
 
 def write_to_file(output, content):
-  with open(output, 'w') as f:
-    f.write(content)
+  f = open(output, 'w')
+  f.write(content)
+  f.close()
 
 def append_to_file(output, content):
-  with open(output, 'a') as f:
-    f.write(content)
+  f = open(output, 'a')
+  f.write(content)
+  f.close()
 
 def read_from_file(file_name):
-  with open(file_name, 'r') as f:
-    content = f.read()
+  f = open(file_name, 'r')
+  content = f.read()
+  f.close()
   return content
 
 def read_from_file_skipping_first_line(file_name):
-  with open(file_name, "r") as f:
-    f.readline()
-    content = f.read()
+  f = open(file_name, "r")
+  f.readline()
+  content = f.read()
+  f.close()
   return content
 
 def read_file_values(file_name):
   result = []
-  with open(file_name, 'r') as f:
-    for line in f:
-      try:
-        value = float(line)
-        result.append(value)
-      except ValueError:
-        return []
+  f = open(file_name, 'r')
+  for line in f:
+    try:
+      value = float(line)
+      result.append(value)
+    except ValueError:
+      f.close()
+      return []
+  f.close()
   return result
 
 def file_exists(file_name):
@@ -209,9 +215,9 @@ inputs = [
     #ProblemInput(2000, 2000, 666, 50, 2000),
 # chapel-randmat, chapel-thresh
     #ProblemInput(3000, 3000, 666, 50, 3000),
-    #ProblemInput(10000, 10000, 666, 50, 10000)
-    #ProblemInput(20000, 20000, 666, 1, 1)
-    ProblemInput(30000, 30000, 666, 1, 1)
+    #ProblemInput(10000, 10000, 666, 50, 10000),
+    #ProblemInput(20000, 20000, 666, 1, 1),
+    ProblemInput(30000, 30000, 666, 1, 1),
   ]
 
 threads = [1, 2, 3, 4, 5, 6, 7, 8]
@@ -297,7 +303,7 @@ def create_inputs():
             append_to_file(next_input_file, "\n%s\n%s\n" % (
                 content, cur.nelts))
 
-TIMEOUT = 10
+TIMEOUT = 3
 
 def get_time_output(language, problem, variation, i, nthreads):
   return "time-%s-%s-%s-%d-%d.out" % (
@@ -318,10 +324,10 @@ def run_all(redirect_output=True):
         if language == "go":
           cmd += "GOMAXPROCS=%d " % nthreads
 
-        cmd += "timeout %d " % (TIMEOUT)
+        #cmd += "timeout %d " % (TIMEOUT)
 
         directory = get_directory(language, problem, variation)
-        cmd += "time -a -f %%e -o %s %s/" % (time_output, directory)
+        cmd += "/usr/bin/time -a -f %%e -o %s %s/" % (time_output, directory)
 
         if language == "erlang":
           cmd += "main.sh"
@@ -394,7 +400,7 @@ def get_results():
 
 GRAPH_SIZE = 700
 
-output_dir = "../../../ufrgs/meu"
+output_dir = "../../../ufrgs/tc"
 
 def create_graph(graph_name, values, pretty_name):
   variation_names = {"seq" : "Sequential", "par" : "Parallel"}
@@ -534,14 +540,14 @@ plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title
     for i in range(len(inputs)):
       out = []
       out.append('''
-set xrange [0:4]
+set xrange [0:8]
 set xtics 1
-set yrange [0:4]
+set yrange [0:8]
 set ytics 1
 set xlabel "threads"
 set terminal png
 set output "plot.png"
-set key top center
+set key top
 ''')
       out.append("plot ")
       first = True
@@ -597,14 +603,14 @@ plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title
     for i in range(len(inputs)):
       out = []
       out.append('''
-set xrange [0:4]
+set xrange [0:8]
 set xtics 1
-set yrange [0:4]
+set yrange [0:8]
 set ytics 1
 set xlabel "threads"
 set terminal png
 set output "plot.png"
-set key top center
+set key top
 ''')
       out.append("plot ")
       first = True
@@ -652,7 +658,7 @@ set key top center
   write_to_file(latex_all_file_name, ''.join(latex_all))
 
 def output_graphs():
-  create_graph("exec-time", results[threads[-1]], "")
+  #create_graph("exec-time", results[threads[-1]], "")
   speedup_graph_name = 'speedup'
   create_speedup_graph(speedup_graph_name, results)
   create_problem_speedup_graph("problem-speedup", speedup_graph_name)
@@ -675,7 +681,7 @@ def main():
     run_all(redirect_output=False)  # TODO: remove outputs
   get_results()
   output_graphs()
-  system('xmessage " ALL DONE " -nearmouse -timeout 1')
+  #system('xmessage " ALL DONE " -nearmouse -timeout 1')
   raw_input("done! press enter to continue...")
   system('cd %s && make' % output_dir)
 
