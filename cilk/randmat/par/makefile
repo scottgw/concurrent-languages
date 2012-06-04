@@ -4,6 +4,7 @@ all: main
 	echo "1 5 8" | ./main --nproc 4
 	echo "2 5 8" | ./main --nproc 4
 	echo "2 5 9" | ./main --nproc 4
+	echo "2 5 9" | ./main --nproc 4 --is_bench
 
 # flags: -cilk-profile, -cilk-span -nproc 4
 main: main.cilk

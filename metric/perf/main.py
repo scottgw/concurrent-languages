@@ -214,10 +214,10 @@ inputs = [
 # chapel-randmat, chapel-thresh
     #ProblemInput(2000, 2000, 666, 50, 2000),
 # chapel-randmat, chapel-thresh
-    #ProblemInput(3000, 3000, 666, 50, 3000),
+    ProblemInput(3000, 3000, 666, 50, 3000),
     #ProblemInput(10000, 10000, 666, 50, 10000),
     #ProblemInput(20000, 20000, 666, 1, 1),
-    ProblemInput(30000, 30000, 666, 1, 1),
+    #ProblemInput(30000, 30000, 666, 1, 1),
   ]
 
 threads = [1, 2, 3, 4, 5, 6, 7, 8]
@@ -337,24 +337,25 @@ def run_all(redirect_output=True):
           cmd += "main"
 
         if language == "chapel":
-          cmd += " --numLocales=1 --numThreadsPerLocale=%d --is_bench" % (
+          cmd += " --numLocales=1 --numThreadsPerLocale=%d" % (
               nthreads)
         elif language == "cilk":
           if variation == 'par':
-            cmd += " --nproc %d " % nthreads
+            cmd += " --nproc %d" % nthreads
           else:
             pass
             #cmd += " --nproc 1 "
 
+        if language == "chapel" or language == "cilk":
+          cmd += " --is_bench"
+
         if language != "scoop":
           cmd += " <";
 
+        cmd += " %s" % (problem_map[problem].input_file_name(inputs[i]));
+
         if redirect_output:
-          cmd += " %s > /dev/null 1>&0 2>&0" % (
-              problem_map[problem].input_file_name(inputs[i]));
-        else:
-          cmd += " %s" % (
-              problem_map[problem].input_file_name(inputs[i]));
+          cmd += " > /dev/null 1>&0 2>&0"
 
         print cmd
         system(cmd, timeout=True)
