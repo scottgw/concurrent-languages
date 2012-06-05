@@ -16,10 +16,18 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+
+static int is_bench = 0;
+
+static double matrix[10000][10000];
+static double vector[10000];
 
 typedef struct sPoint {
   int i, j;
 } Point;
+
+static Point points[10000];
 
 double sqr(double x) {
   return x * x;
@@ -33,110 +41,73 @@ double max(double a, double b) {
   return a > b ? a : b;
 }
 
-typedef struct sSplitState {
-  int nelts;
-  double** matrix;
-  double* vector;
-  Point* points;
-} SplitState;
-
-typedef cilk void (*SplitFunction)(int index, SplitState state);
-
-// parallel for on [begin, end), calling f()
-// state carries the state, to simulate a closure
-cilk void split(int begin, int end, SplitFunction f, SplitState state) {
+// parallel for on [begin, end)
+cilk void fill_matrix(int begin, int end, int ncols) {
   int middle = begin + (end - begin) / 2;
-  if (begin >= end) return;
-  if (begin + 1 == end) {
-    spawn f(begin, state);
-    return;
-  }
-  spawn split(begin, middle, f, state);
-  spawn split(middle, end, f, state);
-}
-
-cilk void outer_split(int index, SplitState state) {
   double nmax = -1;
   int j;
-  for (j = 0; j < state.nelts; j++) {
-    if (index != j) {
-      state.matrix[index][j] = distance(state.points[index],
-          state.points[j]);
-      nmax = max(nmax, state.matrix[index][j]);
+  if (begin + 1 == end) {
+    for (j = 0; j < ncols; j++) {
+      if (begin != j) {
+        matrix[begin][j] = distance(points[begin], points[j]);
+        nmax = max(nmax, matrix[begin][j]);
+      }
+      matrix[begin][begin] = nmax * ncols;
+      vector[begin] = distance((Point){0, 0}, points[begin]);
     }
-    state.matrix[index][index] = nmax * state.nelts;
-    state.vector[index] = distance((Point){0, 0}, state.points[index]);
+    return;
   }
+  spawn fill_matrix(begin, middle, ncols);
+  spawn fill_matrix(middle, end, ncols);
 }
 
-cilk void outer(int nelts, Point* points, double** matrix, double* vector) {
-  SplitState state = {.matrix = matrix, .vector = vector, .points = points,
-    .nelts = nelts};
-  // parallel for on [0, nelts), calls outer_split()
-  spawn split(0, nelts, outer_split, state);
-  sync;
+cilk void outer(int nelts) {
+  spawn fill_matrix(0, nelts, nelts);
 }
 
-double** create_matrix(int nelts) {
-  int i;
-  double** matrix = (double **) malloc(sizeof(double *) * nelts);
-  for (i = 0; i < nelts; i++) {
-    matrix[i] = (double *) malloc(sizeof(double) * nelts);
-  }
-  return matrix;
-}
-
-void free_matrix(int nelts, double** matrix) {
-  int i;
-  for (i = 0; i < nelts; i++) {
-    free(matrix[i]);
-  }
-  free(matrix);
-}
-
-Point* read_vector_of_points(int nelts) {
+void read_vector_of_points(int nelts) {
   int i, a, b;
-  Point* vector = (Point* ) malloc(sizeof(Point) * nelts);
   for (i =  0; i < nelts; i++) {
     scanf("%d %d", &a, &b);
-    vector[i].i = a;
-    vector[i].j = b;
+    points[i].i = a;
+    points[i].j = b;
   }
-  return vector;
 }
 
 cilk int main(int argc, char *argv[]) {
   int nelts, i, j;
-  Point* points;
-  double** matrix;
-  double* vector;
+
+  if (argc == 2) {
+    if (!strcmp(argv[argc - 1], "--is_bench")) {
+      is_bench = 1;
+    }
+  }
 
   scanf("%d", &nelts);
-  points = read_vector_of_points(nelts);
-  matrix = create_matrix(nelts);
-  vector = (double* ) malloc(sizeof(double) * nelts);
 
-  spawn outer(nelts, points, matrix, vector);
+  if (!is_bench) {
+    read_vector_of_points(nelts);
+  }
+
+  spawn outer(nelts);
   sync;
 
-  printf("%d %d\n", nelts, nelts);
-  for (i = 0; i < nelts; i++) {
-    for (j = 0; j < nelts; j++) {
-      printf("%g ", matrix[i][j]);
+  if (!is_bench) {
+    printf("%d %d\n", nelts, nelts);
+    for (i = 0; i < nelts; i++) {
+      for (j = 0; j < nelts; j++) {
+        printf("%g ", matrix[i][j]);
+      }
+      printf("\n");
+    }
+    printf("\n");
+
+    printf("%d\n", nelts);
+    for (i = 0; i < nelts; i++) {
+      printf("%g ", vector[i]);
     }
     printf("\n");
   }
-  printf("\n");
-
-  printf("%d\n", nelts);
-  for (i = 0; i < nelts; i++) {
-    printf("%g ", vector[i]);
-  }
-  printf("\n");
-
-  free_matrix(nelts, matrix);
-  free(vector);
-  free(points);
 
   return 0;
 }
