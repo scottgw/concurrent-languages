@@ -21,20 +21,8 @@ def write_to_file(output, content):
   f.write(content)
   f.close()
 
-def append_to_file(output, content):
-  f = open(output, 'a')
-  f.write(content)
-  f.close()
-
 def read_from_file(file_name):
   f = open(file_name, 'r')
-  content = f.read()
-  f.close()
-  return content
-
-def read_from_file_skipping_first_line(file_name):
-  f = open(file_name, "r")
-  f.readline()
   content = f.read()
   f.close()
   return content
@@ -51,9 +39,6 @@ def read_file_values(file_name):
       return []
   f.close()
   return result
-
-def file_exists(file_name):
-  return os.path.isfile(file_name)
 
 def get_directory(language, problem, variation=""):
   directory = "../../%s/%s" % (language, problem);
@@ -166,13 +151,6 @@ class ChainProblem(Problem):
     return "%d\n%d\n%d\n%d\n" % (data.nrows, data.seed, data.percent,
         data.nelts)
 
-class DumbProblem(Problem):
-  def __init__(self):
-    self.name = "dumb"
-
-  def file_name(self, data):
-    return "dumb_file_name"
-
 problem_classes = [RandmatProblem(), ThreshProblem(), WinnowProblem(),
     OuterProblem(), ProductProblem(), ChainProblem()]
 
@@ -266,48 +244,12 @@ threads = [1, 2, 3, 4]
 #input_winnow = ["250"]
 
 def create_inputs():
-  randmat_problem = RandmatProblem()
-  chain_problem = ChainProblem()
-  for i in range(len(inputs)):
-    cur = inputs[i]
-    file_name = randmat_problem.input_file_name(cur)
-    write_to_file(file_name, randmat_problem.get_input(cur))
-
-  for i in range(len(inputs)):
-    cur = inputs[i]
-    file_name = chain_problem.input_file_name(cur)
-    write_to_file(file_name, chain_problem.get_input(cur))
-
-  for i in range(len(problem_classes) - 1):
+  for i in range(len(problem_classes)):
     problem = problem_classes[i]
-    next_problem = problem_classes[i + 1]
-    print problem.name
     for j in range(len(inputs)):
       cur = inputs[j]
-      input_file = problem.input_file_name(cur)
-      output_file = problem.output_file_name(cur)
-      directory = get_directory("cpp", problem.name)
-      if not file_exists(output_file):
-        cmd = "%s/main < %s > %s" % (
-            directory, input_file, output_file);
-        print cmd
-        system(cmd)
-      if problem.name != "product":
-        next_input_file = next_problem.input_file_name(cur)
-        if not file_exists(next_input_file):
-          cmd = "cp %s %s" % (output_file, next_input_file)
-          #print cmd
-          system(cmd)
-          if next_problem.name == "thresh":
-            append_to_file(next_input_file, "%d\n" % cur.percent)
-          if next_problem.name == "winnow":
-            randmat_input = randmat_problem.output_file_name(cur)
-            cmd = "cp %s %s" % (randmat_input, next_input_file)
-            #print cmd
-            system(cmd)
-            content = read_from_file_skipping_first_line(output_file)
-            append_to_file(next_input_file, "\n%s\n%s\n" % (
-                content, cur.nelts))
+      file_name = problem.input_file_name(cur)
+      write_to_file(file_name, problem.get_input(cur))
 
 TIMEOUT = 3
 
