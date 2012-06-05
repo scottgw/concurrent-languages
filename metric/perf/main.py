@@ -5,9 +5,9 @@ import os
 #languages = set(["chapel", "cilk", "erlang"])
 #languages = ["chapel", "cilk"]
 languages = ["cilk"]
-#problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
+problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
-problems = ["chain"]
+#problems = ["chain"]
 variations = ["seq", "par"]
 
 def system(cmd, timeout=False):
@@ -213,10 +213,12 @@ inputs = [
     #ProblemInput(2000, 2000, 666, 50, 2000),
 # chapel-randmat, chapel-thresh
     #ProblemInput(3000, 3000, 666, 50, 3000),
+# cilk-all good on my machine
     #ProblemInput(10000, 10000, 666, 50, 10000),
 # cilk-thresh
     #ProblemInput(20000, 20000, 666, 1, 1),
-# cilk-winnow, cilk-outer, cilk-product, cilk-randmat?
+# cilk-winnow, cilk-outer, cilk-product, cilk-randmat?, cilk-chain
+# cilk-all good on my machine
     ProblemInput(20000, 20000, 666, 1, 10000),
 # cilk-randmat
     #ProblemInput(30000, 30000, 666, 1, 1),
