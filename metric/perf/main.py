@@ -7,7 +7,7 @@ import os
 languages = ["cilk"]
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
-problems = ["outer"]
+problems = ["product"]
 variations = ["seq", "par"]
 
 def system(cmd, timeout=False):
