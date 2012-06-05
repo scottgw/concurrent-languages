@@ -3,32 +3,32 @@
  *
  * input:
  *   nelts: the number of elements
- *   matrix: a real matrix
- *   vector: a real vector
+ *   outer_matrix: a real matrix
+ *   outer_vector: a real vector
  *
  * output:
- *   result: a real vector, whose values are the result of the product
+ *   product_result: a real vector, whose values are the result of the product
  */
 
 #include <cilk-lib.cilkh>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-#include "common.cilkh"
+static int is_bench = 0;
 
-cilk void product_split(int index, SplitState state) {
-  double sum = 0;
-  int j;
-  for (j = 0; j < state.nelts; j++) {
-    sum += state.matrix_double[index][j] * state.vector[j];
+extern double outer_matrix[10000][10000];
+extern double outer_vector[10000];
+double product_result[10000];
+
+void product(int nelts) {
+  int i, j;
+  double sum;
+  for (i = 0; i < nelts; i++) {
+    sum = 0;
+    for (j = 0; j < nelts; j++) {
+      sum += outer_matrix[i][j] * outer_vector[j];
+    }
+    product_result[i] = sum;
   }
-  state.result[index] = sum;
-}
-
-cilk void product(int nelts, double** matrix, double* vector,
-    double* result) {
-  SplitState state = {.nelts = nelts, .matrix_double = matrix,
-    .vector = vector, .result = result};
-  // parallel for on [0, nelts), calls product_split()
-  spawn split(0, nelts, product_split, state);
 }

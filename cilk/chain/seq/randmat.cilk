@@ -6,29 +6,21 @@
  *   s: the seed
  *
  * output:
- *   matrix: an nrows x ncols integer matrix
+ *   randmat_matrix: an nrows x ncols integer matrix
  */
 
 #include <cilk-lib.cilkh>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
-#include "common.cilkh"
+unsigned char randmat_matrix[30000][30000];
 
-cilk void update_matrix(int col, SplitState state) {
-  state.matrix_int[state.row][col] = rand() % 1000;
+void randmat(int nrows, int ncols, unsigned int s) {
+  int i, j;
+  for (i = 0; i < nrows; i++) {
+    for (j = 0; j < ncols; j++) {
+      randmat_matrix[i][j] = rand_r(&s);
+    }
+  }
 }
-
-cilk void start_cols(int row, SplitState state) {
-  state.row = row;
-  // parallel for on cols
-  spawn split(0, state.ncols, update_matrix, state);
-}
-
-cilk void randmat(int nrows, int ncols, int s, int** matrix) {
-  SplitState state = {.ncols = ncols, .matrix_int = matrix };
-  srand(s);
-  // parallel for on rows
-  spawn split(0, nrows, start_cols, state);
-}
-

@@ -2,119 +2,68 @@
  * winnow: weighted point selection
  *
  * input:
- *   matrix: an integer matrix, whose values are used as masses
- *   mask: a boolean matrix showing which points are eligible for
+ *   randmat_matrix: an integer matrix, whose values are used as masses
+ *   thresh_mask: a boolean matrix showing which points are eligible for
  *     consideration
  *   nrows, ncols: the number of rows and columns
  *   nelts: the number of points to select
  *
  * output:
- *   points: a vector of (x, y) points
+ *   winnow_points: a vector of (x, y) points
  */
 
 #include <cilk-lib.cilkh>
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
-#include "common.cilkh"
+static int is_bench = 0;
 
-int compare(Point l, Point r) {
-  if (l.value < r.value) return 1;
-  if (l.value > r.value) return 0;
-  if (l.i < r.i) return 1;
-  if (l.i > r.i) return 0;
-  return l.j < r.j;
+extern unsigned char randmat_matrix[30000][30000];
+extern unsigned char thresh_mask[30000][30000];
+
+typedef struct sPoint {
+  int value, i, j;
+} Point;
+
+Point winnow_points[30000];
+static Point values[30000];
+
+int compare(const void* vl, const void* vr) {
+  const Point* l = vl, *r = vr;
+  return (l->value - r->value);
 }
 
-cilk void fill_value(int col, SplitState state) {
-  int row = state.row;
-  if (state.mask[row][col] == 1) {
-    state.values[*state.count].value = state.matrix_int[row][col];
-    state.values[*state.count].i = row;
-    state.values[*state.count].j = col;
-    (*state.count)++;
-  }
-}
-
-cilk void fill_values_start_cols(int row, SplitState state) {
-  state.row = row;
-  // parallel for on cols, calls fill_value()
-  spawn split(0, state.ncols, fill_value, state);
-}
-
-cilk void fill_values(int nrows, int ncols, int** matrix, int** mask,
-    Point* values) {
-  int count = 0;
-  SplitState state = {.nrows = nrows, .ncols = ncols, .matrix_int = matrix,
-    .mask = mask, .values = values, .count = &count};
-  // parallel for on rows, calls fill_values_start_cols()
-  spawn split(0, nrows, fill_values_start_cols, state);
-  sync;
-}
-
-typedef int (*CompareFunction)(Point l, Point r);
-
-void swap(Point* values, int i, int j) {
-  Point p = values[i];
-  values[i] = values[j];
-  values[j] = p;
-}
-
-cilk void sort_impl(int start, int end, Point* values,
-    CompareFunction is_less, int depth) {
-  int pivot_index;
-  Point pivot;
-  int spot;
-  int i;
-
-  if (start >= end || start + 1 == end) return;
-  pivot_index = (start + end) / 2;
-  pivot = values[pivot_index];
-  swap(values, pivot_index, end - 1);
-  spot = start;
-  for (i = start; i < end; i++) {
-    if (is_less(values[i], pivot)) {
-      swap(values, i, spot);
-      spot++;
+void winnow(int nrows, int ncols, int nelts) {
+  int i, j, n =  0, count = 0, chunk, index;
+  for (i = 0; i < nrows; i++) {
+    if (is_bench) {
+      for (j = 0; j < ncols; j++) {
+        thresh_mask[i][j] = ((i * j) % (ncols + 1)) == 1;
+      }
+    }
+    for (j = 0; j < ncols; j++) {
+      n += thresh_mask[i][j];
     }
   }
-  swap(values, spot, end - 1);
-  pivot_index = spot;
 
-  spawn sort_impl(start, pivot_index, values, is_less, depth + 1);
-  spawn sort_impl(pivot_index + 1, end, values, is_less, depth + 1);
-}
+  for (i = 0; i < nrows; i++) {
+    for (j = 0; j < ncols; j++) {
+      if (thresh_mask[i][j] == 1) {
+        values[count].value = randmat_matrix[i][j];
+        values[count].i = i;
+        values[count].j = j;
+        count++;
+      }
+    }
+  }
 
-cilk void sort(int n, Point* values, CompareFunction is_less) {
-  spawn sort_impl(0, n, values, is_less, 0);
-  sync;
-}
-
-cilk void fill_point(int i, SplitState state) {
-  int index = i * state.chunk;
-  state.points[i] = state.values[index];
-}
-
-cilk void fill_points(int n, Point* points, Point* values, int chunk) {
-  SplitState state = { .points = points, .values = values, .chunk = chunk};
-  // parallel for on [0, n), calls fill_point()
-  spawn split(0, n, fill_point, state);
-}
-
-cilk void winnow(int nrows, int ncols, int** matrix, int** mask, int nelts,
-    Point* points) {
-  int n = 0, chunk;
-  Point* values;
-
-  n = spawn reduce2d(nrows, ncols, mask, sum); sync;
-
-  values = (Point* ) malloc(sizeof(Point) * n);
-
-  spawn fill_values(nrows, ncols, matrix, mask, values); sync;
-
-  spawn sort(n, values, compare); sync;
+  qsort(values, n, sizeof(*values), compare);
 
   chunk = n / nelts;
 
-  spawn fill_points(nelts, points, values, chunk); sync;
+  for (i = 0; i < nelts; i++) {
+    index = i * chunk;
+    winnow_points[i] = values[index];
+  }
 }
-
