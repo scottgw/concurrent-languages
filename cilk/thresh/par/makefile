@@ -11,5 +11,6 @@ all: main
 	diff main5.out main5.gold
 	./$< < $<6.in > main6.out
 	diff main6.out main6.gold
+	./main --nproc 4 --is_bench < main.in 
 main: main.cilk
 	cilkc -O2 -o main main.cilk

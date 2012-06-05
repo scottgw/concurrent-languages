@@ -7,7 +7,7 @@ import os
 languages = ["cilk"]
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
-problems = ["randmat"]
+problems = ["thresh"]
 variations = ["seq", "par"]
 
 def system(cmd, timeout=False):
@@ -214,9 +214,11 @@ inputs = [
 # chapel-randmat, chapel-thresh
     #ProblemInput(2000, 2000, 666, 50, 2000),
 # chapel-randmat, chapel-thresh
-    ProblemInput(3000, 3000, 666, 50, 3000),
+    #ProblemInput(3000, 3000, 666, 50, 3000),
     #ProblemInput(10000, 10000, 666, 50, 10000),
-    #ProblemInput(20000, 20000, 666, 1, 1),
+# cilk-thresh
+    ProblemInput(20000, 20000, 666, 1, 1),
+# cilk-randmat
     #ProblemInput(30000, 30000, 666, 1, 1),
   ]
 
@@ -286,7 +288,7 @@ def create_inputs():
       if not file_exists(output_file):
         cmd = "%s/main < %s > %s" % (
             directory, input_file, output_file);
-        #print cmd
+        print cmd
         system(cmd)
       if problem.name != "product":
         next_input_file = next_problem.input_file_name(cur)
@@ -329,7 +331,8 @@ def run_all(redirect_output=True):
         #cmd += "timeout %d " % (TIMEOUT)
 
         directory = get_directory(language, problem, variation)
-        cmd += "/usr/bin/time -a -f %%e -o %s %s/" % (time_output, directory)
+        cmd += "/usr/bin/time -a -f %%e -o %s %s/" % (time_output,
+            directory)
 
         if language == "erlang":
           cmd += "main.sh"
@@ -345,8 +348,7 @@ def run_all(redirect_output=True):
           if variation == 'par':
             cmd += " --nproc %d" % nthreads
           else:
-            pass
-            #cmd += " --nproc 1 "
+            pass # must NOT pass --nproc here (because of --is_bench)
 
         if language == "chapel" or language == "cilk":
           cmd += " --is_bench"
@@ -667,7 +669,7 @@ def output_graphs():
   create_problem_speedup_graph("problem-speedup", speedup_graph_name)
   create_language_speedup_graph("language-speedup", speedup_graph_name)
 
-TOTAL_EXECUTIONS = 10
+TOTAL_EXECUTIONS = 3
 
 def main():
   total_time = (

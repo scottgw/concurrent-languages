@@ -11,13 +11,13 @@
 #include <cstdio>
 #include <cstdlib>
 
-static unsigned char matrix[10000][100000];
+static unsigned char matrix[30000][30000];
 
 void randmat(int nrows, int ncols, int s) {
   srand(s);
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
-      matrix[i][j] = rand() % 1000;
+      matrix[i][j] = rand() % 100;
     }
   }
 }

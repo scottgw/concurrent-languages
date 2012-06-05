@@ -51,22 +51,25 @@ void read_matrix(int nrows, int ncols, vector<vector<int> >* matrix) {
   }
 }
 
+vector<vector<int> >* matrix;
+vector<vector<int> >* mask;
+
 int main(int argc, char** argv) {
   int nrows, ncols, nelts;
 
   scanf("%d%d", &nrows, &ncols);
 
-  vector<vector<int> > matrix(nrows, vector<int>(ncols));
-  vector<vector<int> > mask(nrows, vector<int>(ncols));
+  matrix = new vector<vector <int> >(nrows, vector<int>(ncols));
+  mask = new vector<vector<int> >(nrows, vector<int>(ncols));
 
-  read_matrix(nrows, ncols, &matrix);
-  read_matrix(nrows, ncols, &mask);
+  read_matrix(nrows, ncols, matrix);
+  read_matrix(nrows, ncols, mask);
 
   scanf("%d", &nelts);
 
   vector<pair<int, int> > points(nelts);
 
-  winnow(nrows, ncols, matrix, mask, nelts, &points);
+  winnow(nrows, ncols, *matrix, *mask, nelts, &points);
 
   printf("%d\n", nelts);
 
