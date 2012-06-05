@@ -7,7 +7,7 @@ import os
 languages = ["cilk"]
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
-problems = ["thresh"]
+problems = ["winnow"]
 variations = ["seq", "par"]
 
 def system(cmd, timeout=False):
@@ -218,6 +218,8 @@ inputs = [
     #ProblemInput(10000, 10000, 666, 50, 10000),
 # cilk-thresh
     ProblemInput(20000, 20000, 666, 1, 1),
+# cilk-winnow
+    #ProblemInput(20000, 20000, 666, 1, 10000),
 # cilk-randmat
     #ProblemInput(30000, 30000, 666, 1, 1),
   ]
@@ -226,7 +228,7 @@ threads = [1, 2, 3, 4, 5, 6, 7, 8]
 #threads = [1, 2, 3, 4]
 #threads = [2, 4]
 
-##
+#
 
 # ===== general =====
 #inputs = ["10 10 55", "100 100 666", "100 250 777"] #, "100 1000 888"] #, "100 1000 888"]

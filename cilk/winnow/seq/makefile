@@ -7,6 +7,8 @@ all: main
 	diff main3.out main3.gold
 	./main < main4.in > main4.out
 	diff main4.out main4.gold
+	./main < main.in
+	./main --is_bench < main.in
 
 main: main.cilk
-	cilkc -o main main.cilk
+	cilkc -O2 -o main main.cilk
