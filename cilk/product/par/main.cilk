@@ -52,7 +52,7 @@ void read_matrix(int nelts) {
 
 void read_vector(int nelts) {
   int i;
-  for (i =  0; i < nelts; i++) {
+  for (i = 0; i < nelts; i++) {
     scanf("%lf", &vector[i]);
   }
 }

@@ -218,7 +218,7 @@ inputs = [
     #ProblemInput(10000, 10000, 666, 50, 10000),
 # cilk-thresh
     #ProblemInput(20000, 20000, 666, 1, 1),
-# cilk-winnow, cilk-outer
+# cilk-winnow, cilk-outer, cilk-product
     ProblemInput(20000, 20000, 666, 1, 10000),
 # cilk-randmat
     #ProblemInput(30000, 30000, 666, 1, 1),
