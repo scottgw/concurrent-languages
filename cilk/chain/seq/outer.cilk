@@ -1,0 +1,55 @@
+/*
+ * outer: outer product
+ *
+ * input:
+ *   points: a vector of (x, y) points
+ *   nelts: the number of points
+ *
+ * output:
+ *   matrix: a real matrix, whose values are filled with inter-point
+ *     distances
+ *   vector: a real vector, whose values are filled with origin-to-point
+ *     distances
+ */
+
+#include <cilk-lib.cilkh>
+#include <math.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#include "common.cilkh"
+
+double sqr(double x) {
+  return x * x;
+}
+
+double distance(Point a, Point b) {
+  return sqrt(sqr(a.i - b.i) + sqr(a.j - b.j));
+}
+
+double max_double(double a, double b) {
+  return a > b ? a : b;
+}
+
+cilk void outer_split(int index, SplitState state) {
+  double nmax = -1;
+  int j;
+  for (j = 0; j < state.nelts; j++) {
+    if (index != j) {
+      state.matrix_double[index][j] = distance(state.points[index],
+          state.points[j]);
+      nmax = max_double(nmax, state.matrix_double[index][j]);
+    }
+    state.matrix_double[index][index] = nmax * state.nelts;
+    state.vector[index] = distance((Point){.i = 0, .j = 0},
+        state.points[index]);
+  }
+}
+
+cilk void outer(int nelts, Point* points, double** matrix, double* vector) {
+  SplitState state = {.matrix_double = matrix, .vector = vector,
+    .points = points, .nelts = nelts};
+  // parallel for on [0, nelts), calls outer_split()
+  spawn split(0, nelts, outer_split, state);
+}
+
