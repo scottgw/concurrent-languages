@@ -13,12 +13,18 @@
 #include <cilk-lib.cilkh>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+
+int is_bench = 0;
+
+static unsigned char matrix[30000][30000];
+static unsigned char mask[30000][30000];
 
 int max(int a, int b) {
   return a > b ? a : b;
 }
 
-void thresh(int nrows, int ncols, int** matrix, int percent, int** mask) {
+void thresh(int nrows, int ncols, int percent) {
   int i, j;
   int nmax = 0;
   int* histogram;
@@ -54,53 +60,43 @@ void thresh(int nrows, int ncols, int** matrix, int percent, int** mask) {
     }
   }
 
-  free(histogram);
+  /*
+  free(histogram);//*/
 }
 
 int main(int argc, char *argv[]) {
   int nrows, ncols, percent, i, j;
-  int** matrix, ** mask;
+
+  if (argc == 2) {
+    if (!strcmp(argv[argc - 1], "--is_bench")) {
+      is_bench = 1;
+    }
+  }
+
   scanf("%d%d", &nrows, &ncols);
 
-  matrix = (int**) malloc(sizeof(int*) * nrows);
-  for (i = 0; i < nrows; i++) {
-    matrix[i] = (int*) malloc(sizeof(int) * ncols);
-  }
-
-  mask = (int **) malloc(sizeof(int*) * nrows);
-  for (i = 0; i < nrows; i++) {
-    mask[i] = (int*) malloc(sizeof(int) * ncols);
-  }
-
-  for (i = 0; i < nrows; i++) {
-    for (j = 0; j < ncols; j++) {
-      scanf("%d", &matrix[i][j]);
+  if (!is_bench) {
+    for (i = 0; i < nrows; i++) {
+      for (j = 0; j < ncols; j++) {
+        scanf("%hhu", &matrix[i][j]);
+      }
     }
   }
 
   scanf("%d", &percent);
 
-  thresh(nrows, ncols, matrix, percent, mask);
+  thresh(nrows, ncols, percent);
 
-  /*
-  printf("%d %d\n", nrows, ncols);
-  for (i = 0; i < nrows; i++) {
-    for (j = 0; j < ncols; j++) {
-      printf("%d ", mask[i][j]);
+  if (!is_bench) {
+    printf("%d %d\n", nrows, ncols);
+    for (i = 0; i < nrows; i++) {
+      for (j = 0; j < ncols; j++) {
+        printf("%hhu ", mask[i][j]);
+      }
+      printf("\n");
     }
     printf("\n");
   }
-  printf("\n");
-
-  for (i = 0; i < nrows; i++) {
-    free(matrix[i]);
-  }
-  free(matrix);
-
-  for (i = 0; i < nrows; i++) {
-    free(mask[i]);
-  }
-  free(mask);//*/
 
   return 0;
 }

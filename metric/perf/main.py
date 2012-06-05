@@ -4,10 +4,10 @@ import os
 #languages = set(["chapel", "cilk", "erlang", "go", "tbb"])
 #languages = set(["chapel", "cilk", "erlang"])
 #languages = ["chapel", "cilk"]
-languages = ["chapel"]
-#problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
+languages = ["cilk"]
+problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
-problems = ["randmat"]
+#problems = ["chain"]
 variations = ["seq", "par"]
 
 def system(cmd, timeout=False):
@@ -17,33 +17,39 @@ def system(cmd, timeout=False):
     assert(False)
 
 def write_to_file(output, content):
-  with open(output, 'w') as f:
-    f.write(content)
+  f = open(output, 'w')
+  f.write(content)
+  f.close()
 
 def append_to_file(output, content):
-  with open(output, 'a') as f:
-    f.write(content)
+  f = open(output, 'a')
+  f.write(content)
+  f.close()
 
 def read_from_file(file_name):
-  with open(file_name, 'r') as f:
-    content = f.read()
+  f = open(file_name, 'r')
+  content = f.read()
+  f.close()
   return content
 
 def read_from_file_skipping_first_line(file_name):
-  with open(file_name, "r") as f:
-    f.readline()
-    content = f.read()
+  f = open(file_name, "r")
+  f.readline()
+  content = f.read()
+  f.close()
   return content
 
 def read_file_values(file_name):
   result = []
-  with open(file_name, 'r') as f:
-    for line in f:
-      try:
-        value = float(line)
-        result.append(value)
-      except ValueError:
-        return []
+  f = open(file_name, 'r')
+  for line in f:
+    try:
+      value = float(line)
+      result.append(value)
+    except ValueError:
+      f.close()
+      return []
+  f.close()
   return result
 
 def file_exists(file_name):
@@ -51,15 +57,13 @@ def file_exists(file_name):
 
 def get_directory(language, problem, variation=""):
   directory = "../../%s/%s" % (language, problem);
-  if problem != "chain" and language != "cpp":
+  if language != "cpp":
     directory += "/%s" % variation;
   return directory
 
 def get_problems_with_variations():
   for problem in sorted(problems):
     for variation in sorted(variations):
-      if problem == "chain" and variation == "seq":
-        continue
       yield (problem, variation)
 
 ERLANG_MAIN = ("#!/bin/sh\n"
@@ -209,13 +213,22 @@ inputs = [
     #ProblemInput(2000, 2000, 666, 50, 2000),
 # chapel-randmat, chapel-thresh
     #ProblemInput(3000, 3000, 666, 50, 3000),
-    #ProblemInput(10000, 10000, 666, 50, 10000)
-    ProblemInput(20000, 20000, 666, 1, 1)
+# cilk-all good on my machine
+    #ProblemInput(10000, 10000, 666, 50, 10000),
+# cilk-thresh
+    #ProblemInput(20000, 20000, 666, 1, 1),
+# cilk-winnow, cilk-outer, cilk-product, cilk-randmat?, cilk-chain
+# cilk-all good on my machine
+    ProblemInput(20000, 20000, 666, 1, 10000),
+# cilk-randmat
+    #ProblemInput(30000, 30000, 666, 1, 1),
   ]
 
-#threads = [1, 2, 3, 4, 5, 6, 7, 8]
+threads = [1, 2, 3, 4, 5, 6, 7, 8]
 threads = [1, 2, 3, 4]
 #threads = [2, 4]
+
+##
 
 # ===== general =====
 #inputs = ["10 10 55", "100 100 666", "100 250 777"] #, "100 1000 888"] #, "100 1000 888"]
@@ -277,7 +290,7 @@ def create_inputs():
       if not file_exists(output_file):
         cmd = "%s/main < %s > %s" % (
             directory, input_file, output_file);
-        #print cmd
+        print cmd
         system(cmd)
       if problem.name != "product":
         next_input_file = next_problem.input_file_name(cur)
@@ -296,7 +309,7 @@ def create_inputs():
             append_to_file(next_input_file, "\n%s\n%s\n" % (
                 content, cur.nelts))
 
-TIMEOUT = 10
+TIMEOUT = 3
 
 def get_time_output(language, problem, variation, i, nthreads):
   return "time-%s-%s-%s-%d-%d.out" % (
@@ -317,10 +330,11 @@ def run_all(redirect_output=True):
         if language == "go":
           cmd += "GOMAXPROCS=%d " % nthreads
 
-        cmd += "timeout %d " % (TIMEOUT)
+        #cmd += "timeout %d " % (TIMEOUT)
 
         directory = get_directory(language, problem, variation)
-        cmd += "time -a -f %%e -o %s %s/" % (time_output, directory)
+        cmd += "/usr/bin/time -a -f %%e -o %s %s/" % (time_output,
+            directory)
 
         if language == "erlang":
           cmd += "main.sh"
@@ -330,24 +344,24 @@ def run_all(redirect_output=True):
           cmd += "main"
 
         if language == "chapel":
-          cmd += " --numLocales=1 --numThreadsPerLocale=%d --is_bench" % (
+          cmd += " --numLocales=1 --numThreadsPerLocale=%d" % (
               nthreads)
         elif language == "cilk":
           if variation == 'par':
-            cmd += " --nproc %d " % nthreads
+            cmd += " --nproc %d" % nthreads
           else:
-            pass
-            #cmd += " --nproc 1 "
+            pass # must NOT pass --nproc here (because of --is_bench)
+
+        if language == "chapel" or language == "cilk":
+          cmd += " --is_bench"
 
         if language != "scoop":
           cmd += " <";
 
+        cmd += " %s" % (problem_map[problem].input_file_name(inputs[i]));
+
         if redirect_output:
-          cmd += " %s > /dev/null 1>&0 2>&0" % (
-              problem_map[problem].input_file_name(inputs[i]));
-        else:
-          cmd += " %s" % (
-              problem_map[problem].input_file_name(inputs[i]));
+          cmd += " > /dev/null 1>&0 2>&0"
 
         print cmd
         system(cmd, timeout=True)
@@ -393,7 +407,7 @@ def get_results():
 
 GRAPH_SIZE = 700
 
-output_dir = "../../../ufrgs/meu"
+output_dir = "../../../ufrgs/tc"
 
 def create_graph(graph_name, values, pretty_name):
   variation_names = {"seq" : "Sequential", "par" : "Parallel"}
@@ -406,8 +420,6 @@ def create_graph(graph_name, values, pretty_name):
 
     latex_out = []
     for variation in variations:
-      if variation == 'seq' and ( # TODO: chain-seq
-          len(problems) == 1 and problems[0] == 'chain'): continue
       out = []
       out.append("=cluster")
       for language in sorted(languages):
@@ -426,8 +438,6 @@ def create_graph(graph_name, values, pretty_name):
           "ylabel=%s %sexecution time in seconds for input %d\n" % (
               variation_name, pretty_name, i))
       for problem in sorted(problems):
-        if problem == "chain" and variation == "seq":
-          continue
         out.append(problem)
         for language in sorted(languages):
           out.append(" %.10f" % (
@@ -475,11 +485,8 @@ plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title
         out = []
         for nthreads in threads:
             variation = "par"
-            if problem == "chain": #TODO chain-seq
-              tseq = values[threads[0]][problem]["par"][language][i]
-            else:
-              if "seq" not in values[threads[-1]][problem]: continue
-              tseq = values[threads[-1]][problem]["seq"][language][i]
+            if "seq" not in values[threads[-1]][problem]: continue
+            tseq = values[threads[-1]][problem]["seq"][language][i]
             cur = values[nthreads][problem][variation][language][i]
             if cur == INVALID or cur == 0: continue
             out.append("%d\t%.10f\t%.10f\t%d\t%.10f\t1\n" % (
@@ -533,14 +540,14 @@ plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title
     for i in range(len(inputs)):
       out = []
       out.append('''
-set xrange [0:4]
+set xrange [0:8]
 set xtics 1
-set yrange [0:4]
+set yrange [0:8]
 set ytics 1
 set xlabel "threads"
 set terminal png
 set output "plot.png"
-set key top center
+set key top
 ''')
       out.append("plot ")
       first = True
@@ -596,14 +603,14 @@ plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title
     for i in range(len(inputs)):
       out = []
       out.append('''
-set xrange [0:4]
+set xrange [0:8]
 set xtics 1
-set yrange [0:4]
+set yrange [0:8]
 set ytics 1
 set xlabel "threads"
 set terminal png
 set output "plot.png"
-set key top center
+set key top
 ''')
       out.append("plot ")
       first = True
@@ -651,13 +658,13 @@ set key top center
   write_to_file(latex_all_file_name, ''.join(latex_all))
 
 def output_graphs():
-  create_graph("exec-time", results[threads[-1]], "")
+  #create_graph("exec-time", results[threads[-1]], "")
   speedup_graph_name = 'speedup'
   create_speedup_graph(speedup_graph_name, results)
   create_problem_speedup_graph("problem-speedup", speedup_graph_name)
   create_language_speedup_graph("language-speedup", speedup_graph_name)
 
-TOTAL_EXECUTIONS = 5
+TOTAL_EXECUTIONS = 3
 
 def main():
   total_time = (
@@ -667,14 +674,14 @@ def main():
       total_time, total_time / 60., total_time / (
           60. * 60), total_time / (60. * 60 * 24))
   raw_input('press enter to start...')
-  generate_erlang_main()
+  #generate_erlang_main()
   make_all()
   create_inputs()
   for _ in range(TOTAL_EXECUTIONS):
     run_all(redirect_output=False)  # TODO: remove outputs
   get_results()
   output_graphs()
-  system('xmessage " ALL DONE " -nearmouse -timeout 1')
+  #system('xmessage " ALL DONE " -nearmouse -timeout 1')
   raw_input("done! press enter to continue...")
   system('cd %s && make' % output_dir)
 

@@ -6,7 +6,7 @@
  *   s: the seed
  *
  * output:
- *   matrix: an nrows x ncols integer matrix
+ *   randmat_matrix: an nrows x ncols integer matrix
  */
 
 #include <cilk-lib.cilkh>
@@ -14,14 +14,12 @@
 #include <stdio.h>
 #include <string.h>
 
-static unsigned char matrix[30000][30000];
-
-int is_bench = 0;
+unsigned char randmat_matrix[30000][30000];
 
 cilk void fill_row(int begin, int ncols, int seed) {
   int j;
   for (j = 0; j < ncols; j++) {
-    matrix[begin][j] = rand_r(&seed);
+    randmat_matrix[begin][j] = (unsigned char) (rand_r(&seed) % 100);
   }
 }
 
@@ -39,31 +37,4 @@ cilk void fill_matrix(int begin, int end, int ncols, int seed) {
 cilk void randmat(int nrows, int ncols, int s) {
   // parallel for on rows
   spawn fill_matrix(0, nrows, ncols, s);
-}
-
-cilk int main(int argc, char *argv[]) {
-  int nrows, ncols, s, i, j;
-
-  if (argc == 2) {
-    if (!strcmp(argv[argc -1], "--is_bench")) {
-      is_bench = 1;
-    }
-  }
-
-  scanf("%d%d%d", &nrows, &ncols, &s);
-
-  spawn randmat(nrows, ncols, s);
-  sync;
-
-  if (!is_bench) {
-    for (i = 0; i < nrows; i++) {
-      for (j = 0; j < ncols; j++) {
-        printf("%d ", matrix[i][j]);
-      }
-      printf("\n");
-    }
-    printf("\n");
-  }
-
-  return 0;
 }

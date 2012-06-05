@@ -13,8 +13,15 @@
 #include <cilk-lib.cilkh>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-void product(int nelts, double** matrix, double* vector, double* result) {
+static int is_bench = 0;
+
+static double matrix[10000][10000];
+static double vector[10000];
+static double result[10000];
+
+void product(int nelts) {
   int i, j;
   double sum;
   for (i = 0; i < nelts; i++) {
@@ -26,57 +33,47 @@ void product(int nelts, double** matrix, double* vector, double* result) {
   }
 }
 
-double** read_matrix(int nelts) {
+void read_matrix(int nelts) {
   int i, j;
-  double** matrix = (double **) malloc(sizeof(double *) * nelts);
   for (i = 0; i < nelts; i++) {
-    matrix[i] = (double *) malloc(sizeof(double) * nelts);
     for (j = 0; j < nelts; j++) {
       scanf("%lf", &matrix[i][j]);
     }
   }
-  return matrix;
 }
 
-void free_matrix(int nelts, double** matrix) {
+void read_vector(int nelts) {
   int i;
-  for (i = 0; i < nelts; i++) {
-    free(matrix[i]);
-  }
-  free(matrix);
-}
-
-double* read_vector(int nelts) {
-  int i;
-  double* vector = (double* ) malloc(sizeof(double) * nelts);
   for (i =  0; i < nelts; i++) {
     scanf("%lf", &vector[i]);
   }
-  return vector;
 }
 
 int main(int argc, char *argv[]) {
   int nelts, i;
-  double** matrix;
-  double* vector;
-  double* result;
+
+  if (argc == 2) {
+    if (!strcmp(argv[argc - 1], "--is_bench")) {
+      is_bench = 1;
+    }
+  }
 
   scanf("%d", &nelts);
-  matrix = read_matrix(nelts);
-  vector = read_vector(nelts);
-  result = (double* ) malloc(sizeof(double) * nelts);
 
-  product(nelts, matrix, vector, result);
-
-  printf("%d\n", nelts);
-  for (i = 0; i < nelts; i++) {
-    printf("%g ", result[i]);
+  if (!is_bench) {
+    read_matrix(nelts);
+    read_vector(nelts);
   }
-  printf("\n");
 
-  free_matrix(nelts, matrix);
-  free(vector);
-  free(result);
+  product(nelts);
+
+  if (!is_bench) {
+    printf("%d\n", nelts);
+    for (i = 0; i < nelts; i++) {
+      printf("%g ", result[i]);
+    }
+    printf("\n");
+  }
 
   return 0;
 }

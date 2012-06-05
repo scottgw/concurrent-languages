@@ -13,98 +13,75 @@
 #include <cilk-lib.cilkh>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-typedef struct sSplitState {
-  int nelts;
-  double** matrix;
-  double* vector;
-  double* result;
-} SplitState;
+static int is_bench = 0;
 
-typedef cilk void (*SplitFunction)(int index, SplitState state);
+static double matrix[10000][10000];
+static double vector[10000];
+static double result[10000];
 
-// parallel for on [begin, end), calling f()
-// state carries the state, to simulate a closure
-cilk void split(int begin, int end, SplitFunction f, SplitState state) {
+// parallel for on [begin, end)
+cilk void fill_result(int begin, int end, int ncols) {
   int middle = begin + (end - begin) / 2;
-  if (begin >= end) return;
-  if (begin + 1 == end) {
-    spawn f(begin, state);
-    return;
-  }
-  spawn split(begin, middle, f, state);
-  spawn split(middle, end, f, state);
-}
-
-cilk void product_split(int index, SplitState state) {
   double sum = 0;
   int j;
-  for (j = 0; j < state.nelts; j++) {
-    sum += state.matrix[index][j] * state.vector[j];
+  if (begin + 1 == end) {
+    for (j = 0; j < ncols; j++) {
+      sum += matrix[begin][j] * vector[j];
+    }
+    result[begin] = sum;
+    return;
   }
-  state.result[index] = sum;
+  spawn fill_result(begin, middle, ncols);
+  spawn fill_result(middle, end, ncols);
 }
 
-cilk void product(int nelts, double** matrix, double* vector,
-    double* result) {
-  SplitState state = {.nelts = nelts, .matrix = matrix, .vector = vector,
-    .result = result};
-  // parallel for on [0, nelts), calls product_split()
-  spawn split(0, nelts, product_split, state);
+cilk void product(int nelts) {
+  spawn fill_result(0, nelts, nelts);
 }
 
-double** read_matrix(int nelts) {
+void read_matrix(int nelts) {
   int i, j;
-  double** matrix = (double **) malloc(sizeof(double *) * nelts);
   for (i = 0; i < nelts; i++) {
-    matrix[i] = (double *) malloc(sizeof(double) * nelts);
     for (j = 0; j < nelts; j++) {
       scanf("%lf", &matrix[i][j]);
     }
   }
-  return matrix;
 }
 
-void free_matrix(int nelts, double** matrix) {
+void read_vector(int nelts) {
   int i;
   for (i = 0; i < nelts; i++) {
-    free(matrix[i]);
-  }
-  free(matrix);
-}
-
-double* read_vector(int nelts) {
-  int i;
-  double* vector = (double* ) malloc(sizeof(double) * nelts);
-  for (i =  0; i < nelts; i++) {
     scanf("%lf", &vector[i]);
   }
-  return vector;
 }
 
 cilk int main(int argc, char *argv[]) {
   int nelts, i;
-  double** matrix;
-  double* vector;
-  double* result;
+
+  if (argc == 2) {
+    if (!strcmp(argv[argc - 1], "--is_bench")) {
+      is_bench = 1;
+    }
+  }
 
   scanf("%d", &nelts);
-  matrix = read_matrix(nelts);
-  vector = read_vector(nelts);
-  result = (double* ) malloc(sizeof(double) * nelts);
+  if (!is_bench) {
+    read_matrix(nelts);
+    read_vector(nelts);
+  }
 
-  spawn product(nelts, matrix, vector, result);
+  spawn product(nelts);
   sync;
 
-  printf("%d\n", nelts);
-  for (i = 0; i < nelts; i++) {
-    printf("%g ", result[i]);
+  if (!is_bench) {
+    printf("%d\n", nelts);
+    for (i = 0; i < nelts; i++) {
+      printf("%g ", result[i]);
+    }
+    printf("\n");
   }
-  printf("\n");
-
-  free_matrix(nelts, matrix);
-  free(vector);
-  free(result);
 
   return 0;
 }
