@@ -18,8 +18,6 @@
 #include <stdio.h>
 #include <string.h>
 
-static int is_bench = 0;
-
 double outer_matrix[10000][10000];
 double outer_vector[10000];
 

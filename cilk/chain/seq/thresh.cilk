@@ -15,8 +15,6 @@
 #include <stdio.h>
 #include <string.h>
 
-int is_bench = 0;
-
 extern unsigned char randmat_matrix[30000][30000];
 unsigned char thresh_mask[30000][30000];
 

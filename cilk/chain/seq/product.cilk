@@ -15,8 +15,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int is_bench = 0;
-
 extern double outer_matrix[10000][10000];
 extern double outer_vector[10000];
 double product_result[10000];

@@ -7,7 +7,7 @@ import os
 languages = ["cilk"]
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
-problems = ["randmat"]
+problems = ["chain"]
 variations = ["seq", "par"]
 
 def system(cmd, timeout=False):
@@ -57,15 +57,13 @@ def file_exists(file_name):
 
 def get_directory(language, problem, variation=""):
   directory = "../../%s/%s" % (language, problem);
-  if problem != "chain" and language != "cpp":
+  if language != "cpp":
     directory += "/%s" % variation;
   return directory
 
 def get_problems_with_variations():
   for problem in sorted(problems):
     for variation in sorted(variations):
-      if problem == "chain" and variation == "seq":
-        continue
       yield (problem, variation)
 
 ERLANG_MAIN = ("#!/bin/sh\n"
@@ -225,7 +223,7 @@ inputs = [
   ]
 
 threads = [1, 2, 3, 4, 5, 6, 7, 8]
-#threads = [1, 2, 3, 4]
+threads = [1, 2, 3, 4]
 #threads = [2, 4]
 
 ##
@@ -420,8 +418,6 @@ def create_graph(graph_name, values, pretty_name):
 
     latex_out = []
     for variation in variations:
-      if variation == 'seq' and ( # TODO: chain-seq
-          len(problems) == 1 and problems[0] == 'chain'): continue
       out = []
       out.append("=cluster")
       for language in sorted(languages):
@@ -440,8 +436,6 @@ def create_graph(graph_name, values, pretty_name):
           "ylabel=%s %sexecution time in seconds for input %d\n" % (
               variation_name, pretty_name, i))
       for problem in sorted(problems):
-        if problem == "chain" and variation == "seq":
-          continue
         out.append(problem)
         for language in sorted(languages):
           out.append(" %.10f" % (
@@ -489,11 +483,8 @@ plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title
         out = []
         for nthreads in threads:
             variation = "par"
-            if problem == "chain": #TODO chain-seq
-              tseq = values[threads[0]][problem]["par"][language][i]
-            else:
-              if "seq" not in values[threads[-1]][problem]: continue
-              tseq = values[threads[-1]][problem]["seq"][language][i]
+            if "seq" not in values[threads[-1]][problem]: continue
+            tseq = values[threads[-1]][problem]["seq"][language][i]
             cur = values[nthreads][problem][variation][language][i]
             if cur == INVALID or cur == 0: continue
             out.append("%d\t%.10f\t%.10f\t%d\t%.10f\t1\n" % (
