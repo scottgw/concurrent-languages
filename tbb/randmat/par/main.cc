@@ -10,65 +10,65 @@
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
 #include "tbb/parallel_for.h"
 #include "tbb/blocked_range.h"
+#include "tbb/task_scheduler_init.h"
 
 using namespace tbb;
 
-static char matrix[10000][100000];
+typedef blocked_range<size_t> range;
 
-class RandMatCol {
-public: 
-  void operator() ( const blocked_range<size_t>& r ) const { 
-    unsigned int seed = 0;
-    for ( size_t j = r.begin(); j != r.end(); ++j ) {
-      matrix[_row][j] = rand_r(&seed);
-    }
-  }
-  RandMatCol(int row): _row(row) {}
+static unsigned char matrix[30000][30000];
 
-private:
-  int _row;
-};
+int is_bench = 0;
+int n_threads = task_scheduler_init::default_num_threads();
 
-
-class RandMatRow {
-public: 
-  void operator() ( const blocked_range<size_t>& r ) const { 
-    for ( size_t i = r.begin(); i != r.end(); ++i ) {
-      parallel_for(blocked_range<size_t>(0, _ncols),
-          RandMatCol(i), auto_partitioner());
-    }
-  }
-  RandMatRow(int ncols): _ncols(ncols) {}
-
-private:
-  int _ncols;
-};
-
-void randmat(int nrows, int ncols, int s) {
-  srand(s);
-  parallel_for(blocked_range<size_t>(0, nrows),
-      RandMatRow(ncols), auto_partitioner());
+void randmat(int nrows, int ncols, unsigned int seed) {
+  const int LCG_A = 1664525, LCG_C = 1013904223;
+  parallel_for(
+    range(0, nrows),
+    [=, &seed](range r) {
+      for (size_t i = r.begin(); i != r.end(); ++i) {
+        for (int j = 0; j < ncols; j++) {
+          //matrix[i][j] = rand_r(&seed);
+          //matrix[i][j] = tbb::this_tbb_thread::get_id();
+          matrix[i][j] = seed = (LCG_A * seed + LCG_C) % 100;
+        }
+      }
+  });
 }
 
 int main(int argc, char** argv) {
   int nrows, ncols, s;
 
+  for (int i = 1; i < argc; i++) {
+    if (!strcmp(argv[i], "--is_bench")) {
+      is_bench = 1;
+    } else if (!strcmp(argv[i], "--threads")) {
+      sscanf(argv[i + 1], "%d", &n_threads);
+      printf("n_threads: %d\n", n_threads);
+      i++;
+    }
+  }
+
+  task_scheduler_init init(n_threads);
+
   scanf("%d%d%d", &nrows, &ncols, &s);
 
   randmat(nrows, ncols, s);
 
-  /*
-  printf("%d %d\n", nrows, ncols);
-  for (int i = 0; i < nrows; i++) {
-    for (int j = 0; j < ncols; j++) {
-      printf("%d ", matrix[i][j]);
+  if (!is_bench) {
+    printf("%d %d\n", nrows, ncols);
+    for (int i = 0; i < nrows; i++) {
+      for (int j = 0; j < ncols; j++) {
+        printf("%d ", matrix[i][j]);
+      }
+      printf("\n");
     }
     printf("\n");
   }
-  printf("\n");//*/
 
   return 0;
 }

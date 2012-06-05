@@ -4,10 +4,10 @@ import os
 #languages = set(["chapel", "cilk", "erlang", "go", "tbb"])
 #languages = set(["chapel", "cilk", "erlang"])
 #languages = ["chapel", "cilk"]
-languages = ["cilk"]
-problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
+languages = ["tbb"]
+#problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
-#problems = ["chain"]
+problems = ["randmat"]
 variations = ["seq", "par"]
 
 def system(cmd, timeout=False):
@@ -191,20 +191,20 @@ inputs = [
     #ProblemInput(2000, 2000, 666, 50, 2000),
 # chapel-randmat, chapel-thresh
     #ProblemInput(3000, 3000, 666, 50, 3000),
-# cilk-all good on my machine
     #ProblemInput(10000, 10000, 666, 50, 10000),
 # cilk-thresh
     #ProblemInput(20000, 20000, 666, 1, 1),
 # cilk-winnow, cilk-outer, cilk-product, cilk-randmat?, cilk-chain
-# cilk-all good on my machine
+# cilk-all, tbb-randmat
     ProblemInput(20000, 20000, 666, 1, 10000),
 # cilk-randmat
     #ProblemInput(30000, 30000, 666, 1, 1),
   ]
 
 threads = [1, 2, 3, 4, 5, 6, 7, 8]
-threads = [1, 2, 3, 4]
+#threads = [1, 2, 3, 4]
 #threads = [2, 4]
+#threads = [1, 4]
 
 #
 
@@ -293,8 +293,11 @@ def run_all(redirect_output=True):
             cmd += " --nproc %d" % nthreads
           else:
             pass # must NOT pass --nproc here (because of --is_bench)
+        elif language == 'tbb':
+          if variation == 'par':
+            cmd += ' --threads %d' % nthreads
 
-        if language == "chapel" or language == "cilk":
+        if language == "chapel" or language == "cilk" or language == "tbb":
           cmd += " --is_bench"
 
         if language != "scoop":
