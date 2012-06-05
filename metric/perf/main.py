@@ -547,7 +547,7 @@ set ytics 1
 set xlabel "threads"
 set terminal png
 set output "plot.png"
-set key top
+set key left
 ''')
       out.append("plot ")
       first = True
@@ -610,7 +610,7 @@ set ytics 1
 set xlabel "threads"
 set terminal png
 set output "plot.png"
-set key top
+set key left
 ''')
       out.append("plot ")
       first = True

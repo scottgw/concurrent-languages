@@ -148,7 +148,8 @@ class testMain(unittest.TestCase):
     main.inputs = [main.ProblemInput(10, 15, 20, 30, 40)]
     main.TIMEOUT = 99
     main.threads = [999]
-    main.system(('timeout 99 time -a -f %e -o '
+    main.system(('' # 'timeout 99 ' # TODO timeout on ensisun
+                 '/usr/bin/time -a -f %e -o '
                  'time-language-problem-variation-0-999.out '
                  'directory/main < '
                  'problem_10_15_20_30_40.in > /dev/null 1>&0 2>&0'),
@@ -195,11 +196,11 @@ class testMain(unittest.TestCase):
         999: {'problem': {
             'seq': {'language': {0: 100}}}}}
 
-    main.write_to_file('../../../ufrgs/meu/images/graph-exec-time-seq-0.perf', '=cluster;language\ncolors=black,yellow,red,med_blue,light_green,cyan\n=table\nyformat=%g\n=norotate\nxscale=1\nmax=150.000000\nylabel=Sequential execution time in seconds for input 0\nproblem 100.0000000000\n')
-    main.system('../../../ufrgs/meu/bargraph.pl -fig ../../../ufrgs/meu/images/graph-exec-time-seq-0.perf | fig2dev -L ppm -m 4 > ../../../ufrgs/meu/images/graph-exec-time-seq-0.ppm')
-    main.system('mogrify -reverse -flatten ../../../ufrgs/meu/images/graph-exec-time-seq-0.ppm')
-    main.system('mogrify -resize 700x700 -format png ../../../ufrgs/meu/images/graph-exec-time-seq-0.ppm')
-    main.write_to_file('../../../ufrgs/meu/chapters/graph-exec-time-0.tex',
+    main.write_to_file('../../../ufrgs/tc/images/graph-exec-time-seq-0.perf', '=cluster;language\ncolors=black,yellow,red,med_blue,light_green,cyan\n=table\nyformat=%g\n=norotate\nxscale=1\nmax=150.000000\nylabel=Sequential execution time in seconds for input 0\nproblem 100.0000000000\n')
+    main.system('../../../ufrgs/tc/bargraph.pl -fig ../../../ufrgs/tc/images/graph-exec-time-seq-0.perf | fig2dev -L ppm -m 4 > ../../../ufrgs/tc/images/graph-exec-time-seq-0.ppm')
+    main.system('mogrify -reverse -flatten ../../../ufrgs/tc/images/graph-exec-time-seq-0.ppm')
+    main.system('mogrify -resize 700x700 -format png ../../../ufrgs/tc/images/graph-exec-time-seq-0.ppm')
+    main.write_to_file('../../../ufrgs/tc/chapters/graph-exec-time-0.tex',
         '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=125mm]{images/graph-exec-time-seq-0.png}\n  \\caption{Sequential Execution Time for Input 0}\n  \\label{fig:exec:time:seq:0}\n\\end{figure}\n')
 
     m.ReplayAll()
@@ -226,15 +227,15 @@ class testMain(unittest.TestCase):
             'par': {'language': {0: 25}}}}}
 
     main.write_to_file(
-        '../../../ufrgs/meu/images/graph-speedup-language-problem-0.dat', '2\t50.0000000000\t2.0000000000\t2\t1.0000000000\t1\n4\t25.0000000000\t4.0000000000\t4\t1.0000000000\t1\n')
+        '../../../ufrgs/tc/images/graph-speedup-language-problem-0.dat', '2\t50.0000000000\t2.0000000000\t2\t1.0000000000\t1\n4\t25.0000000000\t4.0000000000\t4\t1.0000000000\t1\n')
 
-    main.system('cp ../../../ufrgs/meu/images/graph-speedup-language-problem-0.dat plot.dat')
-    main.system('gnuplot ../../../ufrgs/meu/plot.script')
-    main.system('mv plot.png ../../../ufrgs/meu/images/graph-speedup-language-problem-0.png')
+    main.system('cp ../../../ufrgs/tc/images/graph-speedup-language-problem-0.dat plot.dat')
+    main.system('gnuplot ../../../ufrgs/tc/plot.script')
+    main.system('mv plot.png ../../../ufrgs/tc/images/graph-speedup-language-problem-0.png')
     main.system('rm plot.dat')
-    main.write_to_file('../../../ufrgs/meu/chapters/graph-speedup-language-problem-0.tex',
+    main.write_to_file('../../../ufrgs/tc/chapters/graph-speedup-language-problem-0.tex',
         '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=100mm]{images/graph-speedup-language-problem-0.png}\n  \\caption{Speedup and Efficiency for Language language Problem problem Input 0}\n  \\label{fig:exec:spd:language:problem:0}\n\\end{figure}\n')
-    main.write_to_file('../../../ufrgs/meu/chapters/graph-speedup.tex', '\\input{chapters/graph-speedup-language-problem-0.tex}\n')
+    main.write_to_file('../../../ufrgs/tc/chapters/graph-speedup.tex', '\\input{chapters/graph-speedup-language-problem-0.tex}\n')
 
     m.ReplayAll()
     main.create_speedup_graph("speedup", main.results)
@@ -259,12 +260,12 @@ class testMain(unittest.TestCase):
             'seq': {'language': {0: 100}},
             'par': {'language': {0: 25}}}}}
 
-    main.write_to_file('other.script',   '\nset xrange [0:4]\nset xtics 1\nset yrange [0:4]\nset ytics 1\nset xlabel "threads"\nset terminal png\nset output "plot.png"\nset key top center\nplot \'../../../ufrgs/meu/images/graph-speedup-language-problem-0.dat\' using 1:4 title \'ideal speedup\' w lp, \'../../../ufrgs/meu/images/graph-speedup-language-problem-0.dat\' using 1:3 title \'language speedup\' w lp')
+    main.write_to_file('other.script',   '\nset xrange [0:8]\nset xtics 1\nset yrange [0:8]\nset ytics 1\nset xlabel "threads"\nset terminal png\nset output "plot.png"\nset key left\nplot \'../../../ufrgs/tc/images/graph-speedup-language-problem-0.dat\' using 1:4 title \'ideal speedup\' w lp, \'../../../ufrgs/tc/images/graph-speedup-language-problem-0.dat\' using 1:3 title \'language speedup\' w lp')
     main.system('gnuplot other.script')
-    main.system('mv plot.png ../../../ufrgs/meu/images/graph-problem-speedup-problem-0.png')
+    main.system('mv plot.png ../../../ufrgs/tc/images/graph-problem-speedup-problem-0.png')
     main.system('rm other.script')
-    main.write_to_file('../../../ufrgs/meu/chapters/graph-problem-speedup-problem-0.tex',  '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=100mm]{images/graph-problem-speedup-problem-0.png}\n  \\caption{Speedup for Problem problem Input 0}\n  \\label{fig:exec:spd:problem:0}\n\\end{figure}\n')
-    main.write_to_file('../../../ufrgs/meu/chapters/graph-problem-speedup.tex',  '\\input{chapters/graph-problem-speedup-problem-0.tex}\n')
+    main.write_to_file('../../../ufrgs/tc/chapters/graph-problem-speedup-problem-0.tex',  '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=100mm]{images/graph-problem-speedup-problem-0.png}\n  \\caption{Speedup for Problem problem Input 0}\n  \\label{fig:exec:spd:problem:0}\n\\end{figure}\n')
+    main.write_to_file('../../../ufrgs/tc/chapters/graph-problem-speedup.tex',  '\\input{chapters/graph-problem-speedup-problem-0.tex}\n')
 
     m.ReplayAll()
     main.create_problem_speedup_graph("problem-speedup", "speedup")
@@ -289,12 +290,12 @@ class testMain(unittest.TestCase):
             'seq': {'language': {0: 100}},
             'par': {'language': {0: 25}}}}}
 
-    main.write_to_file('other.script',   '\nset xrange [0:4]\nset xtics 1\nset yrange [0:4]\nset ytics 1\nset xlabel "threads"\nset terminal png\nset output "plot.png"\nset key top center\nplot \'../../../ufrgs/meu/images/graph-speedup-language-problem-0.dat\' using 1:4 title \'ideal speedup\' w lp, \'../../../ufrgs/meu/images/graph-speedup-language-problem-0.dat\' using 1:3 title \'problem speedup\' w lp')
+    main.write_to_file('other.script',   '\nset xrange [0:8]\nset xtics 1\nset yrange [0:8]\nset ytics 1\nset xlabel "threads"\nset terminal png\nset output "plot.png"\nset key left\nplot \'../../../ufrgs/tc/images/graph-speedup-language-problem-0.dat\' using 1:4 title \'ideal speedup\' w lp, \'../../../ufrgs/tc/images/graph-speedup-language-problem-0.dat\' using 1:3 title \'problem speedup\' w lp')
     main.system('gnuplot other.script')
-    main.system('mv plot.png ../../../ufrgs/meu/images/graph-language-speedup-language-0.png')
+    main.system('mv plot.png ../../../ufrgs/tc/images/graph-language-speedup-language-0.png')
     main.system('rm other.script')
-    main.write_to_file('../../../ufrgs/meu/chapters/graph-language-speedup-language-0.tex',  '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=100mm]{images/graph-language-speedup-language-0.png}\n  \\caption{Speedup for Language language Input 0}\n  \\label{fig:exec:spd:language:0}\n\\end{figure}\n')
-    main.write_to_file('../../../ufrgs/meu/chapters/graph-language-speedup.tex',  '\\input{chapters/graph-language-speedup-language-0.tex}\n')
+    main.write_to_file('../../../ufrgs/tc/chapters/graph-language-speedup-language-0.tex',  '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=100mm]{images/graph-language-speedup-language-0.png}\n  \\caption{Speedup for Language language Input 0}\n  \\label{fig:exec:spd:language:0}\n\\end{figure}\n')
+    main.write_to_file('../../../ufrgs/tc/chapters/graph-language-speedup.tex',  '\\input{chapters/graph-language-speedup-language-0.tex}\n')
 
     m.ReplayAll()
     main.create_language_speedup_graph("language-speedup", "speedup")
