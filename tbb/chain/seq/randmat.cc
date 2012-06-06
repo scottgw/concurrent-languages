@@ -7,28 +7,18 @@
  * output:
  *   matrix: random nrows x ncols integer matrix
  */
+#include <cassert>
+#include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
-#include <vector>
+unsigned char randmat_matrix[30000][30000];
 
-#include "tbb/parallel_for.h"
-#include "tbb/blocked_range.h"
-
-using namespace std;
-using namespace tbb;
-
-typedef blocked_range<size_t> range;
-
-void randmat(int nrows, int ncols, int s, vector<vector<int> >* matrix) {
-  srand(s);
-  parallel_for(
-      range(0, nrows),
-      [&](range r) {
-        for (size_t i = r.begin(); i != r.end(); ++i) {
-          for (int j = 0; j < ncols; j++) {
-            (*matrix)[i][j] = rand() % 1000;
-          }
-        }
-      });
+void randmat(int nrows, int ncols, unsigned int seed) {
+  const int LCG_A = 1664525, LCG_C = 1013904223;
+  for (int i = 0; i < nrows; i++) {
+    for (int j = 0; j < ncols; j++) {
+      randmat_matrix[i][j] = seed = (LCG_A * seed + LCG_C) % 100;
+    }
+  }
 }
-

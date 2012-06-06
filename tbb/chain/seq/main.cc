@@ -10,46 +10,45 @@
  *  result: a real vector, whose values are the result of the final product
  */
 #include <cstdio>
+#include <cstring>
 
 #include <vector>
 
 using namespace std;
 
-typedef vector<int> VectorInt;
-typedef vector<VectorInt> MatrixInt;
-typedef vector<double> VectorDouble;
-typedef vector<VectorDouble> MatrixDouble;
-typedef vector<pair<int, int> > VectorPairInt;
+int is_bench = 0;
 
-void randmat(int, int, int, MatrixInt*);
-void thresh(int, int, const MatrixInt&, int, MatrixInt*);
-void winnow(int, int, const MatrixInt&, const MatrixInt&, int,
-    VectorPairInt*);
-void outer(int, const VectorPairInt&, MatrixDouble*, VectorDouble*);
-void product(int, const MatrixDouble&, const VectorDouble&, VectorDouble*);
+void randmat(int, int, unsigned int);
+void thresh(int, int, int);
+void winnow(int, int, int);
+void outer(int);
+void product(int);
 
-int main() {
+extern double product_result[10000];
+
+int main(int argc, char** argv) {
   int nelts, randmat_seed, thresh_percent, winnow_nelts;
+
+  if (argc == 2) {
+    if (!strcmp(argv[argc - 1], "--is_bench")) {
+      is_bench = 1;
+    }
+  }
+
   scanf("%d%d%d%d", &nelts, &randmat_seed, &thresh_percent, &winnow_nelts);
 
-  MatrixInt randmat_matrix(nelts, VectorInt(nelts));
-  MatrixInt thresh_mask(nelts, VectorInt(nelts));
-  VectorPairInt winnow_points(winnow_nelts);
-  MatrixDouble outer_matrix(winnow_nelts, VectorDouble(winnow_nelts));
-  VectorDouble outer_vector(winnow_nelts);
-  VectorDouble product_result(winnow_nelts);
+  randmat(nelts, nelts, randmat_seed);
+  thresh(nelts, nelts, thresh_percent);
+  winnow(nelts, nelts, winnow_nelts);
+  outer(winnow_nelts);
+  product(winnow_nelts);
 
-  randmat(nelts, nelts, randmat_seed, &randmat_matrix);
-  thresh(nelts, nelts, randmat_matrix, thresh_percent, &thresh_mask);
-  winnow(nelts, nelts, randmat_matrix, thresh_mask, winnow_nelts,
-      &winnow_points);
-  outer(winnow_nelts, winnow_points, &outer_matrix, &outer_vector);
-  product(winnow_nelts, outer_matrix, outer_vector, &product_result);
-
-  for (int i = 0; i < winnow_nelts; i++) {
-    printf("%g ", product_result[i]);
+  if (!is_bench) {
+    for (int i = 0; i < winnow_nelts; i++) {
+      printf("%g ", product_result[i]);
+    }
+    printf("\n");
   }
-  printf("\n");
 
   return 0;
 }

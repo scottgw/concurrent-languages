@@ -1,65 +1,52 @@
 /* winnow: weighted point selection
  *
  * input:
- *   matrix: an integer matrix, whose values are used as masses
- *   mask: a boolean matrix, showing which points are eligible for
+ *   randmat_matrix: an integer matrix, whose values are used as masses
+ *   thresh_mask: a boolean matrix, showing which points are eligible for
  *     consideration
  *   nrows, ncols: number of rows and columns
  *   nelts: the number of points to select
  *
  * output:
- *   points: a vector of (x, y) points
+ *   winnow_points: a vector of (x, y) points
  */
+#include <cassert>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
 #include <algorithm>
+#include <iostream>
 #include <vector>
 
-#include "tbb/blocked_range.h"
-#include "tbb/mutex.h"
-#include "tbb/parallel_for.h"
-#include "tbb/parallel_sort.h"
-
 using namespace std;
-using namespace tbb;
 
-typedef blocked_range<size_t> range;
+extern int is_bench;
+extern unsigned char randmat_matrix[20000][20000];
+extern unsigned char thresh_mask[20000][20000];
+pair<int, int> winnow_points[20000];
+static pair<int, pair<int, int> > values[20000];
 
-void winnow(int nrows, int ncols, const vector<vector<int> >& matrix,
-    const vector<vector<int> >& mask, int nelts,
-    vector<pair<int, int> >* points) {
-  vector<pair<int, pair<int, int> > > values;
+void winnow(int nrows, int ncols, int nelts) {
+  int count = 0;
+  for (int i = 0; i < nrows; i++) {
+    for (int j = 0; j < ncols; j++) {
+      if (is_bench) {
+        thresh_mask[i][j] = ((i * j) % (ncols + 1)) == 1;
+      }
+      if (thresh_mask[i][j]) {
+        values[count++] = (make_pair(randmat_matrix[i][j], make_pair(i, j)));
+      }
+    }
+  }
 
-  mutex m;
+  sort(values, values + count);
 
-  parallel_for(
-      range(0, nrows),
-      [&](range r) {
-        for (size_t i = r.begin(); i != r.end(); ++i) {
-          parallel_for(
-            range(0, ncols),
-            [&](range s) {
-              for (size_t j = s.begin(); j != s.end(); ++j) {
-                if (mask[i][j]) {
-                  m.lock();
-                    values.push_back(make_pair(matrix[i][j],
-                        make_pair(i, j)));
-                  m.unlock();
-                }
-              }
-            });
-        }
-      });
-
-  parallel_sort(values.begin(), values.end());
-
-  size_t n = values.size();
+  size_t n = count;
   size_t chunk = n / nelts;
 
-  parallel_for(
-      range(0, nelts),
-      [&](range r) {
-        for(size_t i = r.begin(); i != r.end(); ++i) {
-          int index = i * chunk;
-          (*points)[i] = values[index].second;
-        }
-      });
+  for (int i = 0; i < nelts; i++) {
+    int index = i * chunk;
+    winnow_points[i] = values[index].second;
+  }
 }
