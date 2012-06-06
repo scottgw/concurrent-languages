@@ -29,12 +29,20 @@ func randvec(row, n, seed int, done chan bool) {
   done <- true;
 }
 
+func parallel_for(begin, end, ncols, s int, done chan bool) {
+  if (begin + 1 == end) {
+    randvec(begin, ncols, s + begin, done);
+  } else {
+    middle := begin + (end - begin) / 2;
+    go parallel_for(begin, middle, ncols, s, done);
+    parallel_for(middle, end, ncols, s, done);
+  }
+}
+
 func randmat(nrows, ncols, s int) {
   done := make(chan bool);
   // parallel for on rows
-  for i := 0; i < nrows; i++ {
-    go randvec(i, ncols, s + i, done);
-  }
+  go parallel_for(0, nrows, ncols, s, done);
   for i := 0; i < nrows; i++ {
     <-done;
   }
