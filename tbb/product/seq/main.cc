@@ -9,48 +9,61 @@
  *   result: a real vector, whose values are the result of the product
  */
 #include <cstdio>
+#include <cstring>
 
 #include <iostream>
 #include <vector>
 
 using namespace std;
 
-void product(int nelts, const vector<vector<double> >& matrix,
-    const vector<double>& vec, vector<double>* result) {
+static int is_bench = 0;
 
+static double matrix[10000][10000];
+static double vec[10000];
+static double result[10000];
+
+void product(int nelts) {
   for (int i = 0; i < nelts; i++) {
     double sum = 0;
     for (int j = 0; j < nelts; j++) {
       sum += matrix[i][j] * vec[j];
     }
-    (*result)[i] = sum;
+    result[i] = sum;
   }
 }
 
 int main(int argc, char** argv) {
   int nelts;
-  scanf("%d", &nelts);
 
-  vector<vector<double> > matrix(nelts, vector<double>(nelts));
-  vector<double> vec(nelts), result(nelts);
-
-  for (int i = 0; i < nelts; i++) {
-    for (int j = 0; j < nelts; j++) {
-      cin >> matrix[i][j];
+  for (int i = 1; i < argc; i++) {
+    if (!strcmp(argv[i], "--is_bench")) {
+      is_bench = 1;
     }
   }
 
-  for (int i = 0; i < nelts; i++) {
-    cin >> vec[i];
+  scanf("%d", &nelts);
+
+  if (!is_bench) {
+    for (int i = 0; i < nelts; i++) {
+      for (int j = 0; j < nelts; j++) {
+        cin >> matrix[i][j];
+      }
+    }
+
+    for (int i = 0; i < nelts; i++) {
+      cin >> vec[i];
+    }
   }
 
-  product(nelts, matrix, vec, &result);
+  product(nelts);
 
-  printf("%d\n", nelts, nelts);
-  for (int i = 0; i < nelts; i++) {
-    printf("%g ", result[i]);
+  if (!is_bench) {
+    printf("%d\n", nelts, nelts);
+    for (int i = 0; i < nelts; i++) {
+      printf("%g ", result[i]);
+    }
+    printf("\n");
   }
-  printf("\n");
 
   return 0;
 }
