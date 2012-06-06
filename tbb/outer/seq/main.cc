@@ -13,13 +13,21 @@
 #include <cassert>
 #include <cmath>
 #include <cstdio>
-#include <cstdlib>
+#include <cstdlib> 
+#include <cstring>
 
 #include <algorithm>
 #include <iostream>
 #include <vector>
 
 using namespace std;
+
+static int is_bench = 0;
+
+static pair<int, int> points[10000];
+static double matrix[10000][10000];
+static double vec[10000];
+
 
 double sqr(double x) {
   return x * x;
@@ -29,53 +37,59 @@ double distance(const pair<int, int>& x, const pair<int, int>& y) {
   return sqrt(sqr(x.first - y.first) + sqr(x.second - y.second));
 }
 
-void outer(int nelts, const vector<pair<int, int> > & points,
-    vector<vector<double> >* matrix, vector<double>* vec) {
+void outer(int nelts) {
   for (int i = 0; i < nelts; i++) {
     double nmax = -1;
     for (int j = 0; j < nelts; j++) {
       if (i != j) {
-        (*matrix)[i][j] = ::distance(points[i], points[j]);
-        nmax = max(nmax, (*matrix)[i][j]);
+        matrix[i][j] = ::distance(points[i], points[j]);
+        nmax = max(nmax, matrix[i][j]);
       }
     }
-    (*matrix)[i][i] = nelts * nmax;
-    (*vec)[i] = ::distance(make_pair(0, 0), points[i]);
+    matrix[i][i] = nelts * nmax;
+    vec[i] = ::distance(make_pair(0, 0), points[i]);
   }
 }
 
-void read_vector_of_points(int nelts, vector<pair<int, int> >* vec) {
+void read_vector_of_points(int nelts) {
   for (int i = 0; i < nelts; i++) {
-    cin >> (*vec)[i].first >> (*vec)[i].second;
+    cin >> points[i].first >> points[i].second;
   }
 }
 
 int main(int argc, char** argv) {
   int nelts;
+
+  for (int i = 1; i < argc; i++) {
+    if (!strcmp(argv[i], "--is_bench")) {
+      is_bench = 1;
+    }
+  }
+
   scanf("%d", &nelts);
 
-  vector<pair<int, int> > points(nelts);
-  read_vector_of_points(nelts, &points);
+  if (!is_bench) {
+    read_vector_of_points(nelts);
+  }
 
-  vector<vector<double> > matrix(nelts, vector<double>(nelts));
-  vector<double> vec(nelts);
+  outer(nelts);
 
-  outer(nelts, points, &matrix, &vec);
+  if (!is_bench) {
+    printf("%d %d\n", nelts, nelts);
+    for (int i = 0; i < nelts; i++) {
+      for (int j = 0; j < nelts; j++) {
+        printf("%g ", matrix[i][j]);
+      }
+      printf("\n");
+    }
+    printf("\n");
 
-  printf("%d %d\n", nelts, nelts);
-  for (int i = 0; i < nelts; i++) {
-    for (int j = 0; j < nelts; j++) {
-      printf("%g ", matrix[i][j]);
+    printf("%d\n", nelts);
+    for (int i = 0; i < nelts; i++) {
+      printf("%g ", vec[i]);
     }
     printf("\n");
   }
-  printf("\n");
-
-  printf("%d\n", nelts);
-  for (int i = 0; i < nelts; i++) {
-    printf("%g ", vec[i]);
-  }
-  printf("\n");
 
   return 0;
 }
