@@ -14,7 +14,12 @@ package main
 
 import (
   "fmt"
+  "flag"
 )
+
+var is_bench = flag.Bool("is_bench", false, "")
+var matrix [20000][20000]byte;
+var mask [20000][20000]byte;
 
 func max(a, b int) int {
   if a > b {
@@ -23,17 +28,11 @@ func max(a, b int) int {
   return b;
 }
 
-func thresh(nrows, ncols int, matrix [][]int, percent int) [][]int {
-  var mask[][]int;
-  mask = make([][]int, nrows);
-  for i := 0; i < nrows; i++ {
-    mask[i] = make([]int, ncols);
-  }
-
+func thresh(nrows, ncols int, percent int) {
   var nmax int = 0;
   for i := 0; i < nrows; i++ {
     for j := 0; j < ncols; j++ {
-      nmax = max(nmax, matrix[i][j]);
+      nmax = max(nmax, int(matrix[i][j]));
     }
   }
 
@@ -55,45 +54,41 @@ func thresh(nrows, ncols int, matrix [][]int, percent int) [][]int {
     threshold = i;
   }
 
-
   for i := 0; i < nrows; i++ {
     for j := 0; j < ncols; j++ {
-      if matrix[i][j] >= threshold {
+      if int(matrix[i][j]) >= threshold {
         mask[i][j] = 1;
       }
     }
   }
-
-  return mask;
 }
 
 func main() {
   var nrows, ncols, percent int;
-  var matrix, mask [][]int;
+
+  flag.Parse();
 
   fmt.Scanf("%d%d", &nrows, &ncols);
 
-  matrix = make([][]int, nrows);
-  for i := 0; i < nrows; i++ {
-    matrix[i] = make([]int, ncols);
-  }
-
-  for i := 0; i < nrows; i++ {
-    for j := 0; j < ncols; j++ {
-      fmt.Scanf("%d", &matrix[i][j]);
+  if (!*is_bench) {
+    for i := 0; i < nrows; i++ {
+      for j := 0; j < ncols; j++ {
+        fmt.Scanf("%d", &matrix[i][j]);
+      }
     }
   }
 
   fmt.Scanf("%d", &percent);
 
-  mask = thresh(nrows, ncols, matrix, percent);
-  mask = mask
+  thresh(nrows, ncols, percent);
 
-  for i := 0; i < nrows; i++ {
-    for j := 0; j < ncols; j++ {
-      fmt.Printf("%d ", mask[i][j]);
+  if (!*is_bench) {
+    for i := 0; i < nrows; i++ {
+      for j := 0; j < ncols; j++ {
+        fmt.Printf("%d ", mask[i][j]);
+      }
+      fmt.Printf("\n");
     }
     fmt.Printf("\n");
   }
-  fmt.Printf("\n");
 }
