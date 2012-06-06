@@ -7,7 +7,10 @@ all: main
 	diff main3.out main3.gold
 	./$< < $<4.in > main4.out
 	diff main4.out main4.gold
+	./$< < $<.in > main.out
+	./$< < $<.in
+	./$< < $<.in --is_bench
 
-CXXFLAGS+=-std=c++0x
+CXXFLAGS+=-std=c++0x -O2
 LDFLAGS+=-ltbb
 CXX=g++-4.5

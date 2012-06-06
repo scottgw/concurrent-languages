@@ -13,6 +13,7 @@
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
 #include <algorithm>
 #include <iostream>
@@ -20,33 +21,52 @@
 
 using namespace std;
 
-void winnow(int nrows, int ncols, const vector<vector<int> >& matrix,
-    const vector<vector<int> >& mask, int nelts,
-    vector<pair<int, int> >* points) {
-  vector<pair<int, pair<int, int> > > values;
+int is_bench = 0;
+static unsigned char matrix[20000][20000];
+static unsigned char mask[20000][20000];
+static pair<int, int> points[20000];
+static pair<int, pair<int, int> > values[20000];
+
+void winnow(int nrows, int ncols, int nelts) {
+  int count = 0;
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
+      if (is_bench) {
+        mask[i][j] = ((i * j) % (ncols + 1)) == 1;
+      }
       if (mask[i][j]) {
-        values.push_back(make_pair(matrix[i][j], make_pair(i, j)));
+        values[count++] = (make_pair(matrix[i][j], make_pair(i, j)));
       }
     }
   }
-  sort(values.begin(), values.end());
 
-  size_t n = values.size();
+  sort(values, values + count);
+
+  size_t n = count;
   size_t chunk = n / nelts;
 
   for (int i = 0; i < nelts; i++) {
     int index = i * chunk;
-    (*points)[i] = values[index].second;
+    points[i] = values[index].second;
   }
-
 }
 
-void read_matrix(int nrows, int ncols, vector<vector<int> >* matrix) {
+void read_matrix(int nrows, int ncols) {
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
-      cin >> (*matrix)[i][j];
+      int v;
+      cin >> v;
+      matrix[i][j] = v;
+    }
+  }
+}
+
+void read_mask(int nrows, int ncols) {
+  for (int i = 0; i < nrows; i++) {
+    for (int j = 0; j < ncols; j++) {
+      int v;
+      cin >> v;
+      mask[i][j] = v;
     }
   }
 }
@@ -54,26 +74,31 @@ void read_matrix(int nrows, int ncols, vector<vector<int> >* matrix) {
 int main(int argc, char** argv) {
   int nrows, ncols, nelts;
 
+  for (int i = 1; i < argc; i++) {
+    if (!strcmp(argv[i], "--is_bench")) {
+      is_bench = 1;
+    }
+  }
+
   scanf("%d%d", &nrows, &ncols);
 
-  vector<vector<int> > matrix(nrows, vector<int>(ncols));
-  vector<vector<int> > mask(nrows, vector<int>(ncols));
-
-  read_matrix(nrows, ncols, &matrix);
-  read_matrix(nrows, ncols, &mask);
+  if (!is_bench) {
+    read_matrix(nrows, ncols);
+    read_mask(nrows, ncols);
+  }
 
   scanf("%d", &nelts);
 
-  vector<pair<int, int> > points(nelts);
+  winnow(nrows, ncols, nelts);
 
-  winnow(nrows, ncols, matrix, mask, nelts, &points);
+  if (!is_bench) {
+    printf("%d\n", nelts);
 
-  printf("%d\n", nelts);
-
-  for (int i = 0; i < nelts; i++) {
-    printf("%d %d\n", points[i].first, points[i].second);
+    for (int i = 0; i < nelts; i++) {
+      printf("%d %d\n", points[i].first, points[i].second);
+    }
+    printf("\n");
   }
-  printf("\n");
 
   return 0;
 }
