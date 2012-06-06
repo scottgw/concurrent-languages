@@ -89,7 +89,6 @@ func main() {
   mask = thresh(nrows, ncols, matrix, percent);
   mask = mask
 
-/*
   for i := 0; i < nrows; i++ {
     for j := 0; j < ncols; j++ {
       fmt.Printf("%d ", mask[i][j]);
@@ -97,5 +96,4 @@ func main() {
     fmt.Printf("\n");
   }
   fmt.Printf("\n");
-//*/
 }
