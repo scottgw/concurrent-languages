@@ -7,7 +7,7 @@ import os
 languages = ["tbb"]
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
-problems = ["product"]
+problems = ["chain"]
 variations = ["seq", "par"]
 
 def system(cmd, timeout=False):
@@ -202,7 +202,7 @@ inputs = [
   ]
 
 threads = [1, 2, 3, 4, 5, 6, 7, 8]
-#threads = [1, 2, 3, 4]
+threads = [1, 2, 3, 4]
 #threads = [2, 4]
 #threads = [1, 4]
 

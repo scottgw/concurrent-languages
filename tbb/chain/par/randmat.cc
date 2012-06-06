@@ -5,30 +5,32 @@
  *   s: random number generation seed
  *
  * output:
- *   matrix: random nrows x ncols integer matrix
+ *   randmat_matrix: random nrows x ncols integer matrix
  */
+#include <cassert>
+#include <cstdio>
 #include <cstdlib>
-
-#include <vector>
+#include <cstring>
 
 #include "tbb/parallel_for.h"
 #include "tbb/blocked_range.h"
+#include "tbb/task_scheduler_init.h"
 
-using namespace std;
 using namespace tbb;
 
 typedef blocked_range<size_t> range;
 
-void randmat(int nrows, int ncols, int s, vector<vector<int> >* matrix) {
-  srand(s);
-  parallel_for(
-      range(0, nrows),
-      [&](range r) {
-        for (size_t i = r.begin(); i != r.end(); ++i) {
-          for (int j = 0; j < ncols; j++) {
-            (*matrix)[i][j] = rand() % 1000;
-          }
-        }
-      });
-}
+unsigned char randmat_matrix[30000][30000];
 
+void randmat(int nrows, int ncols, unsigned int seed) {
+  const int LCG_A = 1664525, LCG_C = 1013904223;
+  parallel_for(
+    range(0, nrows),
+    [=, &seed](range r) {
+      for (size_t i = r.begin(); i != r.end(); ++i) {
+        for (int j = 0; j < ncols; j++) {
+          randmat_matrix[i][j] = seed = (LCG_A * seed + LCG_C) % 100;
+        }
+      }
+  });
+}
