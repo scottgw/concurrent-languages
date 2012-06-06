@@ -11,20 +11,28 @@
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
 #include <algorithm>
 
 using namespace std;
 
-void thresh(int nrows, int ncols, int** matrix, int percent, int** mask) {
+int is_bench = 0;
+
+static unsigned char matrix[20000][20000];
+static unsigned char mask[20000][20000];
+static int histogram[100];
+
+void thresh(int nrows, int ncols, int percent) {
   int nmax = 0;
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
-      nmax = max(nmax, matrix[i][j]);
+      if (is_bench) {
+        matrix[i][j] = (i * j) % 100;
+      }
+      nmax = max(nmax, (int)matrix[i][j]);
     }
   }
-
-  int* histogram = new int[nmax + 1];
 
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
@@ -47,55 +55,41 @@ void thresh(int nrows, int ncols, int** matrix, int percent, int** mask) {
       mask[i][j] = matrix[i][j] >= threshold;
     }
   }
-
-  delete[] histogram;
 }
 
 int main(int argc, char** argv) {
   int nrows, ncols, percent;
 
+  if (argc == 2) {
+    if (!strcmp(argv[argc - 1], "--is_bench")) {
+      is_bench = 1;
+    }
+  }
+
   scanf("%d%d", &nrows, &ncols);
 
-  int** matrix = new int* [nrows];
-  for (int i = 0; i < nrows; i++) {
-    matrix[i] = new int[ncols];
-  }
-
-  int** mask = new int* [nrows];
-  for (int i = 0; i < nrows; i++) {
-    mask[i] = new int[ncols];
-  }
-
-  for (int i = 0; i < nrows; i++) {
-    for (int j = 0; j < ncols; j++) {
-      scanf("%d", &matrix[i][j]);
+  if (!is_bench) {
+    for (int i = 0; i < nrows; i++) {
+      for (int j = 0; j < ncols; j++) {
+        scanf("%hhu", &matrix[i][j]);
+      }
     }
   }
 
   scanf("%d", &percent);
 
-  thresh(nrows, ncols, matrix, percent, mask);
+  thresh(nrows, ncols, percent);
 
-/*
-  printf("%d %d\n", nrows, ncols);
-  for (int i = 0; i < nrows; i++) {
-    for (int j = 0; j < ncols; j++) {
-      printf("%d ", mask[i][j]);
+  if (!is_bench) {
+    printf("%d %d\n", nrows, ncols);
+    for (int i = 0; i < nrows; i++) {
+      for (int j = 0; j < ncols; j++) {
+        printf("%hhu ", mask[i][j]);
+      }
+      printf("\n");
     }
     printf("\n");
   }
-  printf("\n");
-
-  for (int i = 0; i < nrows; i++) {
-    delete[] matrix[i];
-  }
-  delete[] matrix;
-
-  for (int i = 0; i < nrows; i++) {
-    delete[] mask[i];
-  }
-  delete[] mask;
-//*/
 
   return 0;
 }

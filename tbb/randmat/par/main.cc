@@ -32,8 +32,6 @@ void randmat(int nrows, int ncols, unsigned int seed) {
     [=, &seed](range r) {
       for (size_t i = r.begin(); i != r.end(); ++i) {
         for (int j = 0; j < ncols; j++) {
-          //matrix[i][j] = rand_r(&seed);
-          //matrix[i][j] = tbb::this_tbb_thread::get_id();
           matrix[i][j] = seed = (LCG_A * seed + LCG_C) % 100;
         }
       }
@@ -48,7 +46,6 @@ int main(int argc, char** argv) {
       is_bench = 1;
     } else if (!strcmp(argv[i], "--threads")) {
       sscanf(argv[i + 1], "%d", &n_threads);
-      printf("n_threads: %d\n", n_threads);
       i++;
     }
   }

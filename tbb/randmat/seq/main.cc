@@ -20,8 +20,6 @@ void randmat(int nrows, int ncols, unsigned int seed) {
   const int LCG_A = 1664525, LCG_C = 1013904223;
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
-      //matrix[i][j] = rand_r(&seed);
-      //matrix[i][j] = i * j;
       matrix[i][j] = seed = (LCG_A * seed + LCG_C) % 100;
     }
   }
