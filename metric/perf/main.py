@@ -4,10 +4,10 @@ import os
 #languages = set(["chapel", "cilk", "erlang", "go", "tbb"])
 #languages = set(["chapel", "cilk", "erlang"])
 #languages = ["chapel", "cilk"]
-languages = ["tbb"]
+languages = ["go"]
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
-problems = ["chain"]
+problems = ["randmat"]
 variations = ["seq", "par"]
 
 def system(cmd, timeout=False):
@@ -195,7 +195,7 @@ inputs = [
 # cilk-thresh
     #ProblemInput(20000, 20000, 666, 1, 1),
 # cilk-winnow, cilk-outer, cilk-product, cilk-randmat?, cilk-chain
-# cilk-all, tbb-randmat
+# cilk-all, tbb-all
     ProblemInput(20000, 20000, 666, 1, 10000),
 # cilk-randmat
     #ProblemInput(30000, 30000, 666, 1, 1),
@@ -269,7 +269,7 @@ def run_all(redirect_output=True):
         # TODO: refactor variations
         #print time_output
         cmd = ""
-        if language == "go":
+        if language == "go" and variation == 'par':
           cmd += "GOMAXPROCS=%d " % nthreads
 
         #cmd += "timeout %d " % (TIMEOUT)
@@ -297,7 +297,8 @@ def run_all(redirect_output=True):
           if variation == 'par':
             cmd += ' --threads %d' % nthreads
 
-        if language == "chapel" or language == "cilk" or language == "tbb":
+        if (language == "chapel" or language == "cilk" or language == "tbb"
+            or language == 'go'):
           cmd += " --is_bench"
 
         if language != "scoop":

@@ -13,38 +13,39 @@ package main
 
 import (
   "fmt"
-  "rand"
+  "flag"
 )
 
-func randmat(nrows, ncols, s int, matrix [][]int) [][]int {
-  rand.Seed(int64(s));
+var is_bench = flag.Bool("is_bench", false, "")
+var matrix [20000][20000]int;
+
+func randmat(nrows, ncols, seed int) {
+  LCG_A := 1664525;
+  LCG_C := 1013904223;
   for i := 0; i < nrows; i++ {
     for j := 0; j < ncols; j++ {
-      matrix[i][j] = rand.Int();
+      seed = (LCG_A * seed + LCG_C) % 100;
+      matrix[i][j] = seed;
     }
   }
-  return matrix;
 }
 
 func main() {
   var nrows, ncols, s int;
-  var matrix [][]int;
+
+  flag.Parse();
 
   fmt.Scanf("%d%d%d", &nrows, &ncols, &s);
 
-  matrix = make([][]int, nrows);
-  for i := 0; i < nrows; i++ {
-    matrix[i] = make([]int, ncols);
-  }
+  randmat(nrows, ncols, s);
 
-  randmat(nrows, ncols, s, matrix);
-
-  /*
-  for i := 0; i < nrows; i++ {
-    for j := 0; j < ncols; j++ {
-      fmt.Printf("%d ", matrix[i][j]);
+  if (!*is_bench) {
+    for i := 0; i < nrows; i++ {
+      for j := 0; j < ncols; j++ {
+        fmt.Printf("%d ", matrix[i][j]);
+      }
+      fmt.Printf("\n");
     }
     fmt.Printf("\n");
   }
-  fmt.Printf("\n");//*/
 }
