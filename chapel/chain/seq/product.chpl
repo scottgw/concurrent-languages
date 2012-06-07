@@ -14,7 +14,7 @@ proc product(nelts: int,
     matrix: [1..nelts, 1..nelts] real,
     vector: [1..nelts] real,
     result: [1..nelts] real) {
-  forall i in 1..nelts do {
+  for i in 1..nelts do {
     var sum: real = 0;
     for j in 1..nelts do {
       sum += matrix[i, j] * vector[j];
