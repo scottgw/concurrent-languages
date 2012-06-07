@@ -6,28 +6,20 @@
  *   s: the seed
  *
  * output:
- *   martix: a nrows x ncols integer matrix
+ *   Randmat_matrix: a nrows x ncols integer matrix
  *
  */
 package all
 
-import (
-  "math/rand"
-)
+var Randmat_matrix [20000][20000]byte;
 
-func Randmat(nrows, ncols, s int) [][]int {
-  matrix := make([][]int, nrows);
+func Randmat(nrows, ncols, seed int) {
+  LCG_A := 1664525;
+  LCG_C := 1013904223;
   for i := 0; i < nrows; i++ {
-    matrix[i] = make([]int, ncols);
+    for j := 0; j < ncols; j++ {
+      seed = (LCG_A * seed + LCG_C) % 100;
+      Randmat_matrix[i][j] = byte(seed);
+    }
   }
-  rand.Seed(int64(s));
-  // parallel for on rows
-  split(0, nrows, func(i int) {
-      for j := 0; j < ncols; j++ {
-        matrix[i][j] = rand.Int() % 1000;
-      }
-    });
-
-  return matrix;
 }
-

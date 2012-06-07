@@ -3,23 +3,22 @@
  *
  * input:
  *   nelts: the number of elements
- *   matrix: the real matrix
- *   vector: the real vector
+ *   Outer_matrix: the real matrix
+ *   Outer_vector: the real vector
  *
  * output:
- *   result: a real vector, whose values are the result of the product
+ *   Product_result: a real vector, whose values are the result of the product
  */
 package all
 
-func Product(nelts int, matrix [][]Double, vector []Double) []Double {
-  result := make([]Double, nelts);
-  // parallel for on [0, nelts)
-  split(0, nelts, func(i int) {
+var Product_result [10000]Double;
+
+func Product(nelts int) {
+  for i := 0; i < nelts; i++ {
     var sum Double = 0;
     for j := 0; j < nelts; j++ {
-      sum += matrix[i][j] * vector[j];
+      sum += Outer_matrix[i][j] * Outer_vector[j];
     }
-    result[i] = sum;
-  });
-  return result;
+    Product_result[i] = sum;
+  }
 }

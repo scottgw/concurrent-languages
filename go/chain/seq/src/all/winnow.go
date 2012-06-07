@@ -2,21 +2,37 @@
  * winnow: weighted point selection
  *
  * input:
- *   matrix: an integer matrix, whose values are used as masses
- *   mask: a boolean matrix showing which points are eligible for
+ *   Randmat_matrix: an integer matrix, whose values are used as masses
+ *   Thresh_mask: a boolean matrix showing which points are eligible for
  *     consideration
  *   nrows, ncols: the number of rows and columns
  *   nelts: the number of points to select
  *
  * output:
- *   points: a vector of (x, y) points
+ *   Winnow_points: a vector of (x, y) points
  *
  */
 package all
 
-func (p Points) Len() int { return len(p) }
-func (p Points) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
-func (p Points) Less(i, j int) bool {
+import (
+  "sort"
+  "flag"
+)
+
+var Is_bench = flag.Bool("is_bench", false, "")
+
+type WinnowPoint struct {
+  value byte;
+  i, j int;
+}
+
+var Winnow_points [10000]WinnowPoint;
+
+type WinnowPoints []WinnowPoint;
+
+func (p WinnowPoints) Len() int { return len(p) }
+func (p WinnowPoints) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
+func (p WinnowPoints) Less(i, j int) bool {
   if p[i].value < p[j].value {
     return true;
   }
@@ -32,72 +48,41 @@ func (p Points) Less(i, j int) bool {
   return p[i].j < p[j].j;
 }
 
-func get_count_func(ncols int, matrix, mask [][]int, result chan Point) (
-    func(index int)) {
-  return func(index int) {
+func Winnow(nrows, ncols, nelts int) {
+  var n = 0;
+
+  for i := 0; i < nrows; i++ {
     for j := 0; j < ncols; j++ {
-      if mask[index][j] == 1 {
-        result <- Point{value: matrix[index][j], i: index, j: j};
+      if (*Is_bench) {
+        if (((i * j) % (ncols + 1)) == 1) {
+          Thresh_mask[i][j] = 1;
+        }
+      }
+      if Thresh_mask[i][j] == 1 {
+        n++;
       }
     }
-  };
-}
-
-func sort_impl(begin, end int, values Points) {
-  if (begin + 1 >= end) {
-    return;
   }
-  var pivot_index int = (begin + end) / 2;
-  values.Swap(end - 1, pivot_index);
-  spot := begin;
-  for i := begin; i < end; i++ {
-    if values.Less(i, end - 1) {
-      values.Swap(i, spot);
-      spot++;
+
+  values := make(WinnowPoints, n);
+
+  var count = 0;
+  for i := 0; i < nrows; i++ {
+    for j := 0; j < ncols; j++ {
+      if Thresh_mask[i][j] == 1 {
+        values[count] = WinnowPoint{Randmat_matrix[i][j], i, j};
+        count++;
+      }
     }
   }
-  values.Swap(spot, end - 1);
-  pivot_index = spot;
+  
+  sort.Sort(values);
 
-  // both calls in parallel
-  split(0, 2, func(index int) {
-      if index == 0 {
-        sort_impl(begin, pivot_index, values);
-      } else {
-        sort_impl(pivot_index + 1, end, values);
-      }
-    });
-}
-
-func sort(n int, values []Point) {
-  sort_impl(0, n, values);
-}
-
-func Winnow(nrows, ncols int, matrix, mask [][]int, nelts int) []Point {
-  n := reduce2d(nrows, ncols, mask, sum, 0, sum, 0);
-
-  points := make(Points, n);
-  values := make(Points, n);
-
-  result := make(chan Point, n);
-  // parallel for on rows
-  split(0, nrows, get_count_func(ncols, matrix, mask, result));
-
-  for i := 0; i < n; i++ {
-    values[i] = <-result;
-  }
-
-  sort(n, values);
-
-  total := len(values);
+  var total = len(values);
   var chunk int = total / nelts;
 
-  // parallel for on [0, nelts)
-  split(0, nelts, func(i int) {
-      index := i * chunk;
-      points[i] = values[index];
-    });
-
-  return points;
+  for i := 0; i < nelts; i++ {
+    var index = i * chunk;
+    Winnow_points[i] = values[index];
+  }
 }
-
