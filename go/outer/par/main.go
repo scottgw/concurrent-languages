@@ -11,18 +11,27 @@
  *   vector: a real vector, whose values are filled with origin-to-point
  *     distances
  */
+
 package main
 
 import (
   "fmt"
   "math"
+  "flag"
 )
+
+var is_bench = flag.Bool("is_bench", false, "")
 
 type Point struct {
   i, j int;
 }
 
+var points [10000]Point;
+
 type double float64;
+
+var matrix [10000][10000]double;
+var vector [10000]double;
 
 type Points []Point;
 
@@ -42,35 +51,36 @@ func distance(a, b Point) double {
         sqr(double(a.j - b.j)))));
 }
 
-func split_worker(index int, op func(index int), done chan bool) {
-  op(index);
-  done <- true;
-}
-  
-// parallel for on [begin, end), calls op()
-func split(begin, end int, op func(index int)) {
-  done := make(chan bool);
-  for i := begin; i < end; i++ {
-    go split_worker(i, op, done)
+func fill_values_impl(begin, end, ncols int, done chan bool) {
+  if (begin + 1 == end) {
+    var nmax double = -1;
+    for j := 0; j < ncols; j++ {
+      if (begin != j) {
+        matrix[begin][j] = distance(points[begin], points[j]);
+        nmax = max(nmax, matrix[begin][j]);
+      }
+    }
+    matrix[begin][begin] = double(ncols) * nmax;
+    vector[begin] = distance(Point{0, 0}, points[begin]);
+    done <- true
+  } else {
+    middle := begin + (end - begin) / 2;
+    go fill_values_impl(begin, middle, ncols, done);
+    fill_values_impl(middle, end, ncols, done);
   }
-  for i := begin; i < end; i++ {
+}
+
+func fill_values(nrows, ncols int) {
+  done := make(chan bool);
+  // parallel for on rows
+  go fill_values_impl(0, nrows, ncols, done);
+  for i := 0; i < nrows; i++ {
     <-done;
   }
 }
 
-func outer(nelts int, points Points, matrix [][]double, vector []double) {
-  // parallel for on [0, nelts)
-  split(0, nelts, func(i int) {
-    var nmax double = -1;
-    for j := 0; j < nelts; j++ {
-      if (i != j) {
-        matrix[i][j] = distance(points[i], points[j]);
-        nmax = max(nmax, matrix[i][j]);
-      }
-    }
-    matrix[i][i] = double(nelts) * nmax;
-    vector[i] = distance(Point{0, 0}, points[i]);
-  });
+func outer(nelts int) {
+  fill_values(nelts, nelts);
 }
 
 func read_integer() int {
@@ -84,51 +94,41 @@ func read_integer() int {
   return value;
 }
 
-func create_matrix(nelts int) [][]double {
-  var matrix [][]double;
-  matrix = make([][]double, nelts);
-  for i := 0; i < nelts; i++ {
-    matrix[i] = make([]double, nelts);
-  }
-  return matrix;
-}
-
-func read_vector_of_points(nelts int) Points {
-  var vector Points;
-  vector = make(Points, nelts);
+func read_vector_of_points(nelts int) {
   for i := 0; i < nelts; i++ {
     a := read_integer();
     b := read_integer();
-    vector[i] = Point{a, b};
+    points[i] = Point{a, b};
   }
-  return vector;
 }
 
 func main() {
   var nelts int;
-  var points Points;
-  var matrix [][]double;
-  var vector []double;
+
+  flag.Parse();
 
   nelts = read_integer();
-  points = read_vector_of_points(nelts);
-  matrix = create_matrix(nelts);
-  vector = make([]double, nelts);
 
-  outer(nelts, points, matrix, vector);
+  if (!*is_bench) {
+    read_vector_of_points(nelts);
+  }
 
-  fmt.Printf("%d %d\n", nelts, nelts);
-  for i := 0; i < nelts; i++ {
-    for j := 0; j < nelts; j++ {
-      fmt.Printf("%g ", matrix[i][j]);
+  outer(nelts);
+
+  if (!*is_bench) {
+    fmt.Printf("%d %d\n", nelts, nelts);
+    for i := 0; i < nelts; i++ {
+      for j := 0; j < nelts; j++ {
+        fmt.Printf("%g ", matrix[i][j]);
+      }
+      fmt.Printf("\n");
+    }
+    fmt.Printf("\n");
+
+    fmt.Printf("%d\n", nelts);
+    for i := 0; i < nelts; i++ {
+      fmt.Printf("%g ", vector[i]);
     }
     fmt.Printf("\n");
   }
-  fmt.Printf("\n");
-
-  fmt.Printf("%d\n", nelts);
-  for i := 0; i < nelts; i++ {
-    fmt.Printf("%g ", vector[i]);
-  }
-  fmt.Printf("\n");
 }

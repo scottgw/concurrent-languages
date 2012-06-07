@@ -16,13 +16,21 @@ package main
 import (
   "fmt"
   "math"
+  "flag"
 )
+
+var is_bench = flag.Bool("is_bench", false, "")
 
 type Point struct {
   i, j int;
 }
 
+var points [10000]Point;
+
 type double float64;
+
+var matrix [10000][10000]double;
+var vector [10000]double;
 
 type Points []Point;
 
@@ -42,7 +50,7 @@ func distance(a, b Point) double {
         sqr(double(a.j - b.j)))));
 }
 
-func outer(nelts int, points Points, matrix [][]double, vector []double) {
+func outer(nelts int) {
   for i := 0; i < nelts; i++ {
     var nmax double = -1;
     for j := 0; j < nelts; j++ {
@@ -67,51 +75,41 @@ func read_integer() int {
   return value;
 }
 
-func create_matrix(nelts int) [][]double {
-  var matrix [][]double;
-  matrix = make([][]double, nelts);
-  for i := 0; i < nelts; i++ {
-    matrix[i] = make([]double, nelts);
-  }
-  return matrix;
-}
-
-func read_vector_of_points(nelts int) Points {
-  var vector Points;
-  vector = make(Points, nelts);
+func read_vector_of_points(nelts int) {
   for i := 0; i < nelts; i++ {
     a := read_integer();
     b := read_integer();
-    vector[i] = Point{a, b};
+    points[i] = Point{a, b};
   }
-  return vector;
 }
 
 func main() {
   var nelts int;
-  var points Points;
-  var matrix [][]double;
-  var vector []double;
+
+  flag.Parse();
 
   nelts = read_integer();
-  points = read_vector_of_points(nelts);
-  matrix = create_matrix(nelts);
-  vector = make([]double, nelts);
 
-  outer(nelts, points, matrix, vector);
+  if (!*is_bench) {
+    read_vector_of_points(nelts);
+  }
 
-  fmt.Printf("%d %d\n", nelts, nelts);
-  for i := 0; i < nelts; i++ {
-    for j := 0; j < nelts; j++ {
-      fmt.Printf("%g ", matrix[i][j]);
+  outer(nelts);
+
+  if (!*is_bench) {
+    fmt.Printf("%d %d\n", nelts, nelts);
+    for i := 0; i < nelts; i++ {
+      for j := 0; j < nelts; j++ {
+        fmt.Printf("%g ", matrix[i][j]);
+      }
+      fmt.Printf("\n");
+    }
+    fmt.Printf("\n");
+
+    fmt.Printf("%d\n", nelts);
+    for i := 0; i < nelts; i++ {
+      fmt.Printf("%g ", vector[i]);
     }
     fmt.Printf("\n");
   }
-  fmt.Printf("\n");
-
-  fmt.Printf("%d\n", nelts);
-  for i := 0; i < nelts; i++ {
-    fmt.Printf("%g ", vector[i]);
-  }
-  fmt.Printf("\n");
 }
