@@ -13,12 +13,18 @@ package main
 
 import (
   "fmt"
+  "flag"
 )
+
+var is_bench = flag.Bool("is_bench", false, "")
 
 type double float64;
 
-func product(nelts int, matrix [][]double, vector []double,
-    result []double) {
+var matrix [10000][10000]double;
+var vector [10000]double;
+var result [10000]double;
+
+func product(nelts int) {
   for i := 0; i < nelts; i++ {
     var sum double = 0;
     for j := 0; j < nelts; j++ {
@@ -50,42 +56,39 @@ func read_double() double {
   return value;
 }
 
-func read_matrix(nelts int) [][]double {
-  var matrix [][]double;
-  matrix = make([][]double, nelts);
+func read_matrix(nelts int) {
   for i := 0; i < nelts; i++ {
-    matrix[i] = make([]double, nelts);
     for j := 0; j < nelts; j++ {
       matrix[i][j] = read_double();
     }
   }
-  return matrix;
 }
 
-func read_vector(nelts int) []double {
-  var vector []double;
-  vector = make([]double, nelts);
+func read_vector(nelts int) {
   for i := 0; i < nelts; i++ {
     vector[i] = read_double();
   }
-  return vector;
 }
 
 func main() {
   var nelts int;
-  var matrix [][]double;
-  var vector, result []double;
+
+  flag.Parse();
 
   nelts = read_integer();
-  matrix = read_matrix(nelts);
-  vector = read_vector(nelts);
-  result = make([]double, nelts);
 
-  product(nelts, matrix, vector, result);
-
-  fmt.Printf("%d\n", nelts);
-  for i := 0; i < nelts; i++ {
-    fmt.Printf("%g ", result[i]);
+  if (!*is_bench) {
+    read_matrix(nelts);
+    read_vector(nelts);
   }
-  fmt.Printf("\n");
+
+  product(nelts);
+
+  if (!*is_bench) {
+    fmt.Printf("%d\n", nelts);
+    for i := 0; i < nelts; i++ {
+      fmt.Printf("%g ", result[i]);
+    }
+    fmt.Printf("\n");
+  }
 }
