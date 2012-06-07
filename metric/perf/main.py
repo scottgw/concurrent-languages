@@ -7,7 +7,7 @@ import os
 languages = ["go"]
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
-problems = ["thresh"]
+problems = ["winnow"]
 variations = ["seq", "par"]
 
 def system(cmd, timeout=False):

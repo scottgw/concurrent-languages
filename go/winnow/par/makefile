@@ -7,9 +7,11 @@ all: main
 	diff main3.out main3.gold
 	./main < main4.in > main4.out
 	diff main4.out main4.gold
+	./main < main.in
+	./main < main.in --is_bench
 
 main: main.8
 	8l -o main main.8
 
 main.8: main.go
-	8g main.go
+	8g -O2 main.go

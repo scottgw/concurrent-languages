@@ -16,13 +16,23 @@ package main
 
 import (
   "fmt"
+  "sort"
+  "flag"
 )
 
+var is_bench = flag.Bool("is_bench", false, "")
+var matrix [20000][20000]byte;
+var mask [20000][20000]byte;
+
 type Point struct {
-  value, i, j int;
+  value byte;
+  i, j int;
 }
 
 type Points []Point;
+
+var points [10000]Point;
+var values Points;
 
 func (p Points) Len() int { return len(p) }
 func (p Points) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
@@ -42,125 +52,74 @@ func (p Points) Less(i, j int) bool {
   return p[i].j < p[j].j;
 }
 
-func reduce2d_worker(n int, array []int, op func(acc, x int) int,
-    start_value int, result chan int) {
-  res := start_value;
-  for i := 0; i < n; i++ {
-    res = op(res, array[i]);
-  }
-  result <- res;
-}
-
-func reduce2d(nrows, ncols int, matrix [][]int,
-    aggregator func(acc, x int) int, aggregator_start_value int,
-    op func(acc, x int) int, op_start_value int) int {
-  response := make(chan int);
-  // parallel reduce on rows
-  for i := 0; i < nrows; i++ {
-    go reduce2d_worker(ncols, matrix[i], op, op_start_value, response);
-  }
-
-  results := make([]int, nrows);
-  for i := 0; i < nrows; i++ {
-    results[i] = <-response
-  }
-
-  go reduce2d_worker(nrows, results, aggregator, aggregator_start_value,
-      response);
-
-  return <-response;
-}
-
-func sum(a, b int) int {
-  return a + b;
-}
-
-func split_worker(index int, op func(index int), done chan bool) {
-  op(index);
-  done <- true;
-}
-  
-// parallel for on [begin, end), calls op()
-func split(begin, end int, op func(index int)) {
-  done := make(chan bool);
-  for i := begin; i < end; i++ {
-    go split_worker(i, op, done)
-  }
-  for i := begin; i < end; i++ {
-    <-done;
-  }
-}
-
-func get_count_func(ncols int, matrix, mask [][]int, result chan Point) (
-    func(index int)) {
-  return func(index int) {
+func reduce_sum_impl(begin, end, ncols int, done chan int) {
+  if (begin + 1 == end) {
+    res := 0
     for j := 0; j < ncols; j++ {
-      if mask[index][j] == 1 {
-        result <- Point{matrix[index][j], index, j};
+      if (*is_bench) {
+        if (((begin * j) % (ncols + 1)) == 1) {
+          mask[begin][j] = 1;
+        }
       }
+      res += int(mask[begin][j]);
     }
-  };
-}
-
-func sort_impl(begin, end int, values Points) {
-  if (begin + 1 >= end) {
-    return;
+    done <- res;
+  } else {
+    middle := begin + (end - begin) / 2;
+    go reduce_sum_impl(begin, middle, ncols, done);
+    reduce_sum_impl(middle, end, ncols, done);
   }
-  var pivot_index int = (begin + end) / 2;
-  values.Swap(end - 1, pivot_index);
-  spot := begin;
-  for i := begin; i < end; i++ {
-    if values.Less(i, end - 1) {
-      values.Swap(i, spot);
-      spot++;
-    }
-  }
-  values.Swap(spot, end - 1);
-  pivot_index = spot;
-
-  // both calls in parallel
-  split(0, 2, func(index int) {
-      if index == 0 {
-        sort_impl(begin, pivot_index, values);
-      } else {
-        sort_impl(pivot_index + 1, end, values);
-      }
-    });
 }
 
-func sort(n int, values []Point) {
-  sort_impl(0, n, values);
-}
-
-func winnow(nrows, ncols int, matrix, mask [][]int, nelts int) []Point {
-  var n = 0;
-
-  n = reduce2d(nrows, ncols, mask, sum, 0, sum, 0);
-
-  var points, values Points;
-  points = make(Points, n);
-  values = make(Points, n);
-
-  result := make(chan Point, n);
+func reduce_sum(nrows, ncols int) int {
+  done := make(chan int);
   // parallel for on rows
-  split(0, nrows, get_count_func(ncols, matrix, mask, result));
-
-  for i := 0; i < n; i++ {
-    values[i] = <-result;
+  go reduce_sum_impl(0, nrows, ncols, done);
+  res := 0
+  for i := 0; i < nrows; i++ {
+    res += <-done
   }
+  return res
+}
 
-  sort(n, values);
+func fill_values_impl(begin, end, ncols int, done chan Point) {
+  if (begin + 1 == end) {
+    for j := 0; j < ncols; j++ {
+      if mask[begin][j] == 1 {
+        done <- Point{matrix[begin][j], begin, j};
+      }
+    }
+  } else {
+    middle := begin + (end - begin) / 2;
+    go fill_values_impl(begin, middle, ncols, done);
+    fill_values_impl(middle, end, ncols, done);
+  }
+}
+
+func fill_values(nrows, ncols, n int) {
+  done := make(chan Point);
+  // parallel for on rows
+  go fill_values_impl(0, nrows, ncols, done);
+  for i := 0; i < n; i++ {
+    values[i] = <-done;
+  }
+}
+
+func winnow(nrows, ncols, nelts int) {
+  n := reduce_sum(nrows, ncols);
+
+  values = make(Points, n);
+  fill_values(nrows, ncols, n)
+  
+  sort.Sort(values);
 
   var total = len(values);
   var chunk int = total / nelts;
 
-  // parallel for on [0, nelts)
-  split(0, nelts, func(i int) {
-      var index = i * chunk;
-      points[i] = values[index];
-    });
-
-  return points;
+  for i := 0; i < nelts; i++ {
+    var index = i * chunk;
+    points[i] = values[index];
+  }
 }
 
 func read_integer() int {
@@ -174,33 +133,44 @@ func read_integer() int {
   return value;
 }
 
-func read_matrix(nrows, ncols int) [][]int {
-  var matrix [][]int;
-  matrix = make([][]int, nrows);
+func read_matrix(nrows, ncols int) {
   for i := 0; i < nrows; i++ {
-    matrix[i] = make([]int, ncols);
     for j := 0; j < ncols; j++ {
-      matrix[i][j] = read_integer();
+      matrix[i][j] = byte(read_integer());
     }
   }
-  return matrix;
+}
+
+func read_mask(nrows, ncols int) {
+  for i := 0; i < nrows; i++ {
+    for j := 0; j < ncols; j++ {
+      mask[i][j] = byte(read_integer());
+    }
+  }
 }
 
 func main() {
   var nrows, ncols, nelts int;
-  var matrix, mask [][]int;
+
+  flag.Parse();
 
   nrows = read_integer();
   ncols = read_integer();
-  matrix = read_matrix(nrows, ncols);
-  mask = read_matrix(nrows, ncols);
+
+  if (!*is_bench) {
+    read_matrix(nrows, ncols);
+    read_mask(nrows, ncols);
+  }
+
   nelts = read_integer();
 
-  var points = winnow(nrows, ncols, matrix, mask, nelts);
+  winnow(nrows, ncols, nelts);
 
-  fmt.Printf("%d\n", nelts);
-  for i := 0; i < nelts; i++ {
-    fmt.Printf("%d %d\n", points[i].i, points[i].j);
+  if (!*is_bench) {
+    fmt.Printf("%d\n", nelts);
+    for i := 0; i < nelts; i++ {
+      fmt.Printf("%d %d\n", points[i].i, points[i].j);
+    }
+    fmt.Printf("\n");
   }
-  fmt.Printf("\n");
 }

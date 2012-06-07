@@ -17,13 +17,21 @@ package main
 import (
   "fmt"
   "sort"
+  "flag"
 )
 
+var is_bench = flag.Bool("is_bench", false, "")
+var matrix [20000][20000]byte;
+var mask [20000][20000]byte;
+
 type Point struct {
-  value, i, j int;
+  value byte;
+  i, j int;
 }
 
 type Points []Point;
+
+var points [10000]Point;
 
 func (p Points) Len() int { return len(p) }
 func (p Points) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
@@ -43,20 +51,23 @@ func (p Points) Less(i, j int) bool {
   return p[i].j < p[j].j;
 }
 
-func winnow(nrows, ncols int, matrix, mask [][]int, nelts int) []Point {
+func winnow(nrows, ncols, nelts int) {
   var n = 0;
 
   for i := 0; i < nrows; i++ {
     for j := 0; j < ncols; j++ {
+      if (*is_bench) {
+        if (((i * j) % (ncols + 1)) == 1) {
+          mask[i][j] = 1;
+        }
+      }
       if mask[i][j] == 1 {
         n++;
       }
     }
   }
 
-  var points, values Points;
-  points = make(Points, n);
-  values = make(Points, n);
+  values := make(Points, n);
 
   var count = 0;
   for i := 0; i < nrows; i++ {
@@ -77,8 +88,6 @@ func winnow(nrows, ncols int, matrix, mask [][]int, nelts int) []Point {
     var index = i * chunk;
     points[i] = values[index];
   }
-
-  return points;
 }
 
 func read_integer() int {
@@ -92,33 +101,44 @@ func read_integer() int {
   return value;
 }
 
-func read_matrix(nrows, ncols int) [][]int {
-  var matrix [][]int;
-  matrix = make([][]int, nrows);
+func read_matrix(nrows, ncols int) {
   for i := 0; i < nrows; i++ {
-    matrix[i] = make([]int, ncols);
     for j := 0; j < ncols; j++ {
-      matrix[i][j] = read_integer();
+      matrix[i][j] = byte(read_integer());
     }
   }
-  return matrix;
+}
+
+func read_mask(nrows, ncols int) {
+  for i := 0; i < nrows; i++ {
+    for j := 0; j < ncols; j++ {
+      mask[i][j] = byte(read_integer());
+    }
+  }
 }
 
 func main() {
   var nrows, ncols, nelts int;
-  var matrix, mask [][]int;
+
+  flag.Parse();
 
   nrows = read_integer();
   ncols = read_integer();
-  matrix = read_matrix(nrows, ncols);
-  mask = read_matrix(nrows, ncols);
+
+  if (!*is_bench) {
+    read_matrix(nrows, ncols);
+    read_mask(nrows, ncols);
+  }
+
   nelts = read_integer();
 
-  var points = winnow(nrows, ncols, matrix, mask, nelts);
+  winnow(nrows, ncols, nelts);
 
-  fmt.Printf("%d\n", nelts);
-  for i := 0; i < nelts; i++ {
-    fmt.Printf("%d %d\n", points[i].i, points[i].j);
+  if (!*is_bench) {
+    fmt.Printf("%d\n", nelts);
+    for i := 0; i < nelts; i++ {
+      fmt.Printf("%d %d\n", points[i].i, points[i].j);
+    }
+    fmt.Printf("\n");
   }
-  fmt.Printf("\n");
 }
