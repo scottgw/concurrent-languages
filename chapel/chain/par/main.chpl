@@ -18,7 +18,8 @@ proc main() {
   var nelts, randmat_seed, thresh_percent, winnow_nelts: int;
   read(nelts, randmat_seed, thresh_percent, winnow_nelts);
 
-  var randmat_matrix, thresh_mask: [1..nelts, 1..nelts] int;
+  var randmat_matrix: [1..nelts, 1..nelts] int;
+  var thresh_mask: [1..nelts, 1..nelts] bool;
   var winnow_points: [1..winnow_nelts] (int, int);
   var outer_matrix: [1..winnow_nelts, 1..winnow_nelts] real;
   var outer_vector, product_result: [1..winnow_nelts] real;

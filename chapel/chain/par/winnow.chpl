@@ -49,7 +49,7 @@ proc sort(n: int, value: [1..n] (int, (int, int))) {
 
 proc winnow(nrows: int, ncols: int,
     matrix: [1..nrows, 1..ncols] int,
-    mask: [1..nrows, 1..ncols] int,
+    mask: [1..nrows, 1..ncols] bool,
     nelts: int,
     points: [1..nelts] (int, int)
     ) {
@@ -61,7 +61,7 @@ proc winnow(nrows: int, ncols: int,
   var values: [1..n] (int, (int, int));  // (value, (i, j))
   var count: int = 1;
   forall i in matrix.domain {
-    if (mask[i] == 1) {
+    if (mask[i]) {
       if (can_go) {
         values[count] = (matrix[i], i);
         count += 1;

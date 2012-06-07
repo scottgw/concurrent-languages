@@ -15,14 +15,14 @@ module Winnow {
 
 proc winnow(nrows: int, ncols: int,
     matrix: [1..nrows, 1..ncols] int,
-    mask: [1..nrows, 1..ncols] int,
+    mask: [1..nrows, 1..ncols] bool,
     nelts: int,
     points: [1..nelts] (int, int)
     ) {
 
   var n: int = 0;
   for m in mask do {
-    if (m == 1) {
+    if (m) {
       n += 1;
     }
   }
@@ -30,7 +30,7 @@ proc winnow(nrows: int, ncols: int,
   var values: [1..n] (int, (int, int));  // (value, (i, j))
   var count: int = 1;
   for i in matrix.domain {
-    if (mask[i] == 1) {
+    if (mask[i]) {
       values[count] = (matrix[i], i);
       count += 1;
     }

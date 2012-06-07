@@ -14,7 +14,7 @@ use Search;
 
 proc thresh(nrows: int, ncols: int,
     matrix: [1..nrows, 1..ncols] int, percent: int,
-    mask: [1..nrows, 1..ncols] int) {
+    mask: [1..nrows, 1..ncols] bool) {
   var nmax: int = 0;
   for m in matrix do {
     nmax = max(nmax, m);

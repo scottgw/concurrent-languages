@@ -1,13 +1,11 @@
 import os
 
 #languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
-#languages = set(["chapel", "cilk", "erlang", "go", "tbb"])
-#languages = set(["chapel", "cilk", "erlang"])
-#languages = ["chapel", "cilk"]
-languages = ["go"]
+#languages = ["chapel", "cilk", "go", "tbb"]
+languages = ["chapel"]
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
-problems = ["chain"]
+problems = ["randmat"]
 variations = ["seq", "par"]
 
 def system(cmd, timeout=False):
@@ -205,6 +203,7 @@ threads = [1, 2, 3, 4, 5, 6, 7, 8]
 threads = [1, 2, 3, 4]
 #threads = [2, 4]
 #threads = [1, 4]
+#threads = [4]
 
 ##
 

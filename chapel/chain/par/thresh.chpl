@@ -14,7 +14,7 @@ use Search;
 
 proc thresh(nrows: int, ncols: int,
     matrix: [1..nrows, 1..ncols] int, percent: int,
-    mask: [1..nrows, 1..ncols] int) {
+    mask: [1..nrows, 1..ncols] bool) {
   var nmax = max reduce matrix;
 
   var histogram: [0..nmax] int;
