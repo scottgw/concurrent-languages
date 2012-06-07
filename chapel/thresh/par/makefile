@@ -15,4 +15,4 @@ all: main
 	./main --is_bench < main.in
 
 main: main.chpl
-	chpl main.chpl -o main
+	chpl -O main.chpl -o main

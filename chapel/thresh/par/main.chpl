@@ -9,34 +9,42 @@
  *   mask: a boolean matrix filled with true for the cells to be kept
  */
 
-use Search;
-
 config const is_bench = false;
 
-proc thresh(nrows: int, ncols: int,
-    matrix: [1..nrows, 1..ncols] int, percent: int,
-    mask: [1..nrows, 1..ncols] int) {
+var matrix: [1..20000, 1..20000]int;
+var mask: [1..20000, 1..20000]bool;
+var histogram: [1..20000, 0..99]int;
+
+proc thresh(nrows: int, ncols: int, percent: int) {
   var nmax = max reduce matrix;
 
-  var histogram: [0..nmax] int;
+  forall i in 1..nrows do {
+    for j in 1..ncols do {
+      histogram[i, matrix[i, j]] += 1;
+    }
+  }
 
-  forall m in matrix {
-    histogram[m] += 1;
+  forall j in 0..(nmax) do {
+    for i in 2..nrows do {
+      histogram[1, j] += histogram[i, j];
+    }
   }
 
   var count: int = (nrows * ncols * percent) / 100;
-  count = nrows * ncols - count;  // because scan starts from the beginning
 
-  var prefixsum = + scan histogram;
-  var threshold: int;
-  var ind: int;
-  var found: bool;
+  var prefixsum: int = 0;
+  var threshold: int = nmax;
 
-  (found, ind) = BinarySearch(prefixsum, count);
-  threshold = ind - 1;
+  for i in 0..nmax do {
+    if (prefixsum > count) then break;
+    prefixsum += histogram[1, nmax - i];
+    threshold = nmax - i;
+  }
 
-  forall i in matrix.domain {
-    mask[i] = matrix[i] >= threshold;
+  forall i in 1..nrows do {
+    for j in 1..ncols do {
+      mask[i, j] = matrix[i, j] >= threshold;
+    }
   }
 }
 
@@ -47,25 +55,28 @@ proc main() {
 
   read(nrows, ncols);
 
-  var matrix: [1..nrows, 1..ncols] int;
-  var mask: [1..nrows, 1..ncols] int;
-
-  for i in 1..nrows do {
-    for j in 1..ncols do {
-      read(matrix[i,j]);
+  if (!is_bench) {
+    for i in 1..nrows do {
+      for j in 1..ncols do {
+        read(matrix[i,j]);
+      }
     }
   }
 
   read(percent);
 
-  thresh(nrows, ncols, matrix, percent, mask);
+  thresh(nrows, ncols, percent);
 
   if (!is_bench) {
     writeln(nrows, " ", ncols);
 
     for i in 1..nrows do {
       for j in 1..ncols do {
-        write(mask[i, j], " ");
+        if (mask[i, j]) {
+          write("1", " ");
+        } else {
+          write("0", " ");
+        }
       }
       writeln();
     }
