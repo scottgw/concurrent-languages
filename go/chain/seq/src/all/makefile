@@ -1,4 +1,4 @@
 all: main
 
 main: randmat.go thresh.go winnow.go outer.go product.go
-	go install
+	GOPATH="`pwd`/../.." go install

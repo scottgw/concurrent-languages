@@ -18,8 +18,8 @@ func Randmat(nrows, ncols, seed int) {
   LCG_C := 1013904223;
   for i := 0; i < nrows; i++ {
     for j := 0; j < ncols; j++ {
-      seed = (LCG_A * seed + LCG_C) % 100;
-      Randmat_matrix[i][j] = byte(seed);
+      seed = LCG_A * seed + LCG_C;
+      Randmat_matrix[i][j] = byte(seed % 100) % 100;
     }
   }
 }
