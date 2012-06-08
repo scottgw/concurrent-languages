@@ -11,10 +11,11 @@
 
 config const is_bench = false;
 
-proc product(nelts: int,
-    matrix: [1..nelts, 1..nelts] real,
-    vector: [1..nelts] real,
-    result: [1..nelts] real) {
+var matrix: [1..10000, 1..10000]real;
+var vector: [1..10000]real;
+var result: [1..10000]real;
+
+proc product(nelts: int) {
   forall i in 1..nelts do {
     var sum: real = 0;
     for j in 1..nelts do {
@@ -28,20 +29,19 @@ proc main() {
   var nelts: int;
   read(nelts);
 
-  var matrix: [1..nelts, 1..nelts] real;
-  var vector, result: [1..nelts] real;
+  if (!is_bench) {
+    for i in 1..nelts do {
+      for j in 1..nelts do {
+        read(matrix[i, j]);
+      }
+    }
 
-  for i in 1..nelts do {
-    for j in 1..nelts do {
-      read(matrix[i, j]);
+    for i in 1..nelts do {
+      read(vector[i]);
     }
   }
 
-  for i in 1..nelts do {
-    read(vector[i]);
-  }
-
-  product(nelts, matrix, vector, result);
+  product(nelts);
 
   if (!is_bench) {
     writeln(nelts);
