@@ -13,65 +13,39 @@
 
 config const is_bench = false;
 
-proc swap(x: int, y: int, value: [?Dom]) {
-  var v = value[x];
-  value[x] = value[y];
-  value[y] = v;
-}
+var matrix: [1..20000, 1..20000]int;
+var mask: [1..20000, 1..20000]bool;
+var count_per_line: [1..20001]int;
+var points: [1..20000] (int, int);
+var values: [0..20000] (int, (int, int)); // (value, i, j))
 
-proc sort_impl(start: int, end: int, value: [?Dom]) {
-  if (start >= end) {
-    return;
-  }
-  var pivot_index = (start + end) / 2;
-  var pivot = value[pivot_index];
-  swap(pivot_index, end, value);
-  var spot = start;
-  for i in start..end do {
-    if (value[i] < pivot) {
-      swap(i, spot, value);
-      spot += 1;
+proc winnow(nrows: int, ncols: int, nelts: int) {
+  var n: int = 0;
+
+  forall i in 1..nrows do {
+    count_per_line[i + 1] = 0;
+    for j in 1..ncols do {
+      if (is_bench) {
+        mask[i, j] = (((i - 1) * (j - 1)) % (ncols + 1)) == 1;
+      }
+      count_per_line[i + 1] += mask[i, j];
     }
   }
-  swap(spot, end, value);
-  pivot_index = spot;
 
-  cobegin {
-    QuickSort(value[start..pivot_index]);
-    QuickSort(value[(pivot_index + 1)..end]);
-    //sort_impl(start, pivot_index, value);
-    //sort_impl(pivot_index + 1, end, value);
-  }
-}
+  var total = + scan count_per_line;
+  n = total[nrows + 1];
 
-proc sort(n: int, value: [1..n] (int, (int, int))) {
-  sort_impl(1, n, value);
-}
-
-proc winnow(nrows: int, ncols: int,
-    matrix: [1..nrows, 1..ncols] int,
-    mask: [1..nrows, 1..ncols] int,
-    nelts: int,
-    points: [1..nelts] (int, int)
-    ) {
-
-  var n: int = 0;
-  
-  n = + reduce mask;
-  var can_go: sync bool = true;
-  var values: [1..n] (int, (int, int));  // (value, (i, j))
-  var count: int = 1;
-  forall i in matrix.domain {
-    if (mask[i] == 1) {
-      if (can_go) {
-        values[count] = (matrix[i], i);
+  forall i in 1..nrows do {
+    var count = total[i];
+    for j in 1..ncols do {
+      if (mask[i, j]) {
+        values[count] = (matrix[i, j], (i, j));
         count += 1;
-        can_go = true;
       }
     }
   }
 
-  sort(n, values);
+  QuickSort(values[0..n]);
 
   var chunk: int = n / nelts;
 
@@ -82,8 +56,7 @@ proc winnow(nrows: int, ncols: int,
   }
 }
 
-proc read_matrix(nrows, ncols: int,
-    matrix: [1..nrows, 1..ncols] int) {
+proc read_matrix(nrows, ncols: int) {
   for i in 1..nrows do {
     for j in 1..ncols do {
       read(matrix[i, j]);
@@ -91,23 +64,31 @@ proc read_matrix(nrows, ncols: int,
   }
 }
 
+proc read_mask(nrows, ncols: int) {
+  for i in 1..nrows do {
+    for j in 1..ncols do {
+      var v: int;
+      read(v);
+      mask[i, j] = v == 1;
+    }
+  }
+}
+
 proc main() {
   var nrows: int;
   var ncols: int;
-  var nelts: int ;
+  var nelts: int;
 
   read(nrows, ncols);
 
-  var matrix, mask: [1..nrows, 1..ncols] int;
-
-  read_matrix(nrows, ncols, matrix);
-  read_matrix(nrows, ncols, mask);
+  if (!is_bench) {
+    read_matrix(nrows, ncols);
+    read_mask(nrows, ncols);
+  }
 
   read(nelts);
 
-  var points: [1..nelts] (int, int);
-
-  winnow(nrows, ncols, matrix, mask, nelts, points);
+  winnow(nrows, ncols, nelts);
 
   if (!is_bench) {
     writeln(nelts);

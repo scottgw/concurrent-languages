@@ -13,30 +13,37 @@
 
 config const is_bench = false;
 
-proc winnow(nrows: int, ncols: int,
-    matrix: [1..nrows, 1..ncols] int,
-    mask: [1..nrows, 1..ncols] int,
-    nelts: int,
-    points: [1..nelts] (int, int)
-    ) {
+var matrix: [1..20000, 1..20000]int;
+var mask: [1..20000, 1..20000]bool;
+var count_per_line: [1..20001]int;
+var points: [1..20000] (int, int);
+var values: [0..20000] (int, (int, int)); // (value, i, j))
 
+proc winnow(nrows: int, ncols: int, nelts: int) {
   var n: int = 0;
-  for m in mask do {
-    if (m == 1) {
-      n += 1;
+
+  for i in 1..nrows do {
+    for j in 1..ncols do {
+      if (is_bench) {
+        mask[i, j] = (((i - 1) * (j - 1)) % (ncols + 1)) == 1;
+      }
+      if (mask[i, j]) {
+        n += 1;
+      }
     }
   }
 
-  var values: [1..n] (int, (int, int));  // (value, (i, j))
   var count: int = 1;
-  for i in matrix.domain {
-    if (mask[i] == 1) {
-      values[count] = (matrix[i], i);
-      count += 1;
+  for i in 1..nrows do {
+    for j in 1..ncols do {
+      if (mask[i, j]) {
+        values[count] = (matrix[i, j], (i, j));
+        count += 1;
+      }
     }
   }
 
-  QuickSort(values);
+  QuickSort(values[0..n]);
 
   var chunk: int = n / nelts;
 
@@ -47,11 +54,20 @@ proc winnow(nrows: int, ncols: int,
   }
 }
 
-proc read_matrix(nrows, ncols: int,
-    matrix: [1..nrows, 1..ncols] int) {
+proc read_matrix(nrows, ncols: int) {
   for i in 1..nrows do {
     for j in 1..ncols do {
       read(matrix[i, j]);
+    }
+  }
+}
+
+proc read_mask(nrows, ncols: int) {
+  for i in 1..nrows do {
+    for j in 1..ncols do {
+      var v: int;
+      read(v);
+      mask[i, j] = v == 1;
     }
   }
 }
@@ -63,16 +79,14 @@ proc main() {
 
   read(nrows, ncols);
 
-  var matrix, mask: [1..nrows, 1..ncols] int;
-
-  read_matrix(nrows, ncols, matrix);
-  read_matrix(nrows, ncols, mask);
+  if (!is_bench) {
+    read_matrix(nrows, ncols);
+    read_mask(nrows, ncols);
+  }
 
   read(nelts);
 
-  var points: [1..nelts] (int, int);
-
-  winnow(nrows, ncols, matrix, mask, nelts, points);
+  winnow(nrows, ncols, nelts);
 
   if (!is_bench) {
     writeln(nelts);
