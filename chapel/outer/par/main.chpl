@@ -13,6 +13,10 @@
 
 config const is_bench = false;
 
+var matrix: [1..10000, 1..10000]real;
+var vector: [1..10000]real;
+var points: [1..10000](int, int);
+
 proc sqr(x: real): real {
   return x * x;
 }
@@ -24,10 +28,7 @@ proc distance(l, r: (int, int)): real {
   return sqrt(sqr(lx - rx) + sqr(ly - ry));
 }
 
-proc outer(nelts: int,
-    points: [1..nelts] (int, int),
-    matrix: [1..nelts, 1..nelts] real, vector: [1..nelts] real) {
-
+proc outer(nelts: int) {
   forall i in 1..nelts do {
     var nmax: real = -1;
     for j in 1..nelts do {
@@ -41,11 +42,11 @@ proc outer(nelts: int,
   }
 }
 
-proc read_vector_of_points(nelts: int, vector: [1..nelts] (int, int)) {
+proc read_vector_of_points(nelts: int) {
   var a, b: int;
   for i in 1..nelts do {
     read(a, b);
-    vector[i] = (a, b);
+    points[i] = (a, b);
   }
 }
 
@@ -55,11 +56,11 @@ proc main() {
 
   var points: [1..nelts] (int, int);
 
-  read_vector_of_points(nelts, points);
+  if (!is_bench) {
+    read_vector_of_points(nelts);
+  }
 
-  var matrix: [1..nelts, 1..nelts] real;
-  var vector: [1..nelts] real;
-  outer(nelts, points, matrix, vector);
+  outer(nelts);
 
   if (!is_bench) {
     writeln(nelts + " " + nelts);
