@@ -10,20 +10,25 @@
  */
 
 module Thresh {
-use Search;
 
-proc thresh(nrows: int, ncols: int,
-    matrix: [1..nrows, 1..ncols] int, percent: int,
-    mask: [1..nrows, 1..ncols] bool) {
+use Randmat;
+
+var mask: [1..20000, 1..20000]bool;
+var histogram: [0..99]int;
+
+proc thresh(nrows: int, ncols: int, percent: int) {
   var nmax: int = 0;
-  for m in matrix do {
-    nmax = max(nmax, m);
+
+  for i in 1..nrows do {
+    for j in 1..ncols do {
+      nmax = max(nmax, matrix[i, j]);
+    }
   }
 
-  var histogram: [0..nmax] int;
-
-  for m in matrix {
-    histogram[m] += 1;
+  for i in 1..nrows do {
+    for j in 1..ncols do {
+      histogram[matrix[i, j]] += 1;
+    }
   }
 
   var count: int = (nrows * ncols * percent) / 100;
@@ -37,9 +42,10 @@ proc thresh(nrows: int, ncols: int,
     threshold = nmax - i;
   }
 
-  for i in matrix.domain {
-    mask[i] = matrix[i] >= threshold;
+  for i in 1..nrows do {
+    for j in 1..ncols do {
+      mask[i, j] = matrix[i, j] >= threshold;
+    }
   }
 }
-
 }

@@ -13,30 +13,39 @@
 
 module Winnow {
 
-proc winnow(nrows: int, ncols: int,
-    matrix: [1..nrows, 1..ncols] int,
-    mask: [1..nrows, 1..ncols] bool,
-    nelts: int,
-    points: [1..nelts] (int, int)
-    ) {
+config const is_bench = false;
 
+use Randmat, Thresh;
+
+var count_per_line: [1..20001]int;
+var points: [1..20000] (int, int);
+var values: [0..20000] (int, (int, int)); // (value, i, j))
+
+proc winnow(nrows: int, ncols: int, nelts: int) {
   var n: int = 0;
-  for m in mask do {
-    if (m) {
-      n += 1;
+
+  for i in 1..nrows do {
+    for j in 1..ncols do {
+      if (is_bench) {
+        mask[i, j] = (((i - 1) * (j - 1)) % (ncols + 1)) == 1;
+      }
+      if (mask[i, j]) {
+        n += 1;
+      }
     }
   }
 
-  var values: [1..n] (int, (int, int));  // (value, (i, j))
   var count: int = 1;
-  for i in matrix.domain {
-    if (mask[i]) {
-      values[count] = (matrix[i], i);
-      count += 1;
+  for i in 1..nrows do {
+    for j in 1..ncols do {
+      if (mask[i, j]) {
+        values[count] = (matrix[i, j], (i, j));
+        count += 1;
+      }
     }
   }
 
-  QuickSort(values);
+  QuickSort(values[0..n]);
 
   var chunk: int = n / nelts;
 

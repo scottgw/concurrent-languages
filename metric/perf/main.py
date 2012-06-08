@@ -5,7 +5,7 @@ import os
 languages = ["chapel"]
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
-problems = ["product"]
+problems = ["chain"]
 variations = ["seq", "par"]
 
 def system(cmd, timeout=False):

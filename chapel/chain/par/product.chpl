@@ -10,10 +10,12 @@
  */
 
 module Product {
-proc product(nelts: int,
-    matrix: [1..nelts, 1..nelts] real,
-    vector: [1..nelts] real,
-    result: [1..nelts] real) {
+
+use Outer;
+
+var result: [1..10000]real;
+
+proc product(nelts: int) {
   forall i in 1..nelts do {
     var sum: real = 0;
     for j in 1..nelts do {

@@ -9,15 +9,18 @@
  */
 
 module Randmat {
-use Random;
 
-proc randmat(nrows: int, ncols: int, s: int,
-    matrix: [1..nrows, 1..ncols] int) {
-  const INT_MAX: int = 1000;
+var matrix: [1..20000, 1..20000]int;
 
-  var rand = new RandomStream(2 * s + 1, false); // s must be odd
-  forall m in matrix {
-    m = floor(rand.getNext() * INT_MAX) : int;
+proc randmat(nrows: int, ncols: int, s: int) {
+  const LCG_A: int = 1664525;
+  const LCG_C: int = 1013904223;
+  forall i in 1..nrows do {
+    var seed = s + i;
+    for j in 1..ncols do {
+      seed = LCG_A * seed + LCG_C;
+      matrix[i, j] = abs(seed) % 100;
+    }
   }
 }
 
