@@ -238,11 +238,9 @@ Mon May 7 20:38:21 2012 -0300 scoop-product-seq start
 Mon May 7 20:51:40 2012 -0300 scoop-product-seq done
 Mon May 7 20:52:43 2012 -0300 scoop-product-par start
 Mon May 7 21:12:12 2012 -0300 scoop-product-par done
-Mon May 7 21:14:20 2012 -0300 scoop-chain-par start
-Mon May 7 21:31:21 2012 -0300 scoop-chain-par pause
 Tue May 8 08:59:59 2012 -0300 scoop-chain-par restart
-Tue May 8 10:17:10 2012 -0300 scoop-chain-par compiles
-Tue May 8 10:23:45 2012 -0300 scoop-chain-par done
+Tue May 8 09:17:10 2012 -0300 scoop-chain-par compiles
+Tue May 8 09:53:45 2012 -0300 scoop-chain-par done
 Thu May 31 07:41:00 2012 -0300 chapel-randmat-par restart
 Thu May 31 07:55:13 2012 -0300 chapel-randmat-par done
 Thu May 31 08:00:41 2012 -0300 chapel-thresh-par restart

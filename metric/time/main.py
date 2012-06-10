@@ -105,7 +105,8 @@ def load_data():
       if problem != "chain":
         result[language][problem]["par"] += result[language][problem]["seq"]
 
-  print result["chapel"]["product"]["par"]
+  result["erlang"]["chain"]["seq"] = result["erlang"]["chain"]["par"]
+  result["scoop"]["chain"]["seq"] = result["scoop"]["chain"]["par"]
 
 def output_tables():
   def create_table(table_name, output_value, extra):
@@ -118,7 +119,7 @@ def output_tables():
       first = True
       print " & ",
       for problem in sorted(problems):
-        if not (problem == "chain" and variation == "seq"):
+        if True:
           if not first:
             print " & ", 
           print problem,
@@ -128,8 +129,6 @@ def output_tables():
       for language in sorted(languages):
         print language,
         for problem in sorted(problems):
-          if problem == "chain" and variation == "seq":
-            continue
           output_value(language, problem, variation, extra)
         print " \\\\"
 
@@ -155,7 +154,8 @@ def output_tables():
     table_type = extra["table_type"]
     cmd = "find ../../%s/%s/%s/ | grep \"\\.%s$\" | xargs cat | grep . | wc %s > wc.out" % (
         language, problem, variation, extension, table_flag)
-    if problem == "chain" and variation == "par":
+    if problem == "chain" and language in [
+        "erlang", "scoop"]:
       cmd = "find ../../%s/%s/ | grep \"\\.%s$\" | xargs cat | grep . | wc %s > wc.out" % (
           language, problem, extension, table_flag)
     os.system(cmd)
@@ -206,8 +206,6 @@ xscale=1
       print "max=%d" % max_value
       print "ylabel=%s %s versus smallest" % (variation_name, pretty_name)
       for problem in sorted(problems):
-        if problem == "chain" and variation == "seq":
-          continue
         print problem,
         nmin = min(
             float(
@@ -225,11 +223,9 @@ xscale=1
       print cmd
       system(cmd)
       cmd = ("mogrify -reverse -flatten %s.ppm" % output_file)
-      print cmd
       system(cmd)
       cmd = ("mogrify -resize %dx%d -format png %s.ppm" % (
           GRAPH_SIZE, GRAPH_SIZE, output_file))
-      print cmd
       system(cmd)
 
 
