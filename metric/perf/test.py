@@ -130,7 +130,7 @@ class testMain(unittest.TestCase):
     main.system('mogrify -reverse -flatten ../../../ufrgs/tc/images/graph-exec-time-seq-0.ppm')
     main.system('mogrify -resize 700x700 -format png ../../../ufrgs/tc/images/graph-exec-time-seq-0.ppm')
     main.write_to_file('../../../ufrgs/tc/chapters/graph-exec-time-0.tex',
-        '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=125mm]{images/graph-exec-time-seq-0.png}\n  \\caption{Sequential Execution Time for Input 0}\n  \\label{fig:exec:time:seq:0}\n\\end{figure}\n')
+        '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=125mm]{images/graph-exec-time-seq-0.png}\n  \\caption{Sequential Execution Time}\n  \\label{fig:exec:time:seq:0}\n\\end{figure}\n')
 
     m.ReplayAll()
     main.create_graph("exec-time", main.results[999], '')
@@ -163,7 +163,7 @@ class testMain(unittest.TestCase):
     main.system('mv plot.png ../../../ufrgs/tc/images/graph-speedup-language-problem-0.png')
     main.system('rm plot.dat')
     main.write_to_file('../../../ufrgs/tc/chapters/graph-speedup-language-problem-0.tex',
-        '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=100mm]{images/graph-speedup-language-problem-0.png}\n  \\caption{Speedup and Efficiency for Language language Problem problem Input 0}\n  \\label{fig:exec:spd:language:problem:0}\n\\end{figure}\n')
+        '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=100mm]{images/graph-speedup-language-problem-0.png}\n  \\caption{Speedup and Efficiency for language language in problem problem}\n  \\label{fig:exec:spd:language:problem:0}\n\\end{figure}\n')
     main.write_to_file('../../../ufrgs/tc/chapters/graph-speedup.tex', '\\input{chapters/graph-speedup-language-problem-0.tex}\n')
 
     m.ReplayAll()
@@ -193,7 +193,7 @@ class testMain(unittest.TestCase):
     main.system('gnuplot other.script')
     main.system('mv plot.png ../../../ufrgs/tc/images/graph-problem-speedup-problem-0.png')
     main.system('rm other.script')
-    main.write_to_file('../../../ufrgs/tc/chapters/graph-problem-speedup-problem-0.tex',  '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=100mm]{images/graph-problem-speedup-problem-0.png}\n  \\caption{Speedup for Problem problem Input 0}\n  \\label{fig:exec:spd:problem:0}\n\\end{figure}\n')
+    main.write_to_file('../../../ufrgs/tc/chapters/graph-problem-speedup-problem-0.tex',  '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=100mm]{images/graph-problem-speedup-problem-0.png}\n  \\caption{Speedup for problem problem in all languages}\n  \\label{fig:exec:spd:problem:0}\n\\end{figure}\n')
     main.write_to_file('../../../ufrgs/tc/chapters/graph-problem-speedup.tex',  '\\input{chapters/graph-problem-speedup-problem-0.tex}\n')
 
     m.ReplayAll()
@@ -223,7 +223,7 @@ class testMain(unittest.TestCase):
     main.system('gnuplot other.script')
     main.system('mv plot.png ../../../ufrgs/tc/images/graph-language-speedup-language-0.png')
     main.system('rm other.script')
-    main.write_to_file('../../../ufrgs/tc/chapters/graph-language-speedup-language-0.tex',  '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=100mm]{images/graph-language-speedup-language-0.png}\n  \\caption{Speedup for Language language Input 0}\n  \\label{fig:exec:spd:language:0}\n\\end{figure}\n')
+    main.write_to_file('../../../ufrgs/tc/chapters/graph-language-speedup-language-0.tex',  '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=100mm]{images/graph-language-speedup-language-0.png}\n  \\caption{Speedup for language language in all problems}\n  \\label{fig:exec:spd:language:0}\n\\end{figure}\n')
     main.write_to_file('../../../ufrgs/tc/chapters/graph-language-speedup.tex',  '\\input{chapters/graph-language-speedup-language-0.tex}\n')
 
     m.ReplayAll()

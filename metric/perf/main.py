@@ -1,11 +1,11 @@
 import os
 
 #languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
-#languages = ["chapel", "cilk", "go", "tbb"]
-languages = ["chapel"]
-#problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
+languages = ["chapel", "cilk", "go", "tbb"]
+#languages = ["chapel"]
+problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
-problems = ["chain"]
+#problems = ["chain"]
 variations = ["seq", "par"]
 
 def system(cmd, timeout=False):
@@ -405,7 +405,7 @@ def create_graph(graph_name, values, pretty_name):
           GRAPH_SIZE, GRAPH_SIZE, output_file))
       system(cmd)
 
-      caption = "%s Execution Time for Input %d" % (variation_name, i)
+      caption = "%s Execution Time" % (variation_name)
       label = "fig:exec:time:%s:%d" % (variation, i)
       latex_out.append((
           "\\begin{figure}[htbp]\n"
@@ -454,8 +454,8 @@ plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title
 
         latex_out = []
         caption = (
-            "Speedup and Efficiency for Language %s Problem %s Input %d" % (
-            language, problem, i))
+            "Speedup and Efficiency for language %s in problem %s" % (
+            language, problem))
         label = "fig:exec:spd:%s:%s:%d" % (language, problem, i)
         latex_out.append((
             "\\begin{figure}[htbp]\n"
@@ -517,7 +517,7 @@ set key left
       system(cmd)
 
       latex_out = []
-      caption = ("Speedup for Problem %s Input %d" % (problem, i))
+      caption = ("Speedup for problem %s in all languages" % (problem))
       label = "fig:exec:spd:%s:%d" % (problem, i)
       latex_out.append((
           "\\begin{figure}[htbp]\n"
@@ -580,7 +580,7 @@ set key left
       system(cmd)
 
       latex_out = []
-      caption = ("Speedup for Language %s Input %d" % (language, i))
+      caption = ("Speedup for language %s in all problems" % (language))
       label = "fig:exec:spd:%s:%d" % (language, i)
       latex_out.append((
           "\\begin{figure}[htbp]\n"
@@ -603,13 +603,13 @@ set key left
   write_to_file(latex_all_file_name, ''.join(latex_all))
 
 def output_graphs():
-  #create_graph("exec-time", results[threads[-1]], "")
+  create_graph("exec-time", results[threads[-1]], "")
   speedup_graph_name = 'speedup'
-  create_speedup_graph(speedup_graph_name, results)
+  #create_speedup_graph(speedup_graph_name, results)
   create_problem_speedup_graph("problem-speedup", speedup_graph_name)
   create_language_speedup_graph("language-speedup", speedup_graph_name)
 
-TOTAL_EXECUTIONS = 3
+TOTAL_EXECUTIONS = 30
 
 def main():
   total_time = (
@@ -620,10 +620,10 @@ def main():
           60. * 60), total_time / (60. * 60 * 24))
   raw_input('press enter to start...')
   #generate_erlang_main()
-  make_all()
-  create_inputs()
-  for _ in range(TOTAL_EXECUTIONS):
-    run_all(redirect_output=False)  # TODO: remove outputs
+  #make_all()
+  #create_inputs()
+  #for _ in range(TOTAL_EXECUTIONS):
+    #run_all(redirect_output=False)  # TODO: remove outputs
   get_results()
   output_graphs()
   #system('xmessage " ALL DONE " -nearmouse -timeout 1')
