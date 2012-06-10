@@ -133,7 +133,7 @@ class testMain(unittest.TestCase):
         '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=125mm]{images/graph-exec-time-seq-0.png}\n  \\caption{Sequential Execution Time}\n  \\label{fig:exec:time:seq:0}\n\\end{figure}\n')
 
     m.ReplayAll()
-    main.create_graph("exec-time", main.results[999], '')
+    main.create_graph("exec-time", main.results[999], '', use_subfigure=False)
     m.VerifyAll()
     m.UnsetStubs()
 
@@ -167,7 +167,7 @@ class testMain(unittest.TestCase):
     main.write_to_file('../../../ufrgs/tc/chapters/graph-speedup.tex', '\\input{chapters/graph-speedup-language-problem-0.tex}\n')
 
     m.ReplayAll()
-    main.create_speedup_graph("speedup", main.results)
+    main.create_speedup_graph("speedup", main.results, use_subfigure=False)
     m.VerifyAll()
     m.UnsetStubs()
 
@@ -197,7 +197,7 @@ class testMain(unittest.TestCase):
     main.write_to_file('../../../ufrgs/tc/chapters/graph-problem-speedup.tex',  '\\input{chapters/graph-problem-speedup-problem-0.tex}\n')
 
     m.ReplayAll()
-    main.create_problem_speedup_graph("problem-speedup", "speedup")
+    main.create_problem_speedup_graph("problem-speedup", "speedup", use_subfigure=False)
     m.VerifyAll()
     m.UnsetStubs()
 
@@ -227,7 +227,7 @@ class testMain(unittest.TestCase):
     main.write_to_file('../../../ufrgs/tc/chapters/graph-language-speedup.tex',  '\\input{chapters/graph-language-speedup-language-0.tex}\n')
 
     m.ReplayAll()
-    main.create_language_speedup_graph("language-speedup", "speedup")
+    main.create_language_speedup_graph("language-speedup", "speedup", use_subfigure=False)
     m.VerifyAll()
     m.UnsetStubs()
 
