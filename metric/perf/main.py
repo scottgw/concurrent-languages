@@ -408,7 +408,7 @@ def create_graph(graph_name, values, pretty_name, use_subfigure=True):
           GRAPH_SIZE, GRAPH_SIZE, output_file))
       system(cmd)
 
-      caption = "%s Execution Time" % (variation_name)
+      caption = "%s" % (variation_name)
       if variation == "par":
         caption += " (using %d threads)" % (threads[-1])
       label = "fig:exec:time:%s:%d" % (variation, i)
@@ -429,6 +429,7 @@ def create_graph(graph_name, values, pretty_name, use_subfigure=True):
 
       
     if use_subfigure:
+      latex_out.append('\\caption{Execution Time}\n')
       latex_out.append('\\end{figure}\n')
     latex_file_name = "%s/chapters/graph-%s-%d.tex" % (
         output_dir, graph_name, i)
@@ -662,7 +663,7 @@ set key left
   write_to_file(latex_all_file_name, ''.join(latex_all))
 
 def output_graphs():
-  #create_graph("exec-time", results[threads[-1]], "")
+  create_graph("exec-time", results[threads[-1]], "")
   speedup_graph_name = 'speedup'
   create_speedup_graph(speedup_graph_name, results)
   create_problem_speedup_graph("problem-speedup", speedup_graph_name)
