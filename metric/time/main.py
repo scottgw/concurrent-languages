@@ -6,7 +6,7 @@ import subprocess
 import os
 
 start_actions = set(["start", "started", "restart", "resume"])
-other_actions = set(["commit", ".fuse_hidden*", "branch", "working", ".*.swp", "restart-done", "reduce2d", "fill_histogram", "prefixsum", "binary_search", "fill_mask", "ReduceState", "read_matrix", "max_matrix", "get_threshold", "reduce2d_with_filter", "split", "read_integer", "testing", "still_synchronous", "asynchrony", "matrix", "parallel_scan", "using", "with_filter", "refac", "sequential_sort", "fill_values", "parallel_sort", "parfor", "parsort", "tuple_sorter", "almost", "quit", "merged", "compiles", "files"])
+other_actions = set(["commit", ".fuse_hidden*", "branch", "working", ".*.swp", "restart-done", "reduce2d", "fill_histogram", "prefixsum", "binary_search", "fill_mask", "ReduceState", "read_matrix", "max_matrix", "get_threshold", "reduce2d_with_filter", "split", "read_integer", "testing", "still_synchronous", "asynchrony", "matrix", "parallel_scan", "using", "with_filter", "refac", "sequential_sort", "fill_values", "parallel_sort", "parfor", "parsort", "tuple_sorter", "almost", "quit", "merged", "compiles", "files", "tests"])
 end_actions = set(["done", "pause"])
 
 start_times = {}
@@ -17,9 +17,15 @@ languages = set()
 variations = ["seq", "par"]
 result = {}
 wc_result = {}
-table_types = {"loc" : "-l", "now" : "-w", "noc" : "-c"}
+table_types = {"loc" : "-l", "now" : "-w"}
 
 total_lines = 0
+
+def system(cmd, timeout=False):
+  ret = os.system(cmd)
+  if ret != 0 and not timeout:
+    print cmd
+    assert(False)
 
 def load_data():
   f = open("log_reverse.txt", "r")
@@ -69,9 +75,6 @@ def load_data():
     if problem == "refac":
       assert(False)
       continue
-    if problem == "chain":
-      if language != "cpp":
-        words.append("par")
 
     if len(words) != 3:
       print words
@@ -102,12 +105,14 @@ def load_data():
       if problem != "chain":
         result[language][problem]["par"] += result[language][problem]["seq"]
 
+  print result["chapel"]["product"]["par"]
+
 def output_tables():
   def create_table(table_name, output_value, extra):
     old_stdout = sys.stdout
 
     for variation in variations:
-      sys.stdout = open("../../../ufrgs/meu/chapters/table-%s-%s.tex" % (
+      sys.stdout = open("../../../ufrgs/tc/chapters/table-%s-%s.tex" % (
         table_name, variation), "w")
 
       first = True
@@ -148,10 +153,10 @@ def output_tables():
     extension = extensions[language]
     table_flag = extra["table_flag"]
     table_type = extra["table_type"]
-    cmd = "find ../../%s/%s/%s/ | grep \"\\.%s$\" | xargs cat | wc %s > wc.out" % (
+    cmd = "find ../../%s/%s/%s/ | grep \"\\.%s$\" | xargs cat | grep . | wc %s > wc.out" % (
         language, problem, variation, extension, table_flag)
     if problem == "chain" and variation == "par":
-      cmd = "find ../../%s/%s/ | grep \"\\.%s$\" | xargs cat | wc %s > wc.out" % (
+      cmd = "find ../../%s/%s/ | grep \"\\.%s$\" | xargs cat | grep . | wc %s > wc.out" % (
           language, problem, extension, table_flag)
     os.system(cmd)
 
@@ -174,14 +179,18 @@ def output_tables():
     create_table(table_name,  wc_table_output, {"table_flag": table_flag,
       "table_type" : table_name})
 
+GRAPH_SIZE = 700
+output_dir = "../../../ufrgs/tc"
+
 def output_graphs():
   def create_graph(graph_name, values, max_value, pretty_name):
     old_stdout = sys.stdout
 
     variation_names = {"seq" : "Sequential", "par" : "Parallel"}
     for variation in variations:
-      sys.stdout = open("../../../ufrgs/meu/images/graph-%s-%s.perf" % (
-        graph_name, variation), "w")
+      output_file = "../../../ufrgs/tc/images/graph-%s-%s" % (
+        graph_name, variation)
+      sys.stdout = open('%s.perf' % output_file, "w")
 
       sys.stdout.write("=cluster")
       for language in sorted(languages):
@@ -208,6 +217,21 @@ xscale=1
           print("%.2f" % (
             float(values[language][problem][variation]) / nmin)),
         print ""
+
+      sys.stdout = old_stdout
+      cmd = (
+          "%s/bargraph.pl -fig %s.perf | fig2dev -L ppm -m 4 > %s.ppm" % (
+              output_dir, output_file, output_file))
+      print cmd
+      system(cmd)
+      cmd = ("mogrify -reverse -flatten %s.ppm" % output_file)
+      print cmd
+      system(cmd)
+      cmd = ("mogrify -resize %dx%d -format png %s.ppm" % (
+          GRAPH_SIZE, GRAPH_SIZE, output_file))
+      print cmd
+      system(cmd)
+
 
     sys.stdout = old_stdout
 
