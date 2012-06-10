@@ -406,6 +406,8 @@ def create_graph(graph_name, values, pretty_name):
       system(cmd)
 
       caption = "%s Execution Time" % (variation_name)
+      if variation == "par":
+        caption += " (using %d threads)" % (threads[-1])
       label = "fig:exec:time:%s:%d" % (variation, i)
       latex_out.append((
           "\\begin{figure}[htbp]\n"
