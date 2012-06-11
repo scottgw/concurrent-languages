@@ -430,6 +430,7 @@ def create_graph(graph_name, values, pretty_name, use_subfigure=True):
       
     if use_subfigure:
       latex_out.append('\\caption{Execution Time}\n')
+      latex_out.append('\\label{fig:exec:time}\n')
       latex_out.append('\\end{figure}\n')
     latex_file_name = "%s/chapters/graph-%s-%d.tex" % (
         output_dir, graph_name, i)
@@ -578,6 +579,7 @@ set key left
 
   if use_subfigure:
     latex_all.append('\\caption{Speedup per problem, in all languages}\n'
+                     '\\label{fig:speedup:problem}\n'
                      '\\end{figure}\n')
   latex_all_file_name = "%s/chapters/graph-%s.tex" % (
     output_dir, graph_name)
@@ -657,6 +659,7 @@ set key left
 
   if use_subfigure:
     latex_all.append('\\caption{Speedup per language, in all problems}\n'
+                     '\\label{fig:speedup:language}\n'
                      '\\end{figure}\n')
   latex_all_file_name = "%s/chapters/graph-%s.tex" % (
     output_dir, graph_name)
