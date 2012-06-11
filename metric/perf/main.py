@@ -200,7 +200,7 @@ inputs = [
   ]
 
 threads = [1, 2, 3, 4, 5, 6, 7, 8]
-threads = [1, 2, 3, 4]
+#threads = [1, 2, 3, 4]
 #threads = [2, 4]
 #threads = [1, 4]
 #threads = [4]
@@ -381,7 +381,7 @@ def create_graph(graph_name, values, pretty_name, use_subfigure=True):
           "xscale=1\n"))
       variation_name = variation_names[variation]
       if nmax == 0: nmax = 1
-      out.append("max=%f\n" % (nmax * 1.5))
+      out.append("max=%f\n" % (nmax * 1.1))
       out.append(
           "ylabel=%s %sexecution time in seconds for input %d\n" % (
               variation_name, pretty_name, i))
@@ -678,7 +678,7 @@ def main():
   print "%fs or %fm or %fh or %fd" % (
       total_time, total_time / 60., total_time / (
           60. * 60), total_time / (60. * 60 * 24))
-  raw_input('press enter to start...')
+  #raw_input('press enter to start...')
   #generate_erlang_main()
   #make_all()
   #create_inputs()
