@@ -683,10 +683,10 @@ def main():
           60. * 60), total_time / (60. * 60 * 24))
   #raw_input('press enter to start...')
   #generate_erlang_main()
-  #make_all()
-  #create_inputs()
-  #for _ in range(TOTAL_EXECUTIONS):
-    #run_all(redirect_output=False)  # TODO: remove outputs
+  make_all()
+  create_inputs()
+  for _ in range(TOTAL_EXECUTIONS):
+    run_all(redirect_output=False)  # TODO: remove outputs
   get_results()
   output_graphs()
   #system('xmessage " ALL DONE " -nearmouse -timeout 1')
