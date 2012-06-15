@@ -54,8 +54,6 @@ proc main() {
   var nelts: int;
   read(nelts);
 
-  var points: [1..nelts] (int, int);
-
   if (!is_bench) {
     read_vector_of_points(nelts);
   }
