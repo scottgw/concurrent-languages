@@ -12,7 +12,7 @@
 #include <cstdlib>
 #include <cstring>
 
-static unsigned char matrix[30000][30000];
+static unsigned char matrix[20000][20000];
 
 int is_bench = 0;
 
