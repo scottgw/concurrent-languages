@@ -12,8 +12,8 @@ all: main
 	./main < main6.in > main.out
 	diff main.out main6.gold
 
-main: main.8
-	8l -o main main.8
+main: main.6
+	6l -o main main.6
 
-main.8: main.go
-	8g -O2 main.go
+main.6: main.go
+	6g -O2 main.go

@@ -44,6 +44,7 @@ int main(int argc, char** argv) {
   scanf("%d", &nelts);
 
   if (!is_bench) {
+    /*
     for (int i = 0; i < nelts; i++) {
       for (int j = 0; j < nelts; j++) {
         cin >> matrix[i][j];
@@ -53,6 +54,7 @@ int main(int argc, char** argv) {
     for (int i = 0; i < nelts; i++) {
       cin >> vec[i];
     }
+    //*/
   }
 
   product(nelts);
