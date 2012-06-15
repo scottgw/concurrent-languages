@@ -22,14 +22,16 @@ typedef blocked_range<size_t> range;
 
 unsigned char randmat_matrix[30000][30000];
 
-void randmat(int nrows, int ncols, unsigned int seed) {
+void randmat(int nrows, int ncols, unsigned int s) {
   const int LCG_A = 1664525, LCG_C = 1013904223;
   parallel_for(
     range(0, nrows),
-    [=, &seed](range r) {
+    [=](range r) {
       for (size_t i = r.begin(); i != r.end(); ++i) {
+        unsigned int seed = s + i;
         for (int j = 0; j < ncols; j++) {
-          randmat_matrix[i][j] = seed = (LCG_A * seed + LCG_C) % 100;
+          seed = LCG_A * seed + LCG_C;
+          randmat_matrix[i][j] = seed % 100;
         }
       }
   });
