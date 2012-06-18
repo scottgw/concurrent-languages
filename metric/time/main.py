@@ -4,6 +4,86 @@ from datetime import datetime
 import sys
 import subprocess
 import os
+import math
+
+def mean(x):
+  n = len(x)
+  total = 0
+  for xi in x:
+    total += xi
+  return total / n
+
+def stddev(x):
+  n = len(x)
+  total = 0
+  meansq = mean([xi * xi for xi in x])
+  meanx = mean(x)
+  sqmean = meanx * meanx
+  return math.sqrt((n * meansq - n * sqmean) / (n - 1))
+
+yindex = []
+xindex = []
+table = []
+
+def get_t(alpha, df):
+  alpha *= 100
+  y = -1
+  for i in range(len(yindex)):
+    if yindex[i] >= alpha:
+      y = i
+      break
+  x = -1
+  for i in range(len(xindex)):
+    if xindex[i] > df:
+      x = i
+      break
+  return table[x][y]
+
+def ttest(xa, alpha):
+  meana = mean(xa)
+  sa = stddev(xa)
+  na = len(xa)
+  delta = get_tdelta(xa, alpha)
+  left = meana - delta
+  right = meana + delta
+  return left > 0
+
+def get_tdelta(xa, alpha):
+  meana = mean(xa)
+  sa = stddev(xa)
+  na = len(xa)
+  t = get_t(1 - alpha / 2, na - 2)
+  #print 'meana: %f\nsa2: %f\nna: %d\nt: %f' % (meana, sa * sa, na, t)
+  return t * sa / math.sqrt(na)
+
+def read_table():
+  with open('tdist.txt', 'r') as f:
+    linenum = 0
+    for line in f:
+      linenum += 1
+      words = line.split()
+      if linenum == 1:
+        for i in range(len(words)):
+          if i == 0:
+            continue
+          words[i] = words[i][0:-1]
+          f = float(words[i])
+          yindex.append(f)
+      elif linenum == 2:
+        continue;
+      else:
+        line = []
+        for i in range(len(words)):
+          if i == 0:
+            xindex.append(float(words[i]))
+          else:
+            line.append(float(words[i]))
+        table.append(line)
+      #print words
+  #print yindex
+  #print table
+
+
 
 start_actions = set(["start", "started", "restart", "resume"])
 other_actions = set(["commit", ".fuse_hidden*", "branch", "working", ".*.swp", "restart-done", "reduce2d", "fill_histogram", "prefixsum", "binary_search", "fill_mask", "ReduceState", "read_matrix", "max_matrix", "get_threshold", "reduce2d_with_filter", "split", "read_integer", "testing", "still_synchronous", "asynchrony", "matrix", "parallel_scan", "using", "with_filter", "refac", "sequential_sort", "fill_values", "parallel_sort", "parfor", "parsort", "tuple_sorter", "almost", "quit", "merged", "compiles", "files", "tests"])
@@ -238,10 +318,57 @@ xscale=1
     pretty_name = pretty_names[table_name]
     create_graph(table_name, wc_result[table_name], 8, pretty_name)
 
+ALPHA = 0.1
+
+def test_significance():
+  #wc_result[table_type][language][problem][variation] = value
+    #result[language][problem][variation])
+  for variation in variations:
+    for la in languages:
+      for lb in languages:
+        if la == lb:
+          continue
+        line = []
+        for problem in problems:
+          line.append(result[la][problem][variation] -
+                      result[lb][problem][variation])
+        passed = ttest(line, ALPHA)
+        if passed:
+          print '%s:%s:%s passed SINGLE' % (la, lb, variation)
+
+  for la in languages:
+    for lb in languages:
+      if la == lb:
+        continue
+      line = []
+      for problem in problems:
+        for variation in variations:
+          line.append(result[la][problem][variation] -
+                      result[lb][problem][variation])
+      passed = ttest(line, ALPHA)
+      if passed:
+        print '%s:%s passed BOTH' % (la, lb)
+
+  for la in languages:
+    for lb in languages:
+      if la == lb:
+        continue
+      line = []
+      for problem in problems:
+        for variation in variations:
+          for table_type in table_types:
+            line.append(int(wc_result[table_type][la][problem][variation]) -
+                        int(wc_result[table_type][lb][problem][variation]))
+      passed = ttest(line, ALPHA)
+      if passed:
+        print '%s:%s passed SIZE' % (la, lb)
+
 def main():
+  read_table()
   load_data()
   output_tables()
-  output_graphs()
+  test_significance()
+  #output_graphs()
   global total_lines
   print "total lines: %d" % total_lines
   print "done"
