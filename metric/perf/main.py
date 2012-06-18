@@ -59,6 +59,14 @@ def ttest(xa, xb, alpha):
   #print '%f: [%f, %f]' % (alpha, left, right)
   return left > 0
 
+def get_tdelta(xa, alpha):
+  meana = mean(xa)
+  sa = stddev(xa)
+  na = len(xa)
+  t = get_t(1 - alpha / 2, na - 2)
+  #print 'meana: %f\nsa2: %f\nna: %d\nt: %f' % (meana, sa * sa, na, t)
+  return t * sa / math.sqrt(na)
+
 def read_table():
   with open('tdist.txt', 'r') as f:
     linenum = 0
@@ -525,7 +533,7 @@ def create_graph(graph_name, values, pretty_name, use_subfigure=True):
         out.append(";" + language)
       out.append((
           "\n"
-          "colors=black,yellow,red,med_blue,light_green,cyan\n"
+          "colors=light_green,yellow,red,med_blue,light_green,cyan\n"
           "=table\n"
           "yformat=%g\n"
           "=norotate\n"
@@ -541,6 +549,15 @@ def create_graph(graph_name, values, pretty_name, use_subfigure=True):
         for language in sorted(languages):
           out.append(" %.10f" % (
             float(values[problem][variation][language][i])))
+        out.append("\n")
+
+      out.append("\n=yerrorbars\n")
+      for problem in sorted(problems):
+        out.append(problem)
+        for language in sorted(languages):
+          out.append(" %.10f" % (get_tdelta(
+              all_values[threads[-1]][problem][variation][language][i],
+              ALPHA)))
         out.append("\n")
 
       output_file_name = "graph-%s-%s-%d" % (graph_name, variation, i)
@@ -770,6 +787,9 @@ set key left
         out.append(", ")
         out.append("'%s.dat' using 1:3 title '%s speedup' w lp" % (
             output_file, problem))
+        #out.append(", ")
+        #out.append("'%s.dat' using 1:3:($3*0.9):($3*1.1) title '%s error' w errorbars" % (
+            #output_file, problem))
       output_file_name = "graph-%s-%s-%d" % (graph_name, language, i)
       script_name = 'other.script'
       write_to_file(script_name, ''.join(out))
@@ -840,10 +860,10 @@ def main():
     #run_all(redirect_output=False)  # TODO: remove outputs
   get_results()
   test_significance()
-  #output_graphs()
+  output_graphs()
   #system('xmessage " ALL DONE " -nearmouse -timeout 1')
-  #raw_input("done! press enter to continue...")
-  #system('cd %s && make' % output_dir)
+  raw_input("done! press enter to continue...")
+  system('cd %s && make' % output_dir)
 
 if __name__ == '__main__':
   main()
