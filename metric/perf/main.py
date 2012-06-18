@@ -56,7 +56,7 @@ def ttest(xa, xb, alpha):
   #print 't: %f\n' % t
   left = meandif - t * s
   right = meandif + t * s
-  print '%f: [%f, %f]' % (alpha, left, right)
+  #print '%f: [%f, %f]' % (alpha, left, right)
   return left > 0
 
 def read_table():
@@ -468,9 +468,38 @@ def test_significance():
         if not passed:
           print 'nth%d:%s:%s:%s:in%d NOT passed PREVIOUS' % (
               nthreads, problem, variation, language, i)
-        else:
-          print 'nth%d:%s:%s:%s:in%d passed PREVIOUS' % (
-              nthreads, problem, variation, language, i)
+        #else:
+          #print 'nth%d:%s:%s:%s:in%d passed PREVIOUS' % (
+              #nthreads, problem, variation, language, i)
+  print '\n\n*** sequential execution time ***\n\n'
+  for i in range(len(inputs)):
+    for problem in problems:
+      print '\n### %s ###' % problem
+      for la in languages:
+        print '%s is better than:' % la, 
+        values = all_values[threads[-1]][problem]['seq'][la][i]
+        for lb in languages:
+          if la != lb:
+            other = all_values[threads[-1]][problem]['seq'][lb][i]
+            passed = ttest(other, values, ALPHA)
+            if passed:
+              print ' %s' % lb, 
+        print ''
+
+  print '\n\n*** parallel execution time ***\n\n'
+  for i in range(len(inputs)):
+    for problem in problems:
+      print '\n### %s ###' % problem
+      for la in languages:
+        print '%s is better than:' % la, 
+        values = all_values[threads[-1]][problem]['par'][la][i]
+        for lb in languages:
+          if la != lb:
+            other = all_values[threads[-1]][problem]['par'][lb][i]
+            passed = ttest(other, values, ALPHA)
+            if passed:
+              print ' %s' % lb, 
+        print ''
 
 GRAPH_SIZE = 700
 
