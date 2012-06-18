@@ -1,4 +1,91 @@
 import os
+import math
+
+def mean(x):
+  n = len(x)
+  total = 0
+  for xi in x:
+    total += xi
+  return total / n
+
+def stddev(x):
+  n = len(x)
+  total = 0
+  meansq = mean([xi * xi for xi in x])
+  meanx = mean(x)
+  sqmean = meanx * meanx
+  return math.sqrt((n * meansq - n * sqmean) / (n - 1))
+
+yindex = []
+xindex = []
+table = []
+
+def get_t(alpha, df):
+  alpha *= 100
+  y = -1
+  for i in range(len(yindex)):
+    if yindex[i] >= alpha:
+      y = i
+      break
+  x = -1
+  for i in range(len(xindex)):
+    if xindex[i] > df:
+      x = i
+      break
+  return table[x][y]
+
+def ttest(xa, xb, alpha):
+  meana = mean(xa)
+  meanb = mean(xb)
+  sa = stddev(xa)
+  sb = stddev(xb)
+  meandif = meana - meanb
+  na = len(xa)
+  nb = len(xb)
+  sa2na = sa * sa / na
+  sb2nb = sb * sb / nb
+  s = math.sqrt(sa2na + sb2nb)
+  v = s * s * s * s / (
+      (sa2na * sa2na / (na - 1)) + (sb2nb * sb2nb / (nb - 1))) - 2
+  #print 'meana: %f\nsa2: %f\nna: %d\n' % (meana, sa * sa, na)
+  #print 'meanb: %f\nsb2: %f\nnb: %d\n' % (meanb, sb * sb, nb)
+  #print 'meandif: %f\ns: %f\nv: %f\n' % (meandif, s, v)
+  #print 't %f %f' % (1 - alpha / 2, v)
+  #t = float(raw_input())
+  t = get_t(1 - alpha / 2, v)
+  #print 't: %f\n' % t
+  left = meandif - t * s
+  right = meandif + t * s
+  print '%f: [%f, %f]' % (alpha, left, right)
+  return left > 0
+
+def read_table():
+  with open('tdist.txt', 'r') as f:
+    linenum = 0
+    for line in f:
+      linenum += 1
+      words = line.split()
+      if linenum == 1:
+        for i in range(len(words)):
+          if i == 0:
+            continue
+          words[i] = words[i][0:-1]
+          f = float(words[i])
+          yindex.append(f)
+      elif linenum == 2:
+        continue;
+      else:
+        line = []
+        for i in range(len(words)):
+          if i == 0:
+            xindex.append(float(words[i]))
+          else:
+            line.append(float(words[i]))
+        table.append(line)
+      #print words
+  #print yindex
+  #print table
+
 
 #languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
 languages = ["chapel", "cilk", "go", "tbb"]
@@ -314,20 +401,25 @@ def run_all(redirect_output=True):
         print value
 
 results = {}
+all_values = {}
 INVALID = 999
 
 def get_results():
   for nthreads in threads:
     if nthreads not in results:
       results[nthreads] = {}
+      all_values[nthreads] = {}
     for (language, problem, variation) in get_all():
       if variation == 'seq' and nthreads != threads[-1]: continue
       if problem not in results[nthreads]:
         results[nthreads][problem] = {}
+        all_values[nthreads][problem] = {}
       if variation not in results[nthreads][problem]:
         results[nthreads][problem][variation] = {}
+        all_values[nthreads][problem][variation] = {}
       if language not in results[nthreads][problem][variation]:
         results[nthreads][problem][variation][language] = {}
+        all_values[nthreads][problem][variation][language] = {}
 
       for i in range(len(inputs)):
         results[nthreads][problem][variation][language][i] = INVALID
@@ -335,6 +427,7 @@ def get_results():
             language, problem, variation, i, nthreads)
         #print time_output
         cur = read_file_values(time_output)
+        all_values[nthreads][problem][variation][language][i] = cur
 
         if (len(cur) == 0):
           continue
@@ -349,6 +442,35 @@ def get_results():
           #avg -= 1
         results[nthreads][problem][variation][language][i] = avg
   #print results
+  #print all_values
+
+ALPHA = 0.001
+
+def test_significance():
+  read_table()
+  for nthreads in threads:
+    if nthreads == 1:
+      continue
+    for (language, problem, variation) in get_all():
+      if variation == 'seq': continue
+
+      for i in range(len(inputs)):
+        values = all_values[nthreads][problem][variation][language][i]
+        single = all_values[threads[-1]][problem]['seq'][language][i]
+
+        passed = ttest(single, values, ALPHA)
+        if not passed:
+          print 'nth%d:%s:%s:%s:in%d NOT passed' % (
+              nthreads, problem, variation, language, i)
+
+        previous = all_values[nthreads - 1][problem][variation][language][i]
+        passed = ttest(previous, values, ALPHA)
+        if not passed:
+          print 'nth%d:%s:%s:%s:in%d NOT passed PREVIOUS' % (
+              nthreads, problem, variation, language, i)
+        else:
+          print 'nth%d:%s:%s:%s:in%d passed PREVIOUS' % (
+              nthreads, problem, variation, language, i)
 
 GRAPH_SIZE = 700
 
@@ -675,12 +797,12 @@ def output_graphs():
 TOTAL_EXECUTIONS = 30
 
 def main():
-  total_time = (
-      len(languages) * len(problems) * TOTAL_EXECUTIONS * len(threads) *
-      TIMEOUT * len(inputs))
-  print "%fs or %fm or %fh or %fd" % (
-      total_time, total_time / 60., total_time / (
-          60. * 60), total_time / (60. * 60 * 24))
+  #total_time = (
+      #len(languages) * len(problems) * TOTAL_EXECUTIONS * len(threads) *
+      #TIMEOUT * len(inputs))
+  #print "%fs or %fm or %fh or %fd" % (
+      #total_time, total_time / 60., total_time / (
+          #60. * 60), total_time / (60. * 60 * 24))
   #raw_input('press enter to start...')
   #generate_erlang_main()
   #make_all()
@@ -688,10 +810,11 @@ def main():
   #for _ in range(TOTAL_EXECUTIONS):
     #run_all(redirect_output=False)  # TODO: remove outputs
   get_results()
-  output_graphs()
+  test_significance()
+  #output_graphs()
   #system('xmessage " ALL DONE " -nearmouse -timeout 1')
-  raw_input("done! press enter to continue...")
-  system('cd %s && make' % output_dir)
+  #raw_input("done! press enter to continue...")
+  #system('cd %s && make' % output_dir)
 
 if __name__ == '__main__':
   main()
