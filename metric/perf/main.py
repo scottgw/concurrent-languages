@@ -690,6 +690,7 @@ set xtics 1
 set yrange [0:8]
 set ytics 1
 set xlabel "threads"
+set ylabel "speedup"
 set terminal png
 set output "plot.png"
 set key left
@@ -770,6 +771,7 @@ set xtics 1
 set yrange [0:8]
 set ytics 1
 set xlabel "threads"
+set ylabel "speedup"
 set terminal png
 set output "plot.png"
 set key left
