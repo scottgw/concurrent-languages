@@ -6,6 +6,24 @@ import subprocess
 import os
 import math
 
+def read_file_values(file_name):
+  result = []
+  f = open(file_name, 'r')
+  for line in f:
+    try:
+      value = float(line)
+      result.append(value)
+    except ValueError:
+      f.close()
+      return []
+  f.close()
+  return result
+
+def write_to_file(output, content):
+  f = open(output, 'w')
+  f.write(content)
+  f.close()
+
 def mean(x):
   n = len(x)
   total = 0
@@ -39,14 +57,26 @@ def get_t(alpha, df):
       break
   return table[x][y]
 
-def ttest(xa, alpha):
-  meana = mean(xa)
+def ttest(xa, xb, alpha):
+  '''meana = mean(xa)
   sa = stddev(xa)
   na = len(xa)
   delta = get_tdelta(xa, alpha)
   left = meana - delta
   right = meana + delta
-  return left > 0
+  return left > 0'''
+  conf = 1 - alpha
+  with open('input.data', 'w') as f:
+    f.write('x y\n')
+    for i in range(len(xa)):
+      f.write('%.10f\t%.10f\n' % (xa[i], xb[i]))
+  cmd = '../r/test_paired.r %f > out.data' % conf
+  # cmd = '../r/test_paired.r %f' % conf
+  system(cmd)
+  pvalue = read_file_values('out.data')[0]
+  # print '%f ' % pvalue,
+  # return pvalue <= alpha
+  return pvalue
 
 def get_tdelta(xa, alpha):
   meana = mean(xa)
@@ -320,48 +350,104 @@ xscale=1
 
 ALPHA = 0.1
 
+ttest_res = {}
+
+def output_pvalues(table, pretty, code):
+  out = []
+  out.append(
+'''
+\\begin{table}[htbp]
+  \\centering
+  \\begin{tabular}{c|cccccc}
+language''')
+  for language in sorted(languages):
+    out.append(' & %s' % language)
+  out.append('\\\\\n\\hline\n')
+  for la in sorted(languages):
+    out.append('%s' % la)
+    for lb in sorted(languages):
+      if la == lb:
+        out.append(' & --')
+      else:
+        out.append(' & %.3e' %  (table[la][lb]))
+    out.append('\\\\\n')
+  out.append('''
+  \end{tabular}
+  \caption{p-values for %s}
+  \label{tab:pv-%s}
+\end{table}''' % (pretty, code))
+  outstr = ''.join(out)
+  output_file_name = "table-pvalue-%s.tex" % (code)
+  output_file = "%s/chapters/%s" % (
+          output_dir, output_file_name)
+  write_to_file(output_file, outstr)
+
 def test_significance():
-  #wc_result[table_type][language][problem][variation] = value
-    #result[language][problem][variation])
+  types = ['tsing', 'tboth', 'size']
+  for t in types:
+    ttest_res[t] = {}
+
   for variation in variations:
+    ttest_res['tsing'][variation] = {}
     for la in languages:
+      ttest_res['tsing'][variation][la] = {}
       for lb in languages:
         if la == lb:
           continue
-        line = []
+        left = []
+        right = []
         for problem in problems:
-          line.append(result[la][problem][variation] -
-                      result[lb][problem][variation])
-        passed = ttest(line, ALPHA)
+          left.append(result[la][problem][variation])
+          right.append(result[lb][problem][variation])
+        pvalue = ttest(left, right, ALPHA)
+        ttest_res['tsing'][variation][la][lb] = pvalue
+        passed = pvalue <= ALPHA
         if passed:
           print '%s:%s:%s passed SINGLE' % (la, lb, variation)
 
   for la in languages:
+    ttest_res['tboth'][la] = {}
     for lb in languages:
       if la == lb:
         continue
-      line = []
+      left = []
+      right = []
       for problem in problems:
         for variation in variations:
-          line.append(result[la][problem][variation] -
-                      result[lb][problem][variation])
-      passed = ttest(line, ALPHA)
+          left.append(result[la][problem][variation])
+          right.append(result[lb][problem][variation])
+      pvalue = ttest(left, right, ALPHA)
+      ttest_res['tboth'][la][lb] = pvalue
+      passed = pvalue <= ALPHA
       if passed:
         print '%s:%s passed BOTH' % (la, lb)
 
   for la in languages:
+    ttest_res['size'][la] = {}
     for lb in languages:
       if la == lb:
         continue
-      line = []
+      left = []
+      right = []
       for problem in problems:
         for variation in variations:
           for table_type in table_types:
-            line.append(int(wc_result[table_type][la][problem][variation]) -
-                        int(wc_result[table_type][lb][problem][variation]))
-      passed = ttest(line, ALPHA)
+            left.append(int(wc_result[table_type][la][problem][variation]))
+            right.append(
+                int(wc_result[table_type][lb][problem][variation]))
+      pvalue = ttest(left, right, ALPHA)
+      ttest_res['size'][la][lb] = pvalue
+      passed = pvalue <= ALPHA
       if passed:
         print '%s:%s passed SIZE' % (la, lb)
+
+  output_pvalues(ttest_res['tsing']['seq'],
+      'time to code sequential version', 'seq-ttc')
+  output_pvalues(ttest_res['tsing']['par'],
+      'time to code parallel version', 'par-ttc')
+  output_pvalues(ttest_res['tboth'], 'time to code both versions',
+      'both-ttc')
+  output_pvalues(ttest_res['size'], 'size of source code', 'size')
 
 def main():
   read_table()
