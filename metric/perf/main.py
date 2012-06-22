@@ -35,6 +35,7 @@ def get_t(alpha, df):
   return table[x][y]
 
 def ttest(xa, xb, alpha):
+  '''
   meana = mean(xa)
   meanb = mean(xb)
   sa = stddev(xa)
@@ -58,6 +59,20 @@ def ttest(xa, xb, alpha):
   right = meandif + t * s
   #print '%f: [%f, %f]' % (alpha, left, right)
   return left > 0
+'''
+  conf = 1 - alpha
+  with open('input.data', 'w') as f:
+    f.write('x y\n')
+    for i in range(min(len(xa), len(xb))):
+      f.write('%.10f\t%.10f\n' % (xa[i], xb[i]))
+  cmd = '../r/test.r %f > out.data' % conf
+  # cmd = '../r/test.r %f' % conf
+  system(cmd)
+  pvalue = read_file_values('out.data')[0]
+  # print '%f ' % pvalue,
+  # return pvalue <= alpha
+  return pvalue
+  #os.exit(0)
 
 def get_tdelta(xa, alpha):
   meana = mean(xa)
@@ -97,6 +112,7 @@ def read_table():
 
 #languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
 languages = ["chapel", "cilk", "go", "tbb"]
+#languages = ["chapel", 'cilk']
 #languages = ["chapel"]
 problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
@@ -297,6 +313,7 @@ inputs = [
 threads = [1, 2, 3, 4, 5, 6, 7, 8]
 #threads = [1, 2, 3, 4]
 #threads = [2, 4]
+#threads = [1, 2, 8]
 #threads = [1, 4]
 #threads = [4]
 
@@ -454,8 +471,9 @@ def get_results():
 
 ALPHA = 0.001
 
-def test_significance():
-  read_table()
+ttest_res = {}
+
+def test_significance_speedup():
   for nthreads in threads:
     if nthreads == 1:
       continue
@@ -465,20 +483,86 @@ def test_significance():
       for i in range(len(inputs)):
         values = all_values[nthreads][problem][variation][language][i]
         single = all_values[threads[-1]][problem]['seq'][language][i]
+        pvalue = ttest(single, values, ALPHA)
 
-        passed = ttest(single, values, ALPHA)
-        if not passed:
-          print 'nth%d:%s:%s:%s:in%d NOT passed' % (
-              nthreads, problem, variation, language, i)
+        if not nthreads in ttest_res['spseq']:
+          ttest_res['spseq'][nthreads] = {}
+        if not problem in ttest_res['spseq'][nthreads]:
+          ttest_res['spseq'][nthreads][problem] = {}
+        if not variation in ttest_res['spseq'][nthreads][problem]:
+          ttest_res['spseq'][nthreads][problem][variation] = {}
+        if not language in ttest_res['spseq'][nthreads][problem][variation]:
+          ttest_res['spseq'][nthreads][problem][variation][language] = {}
+        ttest_res['spseq'][nthreads][problem][variation][language][i] = pvalue
 
         previous = all_values[nthreads - 1][problem][variation][language][i]
-        passed = ttest(previous, values, ALPHA)
-        if not passed:
-          print 'nth%d:%s:%s:%s:in%d NOT passed PREVIOUS' % (
-              nthreads, problem, variation, language, i)
-        #else:
-          #print 'nth%d:%s:%s:%s:in%d passed PREVIOUS' % (
-              #nthreads, problem, variation, language, i)
+        pvalue = ttest(previous, values, ALPHA)
+
+        if not nthreads in ttest_res['spprev']:
+          ttest_res['spprev'][nthreads] = {}
+        if not problem in ttest_res['spprev'][nthreads]:
+          ttest_res['spprev'][nthreads][problem] = {}
+        if not variation in ttest_res['spprev'][nthreads][problem]:
+          ttest_res['spprev'][nthreads][problem][variation] = {}
+        if not language in ttest_res['spprev'][nthreads][problem][variation]:
+          ttest_res['spprev'][nthreads][problem][variation][language] = {}
+        ttest_res['spprev'][nthreads][problem][variation][language][i] = pvalue
+
+  for t in ['spseq', 'spprev']:
+    for nthreads in threads:
+      if nthreads == 1:
+        continue
+      for (language, problem, variation) in get_all():
+        if variation == 'seq': continue
+
+        for i in range(len(inputs)):
+          pvalue = ttest_res[t][nthreads][problem][variation][language][i]
+          passed = pvalue <= ALPHA
+          if not passed:
+            print 'nth%d:%s:%s:%s:in%d NOT passed %s' % (
+                nthreads, problem, variation, language, i, t)
+
+  pretty = {'spseq' : 'sequential', 'spprev' : 'previous parallel'}
+  for language in sorted(languages):
+    for t in ['spseq', 'spprev']:
+      # print '%s:%s' % (language, t)
+      out = []
+      out.append(
+'''
+\\begin{table}[htbp]
+  %\\centering
+  \\begin{tabular}{c|cccccc}
+nthreads''')
+      for problem in sorted(problems):
+        out.append(' & %s' % problem)
+      out.append('\\\\\n\\hline\n')
+      for nthreads in threads:
+        if nthreads == 1:
+          continue
+        out.append('%d' % nthreads)
+        for problem in sorted(problems):
+          out.append(' & %.3e' %  (
+              ttest_res[t][nthreads][problem]['par'][language][0]))
+        out.append('\\\\\n')
+      out.append('''
+  \end{tabular}
+  \caption{p-values for speedup of language %s vs %s time}
+  \label{tab:spd-pv-%s-%s}
+\end{table}''' % (language, pretty[t], language, t))
+      outstr = ''.join(out)
+      output_file_name = "table-pvalue-%s-%s.tex" % (language, t)
+      output_file = "%s/chapters/%s" % (
+              output_dir, output_file_name)
+      write_to_file(output_file, outstr)
+
+def test_significance():
+  read_table() # TODO: remove
+  ttest_types = ['spseq', 'spprev', 'seq', 'par']
+  for t in ttest_types:
+    ttest_res[t] = {}
+
+  # test_significance_speedup()
+
   print '\n\n*** sequential execution time ***\n\n'
   for i in range(len(inputs)):
     for problem in problems:
@@ -489,7 +573,17 @@ def test_significance():
         for lb in languages:
           if la != lb:
             other = all_values[threads[-1]][problem]['seq'][lb][i]
-            passed = ttest(other, values, ALPHA)
+            pvalue = ttest(other, values, ALPHA)
+
+            if 'seq' not in ttest_res:
+              ttest_res['seq'] = {}
+            if la not in ttest_res['seq']:
+              ttest_res['seq'][la] = {}
+            if lb not in ttest_res['seq'][la]:
+              ttest_res['seq'][la][lb] = {}
+            ttest_res['seq'][la][lb][i] = pvalue
+
+            passed = pvalue <= ALPHA
             if passed:
               print ' %s' % lb, 
         print ''
@@ -504,10 +598,53 @@ def test_significance():
         for lb in languages:
           if la != lb:
             other = all_values[threads[-1]][problem]['par'][lb][i]
-            passed = ttest(other, values, ALPHA)
+            pvalue = ttest(other, values, ALPHA)
+
+            if 'par' not in ttest_res:
+              ttest_res['par'] = {}
+            if la not in ttest_res['par']:
+              ttest_res['par'][la] = {}
+            if lb not in ttest_res['par'][la]:
+              ttest_res['par'][la][lb] = {}
+            ttest_res['par'][la][lb][i] = pvalue
+
+            passed = pvalue <= ALPHA
             if passed:
               print ' %s' % lb, 
         print ''
+
+  pretty = {'seq' : 'sequential', 'par' : 'parallel'}
+  for problem in sorted(problems):
+    for t in ['seq', 'par']:
+      out = []
+      out.append(
+'''
+\\begin{table}[htbp]
+  \\centering
+  \\begin{tabular}{c|cccccc}
+language''')
+      for language in sorted(languages):
+        out.append(' & %s' % language)
+      out.append('\\\\\n\\hline\n')
+      for la in sorted(languages):
+        out.append('%s' % la)
+        for lb in sorted(languages):
+          if la == lb:
+            out.append(' & --')
+          else:
+            out.append(' & %.3e' %  (ttest_res[t][la][lb][0]))
+        out.append('\\\\\n')
+      out.append('''
+  \end{tabular}
+  \caption{p-values for %s execution time in problem %s}
+  \label{tab:exec-pv-%s-%s}
+\end{table}''' % (pretty[t], problem, problem, t))
+      outstr = ''.join(out)
+      output_file_name = "table-pvalue-%s-%s.tex" % (problem, t)
+      output_file = "%s/chapters/%s" % (
+              output_dir, output_file_name)
+      write_to_file(output_file, outstr)
+
 
 GRAPH_SIZE = 700
 
@@ -861,7 +998,7 @@ def main():
   #for _ in range(TOTAL_EXECUTIONS):
     #run_all(redirect_output=False)  # TODO: remove outputs
   get_results()
-  test_significance()
+  #test_significance()
   output_graphs()
   #system('xmessage " ALL DONE " -nearmouse -timeout 1')
   raw_input("done! press enter to continue...")

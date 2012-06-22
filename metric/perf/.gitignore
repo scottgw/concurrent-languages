@@ -5,3 +5,4 @@
 *.out
 *.tar.gz
 out.txt
+*.data
