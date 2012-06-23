@@ -984,6 +984,66 @@ def output_graphs():
 
 TOTAL_EXECUTIONS = 30
 
+def calculate():
+  # float(results[threads[-1]][problem]['par'][language][0])))
+  nt = threads[-1]
+  i = 0
+  variations = ['par']
+  nmax = {}
+  nmin = {}
+  local_problems = []
+  for problem in problems:
+    if problem != 'product':
+      local_problems.append(problem)
+
+  for problem in local_problems:
+    nmax[problem] = {}
+    nmin[problem] = {}
+    for variation in variations:
+      nmax[problem][variation] = 0
+      nmin[problem][variation] = 999999999999
+      for language in languages:
+        nmax[problem][variation] = max(nmax[problem][variation],
+            results[nt][problem][variation][language][i])
+        nmin[problem][variation] = min(nmin[problem][variation],
+            results[nt][problem][variation][language][i])
+  calc = {}
+  nsum = 0.0
+  #for problem in local_problems:
+    #print problem, 
+  #print ''
+  for language in languages:
+    #print '%s:' % language, 
+    num = 0.0
+    den = 0.0
+    for problem in local_problems:
+      for variation in variations:
+        #print ' %f (%f) ' % (
+            #results[nt][problem][variation][language][i],
+            #results[nt][problem][variation][language][i] / float(
+                #nmin[problem][variation]))
+        num += (results[nt][problem][variation][language][i] / (
+            float(nmin[problem][variation])))
+        den += 1
+    #print ''
+    #print '%f / %f = %f' % (num, float(den), num / float(den))
+    calc[language] = num / float(den)
+    nsum += calc[language]
+
+  vec = []
+  for language in languages:
+    #vec.append((calc[language] / nsum, language))
+    vec.append((calc[language], language))
+
+  print 'time to execute (par %d)' % nt
+
+  vec.sort()
+  for x in vec:
+    (val, lang) = x
+    print '%s : %f' % (lang, val)
+
+
+
 def main():
   #total_time = (
       #len(languages) * len(problems) * TOTAL_EXECUTIONS * len(threads) *
@@ -998,11 +1058,12 @@ def main():
   #for _ in range(TOTAL_EXECUTIONS):
     #run_all(redirect_output=False)  # TODO: remove outputs
   get_results()
+  calculate()
   #test_significance()
-  output_graphs()
+  #output_graphs()
   #system('xmessage " ALL DONE " -nearmouse -timeout 1')
-  raw_input("done! press enter to continue...")
-  system('cd %s && make' % output_dir)
+  #raw_input("done! press enter to continue...")
+  #system('cd %s && make' % output_dir)
 
 if __name__ == '__main__':
   main()

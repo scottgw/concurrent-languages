@@ -449,11 +449,100 @@ def test_significance():
       'both-ttc')
   output_pvalues(ttest_res['size'], 'size of source code', 'size')
 
+def calculate():
+  # left.append(result[la][problem][variation])
+  variations = ['par']
+  nmax = {}
+  nmin = {}
+  for problem in problems:
+    nmax[problem] = {}
+    nmin[problem] = {}
+    for variation in variations:
+      nmax[problem][variation] = 0
+      nmin[problem][variation] = 999999999999
+      for language in languages:
+        nmax[problem][variation] = max(nmax[problem][variation],
+            result[language][problem][variation])
+        nmin[problem][variation] = min(nmin[problem][variation],
+            result[language][problem][variation])
+  calc = {}
+  nsum = 0.0
+  for language in languages:
+    num = 0.0
+    den = 0.0
+    for problem in problems:
+      for variation in variations:
+        #num += result[language][problem][variation]
+        #num -= nmin[problem][variation]
+        #den += nmax[problem][variation]
+        #den -= nmin[problem][variation]
+        num += (result[language][problem][variation] / (
+            float(nmin[problem][variation])))
+        den += 1
+    calc[language] = num / float(den)
+    nsum += calc[language]
+
+  vec = []
+  for language in languages:
+    #vec.append((calc[language] / nsum, language))
+    vec.append((calc[language], language))
+
+  print '\n\ntime to code (par)\n'
+
+  vec.sort()
+  for x in vec:
+    (val, lang) = x
+    print '%s : %f' % (lang, val)
+  # int(wc_result[table_type][lb][problem][variation]))
+  nmax = {}
+  nmin = {}
+  table_types = ['now']
+  for t in table_types:
+    nmax[t] = {}
+    nmin[t] = {}
+    for problem in problems:
+      nmax[t][problem] = {}
+      nmin[t][problem] = {}
+      for variation in variations:
+        nmax[t][problem][variation] = 0
+        nmin[t][problem][variation] = 999999999999
+        for language in languages:
+          nmax[t][problem][variation] = max(nmax[t][problem][variation],
+              int(wc_result[t][language][problem][variation]))
+          nmin[t][problem][variation] = min(nmin[t][problem][variation],
+              int(wc_result[t][language][problem][variation]))
+  calc = {}
+  nsum = 0.0
+  for language in languages:
+    num = 0.0
+    den = 0.0
+    for t in table_types:
+      for problem in problems:
+        for variation in variations:
+          num += (int(wc_result[t][language][problem][variation]) / (
+              float(nmin[t][problem][variation])))
+          den += 1
+    calc[language] = num / float(den)
+    nsum += calc[language]
+
+  vec = []
+  for language in languages:
+    #vec.append((calc[language] / nsum, language))
+    vec.append((calc[language], language))
+
+  print '\n\nsource code size (NoW - par)\n'
+
+  vec.sort()
+  for x in vec:
+    (val, lang) = x
+    print '%s : %f' % (lang, val)
+
 def main():
   read_table()
   load_data()
   output_tables()
-  test_significance()
+  calculate()
+  #test_significance()
   #output_graphs()
   global total_lines
   print "total lines: %d" % total_lines
