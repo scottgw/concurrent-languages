@@ -111,13 +111,15 @@ def read_table():
 
 
 #languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
-languages = ["chapel", "cilk", "go", "tbb"]
+#languages = ["chapel", "cilk", "go", "tbb"]
 #languages = ["chapel", 'cilk']
-#languages = ["chapel"]
-problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
+languages = ["erlang"]
+#languages = ["chapel", "cilk", "go", "tbb", 'erlang']
+#problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
-#problems = ["chain"]
+problems = ["randmat"]
 variations = ["seq", "par"]
+#variations = ["seq"]
 
 def system(cmd, timeout=False):
   ret = os.system(cmd)
@@ -162,7 +164,7 @@ def get_problems_with_variations():
 
 ERLANG_MAIN = ("#!/bin/sh\n"
                "cd ~/tudo/tcc/apmc/lucia/metric/perf/%s\n"
-               "erl -noshell -s main main -s init stop\n")
+               "erl -noshell -s main main is_bench -s init stop\n")
 
 def get_all():
   for (problem, variation) in get_problems_with_variations():
@@ -304,18 +306,21 @@ inputs = [
 # cilk-thresh
     #ProblemInput(20000, 20000, 666, 1, 1),
 # cilk-winnow, cilk-outer, cilk-product, cilk-randmat?, cilk-chain
-# cilk-all, tbb-all
-    ProblemInput(20000, 20000, 666, 1, 10000),
+# cilk-all, tbb-all, all-all
+    #ProblemInput(20000, 20000, 666, 1, 10000),
+# erlang
+    ProblemInput(2, 20000000, 666, 1, 10000),
 # cilk-randmat
     #ProblemInput(30000, 30000, 666, 1, 1),
   ]
 
-threads = [1, 2, 3, 4, 5, 6, 7, 8]
+#threads = [1, 2, 3, 4, 5, 6, 7, 8]
 #threads = [1, 2, 3, 4]
 #threads = [2, 4]
 #threads = [1, 2, 8]
 #threads = [1, 4]
 #threads = [4]
+threads = [1]
 
 ##
 
@@ -556,7 +561,6 @@ nthreads''')
       write_to_file(output_file, outstr)
 
 def test_significance():
-  read_table() # TODO: remove
   ttest_types = ['spseq', 'spprev', 'seq', 'par']
   for t in ttest_types:
     ttest_res[t] = {}
@@ -976,13 +980,14 @@ set key left
   write_to_file(latex_all_file_name, ''.join(latex_all))
 
 def output_graphs():
+  read_table()
   create_graph("exec-time", results[threads[-1]], "")
   speedup_graph_name = 'speedup'
   create_speedup_graph(speedup_graph_name, results)
   create_problem_speedup_graph("problem-speedup", speedup_graph_name)
   create_language_speedup_graph("language-speedup", speedup_graph_name)
 
-TOTAL_EXECUTIONS = 30
+TOTAL_EXECUTIONS = 3
 
 def calculate():
   # float(results[threads[-1]][problem]['par'][language][0])))
@@ -1052,18 +1057,18 @@ def main():
       #total_time, total_time / 60., total_time / (
           #60. * 60), total_time / (60. * 60 * 24))
   #raw_input('press enter to start...')
-  #generate_erlang_main()
-  #make_all()
-  #create_inputs()
-  #for _ in range(TOTAL_EXECUTIONS):
-    #run_all(redirect_output=False)  # TODO: remove outputs
+  generate_erlang_main()
+  make_all()
+  create_inputs()
+  for _ in range(TOTAL_EXECUTIONS):
+    run_all(redirect_output=False)  # TODO: remove outputs
   get_results()
   calculate()
   #test_significance()
-  #output_graphs()
-  #system('xmessage " ALL DONE " -nearmouse -timeout 1')
-  #raw_input("done! press enter to continue...")
-  #system('cd %s && make' % output_dir)
+  output_graphs()
+  system('xmessage " ALL DONE " -nearmouse -timeout 1')
+  raw_input("done! press enter to continue...")
+  system('cd %s && make' % output_dir)
 
 if __name__ == '__main__':
   main()
