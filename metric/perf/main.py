@@ -113,8 +113,8 @@ def read_table():
 #languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
 #languages = ["chapel", "cilk", "go", "tbb"]
 #languages = ["chapel", 'cilk']
-languages = ["erlang"]
-#languages = ["chapel", "cilk", "go", "tbb", 'erlang']
+#languages = ["erlang"]
+languages = ["chapel", "cilk", "go", "tbb", 'erlang']
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
 problems = ["randmat"]
@@ -164,7 +164,7 @@ def get_problems_with_variations():
 
 ERLANG_MAIN = ("#!/bin/sh\n"
                "cd ~/tudo/tcc/apmc/lucia/metric/perf/%s\n"
-               "erl -noshell -s main main is_bench -s init stop\n")
+               "erl -noshell +S $1 -s main main is_bench -s init stop\n")
 
 def get_all():
   for (problem, variation) in get_problems_with_variations():
@@ -320,7 +320,7 @@ inputs = [
 #threads = [1, 2, 8]
 #threads = [1, 4]
 #threads = [4]
-threads = [1]
+threads = [1, 2]
 
 ##
 
@@ -412,6 +412,11 @@ def run_all(redirect_output=True):
         elif language == 'tbb':
           if variation == 'par':
             cmd += ' --threads %d' % nthreads
+        elif language == 'erlang':
+          if variation == 'par':
+            cmd += ' %d' % nthreads
+          else:
+            cmd += ' 1'
 
         if (language == "chapel" or language == "cilk" or language == "tbb"
             or language == 'go'):
@@ -674,7 +679,7 @@ def create_graph(graph_name, values, pretty_name, use_subfigure=True):
         out.append(";" + language)
       out.append((
           "\n"
-          "colors=light_green,yellow,red,med_blue,light_green,cyan\n"
+          "colors=light_green,yellow,red,med_blue,cyan\n"
           "=table\n"
           "yformat=%g\n"
           "=norotate\n"
@@ -1063,12 +1068,12 @@ def main():
   for _ in range(TOTAL_EXECUTIONS):
     run_all(redirect_output=False)  # TODO: remove outputs
   get_results()
-  calculate()
+  #calculate()
   #test_significance()
-  output_graphs()
-  system('xmessage " ALL DONE " -nearmouse -timeout 1')
-  raw_input("done! press enter to continue...")
-  system('cd %s && make' % output_dir)
+  #output_graphs()
+  #system('xmessage " ALL DONE " -nearmouse -timeout 1')
+  #raw_input("done! press enter to continue...")
+  #system('cd %s && make' % output_dir)
 
 if __name__ == '__main__':
   main()
