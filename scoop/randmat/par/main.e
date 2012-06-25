@@ -9,6 +9,7 @@
 
 class MAIN
 inherit ARGUMENTS
+  EXCEPTIONS
 create make
 
 feature
@@ -16,27 +17,40 @@ feature
   local
     nrows, ncols, s: INTEGER
     matrix: ARRAY[separate ARRAY[INTEGER]]
+    is_bench: BOOLEAN
+    arg: STRING_8
   do
     create in.make_open_read(separate_character_option_value('i'))
+    arg := separate_character_option_value('e')
+    is_bench := False
+    if arg /= Void then
+      is_bench := arg.is_equal("is_bench")
+    end
 
     nrows := read_integer
     ncols := read_integer
     s := read_integer
 
-    --print("nrows: " + nrows.out + ", ncols: " + ncols.out + ", s: " +
-        --s.out + "%N")
+    print("nrows: " + nrows.out + ", ncols: " + ncols.out + ", s: " +
+        s.out + "%N")
 
     create matrix.make_empty
-
+    nrows_ := nrows
+    ncols_ := ncols
+    matrix_ := matrix
+    is_bench_ := is_bench
     randmat(nrows, ncols, s, matrix)
 
-    --across 1 |..| nrows as ic loop
-      --print("line: " + ic.item.out + ": ")
-      --across 1 |..| ncols as jc loop
-        --print(item(matrix.item(ic.item), jc.item).out + " ")
+    --if not is_bench then
+      --across 1 |..| nrows as ic loop
+        --across 1 |..| ncols as jc loop
+          --print(item(matrix.item(ic.item), jc.item).out + " ")
+        --end
+        --print("%N")
       --end
-      --print("%N")
     --end
+    print("main dead%N%N")
+    die(1)
   end
 
   read_integer(): INTEGER
@@ -60,10 +74,10 @@ feature
     workers: LINKED_LIST[separate RANDMAT_PARFOR_WORKER]
   do
     create workers.make
-    create parfor_aggregator.make(nrows)
+    create parfor_aggregator.make(nrows, Current)
     across 1 |..| nrows as ic loop
       matrix.force(create_array(), ic.item)
-      create worker.make(nrows, ncols, seed, matrix.item(ic.item),
+      create worker.make(nrows, ncols, seed + ic.item, matrix.item(ic.item),
           parfor_aggregator)
       workers.extend(worker)
     end
@@ -77,7 +91,7 @@ feature
   require
     aggregator.is_all_done
   do
-    --print("parfor_result%N")
+    print("parfor_result%N")
   end
 
   launch_parfor_worker(worker: separate RANDMAT_PARFOR_WORKER)
@@ -97,9 +111,26 @@ feature
     Result := array.item(index)
   end
 
+  done()
+  do
+    print("%N%NMAIN DONE!%N%N")
+    if not is_bench_ then
+      across 1 |..| nrows_ as ic loop
+        across 1 |..| ncols_ as jc loop
+          print(item(matrix_.item(ic.item), jc.item).out + " ")
+        end
+        print("%N")
+      end
+    end
+    print("%N%NMAIN END!%N%N")
+  end
+
 feature {NONE}
   parfor_aggregator: separate RANDMAT_PARFOR_AGGREGATOR
   in: PLAIN_TEXT_FILE
+  nrows_, ncols_: INTEGER
+  matrix_: ARRAY[separate ARRAY[INTEGER]]
+  is_bench_: BOOLEAN
 
-end -- class RANDMAT
+end
 

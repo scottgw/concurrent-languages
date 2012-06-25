@@ -114,7 +114,8 @@ def read_table():
 #languages = ["chapel", "cilk", "go", "tbb"]
 #languages = ["chapel", 'cilk']
 #languages = ["erlang"]
-languages = ["chapel", "cilk", "go", "tbb", 'erlang']
+languages = ["scoop"]
+#languages = ["chapel", "cilk", "go", "tbb", 'erlang']
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
 problems = ["randmat"]
@@ -286,6 +287,8 @@ inputs = [
     #ProblemInput(250, 250, 666, 10, 25 * (2500 / 100.)),
     #ProblemInput(500, 500, 666, 50, 250),
     #ProblemInput(1000, 1000, 666, 50, 1000),
+# scoop-randmat
+    #ProblemInput(2, 100000, 666, 50, 1000),
 # chapel-all
     #ProblemInput(500, 500, 666, 10, 500 * (500 / 100.)),
 # chapel-outer, chapel-product, chapel-chain
@@ -308,8 +311,7 @@ inputs = [
 # cilk-winnow, cilk-outer, cilk-product, cilk-randmat?, cilk-chain
 # cilk-all, tbb-all, all-all
     #ProblemInput(20000, 20000, 666, 1, 10000),
-# erlang
-    ProblemInput(2, 20000000, 666, 1, 10000),
+    ProblemInput(20, 20000, 666, 1, 10000),
 # cilk-randmat
     #ProblemInput(30000, 30000, 666, 1, 1),
   ]
@@ -397,7 +399,7 @@ def run_all(redirect_output=True):
         if language == "erlang":
           cmd += "main.sh"
         elif language == "scoop":
-          cmd += "main -i"
+          cmd += "main -e is_bench -i"
         else:
           cmd += "main"
 
@@ -1062,7 +1064,7 @@ def main():
       #total_time, total_time / 60., total_time / (
           #60. * 60), total_time / (60. * 60 * 24))
   #raw_input('press enter to start...')
-  generate_erlang_main()
+  #generate_erlang_main()
   make_all()
   create_inputs()
   for _ in range(TOTAL_EXECUTIONS):
@@ -1070,10 +1072,10 @@ def main():
   get_results()
   #calculate()
   #test_significance()
-  #output_graphs()
-  #system('xmessage " ALL DONE " -nearmouse -timeout 1')
-  #raw_input("done! press enter to continue...")
-  #system('cd %s && make' % output_dir)
+  output_graphs()
+  system('xmessage " ALL DONE " -nearmouse -timeout 1')
+  raw_input("done! press enter to continue...")
+  system('cd %s && make' % output_dir)
 
 if __name__ == '__main__':
   main()

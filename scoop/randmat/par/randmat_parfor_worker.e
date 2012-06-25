@@ -12,7 +12,6 @@ feature
     seed := seed_
     matrix := matrix_
     aggregator := aggregator_
-    create rand.set_seed(seed);
   end
 
 feature
@@ -21,15 +20,22 @@ feature
     --print("worker live%N")
     get_result(matrix)
     put_result(aggregator)
+    print("worker dead%N")
   end
 
   get_result(a_matrix: separate ARRAY[INTEGER])
+  local
+    lcg_a, lcg_c, rand_max, int_max: INTEGER
   do
+    lcg_a := 1664525
+    lcg_c := 1013904223
+    rand_max := 100
+    int_max := 2147483647
+    a_matrix.resize(1, ncols)
     across 1 |..| ncols as jc loop
-      rand.forth
-      a_matrix.force(rand.item, jc.item)
+      seed := (lcg_a * seed + lcg_c) \\ int_max
+      a_matrix.put((((seed \\ rand_max) + rand_max) \\ rand_max), jc.item)
     end
-    --put_result(aggregator)
   end
 
   put_result(an_aggregator: separate RANDMAT_PARFOR_AGGREGATOR)
@@ -41,6 +47,5 @@ feature {NONE}
   nrows, ncols, seed: INTEGER
   matrix: separate ARRAY[INTEGER]
   aggregator: separate RANDMAT_PARFOR_AGGREGATOR
-	rand: RANDOM
 
 end
