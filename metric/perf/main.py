@@ -314,13 +314,13 @@ inputs = [
     #ProblemInput(30000, 30000, 666, 1, 1),
   ]
 
-#threads = [1, 2, 3, 4, 5, 6, 7, 8]
+threads = [1, 2, 3, 4, 5, 6, 7, 8]
 #threads = [1, 2, 3, 4]
 #threads = [2, 4]
 #threads = [1, 2, 8]
 #threads = [1, 4]
 #threads = [4]
-threads = [1, 2]
+#threads = [1, 2]
 
 ##
 
@@ -1062,18 +1062,18 @@ def main():
       #total_time, total_time / 60., total_time / (
           #60. * 60), total_time / (60. * 60 * 24))
   #raw_input('press enter to start...')
-  generate_erlang_main()
-  make_all()
-  create_inputs()
-  for _ in range(TOTAL_EXECUTIONS):
-    run_all(redirect_output=False)  # TODO: remove outputs
+  #generate_erlang_main()
+  #make_all()
+  #create_inputs()
+  #for _ in range(TOTAL_EXECUTIONS):
+    #run_all(redirect_output=False)  # TODO: remove outputs
   get_results()
   #calculate()
   #test_significance()
-  #output_graphs()
-  #system('xmessage " ALL DONE " -nearmouse -timeout 1')
-  #raw_input("done! press enter to continue...")
-  #system('cd %s && make' % output_dir)
+  output_graphs()
+  system('xmessage " ALL DONE " -nearmouse -timeout 1')
+  raw_input("done! press enter to continue...")
+  system('cd %s && make' % output_dir)
 
 if __name__ == '__main__':
   main()
