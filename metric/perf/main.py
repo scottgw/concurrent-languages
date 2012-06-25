@@ -322,7 +322,8 @@ inputs = [
 #threads = [1, 2, 8]
 #threads = [1, 4]
 #threads = [4]
-threads = [1, 2]
+#threads = [1, 2]
+threads = [1]
 
 ##
 
@@ -994,7 +995,7 @@ def output_graphs():
   create_problem_speedup_graph("problem-speedup", speedup_graph_name)
   create_language_speedup_graph("language-speedup", speedup_graph_name)
 
-TOTAL_EXECUTIONS = 3
+TOTAL_EXECUTIONS = 30
 
 def calculate():
   # float(results[threads[-1]][problem]['par'][language][0])))
@@ -1069,13 +1070,13 @@ def main():
   create_inputs()
   for _ in range(TOTAL_EXECUTIONS):
     run_all(redirect_output=False)  # TODO: remove outputs
-  get_results()
+  #get_results()
   #calculate()
   #test_significance()
-  output_graphs()
-  system('xmessage " ALL DONE " -nearmouse -timeout 1')
-  raw_input("done! press enter to continue...")
-  system('cd %s && make' % output_dir)
+  #output_graphs()
+  #system('xmessage " ALL DONE " -nearmouse -timeout 1')
+  #raw_input("done! press enter to continue...")
+  #system('cd %s && make' % output_dir)
 
 if __name__ == '__main__':
   main()

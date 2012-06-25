@@ -50,7 +50,7 @@ feature
       --end
     --end
     print("main dead%N%N")
-    die(1)
+    die(0)
   end
 
   read_integer(): INTEGER
