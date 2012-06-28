@@ -293,13 +293,17 @@ GRAPH_SIZE = 700
 output_dir = "../../../ufrgs/tc"
 
 def output_graphs():
-  def create_graph(graph_name, values, max_value, pretty_name):
+  def create_graph(graph_name, values, max_value, pretty_name, is_relative=True):
     old_stdout = sys.stdout
 
     variation_names = {"seq" : "Sequential", "par" : "Parallel"}
     for variation in variations:
-      output_file = "../../../ufrgs/tc/images/graph-%s-%s" % (
-        graph_name, variation)
+      if is_relative:
+        output_file = "../../../ufrgs/tc/images/graph-%s-%s" % (
+          graph_name, variation)
+      else:
+        output_file = "../../../ufrgs/tc/images/other-graph-%s-%s" % (
+          graph_name, variation)
       sys.stdout = open('%s.perf' % output_file, "w")
 
       sys.stdout.write("=cluster")
@@ -314,16 +318,21 @@ xscale=1
 '''
       variation_name = variation_names[variation]
       print "max=%d" % max_value
-      print "ylabel=%s %s versus smallest" % (variation_name, pretty_name)
+      if is_relative:
+        print "ylabel=%s %s versus smallest" % (variation_name, pretty_name)
+      else:
+        print "ylabel=%s %s" % (variation_name, pretty_name)
       for problem in sorted(problems):
         print problem,
         nmin = min(
             float(
               values[language][problem][variation]) for language in sorted(
                 languages))
+        if not is_relative:
+          nmin = 1
         for language in sorted(languages):
-          print("%.2f" % (
-            float(values[language][problem][variation]) / nmin)),
+            print("%.2f" % (
+              float(values[language][problem][variation]) / nmin)),
         print ""
 
       sys.stdout = old_stdout
@@ -347,6 +356,15 @@ xscale=1
   for table_name in table_types:
     pretty_name = pretty_names[table_name]
     create_graph(table_name, wc_result[table_name], 8, pretty_name)
+
+  create_graph("time", result, 800, pretty_names["time"], is_relative=False)
+  max_sizes = {"loc" : 1200, "now" : 3000}
+  for table_name in table_types:
+    pretty_name = pretty_names[table_name]
+    max_size = max_sizes[table_name]
+    create_graph(table_name, wc_result[table_name], max_size, pretty_name,
+        is_relative=False)
+
 
 ALPHA = 0.1
 
@@ -541,9 +559,9 @@ def main():
   read_table()
   load_data()
   output_tables()
-  calculate()
+  #calculate()
   #test_significance()
-  #output_graphs()
+  output_graphs()
   global total_lines
   print "total lines: %d" % total_lines
   print "done"
