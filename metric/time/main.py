@@ -265,7 +265,7 @@ def output_tables():
     cmd = "find ../../%s/%s/%s/ | grep \"\\.%s$\" | xargs cat | grep . | wc %s > wc.out" % (
         language, problem, variation, extension, table_flag)
     if problem == "chain" and language in [
-        "erlang", "scoop"]:
+        "erlang"]:
       cmd = "find ../../%s/%s/ | grep \"\\.%s$\" | xargs cat | grep . | wc %s > wc.out" % (
           language, problem, extension, table_flag)
     os.system(cmd)
