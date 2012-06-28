@@ -587,11 +587,13 @@ def test_significance():
 
             if 'seq' not in ttest_res:
               ttest_res['seq'] = {}
-            if la not in ttest_res['seq']:
-              ttest_res['seq'][la] = {}
-            if lb not in ttest_res['seq'][la]:
-              ttest_res['seq'][la][lb] = {}
-            ttest_res['seq'][la][lb][i] = pvalue
+            if problem not in ttest_res['seq']:
+              ttest_res['seq'][problem] = {}
+            if la not in ttest_res['seq'][problem]:
+              ttest_res['seq'][problem][la] = {}
+            if lb not in ttest_res['seq'][problem][la]:
+              ttest_res['seq'][problem][la][lb] = {}
+            ttest_res['seq'][problem][la][lb][i] = pvalue
 
             passed = pvalue <= ALPHA
             if passed:
@@ -612,11 +614,13 @@ def test_significance():
 
             if 'par' not in ttest_res:
               ttest_res['par'] = {}
-            if la not in ttest_res['par']:
-              ttest_res['par'][la] = {}
-            if lb not in ttest_res['par'][la]:
-              ttest_res['par'][la][lb] = {}
-            ttest_res['par'][la][lb][i] = pvalue
+            if problem not in ttest_res['par']:
+              ttest_res['par'][problem] = {}
+            if la not in ttest_res['par'][problem]:
+              ttest_res['par'][problem][la] = {}
+            if lb not in ttest_res['par'][problem][la]:
+              ttest_res['par'][problem][la][lb] = {}
+            ttest_res['par'][problem][la][lb][i] = pvalue
 
             passed = pvalue <= ALPHA
             if passed:
@@ -642,7 +646,7 @@ language''')
           if la == lb:
             out.append(' & --')
           else:
-            out.append(' & %.3e' %  (ttest_res[t][la][lb][0]))
+            out.append(' & %.3e' %  (ttest_res[t][problem][la][lb][0]))
         out.append('\\\\\n')
       out.append('''
   \end{tabular}
@@ -1097,8 +1101,8 @@ def main():
     #run_all(redirect_output=False)  # TODO: remove outputs
   get_results()
   #calculate()
-  #test_significance()
-  output_graphs()
+  test_significance()
+  #output_graphs()
   system('xmessage " ALL DONE " -nearmouse -timeout 1')
   raw_input("done! press enter to continue...")
   system('cd %s && make' % output_dir)
