@@ -660,7 +660,7 @@ GRAPH_SIZE = 700
 
 output_dir = "../../../ufrgs/tc"
 
-def create_graph(graph_name, values, pretty_name, use_subfigure=True):
+def create_graph(graph_name, values, pretty_name, use_subfigure=True, is_relative=False):
   variation_names = {"seq" : "Sequential", "par" : "Parallel"}
   for i in range(len(inputs)):
     nmax = 0
@@ -668,6 +668,9 @@ def create_graph(graph_name, values, pretty_name, use_subfigure=True):
       cur = values[problem][variation][language][i]
       if cur == INVALID: continue
       if cur > nmax: nmax = cur
+
+    if is_relative:
+      nmax = 16
 
     latex_out = []
     if use_subfigure:
@@ -688,26 +691,38 @@ def create_graph(graph_name, values, pretty_name, use_subfigure=True):
       variation_name = variation_names[variation]
       if nmax == 0: nmax = 1
       out.append("max=%f\n" % (nmax * 1.1))
-      out.append(
-          "ylabel=%s %sexecution time in seconds for input %d\n" % (
-              variation_name, pretty_name, i))
+      if is_relative:
+        out.append(
+            "ylabel=%s %sexecution time (in seconds) relative to smallest\n" % (
+                variation_name, pretty_name))
+      else:
+        out.append(
+            "ylabel=%s %sexecution time (in seconds)\n" % (
+                variation_name, pretty_name))
       for problem in sorted(problems):
         out.append(problem)
+        nmin = 1
+        if is_relative:
+          nmin = min(float(values[problem][variation][l][i]) for l in languages)
         for language in sorted(languages):
           out.append(" %.10f" % (
-            float(values[problem][variation][language][i])))
+            float(values[problem][variation][language][i]) / nmin))
         out.append("\n")
 
-      out.append("\n=yerrorbars\n")
-      for problem in sorted(problems):
-        out.append(problem)
-        for language in sorted(languages):
-          out.append(" %.10f" % (get_tdelta(
-              all_values[threads[-1]][problem][variation][language][i],
-              ALPHA)))
-        out.append("\n")
+      if not is_relative:
+        out.append("\n=yerrorbars\n")
+        for problem in sorted(problems):
+          out.append(problem)
+          for language in sorted(languages):
+            out.append(" %.10f" % (get_tdelta(
+                all_values[threads[-1]][problem][variation][language][i],
+                ALPHA)))
+          out.append("\n")
 
       output_file_name = "graph-%s-%s-%d" % (graph_name, variation, i)
+      if is_relative:
+        output_file_name = "graph-rel-%s-%s-%d" % (
+            graph_name, variation, i)
       output_file = "%s/images/%s" % (
               output_dir, output_file_name)
       write_to_file("%s.perf" % (output_file), ''.join(out))
@@ -727,6 +742,8 @@ def create_graph(graph_name, values, pretty_name, use_subfigure=True):
       if variation == "par":
         caption += " (using %d threads)" % (threads[-1])
       label = "fig:exec:time:%s:%d" % (variation, i)
+      if is_relative:
+        label = "fig:rel:exec:time:%s:%d" % (variation, i)
       if use_subfigure:
         latex_out.append((
             "\\subfigure[%s]{\n"
@@ -744,11 +761,20 @@ def create_graph(graph_name, values, pretty_name, use_subfigure=True):
 
       
     if use_subfigure:
-      latex_out.append('\\caption{Execution Time}\n')
-      latex_out.append('\\label{fig:exec:time}\n')
+      if is_relative:
+        latex_out.append('\\caption{Execution Time (in seconds) relative to smallest}\n')
+      else:
+        latex_out.append('\\caption{Execution Time (in seconds)}\n')
+      if is_relative:
+        latex_out.append('\\label{fig:rel:exec:time}\n')
+      else:
+        latex_out.append('\\label{fig:exec:time}\n')
       latex_out.append('\\end{figure}\n')
     latex_file_name = "%s/chapters/graph-%s-%d.tex" % (
         output_dir, graph_name, i)
+    if is_relative:
+      latex_file_name = "%s/chapters/graph-rel-%s-%d.tex" % (
+          output_dir, graph_name, i)
     write_to_file(latex_file_name, ''.join(latex_out))
 
 def create_speedup_graph(graph_name, values, use_subfigure=True):
@@ -988,6 +1014,7 @@ set key left
 def output_graphs():
   read_table()
   create_graph("exec-time", results[threads[-1]], "")
+  create_graph("exec-time", results[threads[-1]], "", is_relative=True)
   speedup_graph_name = 'speedup'
   create_speedup_graph(speedup_graph_name, results)
   create_problem_speedup_graph("problem-speedup", speedup_graph_name)
