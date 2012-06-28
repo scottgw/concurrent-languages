@@ -350,7 +350,7 @@ xscale=1
 
     sys.stdout = old_stdout
 
-  pretty_names = {"time" : "time to code", "loc" : "LoC", "noc" : "NoC",
+  pretty_names = {"time" : "time to code (in minutes)", "loc" : "LoC", "noc" : "NoC",
       "now" : "NoW"}
   create_graph("time", result, 10, pretty_names["time"])
   for table_name in table_types:
