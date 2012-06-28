@@ -8,52 +8,10 @@
 -- output:
 --   mask: a boolean matrix filled with true for cells kept
 
-class MAIN
-inherit ARGUMENTS
-create make
+class THRESH
+create make_empty
 feature
-  make
-  local
-    nrows, ncols, percent: INTEGER
-    matrix, mask: ARRAY2[INTEGER]
-    i, j: INTEGER
-    in: PLAIN_TEXT_FILE
-    file_name: STRING
-  do
-    file_name := separate_character_option_value('i')
-    !!in.make_open_read(separate_character_option_value('i'))
-
-    in.read_integer
-    nrows := in.last_integer
-
-    in.read_integer
-    ncols := in.last_integer
-
-    create matrix.make(nrows, ncols)
-    from i := 1 until i > nrows loop
-      from j := 1 until j > ncols loop
-        in.read_integer
-        matrix.put(in.last_integer, i, j)
-        j := j + 1
-      end
-      i := i + 1
-    end
-
-    in.read_integer
-    percent := in.last_integer
-
-    create mask.make(nrows, ncols)
-    thresh(nrows, ncols, matrix, percent, mask)
-
-    --from i := 1 until i > nrows loop
-      --from j := 1 until j > ncols loop
-        --print(mask.item(i, j).out + " ")
-        --j := j + 1
-      --end
-      --print("%N")
-      --i := i + 1
-    --end
-  end
+  make_empty do end
 
   thresh(nrows, ncols: INTEGER; matrix: ARRAY2[INTEGER]; percent: INTEGER;
     mask: ARRAY2[INTEGER])
@@ -96,4 +54,4 @@ feature
     end
   end
 
-end -- class MAIN 
+end

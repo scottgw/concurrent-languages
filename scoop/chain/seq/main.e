@@ -16,9 +16,9 @@ feature
   make
   local
     nelts, randmat_seed, thresh_percent, winnow_nelts: INTEGER
-    randmat_matrix, thresh_mask: ARRAY[separate ARRAY[INTEGER]]
+    randmat_matrix, thresh_mask: ARRAY2[INTEGER]
     winnow_points: ARRAY[TUPLE[INTEGER, INTEGER]]
-    outer_matrix: ARRAY[separate ARRAY[DOUBLE]]
+    outer_matrix: ARRAY2[DOUBLE]
     outer_vector: ARRAY[DOUBLE]
     product_result: ARRAY[DOUBLE]
     randmat: RANDMAT
@@ -34,10 +34,10 @@ feature
     thresh_percent := read_integer
     winnow_nelts := read_integer
 
-    create randmat_matrix.make_empty
-    create thresh_mask.make_empty
-    create outer_matrix.make_empty
-    create outer_vector.make_empty
+    create randmat_matrix.make(nelts, nelts)
+    create thresh_mask.make(nelts, nelts)
+    create outer_matrix.make(winnow_nelts, winnow_nelts)
+    create outer_vector.make(1, winnow_nelts)
 
     create randmat.make_empty
     create thresh.make_empty

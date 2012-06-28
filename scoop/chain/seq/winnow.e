@@ -10,56 +10,10 @@
 -- output:
 --   points: a vector of (x, y) points
 
-class MAIN
-inherit ARGUMENTS
-create make
+class WINNOW
+create make_empty
 feature
-  make
-  local
-    nrows, ncols, nelts: INTEGER
-    matrix, mask: ARRAY2[INTEGER]
-    i, j: INTEGER
-    file_name: STRING
-    points: ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
-  do
-    file_name := separate_character_option_value('i')
-    !!in.make_open_read(separate_character_option_value('i'))
-
-    nrows := read_integer
-    ncols := read_integer
-    matrix := read_matrix(nrows, ncols)
-    mask := read_matrix(nrows, ncols)
-    nelts := read_integer
-
-    points := winnow(nrows, ncols, matrix, mask, nelts)
-
-    print(nelts.out + "%N");
-    across 1 |..| nelts as ic loop
-      print(points.item(ic.item).integer_32_item(2).out + " " +
-          points.item(ic.item).integer_32_item(3).out + "%N");
-    end
-    print("%N");
-  end
-
-  read_integer(): INTEGER
-  do
-    in.read_integer
-    Result := in.last_integer
-  end
-
-  read_matrix(nrows, ncols: INTEGER): ARRAY2[INTEGER]
-  local
-    i, j: INTEGER
-    matrix: ARRAY2[INTEGER]
-  do
-    create matrix.make(nrows, ncols)
-    across 1 |..| nrows as ic loop
-      across 1 |..| ncols as jc loop
-        matrix.put(read_integer, ic.item, jc.item)
-      end
-    end
-    Result := matrix
-  end
+  make_empty do end
 
   winnow(nrows, ncols: INTEGER; matrix, mask: ARRAY2[INTEGER];
     nelts: INTEGER) : ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
@@ -98,7 +52,4 @@ feature
     Result := points
   end
 
-feature {NONE}
-  in: PLAIN_TEXT_FILE
-
-end -- class MAIN 
+end
