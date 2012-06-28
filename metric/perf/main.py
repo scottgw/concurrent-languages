@@ -111,13 +111,14 @@ def read_table():
 
 
 #languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
-#languages = ["chapel", "cilk", "go", "tbb"]
+languages = ["chapel", "cilk", "go", "tbb"]
 #languages = ["chapel", 'cilk']
 #languages = ["erlang"]
-languages = ["chapel", "cilk", "go", "tbb", 'erlang']
-#problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
+#languages = ["chapel", "cilk", "go", "tbb", 'erlang']
+#languages = ["chapel", "cilk", "go", "tbb", 'erlang', 'scoop']
+problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
-problems = ["randmat"]
+#problems = ["randmat"]
 variations = ["seq", "par"]
 #variations = ["seq"]
 
@@ -679,7 +680,7 @@ def create_graph(graph_name, values, pretty_name, use_subfigure=True):
         out.append(";" + language)
       out.append((
           "\n"
-          "colors=light_green,yellow,red,med_blue,cyan\n"
+          "colors=light_green,yellow,red,med_blue,cyan,dark_green\n"
           "=table\n"
           "yformat=%g\n"
           "=norotate\n"
