@@ -375,9 +375,11 @@ def output_pvalues(table, pretty, code):
   out.append(
 '''
 \\begin{table}[htbp]
+  \\caption{p-values for %s}
+  \\label{tab:pv-%s}
   \\centering
   \\begin{tabular}{c|cccccc}
-language''')
+language''' % (pretty, code))
   for language in sorted(languages):
     out.append(' & %s' % language)
   out.append('\\\\\n\\hline\n')
@@ -390,10 +392,8 @@ language''')
         out.append(' & %.3e' %  (table[la][lb]))
     out.append('\\\\\n')
   out.append('''
-  \end{tabular}
-  \caption{p-values for %s}
-  \label{tab:pv-%s}
-\end{table}''' % (pretty, code))
+  \\end{tabular}
+\\end{table}''')
   outstr = ''.join(out)
   output_file_name = "table-pvalue-%s.tex" % (code)
   output_file = "%s/chapters/%s" % (
@@ -560,7 +560,7 @@ def main():
   load_data()
   output_tables()
   #calculate()
-  #test_significance()
+  test_significance()
   output_graphs()
   global total_lines
   print "total lines: %d" % total_lines

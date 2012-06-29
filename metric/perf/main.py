@@ -541,9 +541,11 @@ def test_significance_speedup():
       out.append(
 '''
 \\begin{table}[htbp]
-  %\\centering
+  \\caption{p-values for speedup of language %s vs %s time}
+  \\label{tab:spd-pv-%s-%s}
+  \\centering
   \\begin{tabular}{c|cccccc}
-nthreads''')
+nthreads''' % (language, pretty[t], language, t))
       for problem in sorted(problems):
         out.append(' & %s' % problem)
       out.append('\\\\\n\\hline\n')
@@ -556,10 +558,8 @@ nthreads''')
               ttest_res[t][nthreads][problem]['par'][language][0]))
         out.append('\\\\\n')
       out.append('''
-  \end{tabular}
-  \caption{p-values for speedup of language %s vs %s time}
-  \label{tab:spd-pv-%s-%s}
-\end{table}''' % (language, pretty[t], language, t))
+  \\end{tabular}
+\\end{table}''')
       outstr = ''.join(out)
       output_file_name = "table-pvalue-%s-%s.tex" % (language, t)
       output_file = "%s/chapters/%s" % (
@@ -571,7 +571,7 @@ def test_significance():
   for t in ttest_types:
     ttest_res[t] = {}
 
-  # test_significance_speedup()
+  test_significance_speedup()
 
   print '\n\n*** sequential execution time ***\n\n'
   for i in range(len(inputs)):
@@ -634,9 +634,11 @@ def test_significance():
       out.append(
 '''
 \\begin{table}[htbp]
+  \\caption{p-values for %s execution time in problem %s}
+  \\label{tab:exec-pv-%s-%s}
   \\centering
   \\begin{tabular}{c|cccccc}
-language''')
+language''' % (pretty[t], problem, problem, t))
       for language in sorted(languages):
         out.append(' & %s' % language)
       out.append('\\\\\n\\hline\n')
@@ -649,10 +651,8 @@ language''')
             out.append(' & %.3e' %  (ttest_res[t][problem][la][lb][0]))
         out.append('\\\\\n')
       out.append('''
-  \end{tabular}
-  \caption{p-values for %s execution time in problem %s}
-  \label{tab:exec-pv-%s-%s}
-\end{table}''' % (pretty[t], problem, problem, t))
+  \\end{tabular}
+\\end{table}''')
       outstr = ''.join(out)
       output_file_name = "table-pvalue-%s-%s.tex" % (problem, t)
       output_file = "%s/chapters/%s" % (
