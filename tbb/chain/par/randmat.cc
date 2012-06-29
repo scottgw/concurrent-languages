@@ -20,7 +20,7 @@ using namespace tbb;
 
 typedef blocked_range<size_t> range;
 
-unsigned char randmat_matrix[30000][30000];
+unsigned char randmat_matrix[20000][20000];
 
 void randmat(int nrows, int ncols, unsigned int s) {
   const int LCG_A = 1664525, LCG_C = 1013904223;

@@ -17,8 +17,9 @@
 
 int is_bench = 0;
 
-static unsigned char matrix[30000][30000];
-static unsigned char mask[30000][30000];
+static unsigned char matrix[20000][20000];
+static unsigned char mask[20000][20000];
+static int histogram[100];
 
 int max(int a, int b) {
   return a > b ? a : b;
@@ -27,7 +28,6 @@ int max(int a, int b) {
 void thresh(int nrows, int ncols, int percent) {
   int i, j;
   int nmax = 0;
-  int* histogram;
   int count, prefixsum, threshold;
 
   for (i = 0; i < nrows; i++) {
@@ -35,8 +35,6 @@ void thresh(int nrows, int ncols, int percent) {
       nmax = max(nmax, matrix[i][j]);
     }
   }
-
-  histogram = (int*) malloc(sizeof(int) * (nmax + 1));
 
   for (i = 0; i < nrows; i++) {
     for (j = 0; j < ncols; j++) {
@@ -59,9 +57,6 @@ void thresh(int nrows, int ncols, int percent) {
       mask[i][j] = matrix[i][j] >= threshold;
     }
   }
-
-  /*
-  free(histogram);//*/
 }
 
 int main(int argc, char *argv[]) {

@@ -19,13 +19,14 @@ import (
 var is_bench = flag.Bool("is_bench", false, "")
 var matrix [20000][20000]int;
 
-func randmat(nrows, ncols, seed int) {
+func randmat(nrows, ncols, s int) {
   LCG_A := 1664525;
   LCG_C := 1013904223;
   for i := 0; i < nrows; i++ {
+    seed := s + i;
     for j := 0; j < ncols; j++ {
-      seed = (LCG_A * seed + LCG_C) % 100;
-      matrix[i][j] = seed;
+      seed = LCG_A * seed + LCG_C;
+      matrix[i][j] = ((seed % 100) + 100) % 100;
     }
   }
 }

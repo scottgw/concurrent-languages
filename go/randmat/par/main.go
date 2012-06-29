@@ -23,8 +23,8 @@ func randvec(row, n, seed int, done chan bool) {
   LCG_A := 1664525;
   LCG_C := 1013904223;
   for j := 0; j < n; j++ {
-    seed = (LCG_A * seed + LCG_C) % 100;
-    matrix[row][j] = seed
+    seed = LCG_A * seed + LCG_C;
+    matrix[row][j] = ((seed % 100) + 100) % 100;
   }
   done <- true;
 }

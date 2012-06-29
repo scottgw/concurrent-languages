@@ -18,16 +18,16 @@
 #include <string.h>
 
 extern int is_bench;
-extern unsigned char randmat_matrix[30000][30000];
-extern unsigned char thresh_mask[30000][30000];
-static int count_per_line[30001];
+extern unsigned char randmat_matrix[20000][20000];
+extern unsigned char thresh_mask[20000][20000];
+static int count_per_line[20001];
 
 typedef struct sPoint {
   int value, i, j;
 } Point;
 
-Point winnow_points[30000];
-static Point values[30000];
+Point winnow_points[20000];
+static Point values[20000];
 
 int compare(const void* vl, const void* vr) {
   const Point* l = vl, *r = vr;

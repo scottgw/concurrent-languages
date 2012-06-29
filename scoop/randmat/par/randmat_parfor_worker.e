@@ -6,7 +6,6 @@ feature
       aggregator_: separate RANDMAT_PARFOR_AGGREGATOR)
   local
   do
-    --print("worker created%N")
     nrows := nrows_
     ncols := ncols_
     seed := seed_
@@ -18,18 +17,22 @@ feature
 feature
   live
   do
-    --print("worker live%N")
     get_result(matrix)
     put_result(aggregator)
   end
 
   get_result(a_matrix: separate ARRAY[INTEGER])
+  local
+    lcg_a, lcg_c, rand_max, int_max: INTEGER
   do
+    lcg_a := 1664525
+    lcg_c := 1013904223
+    rand_max := 100
+    int_max := 2147483647
     across 1 |..| ncols as jc loop
-      rand.forth
-      a_matrix.force(rand.item, jc.item)
+      seed := (lcg_a * seed + lcg_c) \\ int_max
+      a_matrix.force((((seed \\ rand_max) + rand_max) \\ rand_max), jc.item)
     end
-    --put_result(aggregator)
   end
 
   put_result(an_aggregator: separate RANDMAT_PARFOR_AGGREGATOR)

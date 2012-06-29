@@ -16,27 +16,31 @@ feature
   local
     nrows, ncols, s: INTEGER
     matrix: ARRAY[separate ARRAY[INTEGER]]
+    is_bench: BOOLEAN
+    arg: STRING_8
   do
     create in.make_open_read(separate_character_option_value('i'))
+    arg := separate_character_option_value('e')
+    is_bench := False
+    if arg /= Void then
+      is_bench := arg.is_equal("is_bench")
+    end
 
     nrows := read_integer
     ncols := read_integer
     s := read_integer
 
-    --print("nrows: " + nrows.out + ", ncols: " + ncols.out + ", s: " +
-        --s.out + "%N")
-
     create matrix.make_empty
-
     randmat(nrows, ncols, s, matrix)
 
-    --across 1 |..| nrows as ic loop
-      --print("line: " + ic.item.out + ": ")
-      --across 1 |..| ncols as jc loop
-        --print(item(matrix.item(ic.item), jc.item).out + " ")
-      --end
-      --print("%N")
-    --end
+    if not is_bench then
+      across 1 |..| nrows as ic loop
+        across 1 |..| ncols as jc loop
+          print(item(matrix.item(ic.item), jc.item).out + " ")
+        end
+        print("%N")
+      end
+    end
   end
 
   read_integer(): INTEGER
@@ -49,7 +53,6 @@ feature
   do
     -- parallel for on matrix
     parfor(nrows, ncols, s, matrix)
-    --print("randmat%N")
   end
 
   -- parallel for on matrix
@@ -63,28 +66,24 @@ feature
     create parfor_aggregator.make(nrows)
     across 1 |..| nrows as ic loop
       matrix.force(create_array(), ic.item)
-      create worker.make(nrows, ncols, seed, matrix.item(ic.item),
+      create worker.make(nrows, ncols, seed + ic.item, matrix.item(ic.item),
           parfor_aggregator)
       workers.extend(worker)
     end
     -- parallel for on rows
     workers.do_all(agent launch_parfor_worker)
     parfor_result(parfor_aggregator)
-    --print("parfor%N")
   end
 
   parfor_result(aggregator: separate RANDMAT_PARFOR_AGGREGATOR)
   require
     aggregator.is_all_done
   do
-    --print("parfor_result%N")
   end
 
   launch_parfor_worker(worker: separate RANDMAT_PARFOR_WORKER)
   do
-    --print("<")
     worker.live
-    --print(">")
   end
 
   create_array(): separate ARRAY[INTEGER]
@@ -101,5 +100,4 @@ feature {NONE}
   parfor_aggregator: separate RANDMAT_PARFOR_AGGREGATOR
   in: PLAIN_TEXT_FILE
 
-end -- class RANDMAT
-
+end
