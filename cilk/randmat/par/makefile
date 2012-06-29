@@ -8,4 +8,5 @@ all: main
 
 # flags: -cilk-profile, -cilk-span -nproc 4
 main: main.cilk
-	cilkc -O2 -o main main.cilk
+	#cilkc -O2 -o main main.cilk
+	cilkc -O2 -mcmodel=medium -o main main.cilk

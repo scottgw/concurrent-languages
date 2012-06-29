@@ -20,7 +20,7 @@ feature
     --print("worker live%N")
     get_result(matrix)
     put_result(aggregator)
-    print("worker dead%N")
+    --print("worker dead%N")
   end
 
   get_result(a_matrix: separate ARRAY[INTEGER])

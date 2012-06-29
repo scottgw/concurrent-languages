@@ -31,8 +31,8 @@ feature
     ncols := read_integer
     s := read_integer
 
-    print("nrows: " + nrows.out + ", ncols: " + ncols.out + ", s: " +
-        s.out + "%N")
+    --print("nrows: " + nrows.out + ", ncols: " + ncols.out + ", s: " +
+        --s.out + "%N")
 
     create matrix.make_empty
     nrows_ := nrows
@@ -41,15 +41,15 @@ feature
     is_bench_ := is_bench
     randmat(nrows, ncols, s, matrix)
 
-    --if not is_bench then
-      --across 1 |..| nrows as ic loop
-        --across 1 |..| ncols as jc loop
-          --print(item(matrix.item(ic.item), jc.item).out + " ")
-        --end
-        --print("%N")
-      --end
-    --end
-    print("main dead%N%N")
+    if not is_bench then
+      across 1 |..| nrows as ic loop
+        across 1 |..| ncols as jc loop
+          print(item(matrix.item(ic.item), jc.item).out + " ")
+        end
+        print("%N")
+      end
+    end
+    --print("main dead%N%N")
     die(0)
   end
 
@@ -91,7 +91,7 @@ feature
   require
     aggregator.is_all_done
   do
-    print("parfor_result%N")
+    --print("parfor_result%N")
   end
 
   launch_parfor_worker(worker: separate RANDMAT_PARFOR_WORKER)
@@ -109,20 +109,6 @@ feature
   item(array: separate ARRAY[INTEGER]; index: INTEGER): INTEGER
   do
     Result := array.item(index)
-  end
-
-  done()
-  do
-    print("%N%NMAIN DONE!%N%N")
-    if not is_bench_ then
-      across 1 |..| nrows_ as ic loop
-        across 1 |..| ncols_ as jc loop
-          print(item(matrix_.item(ic.item), jc.item).out + " ")
-        end
-        print("%N")
-      end
-    end
-    print("%N%NMAIN END!%N%N")
   end
 
 feature {NONE}

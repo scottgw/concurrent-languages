@@ -61,10 +61,11 @@ def ttest(xa, xb, alpha):
   return left > 0
 '''
   conf = 1 - alpha
-  with open('input.data', 'w') as f:
-    f.write('x y\n')
-    for i in range(min(len(xa), len(xb))):
-      f.write('%.10f\t%.10f\n' % (xa[i], xb[i]))
+  f = open('input.data', 'w')
+  f.write('x y\n')
+  for i in range(min(len(xa), len(xb))):
+    f.write('%.10f\t%.10f\n' % (xa[i], xb[i]))
+  f.close()
   cmd = '../r/test.r %f > out.data' % conf
   # cmd = '../r/test.r %f' % conf
   system(cmd)
@@ -83,29 +84,30 @@ def get_tdelta(xa, alpha):
   return t * sa / math.sqrt(na)
 
 def read_table():
-  with open('tdist.txt', 'r') as f:
-    linenum = 0
-    for line in f:
-      linenum += 1
-      words = line.split()
-      if linenum == 1:
-        for i in range(len(words)):
-          if i == 0:
-            continue
-          words[i] = words[i][0:-1]
-          f = float(words[i])
-          yindex.append(f)
-      elif linenum == 2:
-        continue;
-      else:
-        line = []
-        for i in range(len(words)):
-          if i == 0:
-            xindex.append(float(words[i]))
-          else:
-            line.append(float(words[i]))
-        table.append(line)
-      #print words
+  f = open('tdist.txt', 'r')
+  linenum = 0
+  for line in f:
+    linenum += 1
+    words = line.split()
+    if linenum == 1:
+      for i in range(len(words)):
+        if i == 0:
+          continue
+        words[i] = words[i][0:-1]
+        f = float(words[i])
+        yindex.append(f)
+    elif linenum == 2:
+      continue;
+    else:
+      line = []
+      for i in range(len(words)):
+        if i == 0:
+          xindex.append(float(words[i]))
+        else:
+          line.append(float(words[i]))
+      table.append(line)
+    #print words
+  #f.close()
   #print yindex
   #print table
 
@@ -114,13 +116,15 @@ def read_table():
 #languages = ["chapel", "cilk", "go", "tbb"]
 #languages = ["chapel", 'cilk']
 #languages = ["erlang"]
-languages = ["scoop"]
+#languages = ["scoop"]
+languages = ["chapel"]
 #languages = ["chapel", "cilk", "go", "tbb", 'erlang']
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
-problems = ["randmat"]
-variations = ["seq", "par"]
-#variations = ["seq"]
+#problems = ["randmat"]
+problems = ["outer"]
+#variations = ["seq", "par"]
+variations = ["par"]
 
 def system(cmd, timeout=False):
   ret = os.system(cmd)
@@ -164,7 +168,7 @@ def get_problems_with_variations():
       yield (problem, variation)
 
 ERLANG_MAIN = ("#!/bin/sh\n"
-               "cd ~/tudo/tcc/apmc/lucia/metric/perf/%s\n"
+               "cd ~/lucia/metric/perf/%s\n"
                "erl -noshell +S $1 -s main main is_bench -s init stop\n")
 
 def get_all():
@@ -178,6 +182,8 @@ def generate_erlang_main():
     output = directory + "/main.sh"
     print output
     write_to_file(output, ERLANG_MAIN % directory)
+    cmd = "chmod +x %s" % output
+    system(cmd)
 
 def make_all():
   for (language, problem, variation) in get_all():
@@ -310,20 +316,20 @@ inputs = [
     #ProblemInput(20000, 20000, 666, 1, 1),
 # cilk-winnow, cilk-outer, cilk-product, cilk-randmat?, cilk-chain
 # cilk-all, tbb-all, all-all
-    #ProblemInput(20000, 20000, 666, 1, 10000),
-    ProblemInput(20, 20000, 666, 1, 10000),
+    ProblemInput(20000, 20000, 666, 1, 10000),
+    #ProblemInput(2000, 20000, 666, 1, 10000),
 # cilk-randmat
     #ProblemInput(30000, 30000, 666, 1, 1),
   ]
 
-#threads = [1, 2, 3, 4, 5, 6, 7, 8]
+threads = [1, 2, 3, 4, 5, 6, 7, 8]
 #threads = [1, 2, 3, 4]
 #threads = [2, 4]
 #threads = [1, 2, 8]
 #threads = [1, 4]
 #threads = [4]
 #threads = [1, 2]
-threads = [1]
+#threads = [1]
 
 ##
 
