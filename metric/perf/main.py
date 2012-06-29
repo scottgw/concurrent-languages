@@ -766,9 +766,9 @@ def create_graph(graph_name, values, pretty_name, use_subfigure=True, is_relativ
       
     if use_subfigure:
       if is_relative:
-        latex_out.append('\\caption{Execution Time (in seconds) relative to smallest}\n')
+        latex_out.append('\\caption{Execution time (in seconds) relative to smallest}\n')
       else:
-        latex_out.append('\\caption{Execution Time (in seconds)}\n')
+        latex_out.append('\\caption{Execution time (in seconds)}\n')
       if is_relative:
         latex_out.append('\\label{fig:rel:exec:time}\n')
       else:
@@ -819,7 +819,7 @@ plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title
 
         latex_out = []
         caption = (
-            "Speedup and Efficiency for language %s in problem %s" % (
+            "Speedup and efficiency for language %s in problem %s" % (
             language, problem))
         label = "fig:exec:spd:%s:%s:%d" % (language, problem, i)
         if use_subfigure:
