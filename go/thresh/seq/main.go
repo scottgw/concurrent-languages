@@ -20,6 +20,7 @@ import (
 var is_bench = flag.Bool("is_bench", false, "")
 var matrix [20000][20000]byte;
 var mask [20000][20000]byte;
+var histogram [100]int;
 
 func max(a, b int) int {
   if a > b {
@@ -35,9 +36,6 @@ func thresh(nrows, ncols int, percent int) {
       nmax = max(nmax, int(matrix[i][j]));
     }
   }
-
-  var histogram []int;
-  histogram = make([]int, nmax + 1);
 
   for i := 0; i < nrows; i++ {
     for j := 0; j < ncols; j++ {

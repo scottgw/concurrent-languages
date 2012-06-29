@@ -6,7 +6,6 @@ feature
       aggregator_: separate RANDMAT_PARFOR_AGGREGATOR)
   local
   do
-    --print("worker created%N")
     nrows := nrows_
     ncols := ncols_
     seed := seed_
@@ -17,7 +16,6 @@ feature
 feature
   live
   do
-    --print("worker live%N")
     get_result(matrix)
     put_result(aggregator)
     --print("worker dead%N")

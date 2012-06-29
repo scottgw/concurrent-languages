@@ -13,6 +13,7 @@
 package all
 
 var Thresh_mask [20000][20000]byte;
+var histogram [100]int;
 
 func max_int(a, b int) int {
   if a > b {
@@ -28,9 +29,6 @@ func Thresh(nrows, ncols int, percent int) {
       nmax = max_int(nmax, int(Randmat_matrix[i][j]));
     }
   }
-
-  var histogram []int;
-  histogram = make([]int, nmax + 1);
 
   for i := 0; i < nrows; i++ {
     for j := 0; j < ncols; j++ {

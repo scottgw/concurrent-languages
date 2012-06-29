@@ -19,16 +19,16 @@
 
 static int is_bench = 0;
 
-static unsigned char matrix[30000][30000];
-static unsigned char mask[30000][30000];
-static int count_per_line[30001];
+static unsigned char matrix[20000][20000];
+static unsigned char mask[20000][20000];
+static int count_per_line[20001];
 
 typedef struct sPoint {
   int value, i, j;
 } Point;
 
-static Point points[30000];
-static Point values[30000];
+static Point points[20000];
+static Point values[20000];
 
 int compare(const void* vl, const void* vr) {
   const Point* l = vl, *r = vr;

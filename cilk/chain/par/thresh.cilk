@@ -15,8 +15,8 @@
 #include <stdio.h>
 #include <string.h>
 
-extern unsigned char randmat_matrix[30000][30000];
-unsigned char thresh_mask[30000][30000];
+extern unsigned char randmat_matrix[20000][20000];
+unsigned char thresh_mask[20000][20000];
 static int histogram[16][100];
 
 int max(int a, int b) {

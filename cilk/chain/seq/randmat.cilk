@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <string.h>
 
-unsigned char randmat_matrix[30000][30000];
+unsigned char randmat_matrix[20000][20000];
 
 void randmat(int nrows, int ncols, unsigned int s) {
   int i, j;

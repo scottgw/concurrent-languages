@@ -12,13 +12,15 @@
 #include <cstdlib>
 #include <cstring>
 
-unsigned char randmat_matrix[30000][30000];
+unsigned char randmat_matrix[20000][20000];
 
-void randmat(int nrows, int ncols, unsigned int seed) {
+void randmat(int nrows, int ncols, unsigned int s) {
   const int LCG_A = 1664525, LCG_C = 1013904223;
   for (int i = 0; i < nrows; i++) {
+    unsigned int seed = s + i;
     for (int j = 0; j < ncols; j++) {
-      randmat_matrix[i][j] = seed = (LCG_A * seed + LCG_C) % 100;
+      seed = LCG_A * seed + LCG_C;
+      randmat_matrix[i][j] = seed % 100;
     }
   }
 }

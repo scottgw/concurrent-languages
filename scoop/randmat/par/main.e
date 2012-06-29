@@ -31,14 +31,7 @@ feature
     ncols := read_integer
     s := read_integer
 
-    --print("nrows: " + nrows.out + ", ncols: " + ncols.out + ", s: " +
-        --s.out + "%N")
-
     create matrix.make_empty
-    nrows_ := nrows
-    ncols_ := ncols
-    matrix_ := matrix
-    is_bench_ := is_bench
     randmat(nrows, ncols, s, matrix)
 
     if not is_bench then
@@ -49,8 +42,6 @@ feature
         print("%N")
       end
     end
-    --print("main dead%N%N")
-    die(0)
   end
 
   read_integer(): INTEGER
@@ -63,7 +54,6 @@ feature
   do
     -- parallel for on matrix
     parfor(nrows, ncols, s, matrix)
-    --print("randmat%N")
   end
 
   -- parallel for on matrix
@@ -84,21 +74,17 @@ feature
     -- parallel for on rows
     workers.do_all(agent launch_parfor_worker)
     parfor_result(parfor_aggregator)
-    --print("parfor%N")
   end
 
   parfor_result(aggregator: separate RANDMAT_PARFOR_AGGREGATOR)
   require
     aggregator.is_all_done
   do
-    --print("parfor_result%N")
   end
 
   launch_parfor_worker(worker: separate RANDMAT_PARFOR_WORKER)
   do
-    --print("<")
     worker.live
-    --print(">")
   end
 
   create_array(): separate ARRAY[INTEGER]
@@ -114,9 +100,5 @@ feature
 feature {NONE}
   parfor_aggregator: separate RANDMAT_PARFOR_AGGREGATOR
   in: PLAIN_TEXT_FILE
-  nrows_, ncols_: INTEGER
-  matrix_: ARRAY[separate ARRAY[INTEGER]]
-  is_bench_: BOOLEAN
 
 end
-

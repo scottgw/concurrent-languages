@@ -30,9 +30,6 @@ feature
     ncols := read_integer
     s := read_integer
 
-    print("nrows: " + nrows.out + ", ncols: " + ncols.out + ", s: " +
-        s.out + "%N")
-
     create matrix.make(nrows, ncols)
     randmat(nrows, ncols, s, matrix)
 

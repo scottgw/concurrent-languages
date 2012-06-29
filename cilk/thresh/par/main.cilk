@@ -17,8 +17,8 @@
 
 int is_bench = 0;
 
-static unsigned char matrix[30000][30000];
-static unsigned char mask[30000][30000];
+static unsigned char matrix[20000][20000];
+static unsigned char mask[20000][20000];
 static int histogram[16][100];
 
 int max(int a, int b) {

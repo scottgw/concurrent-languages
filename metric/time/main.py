@@ -265,7 +265,7 @@ def output_tables():
     cmd = "find ../../%s/%s/%s/ | grep \"\\.%s$\" | xargs cat | grep . | wc %s > wc.out" % (
         language, problem, variation, extension, table_flag)
     if problem == "chain" and language in [
-        "erlang", "scoop"]:
+        "erlang"]:
       cmd = "find ../../%s/%s/ | grep \"\\.%s$\" | xargs cat | grep . | wc %s > wc.out" % (
           language, problem, extension, table_flag)
     os.system(cmd)
@@ -293,13 +293,17 @@ GRAPH_SIZE = 700
 output_dir = "../../../ufrgs/tc"
 
 def output_graphs():
-  def create_graph(graph_name, values, max_value, pretty_name):
+  def create_graph(graph_name, values, max_value, pretty_name, is_relative=True):
     old_stdout = sys.stdout
 
     variation_names = {"seq" : "Sequential", "par" : "Parallel"}
     for variation in variations:
-      output_file = "../../../ufrgs/tc/images/graph-%s-%s" % (
-        graph_name, variation)
+      if is_relative:
+        output_file = "../../../ufrgs/tc/images/graph-%s-%s" % (
+          graph_name, variation)
+      else:
+        output_file = "../../../ufrgs/tc/images/other-graph-%s-%s" % (
+          graph_name, variation)
       sys.stdout = open('%s.perf' % output_file, "w")
 
       sys.stdout.write("=cluster")
@@ -314,16 +318,21 @@ xscale=1
 '''
       variation_name = variation_names[variation]
       print "max=%d" % max_value
-      print "ylabel=%s %s versus smallest" % (variation_name, pretty_name)
+      if is_relative:
+        print "ylabel=%s %s versus smallest" % (variation_name, pretty_name)
+      else:
+        print "ylabel=%s %s" % (variation_name, pretty_name)
       for problem in sorted(problems):
         print problem,
         nmin = min(
             float(
               values[language][problem][variation]) for language in sorted(
                 languages))
+        if not is_relative:
+          nmin = 1
         for language in sorted(languages):
-          print("%.2f" % (
-            float(values[language][problem][variation]) / nmin)),
+            print("%.2f" % (
+              float(values[language][problem][variation]) / nmin)),
         print ""
 
       sys.stdout = old_stdout
@@ -341,12 +350,21 @@ xscale=1
 
     sys.stdout = old_stdout
 
-  pretty_names = {"time" : "time to code", "loc" : "LoC", "noc" : "NoC",
+  pretty_names = {"time" : "time to code (in minutes)", "loc" : "LoC", "noc" : "NoC",
       "now" : "NoW"}
   create_graph("time", result, 10, pretty_names["time"])
   for table_name in table_types:
     pretty_name = pretty_names[table_name]
     create_graph(table_name, wc_result[table_name], 8, pretty_name)
+
+  create_graph("time", result, 800, pretty_names["time"], is_relative=False)
+  max_sizes = {"loc" : 1200, "now" : 3000}
+  for table_name in table_types:
+    pretty_name = pretty_names[table_name]
+    max_size = max_sizes[table_name]
+    create_graph(table_name, wc_result[table_name], max_size, pretty_name,
+        is_relative=False)
+
 
 ALPHA = 0.1
 
@@ -357,9 +375,11 @@ def output_pvalues(table, pretty, code):
   out.append(
 '''
 \\begin{table}[htbp]
+  \\caption{p-values for %s}
+  \\label{tab:pv-%s}
   \\centering
   \\begin{tabular}{c|cccccc}
-language''')
+language''' % (pretty, code))
   for language in sorted(languages):
     out.append(' & %s' % language)
   out.append('\\\\\n\\hline\n')
@@ -372,10 +392,8 @@ language''')
         out.append(' & %.3e' %  (table[la][lb]))
     out.append('\\\\\n')
   out.append('''
-  \end{tabular}
-  \caption{p-values for %s}
-  \label{tab:pv-%s}
-\end{table}''' % (pretty, code))
+  \\end{tabular}
+\\end{table}''')
   outstr = ''.join(out)
   output_file_name = "table-pvalue-%s.tex" % (code)
   output_file = "%s/chapters/%s" % (
@@ -541,9 +559,9 @@ def main():
   read_table()
   load_data()
   output_tables()
-  calculate()
-  #test_significance()
-  #output_graphs()
+  #calculate()
+  test_significance()
+  output_graphs()
   global total_lines
   print "total lines: %d" % total_lines
   print "done"

@@ -4,6 +4,7 @@ all: main
 	echo "1 5 8" | ./main
 	echo "2 5 8" | ./main
 	echo "2 5 9" | ./main
+	echo "2 5 9" | ./main --is_bench
 
 main: main.cilk
 	cilkc -O2 -o main main.cilk

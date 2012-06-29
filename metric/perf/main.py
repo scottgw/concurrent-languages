@@ -113,18 +113,23 @@ def read_table():
 
 
 #languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
-#languages = ["chapel", "cilk", "go", "tbb"]
+languages = ["chapel", "cilk", "go", "tbb"]
 #languages = ["chapel", 'cilk']
 #languages = ["erlang"]
 #languages = ["scoop"]
-languages = ["chapel"]
+#languages = ["chapel"]
 #languages = ["chapel", "cilk", "go", "tbb", 'erlang']
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
 #problems = ["randmat"]
-problems = ["outer"]
-#variations = ["seq", "par"]
-variations = ["par"]
+#problems = ["outer"]
+#languages = ["chapel", "cilk", "go", "tbb", 'erlang']
+#languages = ["chapel", "cilk", "go", "tbb", 'erlang', 'scoop']
+problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
+#problems = ["randmat", "thresh"]
+#problems = ["randmat"]
+variations = ["seq", "par"]
+#variations = ["seq"]
 
 def system(cmd, timeout=False):
   ret = os.system(cmd)
@@ -549,9 +554,11 @@ def test_significance_speedup():
       out.append(
 '''
 \\begin{table}[htbp]
-  %\\centering
+  \\caption{p-values for speedup of language %s vs %s time}
+  \\label{tab:spd-pv-%s-%s}
+  \\centering
   \\begin{tabular}{c|cccccc}
-nthreads''')
+nthreads''' % (language, pretty[t], language, t))
       for problem in sorted(problems):
         out.append(' & %s' % problem)
       out.append('\\\\\n\\hline\n')
@@ -564,10 +571,8 @@ nthreads''')
               ttest_res[t][nthreads][problem]['par'][language][0]))
         out.append('\\\\\n')
       out.append('''
-  \end{tabular}
-  \caption{p-values for speedup of language %s vs %s time}
-  \label{tab:spd-pv-%s-%s}
-\end{table}''' % (language, pretty[t], language, t))
+  \\end{tabular}
+\\end{table}''')
       outstr = ''.join(out)
       output_file_name = "table-pvalue-%s-%s.tex" % (language, t)
       output_file = "%s/chapters/%s" % (
@@ -579,7 +584,7 @@ def test_significance():
   for t in ttest_types:
     ttest_res[t] = {}
 
-  # test_significance_speedup()
+  test_significance_speedup()
 
   print '\n\n*** sequential execution time ***\n\n'
   for i in range(len(inputs)):
@@ -595,11 +600,13 @@ def test_significance():
 
             if 'seq' not in ttest_res:
               ttest_res['seq'] = {}
-            if la not in ttest_res['seq']:
-              ttest_res['seq'][la] = {}
-            if lb not in ttest_res['seq'][la]:
-              ttest_res['seq'][la][lb] = {}
-            ttest_res['seq'][la][lb][i] = pvalue
+            if problem not in ttest_res['seq']:
+              ttest_res['seq'][problem] = {}
+            if la not in ttest_res['seq'][problem]:
+              ttest_res['seq'][problem][la] = {}
+            if lb not in ttest_res['seq'][problem][la]:
+              ttest_res['seq'][problem][la][lb] = {}
+            ttest_res['seq'][problem][la][lb][i] = pvalue
 
             passed = pvalue <= ALPHA
             if passed:
@@ -620,11 +627,13 @@ def test_significance():
 
             if 'par' not in ttest_res:
               ttest_res['par'] = {}
-            if la not in ttest_res['par']:
-              ttest_res['par'][la] = {}
-            if lb not in ttest_res['par'][la]:
-              ttest_res['par'][la][lb] = {}
-            ttest_res['par'][la][lb][i] = pvalue
+            if problem not in ttest_res['par']:
+              ttest_res['par'][problem] = {}
+            if la not in ttest_res['par'][problem]:
+              ttest_res['par'][problem][la] = {}
+            if lb not in ttest_res['par'][problem][la]:
+              ttest_res['par'][problem][la][lb] = {}
+            ttest_res['par'][problem][la][lb][i] = pvalue
 
             passed = pvalue <= ALPHA
             if passed:
@@ -638,9 +647,11 @@ def test_significance():
       out.append(
 '''
 \\begin{table}[htbp]
+  \\caption{p-values for %s execution time in problem %s}
+  \\label{tab:exec-pv-%s-%s}
   \\centering
   \\begin{tabular}{c|cccccc}
-language''')
+language''' % (pretty[t], problem, problem, t))
       for language in sorted(languages):
         out.append(' & %s' % language)
       out.append('\\\\\n\\hline\n')
@@ -650,13 +661,11 @@ language''')
           if la == lb:
             out.append(' & --')
           else:
-            out.append(' & %.3e' %  (ttest_res[t][la][lb][0]))
+            out.append(' & %.3e' %  (ttest_res[t][problem][la][lb][0]))
         out.append('\\\\\n')
       out.append('''
-  \end{tabular}
-  \caption{p-values for %s execution time in problem %s}
-  \label{tab:exec-pv-%s-%s}
-\end{table}''' % (pretty[t], problem, problem, t))
+  \\end{tabular}
+\\end{table}''')
       outstr = ''.join(out)
       output_file_name = "table-pvalue-%s-%s.tex" % (problem, t)
       output_file = "%s/chapters/%s" % (
@@ -668,7 +677,7 @@ GRAPH_SIZE = 700
 
 output_dir = "../../../ufrgs/tc"
 
-def create_graph(graph_name, values, pretty_name, use_subfigure=True):
+def create_graph(graph_name, values, pretty_name, use_subfigure=True, is_relative=False):
   variation_names = {"seq" : "Sequential", "par" : "Parallel"}
   for i in range(len(inputs)):
     nmax = 0
@@ -676,6 +685,9 @@ def create_graph(graph_name, values, pretty_name, use_subfigure=True):
       cur = values[problem][variation][language][i]
       if cur == INVALID: continue
       if cur > nmax: nmax = cur
+
+    if is_relative:
+      nmax = 16
 
     latex_out = []
     if use_subfigure:
@@ -688,7 +700,7 @@ def create_graph(graph_name, values, pretty_name, use_subfigure=True):
         out.append(";" + language)
       out.append((
           "\n"
-          "colors=light_green,yellow,red,med_blue,cyan\n"
+          "colors=light_green,yellow,red,med_blue,cyan,dark_green\n"
           "=table\n"
           "yformat=%g\n"
           "=norotate\n"
@@ -696,26 +708,38 @@ def create_graph(graph_name, values, pretty_name, use_subfigure=True):
       variation_name = variation_names[variation]
       if nmax == 0: nmax = 1
       out.append("max=%f\n" % (nmax * 1.1))
-      out.append(
-          "ylabel=%s %sexecution time in seconds for input %d\n" % (
-              variation_name, pretty_name, i))
+      if is_relative:
+        out.append(
+            "ylabel=%s %sexecution time (in seconds) relative to smallest\n" % (
+                variation_name, pretty_name))
+      else:
+        out.append(
+            "ylabel=%s %sexecution time (in seconds)\n" % (
+                variation_name, pretty_name))
       for problem in sorted(problems):
         out.append(problem)
+        nmin = 1
+        if is_relative:
+          nmin = min(float(values[problem][variation][l][i]) for l in languages)
         for language in sorted(languages):
           out.append(" %.10f" % (
-            float(values[problem][variation][language][i])))
+            float(values[problem][variation][language][i]) / nmin))
         out.append("\n")
 
-      out.append("\n=yerrorbars\n")
-      for problem in sorted(problems):
-        out.append(problem)
-        for language in sorted(languages):
-          out.append(" %.10f" % (get_tdelta(
-              all_values[threads[-1]][problem][variation][language][i],
-              ALPHA)))
-        out.append("\n")
+      if not is_relative:
+        out.append("\n=yerrorbars\n")
+        for problem in sorted(problems):
+          out.append(problem)
+          for language in sorted(languages):
+            out.append(" %.10f" % (get_tdelta(
+                all_values[threads[-1]][problem][variation][language][i],
+                ALPHA)))
+          out.append("\n")
 
       output_file_name = "graph-%s-%s-%d" % (graph_name, variation, i)
+      if is_relative:
+        output_file_name = "graph-rel-%s-%s-%d" % (
+            graph_name, variation, i)
       output_file = "%s/images/%s" % (
               output_dir, output_file_name)
       write_to_file("%s.perf" % (output_file), ''.join(out))
@@ -735,6 +759,8 @@ def create_graph(graph_name, values, pretty_name, use_subfigure=True):
       if variation == "par":
         caption += " (using %d threads)" % (threads[-1])
       label = "fig:exec:time:%s:%d" % (variation, i)
+      if is_relative:
+        label = "fig:rel:exec:time:%s:%d" % (variation, i)
       if use_subfigure:
         latex_out.append((
             "\\subfigure[%s]{\n"
@@ -752,11 +778,20 @@ def create_graph(graph_name, values, pretty_name, use_subfigure=True):
 
       
     if use_subfigure:
-      latex_out.append('\\caption{Execution Time}\n')
-      latex_out.append('\\label{fig:exec:time}\n')
+      if is_relative:
+        latex_out.append('\\caption{Execution time (in seconds) relative to smallest}\n')
+      else:
+        latex_out.append('\\caption{Execution time (in seconds)}\n')
+      if is_relative:
+        latex_out.append('\\label{fig:rel:exec:time}\n')
+      else:
+        latex_out.append('\\label{fig:exec:time}\n')
       latex_out.append('\\end{figure}\n')
     latex_file_name = "%s/chapters/graph-%s-%d.tex" % (
         output_dir, graph_name, i)
+    if is_relative:
+      latex_file_name = "%s/chapters/graph-rel-%s-%d.tex" % (
+          output_dir, graph_name, i)
     write_to_file(latex_file_name, ''.join(latex_out))
 
 def create_speedup_graph(graph_name, values, use_subfigure=True):
@@ -797,7 +832,7 @@ plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title
 
         latex_out = []
         caption = (
-            "Speedup and Efficiency for language %s in problem %s" % (
+            "Speedup and efficiency for language %s in problem %s" % (
             language, problem))
         label = "fig:exec:spd:%s:%s:%d" % (language, problem, i)
         if use_subfigure:
@@ -996,6 +1031,7 @@ set key left
 def output_graphs():
   read_table()
   create_graph("exec-time", results[threads[-1]], "")
+  create_graph("exec-time", results[threads[-1]], "", is_relative=True)
   speedup_graph_name = 'speedup'
   create_speedup_graph(speedup_graph_name, results)
   create_problem_speedup_graph("problem-speedup", speedup_graph_name)
@@ -1076,13 +1112,13 @@ def main():
   create_inputs()
   for _ in range(TOTAL_EXECUTIONS):
     run_all(redirect_output=False)  # TODO: remove outputs
-  #get_results()
+  get_results()
   #calculate()
-  #test_significance()
+  test_significance()
   #output_graphs()
-  #system('xmessage " ALL DONE " -nearmouse -timeout 1')
-  #raw_input("done! press enter to continue...")
-  #system('cd %s && make' % output_dir)
+  system('xmessage " ALL DONE " -nearmouse -timeout 1')
+  raw_input("done! press enter to continue...")
+  system('cd %s && make' % output_dir)
 
 if __name__ == '__main__':
   main()
