@@ -28,3 +28,13 @@ vector V, this program calculates the product A V.
 
 Program 6: Chaining (chain) This problem chains all of the previous
 problems together.
+
+All the programs should understand a flag "--is_bench". This flag
+means that only the size of the inputs is to be read, the inputs
+should be generated on-the-fly, and the outputs should not be written
+to the screen.
+
+Inputs used for performance test: 20000x20000 matrices (randmat,
+thresh, winnow), 1 percent (thresh), 10000 elements (winnow, outer),
+10000x10000 matrix (product). Random integers interval is [0, 100)
+(thresh). Speedup using 1-8 cores.
