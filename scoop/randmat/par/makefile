@@ -9,5 +9,5 @@ all: main
 	./main -i main5.in -e is_bench 
 
 main: main.e $(SRC)
-	ec main.e
+	ec -finalize main.e
 
