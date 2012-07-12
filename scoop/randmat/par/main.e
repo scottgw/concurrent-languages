@@ -73,7 +73,9 @@ feature
     end
     -- parallel for on rows
     workers.do_all(agent launch_parfor_worker)
+    --print("before parfor_result %N")
     parfor_result(parfor_aggregator)
+    --print("after parfor_result %N")
   end
 
   parfor_result(aggregator: separate RANDMAT_PARFOR_AGGREGATOR)

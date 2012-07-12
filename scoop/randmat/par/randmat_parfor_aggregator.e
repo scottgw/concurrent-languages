@@ -13,6 +13,7 @@ feature
   put
   do
     count := count + 1
+    --print("put " + count.out + "%N")
   end
 
   is_all_done(): BOOLEAN

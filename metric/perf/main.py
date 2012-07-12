@@ -113,10 +113,10 @@ def read_table():
 
 
 #languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
-languages = ["chapel", "cilk", "go", "tbb"]
+#languages = ["chapel", "cilk", "go", "tbb"]
 #languages = ["chapel", 'cilk']
 #languages = ["erlang"]
-#languages = ["scoop"]
+languages = ["scoop"]
 #languages = ["chapel"]
 #languages = ["chapel", "cilk", "go", "tbb", 'erlang']
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
@@ -125,11 +125,12 @@ languages = ["chapel", "cilk", "go", "tbb"]
 #problems = ["outer"]
 #languages = ["chapel", "cilk", "go", "tbb", 'erlang']
 #languages = ["chapel", "cilk", "go", "tbb", 'erlang', 'scoop']
-problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
+#problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
-#problems = ["randmat"]
-variations = ["seq", "par"]
+problems = ["randmat"]
+#variations = ["seq", "par"]
 #variations = ["seq"]
+variations = ["par"]
 
 def system(cmd, timeout=False):
   ret = os.system(cmd)
@@ -321,14 +322,15 @@ inputs = [
     #ProblemInput(20000, 20000, 666, 1, 1),
 # cilk-winnow, cilk-outer, cilk-product, cilk-randmat?, cilk-chain
 # cilk-all, tbb-all, all-all
-    ProblemInput(20000, 20000, 666, 1, 10000),
+    #ProblemInput(20000, 20000, 666, 1, 10000),
+    ProblemInput(32, 8000, 666, 1, 10000),
     #ProblemInput(2000, 20000, 666, 1, 10000),
 # cilk-randmat
     #ProblemInput(30000, 30000, 666, 1, 1),
   ]
 
-threads = [1, 2, 3, 4, 5, 6, 7, 8]
-#threads = [1, 2, 3, 4]
+#threads = [1, 2, 3, 4, 5, 6, 7, 8]
+threads = [1, 2, 3, 4]
 #threads = [2, 4]
 #threads = [1, 2, 8]
 #threads = [1, 4]
@@ -403,6 +405,10 @@ def run_all(redirect_output=True):
           cmd += "GOMAXPROCS=%d " % nthreads
 
         #cmd += "timeout %d " % (TIMEOUT)
+        if variation == 'seq' or nthreads == 1:
+          cmd += "taskset -c 0 "
+        else:
+          cmd += "taskset -c 0-%d " % (nthreads - 1)
 
         directory = get_directory(language, problem, variation)
         cmd += "/usr/bin/time -a -f %%e -o %s %s/" % (time_output,
@@ -1037,7 +1043,7 @@ def output_graphs():
   create_problem_speedup_graph("problem-speedup", speedup_graph_name)
   create_language_speedup_graph("language-speedup", speedup_graph_name)
 
-TOTAL_EXECUTIONS = 30
+TOTAL_EXECUTIONS = 3
 
 def calculate():
   # float(results[threads[-1]][problem]['par'][language][0])))
@@ -1114,8 +1120,8 @@ def main():
     run_all(redirect_output=False)  # TODO: remove outputs
   get_results()
   #calculate()
-  test_significance()
-  #output_graphs()
+  #test_significance()
+  output_graphs()
   system('xmessage " ALL DONE " -nearmouse -timeout 1')
   raw_input("done! press enter to continue...")
   system('cd %s && make' % output_dir)
