@@ -223,8 +223,8 @@ def output_tables():
     old_stdout = sys.stdout
 
     for variation in variations:
-      sys.stdout = open("../../../ufrgs/tc/chapters/table-%s-%s.tex" % (
-        table_name, variation), "w")
+      sys.stdout = open(os.path.join (output_dir, "table-%s-%s.tex" % (
+        table_name, variation)), "w")
 
       first = True
       print " & ",
@@ -290,7 +290,12 @@ def output_tables():
       "table_type" : table_name})
 
 GRAPH_SIZE = 700
-output_dir = "../../../ufrgs/tc"
+output_dir = os.path.abspath ("output/")
+images_dir = os.path.join (output_dir, "images/")
+chapters_dir = os.path.join (output_dir, "chapters/")
+
+graph_dir = os.path.abspath ("graph/")
+
 
 def output_graphs():
   def create_graph(graph_name, values, max_value, pretty_name, is_relative=True):
@@ -299,11 +304,11 @@ def output_graphs():
     variation_names = {"seq" : "Sequential", "par" : "Parallel"}
     for variation in variations:
       if is_relative:
-        output_file = "../../../ufrgs/tc/images/graph-%s-%s" % (
-          graph_name, variation)
+        output_file = os.path.join (images_dir,"graph-%s-%s" % (
+          graph_name, variation))
       else:
-        output_file = "../../../ufrgs/tc/images/other-graph-%s-%s" % (
-          graph_name, variation)
+        output_file = os.path.join (images_dir, "other-graph-%s-%s" % (
+          graph_name, variation))
       sys.stdout = open('%s.perf' % output_file, "w")
 
       sys.stdout.write("=cluster")
@@ -336,9 +341,7 @@ xscale=1
         print ""
 
       sys.stdout = old_stdout
-      cmd = (
-          "%s/bargraph.pl -fig %s.perf | fig2dev -L ppm -m 4 > %s.ppm" % (
-              output_dir, output_file, output_file))
+      cmd = os.path.join (graph_dir, "bargraph.pl") + " -fig %s.perf | fig2dev -L ppm -m 4 > %s.ppm" % (output_file, output_file)
       print cmd
       system(cmd)
       cmd = ("mogrify -reverse -flatten %s.ppm" % output_file)
@@ -396,8 +399,7 @@ language''' % (pretty, code))
 \\end{table}''')
   outstr = ''.join(out)
   output_file_name = "table-pvalue-%s.tex" % (code)
-  output_file = "%s/chapters/%s" % (
-          output_dir, output_file_name)
+  output_file = os.path.join (chapters_dir, output_file_name)
   write_to_file(output_file, outstr)
 
 def test_significance():
@@ -555,7 +557,21 @@ def calculate():
     (val, lang) = x
     print '%s : %f' % (lang, val)
 
+def create_directories ():
+  if not os.path.exists (output_dir):
+    os.makedirs (output_dir)
+
+  if not os.path.exists (chapters_dir):
+    os.makedirs (chapters_dir)
+
+  if not os.path.exists (images_dir):
+    os.makedirs (images_dir)
+
+
+
+
 def main():
+  create_directories ()
   read_table()
   load_data()
   output_tables()
