@@ -681,7 +681,8 @@ language''' % (pretty[t], problem, problem, t))
 
 GRAPH_SIZE = 700
 
-output_dir = "../../../ufrgs/tc"
+output_dir = "output"
+bargraph_dir = os.path.abspath("../time/graph")
 
 def create_graph(graph_name, values, pretty_name, use_subfigure=True, is_relative=False):
   variation_names = {"seq" : "Sequential", "par" : "Parallel"}
@@ -750,9 +751,7 @@ def create_graph(graph_name, values, pretty_name, use_subfigure=True, is_relativ
               output_dir, output_file_name)
       write_to_file("%s.perf" % (output_file), ''.join(out))
 
-      cmd = (
-          "%s/bargraph.pl -fig %s.perf | fig2dev -L ppm -m 4 > %s.ppm" % (
-              output_dir, output_file, output_file))
+      cmd = (os.path.join (bargraph_dir, "bargraph.pl") + " -fig %s.perf | fig2dev -L ppm -m 4 > %s.ppm" % (output_file, output_file))
       print cmd
       system(cmd)
       cmd = ("mogrify -reverse -flatten %s.ppm" % output_file)

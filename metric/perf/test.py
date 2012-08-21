@@ -22,8 +22,8 @@ class testMain(unittest.TestCase):
 
     m.ReplayAll()
     main.generate_erlang_main()
-    m.VerifyAll()
     m.UnsetStubs()
+    m.VerifyAll()
 
   def testMakeAll(self):
     m = mox.Mox()
@@ -36,8 +36,8 @@ class testMain(unittest.TestCase):
 
     m.ReplayAll()
     main.make_all()
-    m.VerifyAll()
     m.UnsetStubs()
+    m.VerifyAll()
 
   def testCreateInputs(self):
     m = mox.Mox()
@@ -58,8 +58,8 @@ class testMain(unittest.TestCase):
 
     m.ReplayAll()
     main.create_inputs()
-    m.VerifyAll()
     m.UnsetStubs()
+    m.VerifyAll()
 
   def testRunAll(self):
     m = mox.Mox()
@@ -78,6 +78,7 @@ class testMain(unittest.TestCase):
     main.TIMEOUT = 99
     main.threads = [999]
     main.system(('' # 'timeout 99 ' # TODO timeout on ensisun
+                 'taskset -c 0-998 '
                  '/usr/bin/time -a -f %e -o '
                  'time-language-problem-variation-0-999.out '
                  'directory/main < '
@@ -87,8 +88,8 @@ class testMain(unittest.TestCase):
 
     m.ReplayAll()
     main.run_all()
-    m.VerifyAll()
     m.UnsetStubs()
+    m.VerifyAll()
 
   def testGetResults(self):
     m = mox.Mox()
@@ -107,8 +108,8 @@ class testMain(unittest.TestCase):
     self.assertEqual(
         main.results[999]['problem']['variation']['language'][0],
         (1 + 2) / 2.)
-    m.VerifyAll()
     m.UnsetStubs()
+    m.VerifyAll()
 
   def testOutputExecTimeGraphs(self):
     m = mox.Mox()
@@ -125,17 +126,17 @@ class testMain(unittest.TestCase):
         999: {'problem': {
             'seq': {'language': {0: 100}}}}}
 
-    main.write_to_file('../../../ufrgs/tc/images/graph-exec-time-seq-0.perf', '=cluster;language\ncolors=black,yellow,red,med_blue,light_green,cyan\n=table\nyformat=%g\n=norotate\nxscale=1\nmax=150.000000\nylabel=Sequential execution time in seconds for input 0\nproblem 100.0000000000\n')
-    main.system('../../../ufrgs/tc/bargraph.pl -fig ../../../ufrgs/tc/images/graph-exec-time-seq-0.perf | fig2dev -L ppm -m 4 > ../../../ufrgs/tc/images/graph-exec-time-seq-0.ppm')
-    main.system('mogrify -reverse -flatten ../../../ufrgs/tc/images/graph-exec-time-seq-0.ppm')
-    main.system('mogrify -resize 700x700 -format png ../../../ufrgs/tc/images/graph-exec-time-seq-0.ppm')
-    main.write_to_file('../../../ufrgs/tc/chapters/graph-exec-time-0.tex',
+    main.write_to_file('output/images/graph-exec-time-seq-0.perf', '=cluster;language\ncolors=black,yellow,red,med_blue,light_green,cyan\n=table\nyformat=%g\n=norotate\nxscale=1\nmax=150.000000\nylabel=Sequential execution time in seconds for input 0\nproblem 100.0000000000\n')
+    main.system('output/bargraph.pl -fig output/images/graph-exec-time-seq-0.perf | fig2dev -L ppm -m 4 > output/images/graph-exec-time-seq-0.ppm')
+    main.system('mogrify -reverse -flatten output/images/graph-exec-time-seq-0.ppm')
+    main.system('mogrify -resize 700x700 -format png output/images/graph-exec-time-seq-0.ppm')
+    main.write_to_file('output/chapters/graph-exec-time-0.tex',
         '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=125mm]{images/graph-exec-time-seq-0.png}\n  \\caption{Sequential Execution Time}\n  \\label{fig:exec:time:seq:0}\n\\end{figure}\n')
 
     m.ReplayAll()
     main.create_graph("exec-time", main.results[999], '', use_subfigure=False)
-    m.VerifyAll()
     m.UnsetStubs()
+    m.VerifyAll()
 
   def testOutputSpeedupGraphs(self):
     m = mox.Mox()
@@ -156,20 +157,20 @@ class testMain(unittest.TestCase):
             'par': {'language': {0: 25}}}}}
 
     main.write_to_file(
-        '../../../ufrgs/tc/images/graph-speedup-language-problem-0.dat', '2\t50.0000000000\t2.0000000000\t2\t1.0000000000\t1\n4\t25.0000000000\t4.0000000000\t4\t1.0000000000\t1\n')
+        'output/images/graph-speedup-language-problem-0.dat', '2\t50.0000000000\t2.0000000000\t2\t1.0000000000\t1\n4\t25.0000000000\t4.0000000000\t4\t1.0000000000\t1\n')
 
-    main.system('cp ../../../ufrgs/tc/images/graph-speedup-language-problem-0.dat plot.dat')
-    main.system('gnuplot ../../../ufrgs/tc/plot.script')
-    main.system('mv plot.png ../../../ufrgs/tc/images/graph-speedup-language-problem-0.png')
+    main.system('cp output/images/graph-speedup-language-problem-0.dat plot.dat')
+    main.system('gnuplot output/plot.script')
+    main.system('mv plot.png output/images/graph-speedup-language-problem-0.png')
     main.system('rm plot.dat')
-    main.write_to_file('../../../ufrgs/tc/chapters/graph-speedup-language-problem-0.tex',
-        '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=100mm]{images/graph-speedup-language-problem-0.png}\n  \\caption{Speedup and Efficiency for language language in problem problem}\n  \\label{fig:exec:spd:language:problem:0}\n\\end{figure}\n')
-    main.write_to_file('../../../ufrgs/tc/chapters/graph-speedup.tex', '\\input{chapters/graph-speedup-language-problem-0.tex}\n')
+    main.write_to_file('output/chapters/graph-speedup-language-problem-0.tex',
+        '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=100mm]{images/graph-speedup-language-problem-0.png}\n  \\caption{Speedup and efficiency for language language in problem problem}\n  \\label{fig:exec:spd:language:problem:0}\n\\end{figure}\n')
+    main.write_to_file('output/chapters/graph-speedup.tex', '\\input{chapters/graph-speedup-language-problem-0.tex}\n')
 
     m.ReplayAll()
     main.create_speedup_graph("speedup", main.results, use_subfigure=False)
-    m.VerifyAll()
     m.UnsetStubs()
+    m.VerifyAll()
 
   def testOutputProblemSpeedupGraphs(self):
     m = mox.Mox()
@@ -189,17 +190,17 @@ class testMain(unittest.TestCase):
             'seq': {'language': {0: 100}},
             'par': {'language': {0: 25}}}}}
 
-    main.write_to_file('other.script',   '\nset xrange [0:8]\nset xtics 1\nset yrange [0:8]\nset ytics 1\nset xlabel "threads"\nset terminal png\nset output "plot.png"\nset key left\nplot \'../../../ufrgs/tc/images/graph-speedup-language-problem-0.dat\' using 1:4 title \'ideal speedup\' w lp, \'../../../ufrgs/tc/images/graph-speedup-language-problem-0.dat\' using 1:3 title \'language speedup\' w lp')
+    main.write_to_file('other.script',   '\nset xrange [0:8]\nset xtics 1\nset yrange [0:8]\nset ytics 1\nset xlabel "threads"\nset ylabel "speedup"\nset terminal png\nset output "plot.png"\nset key left\nplot \'output/images/graph-speedup-language-problem-0.dat\' using 1:4 title \'ideal speedup\' w lp, \'output/images/graph-speedup-language-problem-0.dat\' using 1:3 title \'language speedup\' w lp')
     main.system('gnuplot other.script')
-    main.system('mv plot.png ../../../ufrgs/tc/images/graph-problem-speedup-problem-0.png')
+    main.system('mv plot.png output/images/graph-problem-speedup-problem-0.png')
     main.system('rm other.script')
-    main.write_to_file('../../../ufrgs/tc/chapters/graph-problem-speedup-problem-0.tex',  '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=100mm]{images/graph-problem-speedup-problem-0.png}\n  \\caption{Speedup for problem problem in all languages}\n  \\label{fig:exec:spd:problem:0}\n\\end{figure}\n')
-    main.write_to_file('../../../ufrgs/tc/chapters/graph-problem-speedup.tex',  '\\input{chapters/graph-problem-speedup-problem-0.tex}\n')
+    main.write_to_file('output/chapters/graph-problem-speedup-problem-0.tex',  '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=100mm]{images/graph-problem-speedup-problem-0.png}\n  \\caption{Speedup for problem problem in all languages}\n  \\label{fig:exec:spd:problem:0}\n\\end{figure}\n')
+    main.write_to_file('output/chapters/graph-problem-speedup.tex',  '\\input{chapters/graph-problem-speedup-problem-0.tex}\n')
 
     m.ReplayAll()
     main.create_problem_speedup_graph("problem-speedup", "speedup", use_subfigure=False)
-    m.VerifyAll()
     m.UnsetStubs()
+    m.VerifyAll()
 
   def testOutputLanguageSpeedupGraphs(self):
     m = mox.Mox()
@@ -219,17 +220,17 @@ class testMain(unittest.TestCase):
             'seq': {'language': {0: 100}},
             'par': {'language': {0: 25}}}}}
 
-    main.write_to_file('other.script',   '\nset xrange [0:8]\nset xtics 1\nset yrange [0:8]\nset ytics 1\nset xlabel "threads"\nset terminal png\nset output "plot.png"\nset key left\nplot \'../../../ufrgs/tc/images/graph-speedup-language-problem-0.dat\' using 1:4 title \'ideal speedup\' w lp, \'../../../ufrgs/tc/images/graph-speedup-language-problem-0.dat\' using 1:3 title \'problem speedup\' w lp')
+    main.write_to_file('other.script',   '\nset xrange [0:8]\nset xtics 1\nset yrange [0:8]\nset ytics 1\nset xlabel "threads"\nset ylabel "speedup"\nset terminal png\nset output "plot.png"\nset key left\nplot \'output/images/graph-speedup-language-problem-0.dat\' using 1:4 title \'ideal speedup\' w lp, \'output/images/graph-speedup-language-problem-0.dat\' using 1:3 title \'problem speedup\' w lp')
     main.system('gnuplot other.script')
-    main.system('mv plot.png ../../../ufrgs/tc/images/graph-language-speedup-language-0.png')
+    main.system('mv plot.png output/images/graph-language-speedup-language-0.png')
     main.system('rm other.script')
-    main.write_to_file('../../../ufrgs/tc/chapters/graph-language-speedup-language-0.tex',  '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=100mm]{images/graph-language-speedup-language-0.png}\n  \\caption{Speedup for language language in all problems}\n  \\label{fig:exec:spd:language:0}\n\\end{figure}\n')
-    main.write_to_file('../../../ufrgs/tc/chapters/graph-language-speedup.tex',  '\\input{chapters/graph-language-speedup-language-0.tex}\n')
+    main.write_to_file('output/chapters/graph-language-speedup-language-0.tex',  '\\begin{figure}[htbp]\n  %\\centering\n  \\includegraphics[width=100mm]{images/graph-language-speedup-language-0.png}\n  \\caption{Speedup for language language in all problems}\n  \\label{fig:exec:spd:language:0}\n\\end{figure}\n')
+    main.write_to_file('output/chapters/graph-language-speedup.tex',  '\\input{chapters/graph-language-speedup-language-0.tex}\n')
 
     m.ReplayAll()
     main.create_language_speedup_graph("language-speedup", "speedup", use_subfigure=False)
-    m.VerifyAll()
     m.UnsetStubs()
+    m.VerifyAll()
 
 if __name__ == '__main__':
   unittest.main()
