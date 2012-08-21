@@ -1,5 +1,6 @@
-#!/usr/bin/env r
-conf = as.real(argv[1])
+#!/usr/bin/env Rscript
+options = commandArgs (trailingOnly = T)
+conf = as.real(options[1])
 data = read.table('input.data', header = TRUE)
 result = t.test(data$x, data$y, conf.level=conf, alternative='greater', paired=TRUE)
 # print(result)
