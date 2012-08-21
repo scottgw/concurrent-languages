@@ -1,5 +1,10 @@
 #!/usr/bin/python
 
+# Requires: 
+#   - xfig
+#   - R (by using the R script in the sibling directory)
+#   - gnuplot
+
 from datetime import datetime
 import sys
 import subprocess
