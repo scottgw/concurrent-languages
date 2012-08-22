@@ -5,4 +5,4 @@ all: main
 	./main --is_bench < main.in
 
 main: main.cilk
-	cilkc -O2 -o main main.cilk
+	cilkc ${CFLAGS} -O2 -o main main.cilk

@@ -13,4 +13,4 @@ all: main
 	diff main6.out main6.gold
 	./main --nproc 4 --is_bench < main.in 
 main: main.cilk
-	cilkc -O2 -o main main.cilk
+	cilkc ${CFLAGS} -O2 -o main main.cilk

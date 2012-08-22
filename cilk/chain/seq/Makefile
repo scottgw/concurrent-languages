@@ -6,4 +6,4 @@ all: main
 
 # flags: --cilk-profile, --cilk-span
 main: main.cilk randmat.cilk thresh.cilk winnow.cilk outer.cilk product.cilk
-	cilkc -O2 -o main $^
+	cilkc ${CFLAGS} -O2 -o main $^

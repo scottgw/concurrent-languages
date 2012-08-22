@@ -7,4 +7,4 @@ all: main
 	echo "2 5 9" | ./main --is_bench
 
 main: main.cilk
-	cilkc -O2 -o main main.cilk
+	cilkc ${CFLAGS} -O2 -o main main.cilk
