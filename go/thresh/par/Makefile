@@ -13,7 +13,7 @@ all: main
 	diff main.out main6.gold
 
 main: main.6
-	6l -o main main.6
+	go tool 6l -o main main.6
 
 main.6: main.go
-	6g -O2 main.go
+	go tool 6g -O2 main.go
