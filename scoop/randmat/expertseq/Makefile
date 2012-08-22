@@ -7,5 +7,6 @@ all: main
 	./main -i main5.in -e is_bench 
 
 main: main.e
-	ec -finalize main.e
+	ec -config main.ecf -target main -finalize -c_compile;
+	cp EIFGENs/main/F_code/main .
 
