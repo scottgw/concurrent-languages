@@ -1,49 +1,59 @@
 class RANDMAT_PARFOR_WORKER
+  
 create make
+
 feature
-  make (nrows_, ncols_, seed_: INTEGER;
-      matrix_: separate ARRAY[INTEGER];
-      aggregator_: separate RANDMAT_PARFOR_AGGREGATOR)
-  local
-  do
-    nrows := nrows_
-    ncols := ncols_
-    seed := seed_
-    matrix := matrix_
-    aggregator := aggregator_
-  end
+  make (a_start, a_height, a_ncols, a_seed: INTEGER)
+    do
+      start := a_start
+      height := a_height
+      ncols := a_ncols
+      seed := a_seed.to_natural_32
+
+      create matrix.make (height, ncols)
+    end
 
 feature
   live
-  do
-    get_result(matrix)
-    put_result(aggregator)
-    --print("worker dead%N")
-  end
-
-  get_result(a_matrix: separate ARRAY[INTEGER])
-  local
-    lcg_a, lcg_c, rand_max, int_max: INTEGER
-  do
-    lcg_a := 1664525
-    lcg_c := 1013904223
-    rand_max := 100
-    int_max := 2147483647
-    a_matrix.resize(1, ncols)
-    across 1 |..| ncols as jc loop
-      seed := (lcg_a * seed + lcg_c) \\ int_max
-      a_matrix.put((((seed \\ rand_max) + rand_max) \\ rand_max), jc.item)
+    do
+      fill_matrix
     end
-  end
+  
+  fill_matrix
+    local
+      s, lcg_a, lcg_c, rand_max: NATURAL
+      i, j: INTEGER
+    do
+      lcg_a := 1664525
+      lcg_c := 1013904223
+      rand_max := 100
 
-  put_result(an_aggregator: separate RANDMAT_PARFOR_AGGREGATOR)
-  do
-    an_aggregator.put
-  end
+      from i := start
+      until i >= start + height
+      loop
+        s := seed + i.to_natural_32
+        from j := 1
+        until j > ncols
+        loop
+          seed := lcg_a * seed + lcg_c
+          matrix [i, j] := (seed \\ rand_max).to_integer_32
+          j := j + 1
+        end
+        i := i + 1
+      end
+    end
 
+  get (i, j: INTEGER): INTEGER
+    do
+      Result := matrix [i, j]
+    end
+  
+  matrix: ARRAY2 [INTEGER]
+  height: INTEGER
+  start: INTEGER
+  
 feature {NONE}
-  nrows, ncols, seed: INTEGER
-  matrix: separate ARRAY[INTEGER]
-  aggregator: separate RANDMAT_PARFOR_AGGREGATOR
-
+  seed: NATURAL
+  ncols: INTEGER
+  
 end
