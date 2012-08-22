@@ -35,8 +35,8 @@ feature
         from j := 1
         until j > ncols
         loop
-          seed := lcg_a * seed + lcg_c
-          matrix [i, j] := (seed \\ rand_max).to_integer_32
+          s := lcg_a * s + lcg_c
+          matrix [i - start + 1, j] := (s \\ rand_max).to_integer_32
           j := j + 1
         end
         i := i + 1
@@ -45,7 +45,7 @@ feature
 
   get (i, j: INTEGER): INTEGER
     do
-      Result := matrix [i, j]
+      Result := matrix [i - start  + 1, j]
     end
   
   matrix: ARRAY2 [INTEGER]

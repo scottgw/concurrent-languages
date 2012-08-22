@@ -36,10 +36,9 @@ feature
       workers := randmat(nrows, ncols, s)
 
       if not is_bench then
-        -- workers.do_all (agent fetch_submatrix (ncols, ?))
-        fetch_workers (ncols, workers)
-        join_workers (workers)
-        -- workers.do_all (agent join)
+        workers.do_all (agent fetch_submatrix (ncols, ?))
+        workers.do_all (agent join)
+        
         from i := 1
         until i > nrows
         loop
@@ -84,43 +83,24 @@ feature
       loop
         height := (nrows - start) // (num_workers - i)
 
-        create worker.make (start + 1, height, ncols, seed + start + 1)
-        Result.extend(worker)
-
+        if height /= 0 then
+          create worker.make (start + 1, height, ncols, seed + start + 1)
+          Result.extend(worker)
+        end
+          
         start := start + height
         i := i + 1
       end
 
       -- parallel for on rows
-      Result.do_all(agent launch_parfor_worker)
+      Result.do_all(agent live_worker)
     end
 
-  join_workers (workers: LINKED_LIST [separate RANDMAT_PARFOR_WORKER])
-    do
-      from workers.start
-      until workers.after
-      loop
-        join (workers.item)
-        workers.forth
-      end
-    end
   
   join (obj: separate RANDMAT_PARFOR_WORKER)
     require obj.generator /= Void
     do
     end
-
-  fetch_workers (ncols: INTEGER;
-                workers: LINKED_LIST [separate RANDMAT_PARFOR_WORKER])
-    do
-      from workers.start
-      until workers.after
-      loop
-        fetch_submatrix (ncols, workers.item)
-        workers.forth
-      end
-    end
-
   
   fetch_submatrix (ncols: INTEGER;
                    worker: separate RANDMAT_PARFOR_WORKER)
@@ -136,7 +116,7 @@ feature
         from j := 1
         until j > ncols
         loop
-          matrix [i,j] := worker.get (i, j) -- matrix [i,j]
+          matrix [i,j] := worker.get (i, j)
           j := j + 1
         end
         i := i + 1
@@ -144,7 +124,7 @@ feature
     end
   
 
-  launch_parfor_worker(worker: separate RANDMAT_PARFOR_WORKER)
+  live_worker(worker: separate RANDMAT_PARFOR_WORKER)
     do
       worker.live
     end
