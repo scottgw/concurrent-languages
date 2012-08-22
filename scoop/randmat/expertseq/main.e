@@ -35,7 +35,7 @@ feature
       s := read_integer
 
       create matrix.make(nrows, ncols)
-      randmat(nrows, ncols, s, matrix)
+      randmat(nrows, ncols, s.to_natural_32 , matrix)
 
       if not is_bench then
         from i := 1
@@ -62,25 +62,24 @@ feature
       Result := input.last_integer
     end
 
-  randmat(nrows, ncols, s: INTEGER; matrix: ARRAY2[INTEGER])
+  randmat(nrows, ncols:INTEGER;  s: NATURAL; matrix: ARRAY2[INTEGER])
     local
-      seed, lcg_a, lcg_c, rand_max, int_max: INTEGER
+      seed, lcg_a, lcg_c, rand_max: NATURAL
       i, j: INTEGER
     do
       lcg_a := 1664525
       lcg_c := 1013904223
       rand_max := 100
-      int_max := 2147483647
 
       from i := 1
       until i > nrows
       loop
-        seed := s + i
+        seed := s + i.to_natural_32
         from j := 1
         until j > ncols
         loop
-          seed := (lcg_a * seed + lcg_c) \\ int_max
-          matrix [i, j] := ((seed \\ rand_max) + rand_max) \\ rand_max
+          seed := lcg_a * seed + lcg_c
+          matrix [i, j] := (seed \\ rand_max).to_integer_32
           j := j + 1
         end
         i := i + 1
