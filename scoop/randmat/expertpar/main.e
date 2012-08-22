@@ -33,17 +33,13 @@ feature
       s := read_integer
 
       create matrix.make (nrows,ncols)
-      print ("BOO1")
       workers := randmat(nrows, ncols, s)
 
       if not is_bench then
-        print ("BOO2")
         -- workers.do_all (agent fetch_submatrix (ncols, ?))
         fetch_workers (ncols, workers)
-        print ("BOO3")
         join_workers (workers)
         -- workers.do_all (agent join)
-        print ("BOO4")        
         from i := 1
         until i > nrows
         loop
