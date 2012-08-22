@@ -130,7 +130,7 @@ languages = ["scoop"]
 problems = ["randmat"]
 #variations = ["seq", "par"]
 #variations = ["seq"]
-variations = ["par"]
+variations = ["expertseq"]
 
 def system(cmd, timeout=False):
   ret = os.system(cmd)
