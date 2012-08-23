@@ -13,6 +13,7 @@ feature
       create matrix.make (height, ncols)
     end
 
+  
 feature
   live
     do
