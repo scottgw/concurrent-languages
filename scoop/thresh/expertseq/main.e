@@ -21,7 +21,7 @@ feature
     file_name: STRING
   do
     file_name := separate_character_option_value('i')
-    !!in.make_open_read(separate_character_option_value('i'))
+    create in.make_open_read(separate_character_option_value('i'))
 
     in.read_integer
     nrows := in.last_integer
@@ -45,12 +45,21 @@ feature
     create mask.make(nrows, ncols)
     thresh(nrows, ncols, matrix, percent, mask)
 
-    across 1 |..| nrows as ic loop
-      across 1 |..| ncols as jc loop
-        print(mask.item(ic.item, jc.item).out + " ")
+    print (nrows.out + " " + ncols.out + "%N")
+    
+    from i := 1
+    until i > nrows
+    loop
+      from j := 1
+      until j > ncols
+      loop
+        print (mask [i, j].out + " ")
+        j := j + 1
       end
-      print("%N")
+      print ("%N")
+      i := i + 1
     end
+
   end
 
   thresh(nrows, ncols: INTEGER; matrix: ARRAY2[INTEGER]; percent: INTEGER;
@@ -66,10 +75,32 @@ feature
       nmax := nmax.max(m.item)
     end
 
+    from i := 1
+    until i > nrows
+    loop
+      from j := 1
+      until j > ncols
+      loop
+        nmax := nmax.max(matrix [i, j])
+        j := j + 1
+      end
+      i := i + 1
+    end
+
+  
     create histogram.make(0, nmax + 1)
 
-    across matrix as m loop
-      histogram.put(histogram.item(m.item) + 1, m.item)
+
+    from i := 1
+    until i > nrows
+    loop
+      from j := 1
+      until j > ncols
+      loop
+        histogram [matrix[i,j]] := histogram [matrix [i,j]] + 1
+        j := j + 1
+      end
+      i := i + 1
     end
 
     count := (nrows * ncols * percent) / 100
@@ -77,18 +108,28 @@ feature
     prefixsum := 0
     threshold := nmax
 
-    from i := nmax until not(i >= 0 and prefixsum <= count) loop
+    from i := nmax
+    until not (i >= 0 and prefixsum <= count)
+    loop
       prefixsum := prefixsum + histogram[i];
       threshold := i;
       i := i - 1
     end
 
-    across 1 |..| nrows as ic loop
-      across 1 |..| ncols as jc loop
-        if matrix.item(ic.item, jc.item) >= threshold then
-          mask.put(1, ic.item, jc.item)
+
+    from i := 1
+    until i > nrows
+    loop
+      from j := 1
+      until j > ncols
+      loop
+        if matrix [i, j] >= threshold then
+          mask [i, j] := 1
         end
+
+        j := j + 1
       end
+      i := i + 1
     end
   end
 
