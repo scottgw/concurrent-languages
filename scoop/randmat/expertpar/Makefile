@@ -1,4 +1,4 @@
-SRC =  main.e randmat_parfor_worker.e randmat_parfor_aggregator.e
+SRC =  main.e randmat_parfor_worker.e 
 
 all: main
 	./main -i main.in

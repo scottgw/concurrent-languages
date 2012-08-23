@@ -32,7 +32,7 @@ feature
       from i := start
       until i >= start + height
       loop
-        s := seed + i.to_natural_32
+        s := seed + i.to_natural_32 - 1
         from j := 1
         until j > ncols
         loop

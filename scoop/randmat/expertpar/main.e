@@ -84,7 +84,7 @@ feature
         height := (nrows - start) // (num_workers - i)
 
         if height /= 0 then
-          create worker.make (start + 1, height, ncols, seed + start + 1)
+          create worker.make (start + 1, height, ncols, seed)
           Result.extend(worker)
         end
           
