@@ -74,7 +74,7 @@ feature
       from i := 1
       until i > nrows
       loop
-        seed := s + i.to_natural_32 
+        seed := s + i.to_natural_32 - 1
         from j := 1
         until j > ncols
         loop
