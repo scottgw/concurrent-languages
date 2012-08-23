@@ -1,78 +1,121 @@
 class REDUCE2D_WORKER
-inherit EXECUTION_ENVIRONMENT
+
+inherit
+  EXECUTION_ENVIRONMENT
+
 create
-  make,
   make_with_filter
 
 feature
-  make (nrows_, ncols_: INTEGER; array_: separate ARRAY[INTEGER];
-      aggregator_: separate REDUCE2D_AGGREGATOR;
-      op_: INTEGER)
-  local
-  do
-    nrows := nrows_
-    ncols := ncols_
-    array := array_
-    aggregator := aggregator_
-    op := op_
-  end
-
-  make_with_filter (nrows_, ncols_: INTEGER;
-      array_: separate ARRAY[INTEGER];
-      aggregator_: separate REDUCE2D_AGGREGATOR;
-      op_: INTEGER;
-      value_: INTEGER)
-  local
-  do
-    nrows := nrows_
-    ncols := ncols_
-    array := array_
-    aggregator := aggregator_
-    op := op_
-    value := value_
-  end
+  make_with_filter
+       (start_, final_: INTEGER;
+        ncols_: INTEGER;
+        array_: separate ARRAY2[INTEGER];
+        accum_: separate CELL [INTEGER]
+        op_: INTEGER;
+        value_: INTEGER
+        )
+    do
+      start := start_
+      final := final_
+      ncols := ncols_
+      array := array_
+      accum := accum_
+      op := op_
+      value := value_
+    end
 
 feature
   live
-  do
-    get_result(array, aggregator)
-  end
-
-  get_result(an_array: separate ARRAY[INTEGER];
-      an_aggregator: separate REDUCE2D_AGGREGATOR)
-  local
-    j: INTEGER
-    res: INTEGER
-  do
-    res := an_array.item(1)
-    if op = {REDUCE2D_OPERATOR}.filter then
-      res := filter(res)
-    end
-    if ncols > 1 then
-      across 2 |..| ncols as jc loop
-        inspect op
-        when {REDUCE2D_OPERATOR}.max then
-          res := res.max(an_array.item(jc.item))
-        when {REDUCE2D_OPERATOR}.filter then
-          res := res + filter(an_array.item(jc.item))
-        end
+    do
+      if start /= final + 1 then
+        get_result(fetch_array (array))
       end
     end
-    an_aggregator.put(res)
-  end
 
-  filter(x: INTEGER): INTEGER
-  do
-    Result := 0
-    if x = value then
-      Result := 1
+  to_local_row (x: INTEGER) : INTEGER
+    do
+      Result := x - start + 1
     end
-  end
+  
+  fetch_array (a_sep_array: separate ARRAY2[INTEGER]): ARRAY2 [INTEGER]
+    local
+      i, j: INTEGER
+    do
+      create Result.make (final - start + 1, ncols)
+      
+      from i := start
+      until i > final
+      loop
+        from j := 1
+        until j > ncols
+        loop
+          Result [to_local_row (i), j] := a_sep_array [i, j]
+          j := j + 1
+        end
+        i := i + 1
+      end
+    end
+  
+  get_result(a_array: ARRAY2[INTEGER])
+    local
+      i, j: INTEGER
+      res: INTEGER
+    do
+      inspect op
+      when {REDUCE2D_OPERATOR}.max then
+        res := {INTEGER_32}.Min_value
+      when {REDUCE2D_OPERATOR}.filter then
+        res := 0
+      end
+
+      from i := start
+      until i > final
+      loop
+        from j := 1
+        until j > ncols
+        loop
+          inspect op
+          when {REDUCE2D_OPERATOR}.max then
+            res := res.max(a_array [i, j])
+          when {REDUCE2D_OPERATOR}.filter then
+            res := res + filter(a_array [i, j])
+          end
+          j := j + 1
+        end
+        i := i + 1
+      end
+
+      update_separate_accumulator (res, accum)
+    end
+
+  update_separate_accumulator (res: INTEGER; acc: separate CELL [INTEGER])
+    local
+      x: INTEGER
+    do
+      x := acc.item
+      inspect op
+      when {REDUCE2D_OPERATOR}.max then
+        x := res.max(x)
+      when {REDUCE2D_OPERATOR}.filter then
+        x := res + filter(x)
+      end
+      acc.put (x)
+    end
+  
+  filter(x: INTEGER): INTEGER
+    do
+      Result := 0
+      if x = value then
+        Result := 1
+      end
+    end
 
 feature {NONE}
-  nrows, ncols: INTEGER
-  array: separate ARRAY[INTEGER]
-  aggregator: separate REDUCE2D_AGGREGATOR
+  accum: separate CELL [INTEGER]
+  start, final: INTEGER
+  ncols: INTEGER
+  array: separate ARRAY2[INTEGER]
   op: INTEGER
   value: INTEGER
 
