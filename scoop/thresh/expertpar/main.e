@@ -15,7 +15,6 @@ feature
   make
     local
       nrows, ncols, percent: INTEGER
-      matrix: separate ARRAY2[INTEGER]
       mask: ARRAY2[INTEGER]
       in: PLAIN_TEXT_FILE
       file_name: STRING
@@ -36,7 +35,7 @@ feature
       in.read_integer
       percent := in.last_integer
 
-      mask := thresh(nrows, ncols, matrix, percent)
+      mask := thresh(nrows, ncols, percent)
 
       from i := 1
       until i > nrows
@@ -52,7 +51,7 @@ feature
       end
     end
 
-  read_matrix(nrows, ncols: INTEGER; matrix: separate ARRAY2[INTEGER];
+  read_matrix(nrows, ncols: INTEGER; a_matrix: separate ARRAY2[INTEGER];
               in: PLAIN_TEXT_FILE)
     local
       i, j: INTEGER
@@ -64,7 +63,7 @@ feature
         until j > ncols
         loop
           in.read_integer
-          matrix [i,j] := in.last_integer
+          a_matrix [i,j] := in.last_integer
           j := j + 1
         end
         i := i + 1
@@ -86,79 +85,59 @@ feature
       Result := array.item(index)
     end
 
-  thresh(nrows, ncols: INTEGER; matrix: separate ARRAY2[INTEGER];
+  thresh(nrows, ncols: INTEGER;
          percent: INTEGER;):  ARRAY2 [INTEGER]
     local
       nmax: INTEGER
-      histogram: ARRAY[INTEGER]
       count: INTEGER
       prefixsum, threshold: INTEGER
       i: INTEGER
     do
-      nmax := reduce2d (nrows, ncols, matrix);
+      create histogram.make_filled(0, 0, 100)
+            
+      nmax := reduce2d (nrows, ncols)
 
-      create histogram.make_filled(0, 0, nmax + 1)
+      threshold := calculate_threshold (nrows, ncols, percent, accum, histogram)
+      
+      -- parallel for on matrix
+      Result := parfor(nrows, ncols, threshold)
+    end
 
-      from i := 0
-      until i > nmax + 1
-      loop
-        histogram [i] := reduce2d_with_filter(nrows, ncols, matrix, i)
-        i := i + 1
-      end
-
+  calculate_threshold (nrows, ncols, percent: INTEGER;
+                       a_accum: separate CELL [INTEGER];
+                       a_histogram: separate ARRAY [INTEGER]): INTEGER
+    local
+      count: INTEGER
+      nmax: INTEGER
+      threshold: INTEGER
+      prefixsum: INTEGER
+      i: INTEGER
+    do
+      nmax := a_accum.item
       count := (nrows * ncols * percent) // 100
       
       prefixsum := 0
       threshold := nmax
       
       from i := nmax until not(i >= 0 and prefixsum <= count) loop
-        prefixsum := prefixsum + histogram[i];
+        prefixsum := prefixsum + a_histogram[i];
         threshold := i;
         i := i - 1
       end
-      
-      -- parallel for on matrix
-      Result := parfor(nrows, ncols, matrix, threshold)
-    end
 
-  reduce2d(nrows, ncols: INTEGER; matrix: separate ARRAY2[INTEGER]):
-      INTEGER
-    do
-      Result :=
-        reduce2d_impl(nrows
-                     , ncols
-                     , matrix
-                     , 0
-                     , {REDUCE2D_OPERATOR}.max)
-    end
-
-  reduce2d_with_filter(nrows, ncols: INTEGER;
-                       matrix: separate ARRAY2[INTEGER];
-                       value: INTEGER): INTEGER
-    do
-      Result :=
-        reduce2d_impl(nrows
-                     , ncols
-                     , matrix
-                     , value
-                     , {REDUCE2D_OPERATOR}.sum)
+      Result := threshold
     end
 
   num_workers: INTEGER = 32
   
-  reduce2d_impl(nrows, ncols: INTEGER;
-                matrix: separate ARRAY2[INTEGER];
-                value: INTEGER;
-                op: INTEGER): INTEGER
+  reduce2d (nrows, ncols: INTEGER): INTEGER
     local
       worker: separate REDUCE2D_WORKER
       workers: LINKED_LIST [separate REDUCE2D_WORKER]
       start, height, i: INTEGER
-      accum: separate CELL [INTEGER]
     do
       create workers.make
       create accum.put (0)
---      create reduce2d_aggregator.make(nrows, op_aggregator)
       
       from
         start := 0
@@ -167,16 +146,17 @@ feature
       loop
         height := (nrows - start) // (num_workers - i)
 
-        create worker.make_with_filter
-                  (start + 1
-                   , start + height
-                   , ncols
-                   , matrix
-                   , accum
-                   , op
-                   , value)
-    
-        workers.extend(worker)        
+        if height > 0 then
+          create worker.make_with_filter
+                     (start + 1
+                      , start + height
+                      , ncols
+                      , matrix
+                      , accum
+                      , histogram)
+          
+          workers.extend(worker)
+        end
           
         start := start + height
         i := i + 1
@@ -188,19 +168,17 @@ feature
       Result := reduce2d_result(accum)
     end
 
-  reduce2d_result(accum: separate CELL[INTEGER]): INTEGER
+  reduce2d_result(a_accum: separate CELL[INTEGER]): INTEGER
     do
-      Result := accum.item
+      Result := a_accum.item
     end
   
   -- parallel for on matrix
   parfor(nrows, ncols: INTEGER;
-         matrix: separate ARRAY2[INTEGER];
          threshold: INTEGER): ARRAY2 [INTEGER]
     local
       worker: separate PARFOR_WORKER
       workers: LINKED_LIST[separate PARFOR_WORKER]
-      shared: separate ARRAY2[INTEGER]
       reader: separate PARFOR_READER
       i, start, height: INTEGER
     do
@@ -214,7 +192,7 @@ feature
       until i >= num_workers
       loop
         height := (nrows - start) // (num_workers - i)
-        
+
         create worker.make
                    (start + 1
                    , start + height
@@ -249,32 +227,28 @@ feature
         from j := 1
         until j > ncols
         loop
-          Result [i, j] := a_array [i, j]
+          Result [i, j] := a_array.item (i, j)
           j := j + 1
         end
         i := i + 1
       end
     end
 
-  parfor_result(reader: separate PARFOR_READER)
-    do
-      reader.get_result(parfor_aggregator)
-    end
-
 feature {NONE}
-  reduce2d_aggregator: separate REDUCE2D_AGGREGATOR
-  parfor_aggregator: separate PARFOR_AGGREGATOR
-
-
+  matrix: separate ARRAY2[INTEGER]
+  shared: separate ARRAY2[INTEGER]
+  accum: separate CELL [INTEGER]
+  histogram: separate ARRAY[INTEGER]
+  
   join_reduce (s: separate REDUCE2D_WORKER)
     require
-      s.generator /= Void
+      attached s implies (s.generator /= Void or s.generator = Void)
     do
     end
 
   join_parfor (s: separate PARFOR_WORKER)
     require
-      s.generator /= Void
+      s /= Void implies (s.generator /= Void or s.generator = Void)
     do
     end
   

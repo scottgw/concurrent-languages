@@ -19,7 +19,9 @@ feature
 feature
   live
     do
-      get_result(fetch_array (from_array))
+      if final >= start then
+        get_result(fetch_array (from_array))
+      end
     end
 
   to_local_row (x: INTEGER) : INTEGER
@@ -60,10 +62,10 @@ feature
         from j := 1
         until j > ncols
         loop
-          if a_from_array [i, j] >= threshold then
-            to_array [i, j] := 1
+          if a_from_array [to_local_row (i), j] >= threshold then
+            to_array [to_local_row(i), j] := 1
           else
-            to_array [i, j] := 0
+            to_array [to_local_row (i), j] := 0
           end
           j := j + 1
         end
@@ -84,7 +86,8 @@ feature
         from j := 1
         until j > ncols
         loop
-          a_shared [i, j] := a_array [i, j]
+          a_shared.item (i, j).generator.do_nothing
+          a_shared.put (a_array [to_local_row (i), j], i ,j)
           j := j + 1
         end
         i := i + 1

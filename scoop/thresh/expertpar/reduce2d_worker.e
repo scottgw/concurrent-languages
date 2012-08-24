@@ -11,9 +11,8 @@ feature
        (start_, final_: INTEGER;
         ncols_: INTEGER;
         array_: separate ARRAY2[INTEGER];
-        accum_: separate CELL [INTEGER]
-        op_: INTEGER;
-        value_: INTEGER
+        accum_: separate CELL [INTEGER];
+        histogram_: separate ARRAY[INTEGER]
         )
     do
       start := start_
@@ -21,8 +20,7 @@ feature
       ncols := ncols_
       array := array_
       accum := accum_
-      op := op_
-      value := value_
+      histogram := histogram_
     end
 
 feature
@@ -39,6 +37,8 @@ feature
     end
   
   fetch_array (a_sep_array: separate ARRAY2[INTEGER]): ARRAY2 [INTEGER]
+    require
+      a_sep_array.generator /= Void
     local
       i, j: INTEGER
     do
@@ -50,7 +50,7 @@ feature
         from j := 1
         until j > ncols
         loop
-          Result [to_local_row (i), j] := a_sep_array [i, j]
+          Result [to_local_row (i), j] := a_sep_array.item (i, j)
           j := j + 1
         end
         i := i + 1
@@ -60,63 +60,55 @@ feature
   get_result(a_array: ARRAY2[INTEGER])
     local
       i, j: INTEGER
-      res: INTEGER
+      max: INTEGER
+      hist: ARRAY [INTEGER]
+      e: INTEGER
     do
-      inspect op
-      when {REDUCE2D_OPERATOR}.max then
-        res := {INTEGER_32}.Min_value
-      when {REDUCE2D_OPERATOR}.filter then
-        res := 0
-      end
-
+      create hist.make_filled (0, 0, 100)
+      max := 0
+      
       from i := start
       until i > final
       loop
         from j := 1
         until j > ncols
         loop
-          inspect op
-          when {REDUCE2D_OPERATOR}.max then
-            res := res.max(a_array [i, j])
-          when {REDUCE2D_OPERATOR}.filter then
-            res := res + filter(a_array [i, j])
-          end
+          e        := a_array [to_local_row (i), j]
+          hist [e] := hist [e] + 1
+          max      := e.max (max)
+          
           j := j + 1
         end
         i := i + 1
       end
-
-      update_separate_accumulator (res, accum)
+      update_separate_accumulator (max, accum, hist, histogram)
     end
 
-  update_separate_accumulator (res: INTEGER; acc: separate CELL [INTEGER])
+  update_separate_accumulator (max: INTEGER;
+                               acc: separate CELL [INTEGER];
+                               hist: ARRAY [INTEGER];
+                               sep_hist: separate ARRAY [INTEGER])
     local
-      x: INTEGER
+      i: INTEGER
     do
-      x := acc.item
-      inspect op
-      when {REDUCE2D_OPERATOR}.max then
-        x := res.max(x)
-      when {REDUCE2D_OPERATOR}.filter then
-        x := res + filter(x)
+      i := acc.item
+      acc.put (i.max (max))
+
+      from i := 0
+      until i > 100
+      loop
+        sep_hist [i] := sep_hist [i] + hist [i]
+        i := i + 1
       end
-      acc.put (x)
     end
   
-  filter(x: INTEGER): INTEGER
-    do
-      Result := 0
-      if x = value then
-        Result := 1
-      end
-    end
-
-feature {NONE}
-  accum: separate CELL [INTEGER]
   start, final: INTEGER
+  
+feature {NONE}
+  histogram: separate ARRAY[INTEGER]
+  accum: separate CELL [INTEGER]
+  
   ncols: INTEGER
   array: separate ARRAY2[INTEGER]
-  op: INTEGER
-  value: INTEGER
 
 end
