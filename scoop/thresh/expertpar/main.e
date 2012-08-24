@@ -52,34 +52,12 @@ feature
       end
     end
 
-  read_matrix(nrows, ncols: INTEGER; a_matrix: separate ARRAY2[INTEGER];
-              in: PLAIN_TEXT_FILE)
-    require
-      a_matrix.generator /= Void
-    local
-      i, j: INTEGER
-    do
-      from i := 1
-      until i > nrows
-      loop
-        from j := 1
-        until j > ncols
-        loop
-          in.read_integer
-          a_matrix.put (in.last_integer, i, j) 
-          a_matrix.item (i,j).generator.do_nothing
-          j := j + 1
-        end
-        i := i + 1
-      end
-    end
-
   thresh(nrows, ncols: INTEGER;
          percent: INTEGER;):  ARRAY2 [INTEGER]
     local
       threshold: INTEGER
     do
-      print ("thresh%N")
+      print ("main thresh%N")
       create histogram.make_filled(0, 0, 100)
             
       reduce2d (nrows, ncols)
@@ -89,33 +67,6 @@ feature
       -- parallel for on matrix
       Result := parfor(nrows, ncols, threshold)
     end
-
-  calculate_threshold (nrows, ncols, percent: INTEGER;
-                       a_accum: separate CELL [INTEGER];
-                       a_histogram: separate ARRAY [INTEGER]): INTEGER
-    local
-      count: INTEGER
-      nmax: INTEGER
-      threshold: INTEGER
-      prefixsum: INTEGER
-      i: INTEGER
-    do
-      nmax := a_accum.item
-      count := (nrows * ncols * percent) // 100
-      
-      prefixsum := 0
-      threshold := nmax
-      
-      from i := nmax until not(i >= 0 and prefixsum <= count) loop
-        prefixsum := prefixsum + a_histogram[i];
-        threshold := i;
-        i := i - 1
-      end
-
-      Result := threshold
-    end
-
-  num_workers: INTEGER = 32
   
   reduce2d (nrows, ncols: INTEGER)
     local
@@ -123,7 +74,7 @@ feature
       workers: LINKED_LIST [separate REDUCE2D_WORKER]
       start, height, i: INTEGER
     do
-      print ("reduce2d%N")
+      print ("main reduce2d%N")
       create workers.make
       create accum.put (0)
       
@@ -150,14 +101,82 @@ feature
         i := i + 1
       end
       -- parallel for on rows
-      print ("reduce2d do_all live%N")
-      workers.do_all(agent {REDUCE2D_WORKER}.live) -- launch_reduce2d_worker)
-      workers.do_all(agent join_reduce)
+      print ("main reduce2d do_all live%N")
+      -- workers.do_all(agent {REDUCE2D_WORKER}.live)
+      workers_reduce_live (workers)
+      print ("main reduce2d do_all join%N")
+      
+      -- workers.do_all(agent join_reduce)
+      workers_reduce_join (workers)
     end
 
-  reduce2d_result(a_accum: separate CELL[INTEGER]): INTEGER
+  workers_reduce_live (workers: LINKED_LIST [separate REDUCE2D_WORKER])
     do
-      Result := a_accum.item
+      from workers.start
+      until workers.after
+      loop
+        live_reduce (workers.item)
+        workers.forth
+      end
+    end
+
+  workers_reduce_join (workers: LINKED_LIST [separate REDUCE2D_WORKER])
+    do
+      from workers.start
+      until workers.after
+      loop
+        join_reduce (workers.item)
+        workers.forth
+      end
+    end
+
+  
+  live_reduce (worker: separate REDUCE2D_WORKER)
+    do
+      worker.live
+    end
+
+
+  workers_parfor_live (workers: LINKED_LIST [separate PARFOR_WORKER])
+    do
+      from workers.start
+      until workers.after
+      loop
+        live_parfor (workers.item)
+        workers.forth
+      end
+    end
+
+  live_parfor (worker: separate PARFOR_WORKER)
+    do
+      worker.live
+    end
+
+  
+  
+  calculate_threshold (nrows, ncols, percent: INTEGER;
+                       a_accum: separate CELL [INTEGER];
+                       a_histogram: separate ARRAY [INTEGER]): INTEGER
+    local
+      count: INTEGER
+      nmax: INTEGER
+      threshold: INTEGER
+      prefixsum: INTEGER
+      i: INTEGER
+    do
+      nmax := a_accum.item
+      count := (nrows * ncols * percent) // 100
+      
+      prefixsum := 0
+      threshold := nmax
+      
+      from i := nmax until not(i >= 0 and prefixsum <= count) loop
+        prefixsum := prefixsum + a_histogram[i];
+        threshold := i;
+        i := i - 1
+      end
+
+      Result := threshold
     end
   
   -- parallel for on matrix
@@ -193,8 +212,10 @@ feature
       end
  
       -- parallel for on rows
-      workers.do_all(agent {PARFOR_WORKER}.live)
+      -- workers.do_all(agent {PARFOR_WORKER}.live)
+      workers_parfor_live (workers)
       workers.do_all(agent join_parfor)
+      
       
       Result := fetch_matrix (nrows, ncols, shared)
     end
@@ -219,11 +240,37 @@ feature
       end
     end
 
+  read_matrix(nrows, ncols: INTEGER;
+              a_matrix: separate ARRAY2[INTEGER];
+              in: PLAIN_TEXT_FILE)
+    require
+      a_matrix.generator /= Void
+    local
+      i, j: INTEGER
+    do
+      from i := 1
+      until i > nrows
+      loop
+        from j := 1
+        until j > ncols
+        loop
+          in.read_integer
+          a_matrix.put (in.last_integer, i, j) 
+          a_matrix.item (i,j).generator.do_nothing
+          j := j + 1
+        end
+        i := i + 1
+      end
+    end
+
+  
 feature {NONE}
   matrix: separate ARRAY2[INTEGER]
   shared: separate ARRAY2[INTEGER]
   accum: separate CELL [INTEGER]
   histogram: separate ARRAY[INTEGER]
+
+  num_workers: INTEGER = 32
   
   join_reduce (s: separate REDUCE2D_WORKER)
     require

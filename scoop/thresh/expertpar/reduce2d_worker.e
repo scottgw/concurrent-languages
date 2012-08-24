@@ -1,5 +1,5 @@
 class REDUCE2D_WORKER
-
+  
 create
   make_with_filter
 
@@ -25,6 +25,9 @@ feature
     do
       if start /= final + 1 then
         tag ("live")
+        -- if start = 1 then
+        --   (create {EXECUTION_ENVIRONMENT}).sleep (5000000000)
+        -- end
         get_result(fetch_array (input_array))
       end
     end
@@ -39,6 +42,7 @@ feature
       a_sep_array.generator /= Void
     local
       i, j: INTEGER
+      e: INTEGER
     do
       tag ("fetch start")
       create Result.make_filled (0, final - start + 1, ncols)
@@ -49,7 +53,9 @@ feature
         from j := 1
         until j > ncols
         loop
-          Result [to_local_row (i), j] := a_sep_array.item (i, j)
+          e := a_sep_array.item (i, j)
+          e.do_nothing
+          Result [to_local_row (i), j] := e
           j := j + 1
         end
         i := i + 1
