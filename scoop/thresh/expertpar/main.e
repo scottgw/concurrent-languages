@@ -31,12 +31,13 @@ feature
 
       create matrix.make_filled (0, nrows, ncols)
       read_matrix(nrows, ncols, matrix, in)
-
+      print ("main read_matrix%N")
+      
       in.read_integer
       percent := in.last_integer
 
       mask := thresh(nrows, ncols, percent)
-
+      
       from i := 1
       until i > nrows
       loop
@@ -78,6 +79,7 @@ feature
     local
       threshold: INTEGER
     do
+      print ("thresh%N")
       create histogram.make_filled(0, 0, 100)
             
       reduce2d (nrows, ncols)
@@ -121,6 +123,7 @@ feature
       workers: LINKED_LIST [separate REDUCE2D_WORKER]
       start, height, i: INTEGER
     do
+      print ("reduce2d%N")
       create workers.make
       create accum.put (0)
       
@@ -147,6 +150,7 @@ feature
         i := i + 1
       end
       -- parallel for on rows
+      print ("reduce2d do_all live%N")
       workers.do_all(agent {REDUCE2D_WORKER}.live) -- launch_reduce2d_worker)
       workers.do_all(agent join_reduce)
     end
