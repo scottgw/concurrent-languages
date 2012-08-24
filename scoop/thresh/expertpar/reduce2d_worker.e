@@ -24,10 +24,6 @@ feature
   live
     do
       if start /= final + 1 then
-        tag ("live")
-        -- if start = 1 then
-        --   (create {EXECUTION_ENVIRONMENT}).sleep (5000000000)
-        -- end
         get_result(fetch_array (input_array))
       end
     end
@@ -44,7 +40,6 @@ feature
       i, j: INTEGER
       e: INTEGER
     do
-      tag ("fetch start")
       create Result.make_filled (0, final - start + 1, ncols)
 
       from i := start
@@ -60,7 +55,6 @@ feature
         end
         i := i + 1
       end
-      tag ("fetch end")
     end
 
   get_result(a_array: ARRAY2[INTEGER])
@@ -79,32 +73,14 @@ feature
         from j := 1
         until j > ncols
         loop
-          tag ("get_result.loop1")
           e        := a_array [to_local_row (i), j]
-          tag ("get_result.loop2")
           hist [e] := hist [e] + 1
           max      := e.max (max)
-
           j := j + 1
         end
         i := i + 1
       end
-      tag ("get_result.loop exit")
       update_separate_accumulator (max, accum, hist, histogram)
-      blurg (accum, histogram)
-    end
-
-  tag (str: STRING)
-    do
-      print ("reduce -> " + str + ": (" + start.out + ", " + final.out + ")%N")
-    end
-
-  blurg (acc: separate ARRAY [INTEGER];
-                               sep_hist: separate ARRAY [INTEGER])
-    require
-      acc.generator /= Void and sep_hist.generator /= Void
-    do
-      tag ("blurg!")
     end
 
   update_separate_accumulator (max: INTEGER;
@@ -118,15 +94,13 @@ feature
       h: INTEGER
       newmax: INTEGER
     do
-      tag ("update_separate start")
       i := acc.item (1)
-      tag ("update_separate old max: " + i.out)
       newmax := i.max (max)
-      tag ("update_separate new max: " + newmax.out)
+
       if newmax > 100 then
       	(1 / (i-i)).do_nothing
       end
-      acc.put (1, newmax)
+      acc.put (newmax, 1)
 
       from i := 0
       until i > 100
@@ -135,7 +109,6 @@ feature
       	sep_hist.put (h + hist [i], i)
         i := i + 1
       end
-      tag ("update_separate end")
     end
 
   start, final: INTEGER

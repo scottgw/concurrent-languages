@@ -34,7 +34,6 @@ feature
       create accum.make_filled (0, 1, 1)
 
       read_matrix (nrows, ncols, matrix, in)
-      print ("main read_matrix%N")
 
       in.read_integer
       percent := in.last_integer
@@ -55,30 +54,15 @@ feature
       end
     end
 
-  set_max (cell: separate CELL [INTEGER])
-    local
-      i: INTEGER
-  	do
-  	  i := cell.item
-  	  print ("set max: " + i.out + "%N")
-  	  cell.put (0)
-  	  i := cell.item
-  	  print ("set max after: " + i.out + "%N")
-  	end
-
   thresh(nrows, ncols: INTEGER;
          percent: INTEGER;):  ARRAY2 [INTEGER]
     local
       threshold: INTEGER
     do
-      print ("main thresh%N")
-
-
-      print ("thresh.reduce2d%N")
       reduce2d (nrows, ncols)
-      print ("thresh.threshold%N")
+
       threshold := calculate_threshold (nrows, ncols, percent, accum, histogram)
-      print ("thresh.parfor%N")
+
       -- parallel for on matrix
       Result := parfor(nrows, ncols, threshold)
     end
@@ -89,7 +73,6 @@ feature
       workers: LINKED_LIST [separate REDUCE2D_WORKER]
       start, height, i: INTEGER
     do
-      print ("main reduce2d%N")
       create workers.make
 
       from
@@ -115,12 +98,9 @@ feature
         i := i + 1
       end
       -- parallel for on rows
-      print ("main reduce2d do_all live%N")
-      -- workers.do_all(agent {REDUCE2D_WORKER}.live)
       workers_reduce_live (workers)
-      print ("main reduce2d do_all join%N")
 
-      -- workers.do_all(agent join_reduce)
+      -- join workers
       workers_reduce_join (workers)
     end
 
@@ -139,7 +119,6 @@ feature
       from workers.start
       until workers.after
       loop
-        print ("joined worker%N")
         join_reduce (workers.item)
         workers.forth
       end
@@ -178,13 +157,12 @@ feature
       i: INTEGER
       h: INTEGER
     do
-      print ("calculate threshold start%N")
       nmax := a_accum.item (1)
       count := (nrows * ncols * percent) // 100
 
       prefixsum := 0
       threshold := nmax
-      print ("calculate threshold preloop: " + nmax.out + "%N")
+
       from i := nmax until not(i >= 0 and prefixsum <= count) loop
       	h := a_histogram.item (i)
         prefixsum := prefixsum + h
@@ -193,7 +171,6 @@ feature
       end
 
       Result := threshold
-      print ("calculate threshold end%N")
     end
 
   -- parallel for on matrix
@@ -204,7 +181,6 @@ feature
       workers: LINKED_LIST[separate PARFOR_WORKER]
       i, start, height: INTEGER
     do
-      print ("parfor start%N")
       create workers.make
       create shared.make_filled (0, nrows, ncols)
 
@@ -216,7 +192,6 @@ feature
         height := (nrows - start) // (num_workers - i)
 
         if height > 0 then
-          print ("parfor worker: " + (start + 1).out + ", " + (start + height).out + "%N")
           create worker.make
                      (start + 1
                      , start + height
@@ -234,12 +209,10 @@ feature
       end
 
       -- parallel for on rows
-      -- workers.do_all(agent {PARFOR_WORKER}.live)
-      print ("main parfor live%N")
       workers_parfor_live (workers)
-      print ("main parfor join%N")
-      workers.do_all(agent join_parfor)
 
+      -- join workers
+      workers.do_all(agent join_parfor)
 
       Result := fetch_matrix (nrows, ncols, shared)
     end
