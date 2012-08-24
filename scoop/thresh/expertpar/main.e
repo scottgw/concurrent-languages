@@ -63,7 +63,7 @@ feature
         until j > ncols
         loop
           in.read_integer
-          a_matrix [i,j] := in.last_integer
+          a_matrix.item (i,j) := in.last_integer
           j := j + 1
         end
         i := i + 1
