@@ -1,8 +1,5 @@
 class REDUCE2D_WORKER
 
-inherit
-  EXECUTION_ENVIRONMENT
-
 create
   make_with_filter
 
@@ -18,7 +15,7 @@ feature
       start := start_
       final := final_
       ncols := ncols_
-      array := array_
+      input_array := array_
       accum := accum_
       histogram := histogram_
     end
@@ -27,7 +24,8 @@ feature
   live
     do
       if start /= final + 1 then
-        get_result(fetch_array (array))
+        tag ("live")
+        get_result(fetch_array (input_array))
       end
     end
 
@@ -42,7 +40,8 @@ feature
     local
       i, j: INTEGER
     do
-      create Result.make (final - start + 1, ncols)
+      tag ("fetch start")
+      create Result.make_filled (0, final - start + 1, ncols)
       
       from i := start
       until i > final
@@ -55,8 +54,9 @@ feature
         end
         i := i + 1
       end
+      tag ("fetch end")
     end
-  
+
   get_result(a_array: ARRAY2[INTEGER])
     local
       i, j: INTEGER
@@ -73,7 +73,9 @@ feature
         from j := 1
         until j > ncols
         loop
+          tag ("get_result.loop1")
           e        := a_array [to_local_row (i), j]
+          tag ("get_result.loop2")
           hist [e] := hist [e] + 1
           max      := e.max (max)
           
@@ -84,6 +86,11 @@ feature
       update_separate_accumulator (max, accum, hist, histogram)
     end
 
+  tag (str: STRING)
+    do
+      print ("reduce -> " + str + ": (" + start.out + ", " + final.out + ")%N")
+    end
+    
   update_separate_accumulator (max: INTEGER;
                                acc: separate CELL [INTEGER];
                                hist: ARRAY [INTEGER];
@@ -109,6 +116,6 @@ feature {NONE}
   accum: separate CELL [INTEGER]
   
   ncols: INTEGER
-  array: separate ARRAY2[INTEGER]
+  input_array: separate ARRAY2[INTEGER]
 
 end
