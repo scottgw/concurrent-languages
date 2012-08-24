@@ -11,7 +11,6 @@ main: main.e reduce2d_worker.e parfor_worker.e
 	ec -config main.ecf -target main -finalize -c_compile;
 	cp EIFGENs/main/F_code/main .
 
-
 worktest: mainw
 	./mainw -i main.in
 	./mainw -i main2.in
