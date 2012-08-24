@@ -1,5 +1,5 @@
 class REDUCE2D_WORKER
-  
+
 create
   make_with_filter
 
@@ -8,7 +8,7 @@ feature
        (start_, final_: INTEGER;
         ncols_: INTEGER;
         array_: separate ARRAY2[INTEGER];
-        accum_: separate CELL [INTEGER];
+        accum_: separate ARRAY [INTEGER];
         histogram_: separate ARRAY[INTEGER]
         )
     do
@@ -36,7 +36,7 @@ feature
     do
       Result := x - start + 1
     end
-  
+
   fetch_array (a_sep_array: separate ARRAY2[INTEGER]): ARRAY2 [INTEGER]
     require
       a_sep_array.generator /= Void
@@ -46,7 +46,7 @@ feature
     do
       tag ("fetch start")
       create Result.make_filled (0, final - start + 1, ncols)
-      
+
       from i := start
       until i > final
       loop
@@ -72,7 +72,7 @@ feature
     do
       create hist.make_filled (0, 0, 100)
       max := 0
-      
+
       from i := start
       until i > final
       loop
@@ -84,43 +84,66 @@ feature
           tag ("get_result.loop2")
           hist [e] := hist [e] + 1
           max      := e.max (max)
-          
+
           j := j + 1
         end
         i := i + 1
       end
+      tag ("get_result.loop exit")
       update_separate_accumulator (max, accum, hist, histogram)
+      blurg (accum, histogram)
     end
 
   tag (str: STRING)
     do
       print ("reduce -> " + str + ": (" + start.out + ", " + final.out + ")%N")
     end
-    
+
+  blurg (acc: separate ARRAY [INTEGER];
+                               sep_hist: separate ARRAY [INTEGER])
+    require
+      acc.generator /= Void and sep_hist.generator /= Void
+    do
+      tag ("blurg!")
+    end
+
   update_separate_accumulator (max: INTEGER;
-                               acc: separate CELL [INTEGER];
+                               acc: separate ARRAY [INTEGER];
                                hist: ARRAY [INTEGER];
                                sep_hist: separate ARRAY [INTEGER])
+    require
+      acc.generator /= Void and sep_hist.generator /= Void
     local
       i: INTEGER
+      h: INTEGER
+      newmax: INTEGER
     do
-      i := acc.item
-      acc.put (i.max (max))
+      tag ("update_separate start")
+      i := acc.item (1)
+      tag ("update_separate old max: " + i.out)
+      newmax := i.max (max)
+      tag ("update_separate new max: " + newmax.out)
+      if newmax > 100 then
+      	(1 / (i-i)).do_nothing
+      end
+      acc.put (1, newmax)
 
       from i := 0
       until i > 100
       loop
-        sep_hist [i] := sep_hist [i] + hist [i]
+      	h := sep_hist.item (i)
+      	sep_hist.put (h + hist [i], i)
         i := i + 1
       end
+      tag ("update_separate end")
     end
-  
+
   start, final: INTEGER
-  
+
 feature {NONE}
   histogram: separate ARRAY[INTEGER]
-  accum: separate CELL [INTEGER]
-  
+  accum: separate ARRAY [INTEGER]
+
   ncols: INTEGER
   input_array: separate ARRAY2[INTEGER]
 

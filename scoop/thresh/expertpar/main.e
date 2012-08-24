@@ -20,9 +20,9 @@ feature
       file_name: STRING
       i, j: INTEGER
     do
-      file_name := separate_character_option_value('i')
-      create in.make_open_read(file_name)
-      
+      file_name := separate_character_option_value ('i')
+      create in.make_open_read (file_name)
+
       in.read_integer
       nrows := in.last_integer
 
@@ -30,14 +30,17 @@ feature
       ncols := in.last_integer
 
       create matrix.make_filled (0, nrows, ncols)
-      read_matrix(nrows, ncols, matrix, in)
+      create histogram.make_filled(0, 0, 100)
+      create accum.make_filled (0, 1, 1)
+
+      read_matrix (nrows, ncols, matrix, in)
       print ("main read_matrix%N")
-      
+
       in.read_integer
       percent := in.last_integer
 
-      mask := thresh(nrows, ncols, percent)
-      
+      mask := thresh (nrows, ncols, percent)
+
       from i := 1
       until i > nrows
       loop
@@ -52,22 +55,34 @@ feature
       end
     end
 
+  set_max (cell: separate CELL [INTEGER])
+    local
+      i: INTEGER
+  	do
+  	  i := cell.item
+  	  print ("set max: " + i.out + "%N")
+  	  cell.put (0)
+  	  i := cell.item
+  	  print ("set max after: " + i.out + "%N")
+  	end
+
   thresh(nrows, ncols: INTEGER;
          percent: INTEGER;):  ARRAY2 [INTEGER]
     local
       threshold: INTEGER
     do
       print ("main thresh%N")
-      create histogram.make_filled(0, 0, 100)
-            
-      reduce2d (nrows, ncols)
 
+
+      print ("thresh.reduce2d%N")
+      reduce2d (nrows, ncols)
+      print ("thresh.threshold%N")
       threshold := calculate_threshold (nrows, ncols, percent, accum, histogram)
-      
+      print ("thresh.parfor%N")
       -- parallel for on matrix
       Result := parfor(nrows, ncols, threshold)
     end
-  
+
   reduce2d (nrows, ncols: INTEGER)
     local
       worker: separate REDUCE2D_WORKER
@@ -76,8 +91,7 @@ feature
     do
       print ("main reduce2d%N")
       create workers.make
-      create accum.put (0)
-      
+
       from
         start := 0
         i := 0
@@ -93,10 +107,10 @@ feature
                       , matrix
                       , accum
                       , histogram)
-          
+
           workers.extend(worker)
         end
-          
+
         start := start + height
         i := i + 1
       end
@@ -105,7 +119,7 @@ feature
       -- workers.do_all(agent {REDUCE2D_WORKER}.live)
       workers_reduce_live (workers)
       print ("main reduce2d do_all join%N")
-      
+
       -- workers.do_all(agent join_reduce)
       workers_reduce_join (workers)
     end
@@ -130,12 +144,10 @@ feature
       end
     end
 
-  
   live_reduce (worker: separate REDUCE2D_WORKER)
     do
       worker.live
     end
-
 
   workers_parfor_live (workers: LINKED_LIST [separate PARFOR_WORKER])
     do
@@ -152,33 +164,37 @@ feature
       worker.live
     end
 
-  
-  
   calculate_threshold (nrows, ncols, percent: INTEGER;
-                       a_accum: separate CELL [INTEGER];
+                       a_accum: separate ARRAY [INTEGER];
                        a_histogram: separate ARRAY [INTEGER]): INTEGER
+    require
+      a_accum.generator /= Void and a_histogram.generator /= Void
     local
       count: INTEGER
       nmax: INTEGER
       threshold: INTEGER
       prefixsum: INTEGER
       i: INTEGER
+      h: INTEGER
     do
-      nmax := a_accum.item
+      print ("calculate threshold start%N")
+      nmax := a_accum.item (1)
       count := (nrows * ncols * percent) // 100
-      
+
       prefixsum := 0
       threshold := nmax
-      
+      print ("calculate threshold preloop: " + nmax.out + "%N")
       from i := nmax until not(i >= 0 and prefixsum <= count) loop
-        prefixsum := prefixsum + a_histogram[i];
+      	h := a_histogram.item (i)
+        prefixsum := prefixsum + h
         threshold := i;
         i := i - 1
       end
 
       Result := threshold
+      print ("calculate threshold end%N")
     end
-  
+
   -- parallel for on matrix
   parfor(nrows, ncols: INTEGER;
          threshold: INTEGER): ARRAY2 [INTEGER]
@@ -187,9 +203,10 @@ feature
       workers: LINKED_LIST[separate PARFOR_WORKER]
       i, start, height: INTEGER
     do
+      print ("parfor start%N")
       create workers.make
       create shared.make_filled (0, nrows, ncols)
-      
+
       from
         start := 0
         i := 0
@@ -197,26 +214,32 @@ feature
       loop
         height := (nrows - start) // (num_workers - i)
 
-        create worker.make
-                   (start + 1
-                   , start + height
-                   , ncols
-                   , matrix
-                   , shared
-                   , threshold)
-    
-        workers.extend(worker)        
-        
+        if height > 0 then
+          print ("parfor worker: " + (start + 1).out + ", " + (start + height).out + "%N")
+          create worker.make
+                     (start + 1
+                     , start + height
+                     , ncols
+                     , matrix
+                     , shared
+                     , threshold)
+
+          workers.extend(worker)
+        end
+
+
         start := start + height
         i := i + 1
       end
- 
+
       -- parallel for on rows
       -- workers.do_all(agent {PARFOR_WORKER}.live)
+      print ("main parfor live%N")
       workers_parfor_live (workers)
+      print ("main parfor join%N")
       workers.do_all(agent join_parfor)
-      
-      
+
+
       Result := fetch_matrix (nrows, ncols, shared)
     end
 
@@ -255,7 +278,7 @@ feature
         until j > ncols
         loop
           in.read_integer
-          a_matrix.put (in.last_integer, i, j) 
+          a_matrix.put (in.last_integer, i, j)
           a_matrix.item (i,j).generator.do_nothing
           j := j + 1
         end
@@ -263,15 +286,15 @@ feature
       end
     end
 
-  
+
 feature {NONE}
   matrix: separate ARRAY2[INTEGER]
   shared: separate ARRAY2[INTEGER]
-  accum: separate CELL [INTEGER]
+  accum: separate ARRAY [INTEGER]
   histogram: separate ARRAY[INTEGER]
 
   num_workers: INTEGER = 32
-  
+
   join_reduce (s: separate REDUCE2D_WORKER)
     require
       s.generator /= Void
@@ -283,4 +306,4 @@ feature {NONE}
       s.generator /= Void
     do
     end
-  end -- class MAIN 
+  end -- class MAIN
