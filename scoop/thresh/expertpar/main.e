@@ -139,6 +139,7 @@ feature
       from workers.start
       until workers.after
       loop
+        print ("joined worker%N")
         join_reduce (workers.item)
         workers.forth
       end
@@ -297,13 +298,13 @@ feature {NONE}
 
   join_reduce (s: separate REDUCE2D_WORKER)
     require
-      s.generator /= Void
+      s.generator = s.generator
     do
     end
 
   join_parfor (s: separate PARFOR_WORKER)
     require
-      s.generator /= Void
+      s.generator = s.generator
     do
     end
   end -- class MAIN
