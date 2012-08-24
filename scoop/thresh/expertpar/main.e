@@ -29,7 +29,7 @@ feature
       in.read_integer
       ncols := in.last_integer
 
-      create matrix.make (nrows, ncols)
+      create matrix.make_filled (0, nrows, ncols)
       read_matrix(nrows, ncols, matrix, in)
 
       in.read_integer
@@ -53,6 +53,8 @@ feature
 
   read_matrix(nrows, ncols: INTEGER; a_matrix: separate ARRAY2[INTEGER];
               in: PLAIN_TEXT_FILE)
+    require
+      a_matrix.generator /= Void
     local
       i, j: INTEGER
     do
@@ -63,39 +65,22 @@ feature
         until j > ncols
         loop
           in.read_integer
-          a_matrix.item (i,j) := in.last_integer
+          a_matrix.put (in.last_integer, i, j) 
+          a_matrix.item (i,j).generator.do_nothing
           j := j + 1
         end
         i := i + 1
       end
     end
 
-  create_array(): separate ARRAY[INTEGER]
-    do
-      create {separate ARRAY[INTEGER]} Result.make_empty
-    end
-
-      put(array: separate ARRAY[INTEGER]; value, index: INTEGER)
-    do
-      array.force(value, index)
-    end
-
-  item(array: separate ARRAY[INTEGER]; index: INTEGER): INTEGER
-    do
-      Result := array.item(index)
-    end
-
   thresh(nrows, ncols: INTEGER;
          percent: INTEGER;):  ARRAY2 [INTEGER]
     local
-      nmax: INTEGER
-      count: INTEGER
-      prefixsum, threshold: INTEGER
-      i: INTEGER
+      threshold: INTEGER
     do
       create histogram.make_filled(0, 0, 100)
             
-      nmax := reduce2d (nrows, ncols)
+      reduce2d (nrows, ncols)
 
       threshold := calculate_threshold (nrows, ncols, percent, accum, histogram)
       
@@ -130,7 +115,7 @@ feature
 
   num_workers: INTEGER = 32
   
-  reduce2d (nrows, ncols: INTEGER): INTEGER
+  reduce2d (nrows, ncols: INTEGER)
     local
       worker: separate REDUCE2D_WORKER
       workers: LINKED_LIST [separate REDUCE2D_WORKER]
@@ -161,11 +146,9 @@ feature
         start := start + height
         i := i + 1
       end
- 
       -- parallel for on rows
-      workers.do_all(agent launch_reduce2d_worker)
+      workers.do_all(agent {REDUCE2D_WORKER}.live) -- launch_reduce2d_worker)
       workers.do_all(agent join_reduce)
-      Result := reduce2d_result(accum)
     end
 
   reduce2d_result(a_accum: separate CELL[INTEGER]): INTEGER
@@ -179,12 +162,10 @@ feature
     local
       worker: separate PARFOR_WORKER
       workers: LINKED_LIST[separate PARFOR_WORKER]
-      reader: separate PARFOR_READER
       i, start, height: INTEGER
     do
       create workers.make
-      create reader.make
-      create shared.make (nrows, ncols)
+      create shared.make_filled (0, nrows, ncols)
       
       from
         start := 0
@@ -208,7 +189,7 @@ feature
       end
  
       -- parallel for on rows
-      workers.do_all(agent launch_parfor_worker)
+      workers.do_all(agent {PARFOR_WORKER}.live)
       workers.do_all(agent join_parfor)
       
       Result := fetch_matrix (nrows, ncols, shared)
@@ -219,7 +200,7 @@ feature
     local
       i, j: INTEGER
     do
-      create Result.make (nrows, ncols)
+      create Result.make_filled (0, nrows, ncols)
 
       from i := 1
       until i > nrows
@@ -242,23 +223,13 @@ feature {NONE}
   
   join_reduce (s: separate REDUCE2D_WORKER)
     require
-      attached s implies (s.generator /= Void or s.generator = Void)
+      s.generator /= Void
     do
     end
 
   join_parfor (s: separate PARFOR_WORKER)
     require
-      s /= Void implies (s.generator /= Void or s.generator = Void)
+      s.generator /= Void
     do
     end
-  
-  launch_reduce2d_worker(worker: separate REDUCE2D_WORKER)
-    do
-      worker.live
-    end
-
-  launch_parfor_worker(worker: separate PARFOR_WORKER)
-    do
-      worker.live
-    end
-end -- class MAIN 
+  end -- class MAIN 
