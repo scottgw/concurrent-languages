@@ -1,11 +1,14 @@
 import os
 import math
+import time
 
 def mean(x):
   n = len(x)
   total = 0
   for xi in x:
     total += xi
+  if n == 0:
+    print all_values
   return total / n
 
 def stddev(x):
@@ -389,11 +392,14 @@ def get_time_output(language, problem, variation, i, nthreads):
   return "time-%s-%s-%s-%d-%d.out" % (
       language, problem, variation, i, nthreads)
 
+def is_sequential (variation):
+  return  variation == "seq" or variation == "expertseq"
+
 def run_all(redirect_output=True):
   # TODO: check processor usage
   for nthreads in threads:
     for (language, problem, variation) in get_all():
-      if variation == 'seq' and nthreads != threads[-1]: continue
+      if is_sequential (variation) and nthreads != threads[-1]: continue
       for i in range(len(inputs)):
         #TODO: get time output file name
         time_output = get_time_output(
@@ -405,14 +411,17 @@ def run_all(redirect_output=True):
           cmd += "GOMAXPROCS=%d " % nthreads
 
         #cmd += "timeout %d " % (TIMEOUT)
-        if variation == 'seq' or nthreads == 1:
+        if is_sequential (variation) or nthreads == 1:
           cmd += "taskset -c 0 "
         else:
           cmd += "taskset -c 0-%d " % (nthreads - 1)
 
+        # using python timing below
+        # directory = get_directory(language, problem, variation)
+        # cmd += "/usr/bin/time -a -f %%e -o %s %s/" % (time_output,
+        #     directory)
         directory = get_directory(language, problem, variation)
-        cmd += "/usr/bin/time -a -f %%e -o %s %s/" % (time_output,
-            directory)
+        cmd += directory + '/'
 
         if language == "erlang":
           cmd += "main.sh"
@@ -451,9 +460,16 @@ def run_all(redirect_output=True):
           cmd += " > /dev/null 1>&0 2>&0"
 
         print cmd
+
+        t1 = time.time ()
         system(cmd, timeout=True)
-        value = read_from_file(time_output)
-        print value
+        t2 = time.time ()
+        tdiff = t2 - t1
+
+        with open (time_output, 'a') as output_file:
+          output_file.write (str (tdiff) + '\n')
+
+        print tdiff
 
 results = {}
 all_values = {}
@@ -465,7 +481,7 @@ def get_results():
       results[nthreads] = {}
       all_values[nthreads] = {}
     for (language, problem, variation) in get_all():
-      if variation == 'seq' and nthreads != threads[-1]: continue
+      if is_sequential (variation) and nthreads != threads[-1]: continue
       if problem not in results[nthreads]:
         results[nthreads][problem] = {}
         all_values[nthreads][problem] = {}
@@ -508,7 +524,7 @@ def test_significance_speedup():
     if nthreads == 1:
       continue
     for (language, problem, variation) in get_all():
-      if variation == 'seq': continue
+      if is_sequential (variation): continue
 
       for i in range(len(inputs)):
         values = all_values[nthreads][problem][variation][language][i]
@@ -646,9 +662,13 @@ def test_significance():
               print ' %s' % lb, 
         print ''
 
-  pretty = {'seq' : 'sequential', 'par' : 'parallel'}
+  pretty = {'seq' : 'sequential'
+            , 'par' : 'parallel'
+            , 'expertseq' : 'expert sequential'
+            , 'expertpar' : 'expert parallel'
+            }
   for problem in sorted(problems):
-    for t in ['seq', 'par']:
+    for t in ['seq', 'par', 'expertseq', 'expertpar']:
       out = []
       out.append(
 '''
@@ -685,7 +705,11 @@ output_dir = "output"
 bargraph_dir = os.path.abspath("../time/graph")
 
 def create_graph(graph_name, values, pretty_name, use_subfigure=True, is_relative=False):
-  variation_names = {"seq" : "Sequential", "par" : "Parallel"}
+  variation_names = {"seq" : "Sequential"
+                     , "par" : "Parallel"
+                     , "expertseq": "Expert sequential"
+                     , "expertpar": "Expert parallel"
+                     }
   for i in range(len(inputs)):
     nmax = 0
     for (language, problem, variation) in get_all():
@@ -761,7 +785,7 @@ def create_graph(graph_name, values, pretty_name, use_subfigure=True, is_relativ
       system(cmd)
 
       caption = "%s" % (variation_name)
-      if variation == "par":
+      if not is_sequential (variation):
         caption += " (using %d threads)" % (threads[-1])
       label = "fig:exec:time:%s:%d" % (variation, i)
       if is_relative:
@@ -813,7 +837,9 @@ plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title
         out = []
         for nthreads in threads:
             variation = "par"
-            if "seq" not in values[threads[-1]][problem]: continue
+            if "seq" not in values[threads[-1]][problem] or "expertseq" not in values[threads[-1]][problem]: continue
+
+            
             tseq = values[threads[-1]][problem]["seq"][language][i]
             cur = values[nthreads][problem][variation][language][i]
             if cur == INVALID or cur == 0: continue
