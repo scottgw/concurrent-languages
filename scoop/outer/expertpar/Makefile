@@ -3,5 +3,5 @@ all: main
 	diff main.out main.gold
 
 main: main.e comparator.e
-	ec main.e
+	ec -config main.ecf -target main -finalize -c_compile
 
