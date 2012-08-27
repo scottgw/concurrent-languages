@@ -8,6 +8,6 @@ all: main
 	./main -i main4.in > main4.out
 	diff main4.out main4.gold
 
-main: main.e comparator.e
-	ec main.e
-
+main: main.e tuple_comparator.e
+	ec -config main.ecf -target main -finalize -c_compile;
+	cp EIFGENs/main/F_code/main .
