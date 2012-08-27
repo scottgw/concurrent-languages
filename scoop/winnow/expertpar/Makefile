@@ -8,7 +8,22 @@ all: main
 	./main -i main4.in > main4.out
 	diff main4.out main4.gold
 
-main: main.e tuple_comparator.e tuple_sorter.e \
-				parfor_aggregator.e parfor_worker.e parfor_reader.e
-	ec main.e
+main: main.e tuple_comparator.e tuple_sorter.e parfor_worker.e
+	ec -config main.ecf -target main -finalize -c_compile;
+	cp EIFGENs/main/F_code/main .
+
+allw: mainw
+	./mainw -i main.in > main.out
+	diff main.out main.gold
+	./mainw -i main2.in > main2.out
+	diff main2.out main2.gold
+	./mainw -i main3.in > main3.out
+	diff main3.out main3.gold
+	./mainw -i main4.in > main4.out
+	diff main4.out main4.gold
+
+
+mainw: main.e tuple_comparator.e parfor_worker.e tuple_sorter.e
+	ec -config main.ecf -target main -c_compile;
+	cp EIFGENs/main/W_code/main mainw
 

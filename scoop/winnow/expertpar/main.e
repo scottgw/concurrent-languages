@@ -24,10 +24,15 @@ feature
       
       nrows := read_integer
       ncols := read_integer
-      create matrix.make_empty
+      
+
+      create result_vector.make_empty
+      create matrix.make (nrows, ncols)
       read_matrix(nrows, ncols, matrix)
-      create mask.make_empty
+      
+      create mask.make (nrows, ncols)
       read_matrix(nrows, ncols, mask)
+      
       nelts := read_integer
       
       points := winnow(nrows, ncols, nelts)
@@ -75,7 +80,7 @@ feature
       n, chunk, index: INTEGER
     do
       -- parallel for on matrix
-      values := parfor(nrows, ncols);
+      values := parfor(nelts, nrows, ncols);
       
       create sorter.make()
       values := sorter.sort(values)
@@ -90,36 +95,16 @@ feature
       loop
         index := (i - 1) * chunk + 1
         points [i] := values [index]
+        i := i + 1
       end
       
       Result := points
     end
-
-  -- parallel for on matrix
-  parfor(nrows, ncols: INTEGER): ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
-  local
-    worker: separate PARFOR_WORKER
-    workers: LINKED_LIST[separate PARFOR_WORKER]
-    reader: separate PARFOR_READER
-  do
-    create workers.make
-    create reader.make
-    create parfor_aggregator.make(nrows)
-    across 1 |..| nrows as ic loop
-      create worker.make(nrows, ncols, ic.item, matrix.item(ic.item),
-        mask.item(ic.item), parfor_aggregator)
-      workers.extend(worker)
-    end
-    -- parallel for on rows
-    workers.do_all(agent launch_parfor_worker)
-    Result := parfor_result(reader)
-  end
-
-
   
   num_workers: INTEGER = 32
   
-  parfor (nrows, ncols: INTEGER): ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
+  parfor (nelts, nrows, ncols: INTEGER):
+      ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
     local
       worker: separate PARFOR_WORKER
       workers: LINKED_LIST [separate PARFOR_WORKER]
@@ -132,15 +117,16 @@ feature
         i := 0
       until i >= num_workers
       loop
-        height := (nelts - start) // (num_workers - i)
+        height := (nrows - start) // (num_workers - i)
 
         if height > 0 then
           create worker.make
                      (start + 1
                       , start + height
+                      , ncols
                       , nelts
                       , matrix
-                      , vector
+                      , mask
                       , result_vector)
 
           workers.extend(worker)
@@ -155,32 +141,7 @@ feature
       -- join workers
       workers_join (workers)
 
-      Result := to_local (nelts, result_vector)
-    end
-
-  -- to_separate(nelts: INTEGER; vector: ARRAY[REAL_64])
-  -- : separate ARRAY[REAL_64]
-  --   local
-  --     res: separate ARRAY[REAL_64]
-  --   do
-  --     create res.make_empty
-  --     across 1 |..| nelts as ic loop
-  --     res.force(vector.item(ic.item), ic.item);
-  --   end
-  -- Result := res
-  --   end
-
-  to_local(nelts: INTEGER; a_vector: separate ARRAY[REAL_64]): ARRAY[REAL_64]
-    local
-      i: INTEGER
-    do
-      create Result.make_filled (0, 1, nelts)
-      from i := 1
-      until i > nelts
-      loop
-        Result [i] := a_vector [i]
-        i := i + 1
-      end
+      Result := to_local_values (result_vector)
     end
 
 feature {NONE}
@@ -217,36 +178,34 @@ feature {NONE}
 
   
   launch_parfor_worker(worker: separate PARFOR_WORKER)
-  do
-    worker.live
-  end
-
-  parfor_result(reader: separate PARFOR_READER)
-      : ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
-  do
-    Result := to_local_values(reader.get_result(parfor_aggregator))
-  end
-
-  to_local_values(values: separate ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]])
-      : ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
-  local
-    local_values: ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
-  do
-    create local_values.make_empty
-    across 1 |..| values.count as ic loop
-      local_values.force([
-        values.item(ic.item).integer_32_item(1),
-        values.item(ic.item).integer_32_item(2),
-        values.item(ic.item).integer_32_item(3)], ic.item)
+    do
+      worker.live
     end
-    Result := local_values
-  end
 
+  to_local_values(values: separate ARRAY[TUPLE[value, i, j: INTEGER]]):
+      ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
+    local
+      k: INTEGER
+      n: INTEGER
+    do
+      n := values.count
+      create Result.make (1, n)
+            
+      
+      from k := 1
+      until k > n
+      loop
+        Result [k] := [values [k].value,
+                       values [k].i,
+                       values [k].j]
+        k := k + 1
+      end
+    end
+  
 feature {NONE}
   in: PLAIN_TEXT_FILE
-  parfor_aggregator: separate PARFOR_AGGREGATOR
 
   matrix, mask: separate ARRAY2[INTEGER]
-
+  result_vector: separate ARRAY [TUPLE [INTEGER, INTEGER, INTEGER]]
   
 end -- class MAIN 
