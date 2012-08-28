@@ -31,7 +31,7 @@ feature
       read_vector_of_points(nelts, points)
   
       create result_vector.make_filled(0.0, 1, nelts)
-      create result_matrix.make (1, nelts)
+      create result_matrix.make (nelts, nelts)
 
       local_matrix := outer (nelts)
 
@@ -62,7 +62,8 @@ feature
     end
 
 
-  get_vector (nelts: INTEGER; a_vector: separate ARRAY [DOUBLE]): ARRAY [DOUBLE]
+  get_vector (nelts: INTEGER; a_vector: separate ARRAY [DOUBLE]):
+      ARRAY [DOUBLE]
     local
       i: INTEGER
     do
@@ -85,11 +86,14 @@ feature
                         a_vector: separate ARRAY[TUPLE[INTEGER, INTEGER]])
     local
       i: INTEGER
+      x, y: INTEGER
     do      
       from i := 1
       until i > nelts
       loop
-        a_vector [i] := [read_integer, read_integer]
+        x := read_integer
+        y := read_integer
+        a_vector [i] := [x, y]
         i := i + 1
       end
     end
@@ -141,7 +145,7 @@ feature
     local
       i, j: INTEGER
     do
-      create Result.make (1, nelts)
+      create Result.make (nelts, nelts)
       from i := 1
       until i > nelts
       loop
@@ -183,7 +187,7 @@ feature {NONE}
 
   worker_join(worker: separate PARFOR_WORKER)
     require
-      worker.generator /= Void
+      worker.generator /= Void -- worker.generator
     do
     end
 
