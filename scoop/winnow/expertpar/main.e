@@ -56,6 +56,7 @@ feature
   read_matrix(nrows, ncols: INTEGER; a_matrix: separate ARRAY2[INTEGER])
     local
       i, j: INTEGER
+      v: INTEGER
     do
       from i := 1
       until i > nrows
@@ -81,7 +82,7 @@ feature
       n, chunk, index: INTEGER
     do
       -- parallel for on matrix
-      values := parfor(nelts, nrows, ncols);
+      values := parfor (nelts, nrows, ncols);
       
       create sorter.make()
       values := sorter.sort(values)
@@ -188,6 +189,7 @@ feature {NONE}
     local
       k: INTEGER
       n: INTEGER
+      v,x,y: INTEGER
     do
       n := values.count
       create Result.make (1, n)
@@ -196,9 +198,13 @@ feature {NONE}
       from k := 1
       until k > n
       loop
-        Result [k] := [values [k].value,
-                       values [k].i,
-                       values [k].j]
+        -- Scoop bug: this doesn't work unless I store these
+        -- explicitly into values.
+        v := values [k].value
+        x := values [k].i
+        y := values [k].j
+        
+        Result [k] := [v, x, y]
         k := k + 1
       end
     end

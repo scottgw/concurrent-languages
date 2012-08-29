@@ -82,16 +82,18 @@ feature
     end
 
   put_vector (a_vector: ARRAY [TUPLE[INTEGER, INTEGER, INTEGER]];
-              a_sep_vector: separate ARRAY [TUPLE[INTEGER, INTEGER, INTEGER]])
+              a_sep_vector: separate ARRAY [TUPLE[v,x,y: INTEGER]])
     local
       i: INTEGER
       n: INTEGER
+      t: TUPLE [v,x,y: INTEGER]
     do
       n := a_sep_vector.count
       from i := 1
       until i > a_vector.count
       loop
-        a_sep_vector.force (a_vector [i], n + i)
+        t := a_vector [i]
+        a_sep_vector.force (t, n + i)
         i := i + 1
       end
     end
