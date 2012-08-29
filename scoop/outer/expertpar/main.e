@@ -66,12 +66,14 @@ feature
       ARRAY [DOUBLE]
     local
       i: INTEGER
+      d: DOUBLE
     do
       create Result.make (1, nelts)
       from i := 1
       until i > nelts
       loop
-        Result [i] := a_vector [i]
+        d := a_vector.item (i)
+        Result [i] := d
         i := i + 1
       end
     end
@@ -83,7 +85,9 @@ feature
     end
 
   read_vector_of_points(nelts: INTEGER;
-                        a_vector: separate ARRAY[TUPLE[INTEGER, INTEGER]])
+                        a_vector: separate ARRAY[TUPLE[x, y: INTEGER]])
+    require
+      a_vector.generator /= Void
     local
       i: INTEGER
       x, y: INTEGER
@@ -94,6 +98,7 @@ feature
         x := read_integer
         y := read_integer
         a_vector [i] := [x, y]
+        -- print (a_vector [i].x.out + "," + a_vector [i].y.out + "%N")
         i := i + 1
       end
     end
@@ -121,10 +126,10 @@ feature
           create worker.make
                      (start + 1
                       , start + height
-                      , nelts
-                      , points
-                      , result_vector
-                      , result_matrix)
+                      , nelts)
+                      -- , points
+                      -- , result_vector
+                      -- , result_matrix)
 
           workers.extend(worker)
         end
@@ -141,10 +146,15 @@ feature
       Result := to_local (nelts, result_matrix)
     end
 
-  to_local(nelts: INTEGER; a_matrix: separate ARRAY2[REAL_64]): ARRAY2[REAL_64]
+  to_local(nelts: INTEGER; a_matrix: separate SARRAY2[REAL_64]): ARRAY2[REAL_64]
+    require
+      a_matrix.generator /= Void
     local
       i, j: INTEGER
+      d: DOUBLE
     do
+      
+      -- print ((a_matrix = Void).out + ":" + a_matrix.height.out + "," + a_matrix.width.out + "%N")
       create Result.make (nelts, nelts)
       from i := 1
       until i > nelts
@@ -152,7 +162,8 @@ feature
         from j := 1
         until j > nelts
         loop
-          Result [i, j] := a_matrix [i, j]
+          d := a_matrix.item (i, j)
+          Result [i, j] := d
           j := j + 1
         end
         i := i + 1
@@ -182,6 +193,9 @@ feature {NONE}
   
   worker_live (worker: separate PARFOR_WORKER)
     do
+      -- print ("pre setup%N")
+      worker.set_it_up (points, result_vector, result_matrix)
+      -- print ("post setup%N")
       worker.live
     end
 
@@ -193,6 +207,7 @@ feature {NONE}
 
   launch_parfor_worker(worker: separate PARFOR_WORKER)
     do
+
       worker.live
     end
 
@@ -217,7 +232,7 @@ feature {NONE}
   in: PLAIN_TEXT_FILE
   points: separate ARRAY[TUPLE[INTEGER, INTEGER]]      
   result_vector: separate ARRAY[REAL_64]
-  result_matrix: separate ARRAY2[REAL_64]
+  result_matrix: separate SARRAY2[REAL_64]
   
 end -- class MAIN 
 
