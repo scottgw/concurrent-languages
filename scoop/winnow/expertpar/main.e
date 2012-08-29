@@ -63,7 +63,8 @@ feature
         from j := 1
         until j > ncols
         loop
-          a_matrix [i, j] := read_integer
+          v := read_integer
+          a_matrix [i, j] := v
           j := j + 1
         end
         i := i + 1
