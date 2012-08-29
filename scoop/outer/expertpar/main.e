@@ -196,11 +196,6 @@ feature {NONE}
       worker.live
     end
 
-  parfor_result(reader: separate PARFOR_READER)
-    do
-      reader.get_result(parfor_aggregator)
-    end
-
   sqr(a: DOUBLE): DOUBLE
     do
       Result := a * a
@@ -220,7 +215,6 @@ feature {NONE}
 
 feature {NONE}
   in: PLAIN_TEXT_FILE
-  parfor_aggregator: PARFOR_AGGREGATOR
   points: separate ARRAY[TUPLE[INTEGER, INTEGER]]      
   result_vector: separate ARRAY[REAL_64]
   result_matrix: separate ARRAY2[REAL_64]
