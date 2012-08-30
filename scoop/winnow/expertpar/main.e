@@ -35,20 +35,22 @@ feature
       read_matrix(nrows, ncols, matrix)
       
       create mask.make (nrows, ncols)
-      read_matrix(nrows, ncols, mask)
+      read_mask(nrows, ncols, mask)
       
       nelts := read_integer
       
       points := winnow(nrows, ncols, nelts)
 
-      print(nelts.out + "%N")
-      from k := 1
-      until k > nelts
-      loop
-        print(points [k].i.out + " " + points [k].j.out + "%N");
-        k := k + 1
+      if not is_bench then
+        print(nelts.out + "%N")
+        from k := 1
+        until k > nelts
+        loop
+          print(points [k].i.out + " " + points [k].j.out + "%N")
+          k := k + 1
+        end
+        print("%N")
       end
-      print("%N");
     end
   
   read_integer: INTEGER
@@ -76,6 +78,35 @@ feature
       end
     end
 
+  read_mask(nrows, ncols: INTEGER; a_matrix: separate ARRAY2[INTEGER])
+    local
+      i, j: INTEGER
+      v: INTEGER
+    do
+      from i := 1
+      until i > nrows
+      loop
+        from j := 1
+        until j > ncols
+        loop
+          if is_bench then
+            if ((i * j) \\ (ncols + 1)) = 1 then
+              v := 1
+            else
+              v := 0
+            end
+          else
+            v := read_integer
+          end
+          
+          a_matrix [i, j] := v
+          j := j + 1
+        end
+        i := i + 1
+      end
+    end
+
+  
   winnow(nrows, ncols: INTEGER; nelts: INTEGER):
       ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
     local
