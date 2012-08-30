@@ -144,6 +144,17 @@ feature
       worker.live
     end
 
+  workers_parfor_join (workers: LINKED_LIST [separate PARFOR_WORKER])
+    do
+      from workers.start
+      until workers.after
+      loop
+        join_parfor (workers.item)
+        workers.forth
+      end
+    end
+
+  
   calculate_threshold (nrows, ncols, percent: INTEGER;
                        a_accum: separate ARRAY [INTEGER];
                        a_histogram: separate ARRAY [INTEGER]): INTEGER
@@ -212,7 +223,7 @@ feature
       workers_parfor_live (workers)
 
       -- join workers
-      workers.do_all(agent join_parfor)
+      workers_parfor_join (workers)
 
       Result := fetch_matrix (nrows, ncols, shared)
     end
@@ -253,7 +264,6 @@ feature
         loop
           in.read_integer
           a_matrix.put (in.last_integer, i, j)
-          a_matrix.item (i,j).generator.do_nothing
           j := j + 1
         end
         i := i + 1
@@ -271,13 +281,13 @@ feature {NONE}
 
   join_reduce (s: separate REDUCE2D_WORKER)
     require
-      s.generator = s.generator
+      s.generator /= Void
     do
     end
 
   join_parfor (s: separate PARFOR_WORKER)
     require
-      s.generator = s.generator
+      s.generator /= Void
     do
     end
   end -- class MAIN
