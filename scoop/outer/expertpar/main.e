@@ -27,8 +27,9 @@ feature
 
       nelts := read_integer
 
-      create points.make (1, nelts)
-      read_vector_of_points(nelts, points)
+      create x_points.make (1, nelts)
+      create y_points.make (1, nelts)
+      read_vector_of_points(nelts, x_points, y_points)
   
       create result_vector.make_filled(0.0, 1, nelts)
       create result_matrix.make (nelts, nelts)
@@ -85,9 +86,7 @@ feature
     end
 
   read_vector_of_points(nelts: INTEGER;
-                        a_vector: separate ARRAY[VAL_COORD])
-    require
-      a_vector.generator /= Void
+                        x_vector, y_vector: separate ARRAY[INTEGER])
     local
       i: INTEGER
       x, y: INTEGER
@@ -97,8 +96,8 @@ feature
       loop
         x := read_integer
         y := read_integer
-        a_vector [i] := create {VAL_COORD}.make (0, x, y)
-        -- print (a_vector [i].x.out + "," + a_vector [i].y.out + "%N")
+        x_vector [i] := x
+        y_vector [i] := y
         i := i + 1
       end
     end
@@ -126,10 +125,11 @@ feature
           create worker.make
                      (start + 1
                       , start + height
-                      , nelts)
-                      -- , points
-                      -- , result_vector
-                      -- , result_matrix)
+                      , nelts
+                      , x_points
+                      , y_points
+                      , result_vector
+                      , result_matrix)
 
           workers.extend(worker)
         end
@@ -146,15 +146,13 @@ feature
       Result := to_local (nelts, result_matrix)
     end
 
-  to_local(nelts: INTEGER; a_matrix: separate SARRAY2[REAL_64]): ARRAY2[REAL_64]
+  to_local(nelts: INTEGER; a_matrix: separate ARRAY2[REAL_64]): ARRAY2[REAL_64]
     require
       a_matrix.generator /= Void
     local
       i, j: INTEGER
       d: DOUBLE
     do
-      
-      -- print ((a_matrix = Void).out + ":" + a_matrix.height.out + "," + a_matrix.width.out + "%N")
       create Result.make (nelts, nelts)
       from i := 1
       until i > nelts
@@ -176,7 +174,6 @@ feature {NONE}
       from workers.start
       until workers.after
       loop
-        worker_setup (workers.item)
         worker_live (workers.item)
         workers.forth
       end
@@ -192,10 +189,6 @@ feature {NONE}
       end
     end
 
-  worker_setup (worker: separate PARFOR_WORKER)
-    do
-      worker.set_it_up (points, result_vector, result_matrix)
-    end
   
   worker_live (worker: separate PARFOR_WORKER)
     do
@@ -204,7 +197,7 @@ feature {NONE}
 
   worker_join(worker: separate PARFOR_WORKER)
     require
-      worker.generator /= Void -- worker.generator
+      worker.generator /= Void
     do
     end
 

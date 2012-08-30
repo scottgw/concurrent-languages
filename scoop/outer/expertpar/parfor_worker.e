@@ -5,44 +5,38 @@ create
   make
 
 feature
-  make (start_, final_, nelts_: INTEGER)
+  make (start_, final_, nelts_: INTEGER;
+        x_points_: separate ARRAY[INTEGER];
+        y_points_: separate ARRAY[INTEGER];
+        result_vector_: separate ARRAY[DOUBLE];
+        result_matrix_: separate ARRAY2[DOUBLE])
     do
       start := start_
       final := final_
       nelts := nelts_
-      -- points := points_
-      -- result_vector := result_vector_
-      -- result_matrix := result_matrix_
-    end
-
-feature
-  set_it_up (points_: separate ARRAY[TUPLE[INTEGER, INTEGER]];
-             result_vector_: separate ARRAY[DOUBLE];
-             result_matrix_: separate SARRAY2[DOUBLE])
-    do
-      points := points_
-      -- print ("setting points: " + start.out + " -> " + (points /= Void).out + "%N")
-            
+      x_points := x_points_
+      y_points := y_points_
       result_vector := result_vector_
       result_matrix := result_matrix_
     end
+
+feature
   
   live
+    local
+      a: ARRAY [TUPLE [INTEGER, INTEGER]]
     do
-      print ("prefetch%N")
-      get_result(fetch_array (points))
+      a := fetch_array (x_points, y_points)
+      get_result(a)
     end
 
 
-  fetch_array (a_sep_array: separate ARRAY[TUPLE[x,y: INTEGER]]):
+  fetch_array (xs, ys: separate ARRAY[INTEGER]):
       ARRAY [TUPLE[INTEGER, INTEGER]]
-    require
-      a_sep_array.generator = a_sep_array.generator
     local
       i: INTEGER
       x, y: INTEGER
     do
-      print ("in fetch%N")
       create Result.make (1, nelts)
 
       from i := 1
@@ -50,9 +44,8 @@ feature
       loop
         -- SCOOP bug: this doesn't work if I don't store these into
         -- local variables explicitly.
-        x := a_sep_array.item (i).x -- integer_32_item (1)
-        y := a_sep_array.item (i).y;
-        -- print (x.out + "," + y.out + "%N") -- .do_nothing
+        x := xs [i]
+        y := ys [i]
         Result [i] := [x, y]
         i := i + 1
       end
@@ -101,7 +94,7 @@ feature
       set_result_matrix (matrix, result_matrix)
     end
 
-  set_result_matrix (mat: ARRAY2[DOUBLE]; smat: separate SARRAY2[DOUBLE])
+  set_result_matrix (mat: ARRAY2[DOUBLE]; smat: separate ARRAY2[DOUBLE])
     require
       smat.generator /= Void
     local
@@ -114,8 +107,6 @@ feature
         until j > nelts
         loop
           smat.put (mat [to_local_row (i), j], i, j)
-         
-          -- print (mat [to_local_row (i), j].out + " -> " + smat.item (i, j).out + "%N")
           j := j + 1
         end
         i := i + 1
@@ -150,7 +141,7 @@ feature
 feature {NONE}
   start, final, nelts: INTEGER
   result_vector: separate ARRAY[DOUBLE]
-  result_matrix: separate SARRAY2[DOUBLE]
-  points: separate ARRAY[TUPLE[INTEGER, INTEGER]]
+  result_matrix: separate ARRAY2[DOUBLE]
+  x_points, y_points: separate ARRAY[INTEGER]
 
 end
