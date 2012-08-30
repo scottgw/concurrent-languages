@@ -10,7 +10,6 @@
 --   vector: a real vector, whose values are filled with origin-to-point
 --     distances
 
-
 class MAIN
 inherit ARGUMENTS
 create make
@@ -27,36 +26,46 @@ feature
       file_name := separate_character_option_value ('i')
       create in.make_open_read (file_name)
 
+      is_bench := index_of_word_option ("is_bench") > 0
+      
       nelts := read_integer
-      points := read_vector_of_points(nelts)
-      create matrix.make_filled(0.0, nelts, nelts)
-      create vector.make_filled(0.0, 1, nelts)
+
+      if not is_bench then
+        points := read_vector_of_points(nelts)
+      else
+        create points.make_filled ([0,0], 1, nelts)
+      end
+      
+      create matrix.make_filled (0.0, nelts, nelts)
+      create vector.make_filled (0.0, 1, nelts)
 
       outer(nelts, points, matrix, vector)
 
-      print(nelts.out + " " + nelts.out + "%N");
-      from i := 1
-      until i > nelts
-      loop
-        from j := 1
-        until j > nelts
+      if not is_bench then
+        print(nelts.out + " " + nelts.out + "%N")
+        from i := 1
+        until i > nelts
         loop
-          print(matrix [i, j].out + " ")
-          j := j + 1
+          from j := 1
+          until j > nelts
+          loop
+            print(matrix [i, j].out + " ")
+            j := j + 1
+          end
+          print ("%N")
+          i := i + 1
         end
-        print ("%N")
-        i := i + 1
-      end
-      print("%N");
+        print("%N");
 
-      print(nelts.out + "%N");
-      from i := 1
-      until i > nelts
-      loop
-        print (vector[i].out + " ")
-        i := i + 1
+        print(nelts.out + "%N")
+        from i := 1
+        until i > nelts
+        loop
+          print (vector[i].out + " ")
+          i := i + 1
+        end
+        print("%N")
       end
-      print("%N");
     end
 
   read_integer: INTEGER
@@ -115,6 +124,7 @@ feature
 
 feature {NONE}
   in: PLAIN_TEXT_FILE
-
+  is_bench: BOOLEAN
+  
 end -- class MAIN 
 
