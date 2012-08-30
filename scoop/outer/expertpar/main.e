@@ -85,7 +85,7 @@ feature
     end
 
   read_vector_of_points(nelts: INTEGER;
-                        a_vector: separate ARRAY[TUPLE[x, y: INTEGER]])
+                        a_vector: separate ARRAY[VAL_COORD])
     require
       a_vector.generator /= Void
     local
@@ -97,14 +97,14 @@ feature
       loop
         x := read_integer
         y := read_integer
-        a_vector [i] := [x, y]
+        a_vector [i] := create {VAL_COORD}.make (0, x, y)
         -- print (a_vector [i].x.out + "," + a_vector [i].y.out + "%N")
         i := i + 1
       end
     end
 
 
-  num_workers: INTEGER = 32
+  num_workers: INTEGER = 1
   
   -- parallel for on nelts
   outer (nelts: INTEGER): ARRAY2[REAL_64]
@@ -176,6 +176,7 @@ feature {NONE}
       from workers.start
       until workers.after
       loop
+        worker_setup (workers.item)
         worker_live (workers.item)
         workers.forth
       end
@@ -190,12 +191,14 @@ feature {NONE}
         workers.forth
       end
     end
+
+  worker_setup (worker: separate PARFOR_WORKER)
+    do
+      worker.set_it_up (points, result_vector, result_matrix)
+    end
   
   worker_live (worker: separate PARFOR_WORKER)
     do
-      -- print ("pre setup%N")
-      worker.set_it_up (points, result_vector, result_matrix)
-      -- print ("post setup%N")
       worker.live
     end
 
@@ -230,9 +233,10 @@ feature {NONE}
 
 feature {NONE}
   in: PLAIN_TEXT_FILE
-  points: separate ARRAY[TUPLE[INTEGER, INTEGER]]      
+  x_points: separate ARRAY[INTEGER]
+  y_points: separate ARRAY[INTEGER]
   result_vector: separate ARRAY[REAL_64]
-  result_matrix: separate SARRAY2[REAL_64]
+  result_matrix: separate ARRAY2[REAL_64]
   
 end -- class MAIN 
 
