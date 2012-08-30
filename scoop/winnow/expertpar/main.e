@@ -186,6 +186,8 @@ feature {NONE}
 
   to_local_values(values: separate ARRAY[TUPLE[value, i, j: INTEGER]]):
       ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
+    require
+      values.generator /= Void
     local
       k: INTEGER
       n: INTEGER
@@ -202,8 +204,9 @@ feature {NONE}
         -- explicitly into values.
         v := values [k].value
         x := values [k].i
-        y := values [k].j
+        y := values [k].j;
         
+        print (x.out + "," + y.out + "%N") -- .do_nothing
         Result [k] := [v, x, y]
         k := k + 1
       end
