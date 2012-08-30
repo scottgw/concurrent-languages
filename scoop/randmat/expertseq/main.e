@@ -24,6 +24,7 @@ feature
       i, j: INTEGER
     do
       create input.make_open_read(separate_character_option_value('i'))
+      
       arg := separate_character_option_value('e')
       is_bench := False
       if arg /= Void then
