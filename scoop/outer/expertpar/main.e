@@ -113,7 +113,6 @@ feature
       end
     end
 
-
   num_workers: INTEGER = 1
   
   -- parallel for on nelts
