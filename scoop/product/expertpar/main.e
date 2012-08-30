@@ -182,7 +182,6 @@ feature {NONE}
 
 feature {NONE}
   in: PLAIN_TEXT_FILE
-  parfor_aggregator: PARFOR_AGGREGATOR
   matrix: separate ARRAY2[REAL_64]
   vector: separate ARRAY[REAL_64]
   result_vector: separate ARRAY[REAL_64]
