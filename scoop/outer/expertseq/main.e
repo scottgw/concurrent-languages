@@ -10,6 +10,7 @@
 --   vector: a real vector, whose values are filled with origin-to-point
 --     distances
 
+
 class MAIN
 inherit ARGUMENTS
 create make
