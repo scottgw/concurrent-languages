@@ -30,10 +30,17 @@ feature
       file_name := separate_character_option_value('i')
       create in.make_open_read(file_name)
 
+      is_bench := index_of_word_option ("is_bench") > 0
+      
       nrows := read_integer
       ncols := read_integer
-      matrix := read_matrix(nrows, ncols)
-      mask := read_matrix(nrows, ncols)
+
+      if not is_bench then
+        matrix := read_matrix(nrows, ncols)
+      end
+              
+      mask := read_mask(nrows, ncols)
+      
       nelts := read_integer
 
       points := winnow(nrows, ncols, matrix, mask, nelts)
@@ -73,6 +80,37 @@ feature
       end
     end
 
+
+  read_mask(nrows, ncols: INTEGER): ARRAY2[INTEGER]
+    local
+      i, j: INTEGER
+      v: INTEGER
+    do
+      create Result.make(nrows, ncols)
+      from i := 1
+      until i > nrows
+      loop
+        from j := 1
+        until j > ncols
+        loop
+          if is_bench then
+            if ((i * j) \\ (ncols + 1)) = 1 then
+              v := 1
+            else
+              v := 0
+            end
+          else
+            v := read_integer
+          end
+          
+          Result [i, j] := v
+          j := j + 1
+        end
+        i := i + 1
+      end
+    end
+
+  
   winnow(nrows, ncols: INTEGER; matrix, mask: ARRAY2[INTEGER];
          nelts: INTEGER) : ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
     local
@@ -120,5 +158,6 @@ feature
 
 feature {NONE}
   in: PLAIN_TEXT_FILE
-
+  is_bench: BOOLEAN
+  
 end -- class MAIN 
