@@ -23,6 +23,8 @@ feature
       file_name := separate_character_option_value ('i')
       create in.make_open_read (file_name)
 
+      is_bench := index_of_word_option ("is_bench") > 0
+      
       in.read_integer
       nrows := in.last_integer
 
@@ -40,17 +42,19 @@ feature
 
       mask := thresh (nrows, ncols, percent)
 
-      from i := 1
-      until i > nrows
-      loop
-        from j := 1
-        until j > ncols
+      if not is_bench then
+        from i := 1
+        until i > nrows
         loop
-          print (mask[i,j].out + " ")
-          j := j + 1
+          from j := 1
+          until j > ncols
+          loop
+            print (mask[i,j].out + " ")
+            j := j + 1
+          end
+          print ("%N")
+          i := i + 1
         end
-        print ("%N")
-        i := i + 1
       end
     end
 
@@ -204,6 +208,7 @@ feature
       a_matrix.generator /= Void
     local
       i, j: INTEGER
+      v: INTEGER
     do
       from i := 1
       until i > nrows
@@ -211,8 +216,13 @@ feature
         from j := 1
         until j > ncols
         loop
-          in.read_integer
-          a_matrix.put (in.last_integer, i, j)
+          if is_bench then
+            v := (i * j) \\ 100
+          else
+            in.read_integer
+            v := in.last_integer            
+          end
+          a_matrix.put (v, i, j)
           j := j + 1
         end
         i := i + 1
@@ -221,6 +231,8 @@ feature
 
 
 feature {NONE}
+  is_bench: BOOLEAN
+  
   matrix: separate ARRAY2[INTEGER]
   shared: separate ARRAY2[INTEGER]
   accum: separate ARRAY [INTEGER]

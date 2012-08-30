@@ -17,6 +17,7 @@ feature
     nrows, ncols, percent: INTEGER
     matrix, mask: ARRAY2[INTEGER]
     i, j: INTEGER
+    v: INTEGER
     in: PLAIN_TEXT_FILE
     file_name: STRING
   do
@@ -34,8 +35,13 @@ feature
     create matrix.make(nrows, ncols)
     from i := 1 until i > nrows loop
       from j := 1 until j > ncols loop
-        in.read_integer
-        matrix.put(in.last_integer, i, j)
+        if is_bench then
+          v := (i * j) \\ 100
+        else
+          in.read_integer
+          v := in.last_integer            
+        end
+        matrix.put(v, i, j)
         j := j + 1
       end
       i := i + 1
