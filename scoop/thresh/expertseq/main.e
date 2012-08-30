@@ -21,6 +21,8 @@ feature
     file_name: STRING
   do
     file_name := separate_character_option_value('i')
+    is_bench := index_of_word_option ("is_bench") > 0
+
     create in.make_open_read(separate_character_option_value('i'))
 
     in.read_integer
@@ -61,6 +63,8 @@ feature
     end
 
   end
+
+  is_bench: BOOLEAN
 
   thresh(nrows, ncols: INTEGER; matrix: ARRAY2[INTEGER]; percent: INTEGER;
     mask: ARRAY2[INTEGER])
