@@ -45,15 +45,17 @@ feature
 
       points := winnow(nrows, ncols, matrix, mask, nelts)
 
-      print(nelts.out + "%N");
-
-      from k := 1
-      until k > nelts
-      loop
-        print(points [k].i.out + " " + points [k].j.out + "%N");
-        k := k + 1
+      if not is_bench then
+        print(nelts.out + "%N");
+        
+        from k := 1
+        until k > nelts
+        loop
+          print(points [k].i.out + " " + points [k].j.out + "%N");
+          k := k + 1
+        end
+        print("%N");
       end
-      print("%N");
     end
 
   read_integer(): INTEGER
