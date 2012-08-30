@@ -25,7 +25,7 @@ feature
       file_name := separate_character_option_value('i')
       create in.make_open_read(separate_character_option_value('i'))
 
-      is_bench := index_of_word_option ("is_bench") > 0
+      is_bench := index_of_word_option ("bench") > 0
       
       nelts := read_integer
 
