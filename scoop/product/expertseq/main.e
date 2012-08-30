@@ -8,7 +8,6 @@
 -- output:
 --   res: a real vector, whose values are the result of the product
 
-
 class MAIN
   
 inherit
@@ -28,41 +27,48 @@ feature
     do
       create in.make_open_read(separate_character_option_value('i'))
 
+      is_bench := index_of_word_option ("is_bench") > 0
+      
       in.read_integer
       nelts := in.last_integer
 
       create matrix.make_filled(0.0, nelts, nelts)
-      from i := 1
-      until i > nelts
-      loop
-        from j := 1
-        until j > nelts
+      create vector.make_filled(0.0, 1, nelts)
+
+      if not is_bench then
+
+        from i := 1
+        until i > nelts
         loop
-          matrix [i, j] := read_double
-          j := j + 1
+          from j := 1
+          until j > nelts
+          loop
+            matrix [i, j] := read_double
+            j := j + 1
+          end
+          i := i + 1
         end
-        i := i + 1
+
+        from i := 1
+        until i > nelts
+        loop
+          vector [i] := read_double
+          i := i + 1
+        end
       end
   
-      create vector.make_filled(0.0, 1, nelts)
-      from i := 1
-      until i > nelts
-      loop
-        vector [i] := read_double
-        i := i + 1
-      end
-
       res := product(nelts, matrix, vector)
 
-      print(nelts.out + "%N");
-
-      from i := 1
-      until i > nelts
-      loop
-        print(res [i].out + " ");
-        i := i + 1
+      if not is_bench then
+        print(nelts.out + "%N");
+        from i := 1
+        until i > nelts
+        loop
+          print(res [i].out + " ");
+          i := i + 1
+        end
+        print("%N");
       end
-      print("%N");
     end
 
   read_double: DOUBLE
@@ -95,6 +101,7 @@ feature
 
 feature {NONE}
   in: PLAIN_TEXT_FILE
-
+  is_bench: BOOLEAN
+  
 end -- class MAIN 
 
