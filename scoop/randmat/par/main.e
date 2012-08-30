@@ -21,11 +21,8 @@ feature
     arg: STRING_8
   do
     create in.make_open_read(separate_character_option_value('i'))
-    arg := separate_character_option_value('e')
-    is_bench := False
-    if arg /= Void then
-      is_bench := arg.is_equal("is_bench")
-    end
+
+    is_bench := index_of_word_option ("is_bench") > 0
 
     nrows := read_integer
     ncols := read_integer
