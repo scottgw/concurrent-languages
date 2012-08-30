@@ -26,7 +26,10 @@ feature
       ncols := read_integer
       
 
-      create result_vector.make_empty
+      create v_vector.make_empty
+      create x_vector.make_empty
+      create y_vector.make_empty
+      
       create matrix.make (nrows, ncols)
       read_matrix(nrows, ncols, matrix)
       
@@ -129,7 +132,9 @@ feature
                       , nelts
                       , matrix
                       , mask
-                      , result_vector)
+                      , v_vector
+                      , x_vector
+                      , y_vector)
 
           workers.extend(worker)
         end
@@ -143,7 +148,7 @@ feature
       -- join workers
       workers_join (workers)
 
-      Result := to_local_values (result_vector)
+      Result := to_local_values (v_vector, x_vector, y_vector)
     end
 
 feature {NONE}
@@ -184,31 +189,27 @@ feature {NONE}
       worker.live
     end
 
-  to_local_values(values: separate ARRAY[TUPLE[value, i, j: INTEGER]]):
+  to_local_values(vs, xs, ys: separate ARRAY[INTEGER]):
       ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
     require
-      values.generator /= Void
+      xs.generator /= Void
     local
-      k: INTEGER
+      i: INTEGER
       n: INTEGER
       v,x,y: INTEGER
     do
-      n := values.count
+      n := vs.count
       create Result.make (1, n)
-            
       
-      from k := 1
-      until k > n
+      from i := 1
+      until i > n
       loop
-        -- Scoop bug: this doesn't work unless I store these
-        -- explicitly into values.
-        v := values [k].value
-        x := values [k].i
-        y := values [k].j;
+        v := vs [i]
+        x := xs [i]
+        y := ys [i]
         
-        print (x.out + "," + y.out + "%N") -- .do_nothing
-        Result [k] := [v, x, y]
-        k := k + 1
+        Result [i] := [v, x, y]
+        i := i + 1
       end
     end
   
@@ -216,6 +217,6 @@ feature {NONE}
   in: PLAIN_TEXT_FILE
 
   matrix, mask: separate ARRAY2[INTEGER]
-  result_vector: separate ARRAY [TUPLE [INTEGER, INTEGER, INTEGER]]
+  v_vector, x_vector, y_vector: separate ARRAY [INTEGER]
   
 end -- class MAIN 

@@ -4,7 +4,7 @@ feature
   make (start_, final_: INTEGER;
         ncols_, nelts_: INTEGER;
         matrix_array_, mask_array_: separate ARRAY2[INTEGER];
-        result_vector_: separate ARRAY [TUPLE[INTEGER, INTEGER, INTEGER]])
+        v_vector_, x_vector_, y_vector_: separate ARRAY [INTEGER])
     do
       start := start_
       final := final_
@@ -12,7 +12,9 @@ feature
       nelts := nelts_
       matrix_array := matrix_array_
       mask_array := mask_array_
-      result_vector := result_vector_
+      v_vector := v_vector_
+      x_vector := x_vector_
+      y_vector := y_vector_
     end
 
 feature
@@ -78,22 +80,24 @@ feature
         i := i + 1
       end
 
-      put_vector (vector, result_vector)
+      put_vector (vector, v_vector, x_vector, y_vector)
     end
 
-  put_vector (a_vector: ARRAY [TUPLE[INTEGER, INTEGER, INTEGER]];
-              a_sep_vector: separate ARRAY [TUPLE[v,x,y: INTEGER]])
+  put_vector (a_vector: ARRAY [TUPLE[v,x,y: INTEGER]];
+              vs, xs, ys: separate ARRAY [INTEGER])
     local
       i: INTEGER
       n: INTEGER
       t: TUPLE [v,x,y: INTEGER]
     do
-      n := a_sep_vector.count
+      n := xs.count
       from i := 1
       until i > a_vector.count
       loop
         t := a_vector [i]
-        a_sep_vector.force (t, n + i)
+        vs.force (t.v, n + i)
+        xs.force (t.x, n + i)
+        ys.force (t.y, n + i)
         i := i + 1
       end
     end
@@ -104,6 +108,6 @@ feature {NONE}
   nelts: INTEGER
   ncols: INTEGER
   matrix_array, mask_array: separate ARRAY2[INTEGER]
-  result_vector: separate ARRAY [TUPLE[INTEGER, INTEGER, INTEGER]]
+  v_vector, x_vector, y_vector: separate ARRAY [INTEGER]
 
 end
