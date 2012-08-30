@@ -103,57 +103,6 @@ feature
       -- join workers
       workers_reduce_join (workers)
     end
-
-  workers_reduce_live (workers: LINKED_LIST [separate REDUCE2D_WORKER])
-    do
-      from workers.start
-      until workers.after
-      loop
-        live_reduce (workers.item)
-        workers.forth
-      end
-    end
-
-  workers_reduce_join (workers: LINKED_LIST [separate REDUCE2D_WORKER])
-    do
-      from workers.start
-      until workers.after
-      loop
-        join_reduce (workers.item)
-        workers.forth
-      end
-    end
-
-  live_reduce (worker: separate REDUCE2D_WORKER)
-    do
-      worker.live
-    end
-
-  workers_parfor_live (workers: LINKED_LIST [separate PARFOR_WORKER])
-    do
-      from workers.start
-      until workers.after
-      loop
-        live_parfor (workers.item)
-        workers.forth
-      end
-    end
-
-  live_parfor (worker: separate PARFOR_WORKER)
-    do
-      worker.live
-    end
-
-  workers_parfor_join (workers: LINKED_LIST [separate PARFOR_WORKER])
-    do
-      from workers.start
-      until workers.after
-      loop
-        join_parfor (workers.item)
-        workers.forth
-      end
-    end
-
   
   calculate_threshold (nrows, ncols, percent: INTEGER;
                        a_accum: separate ARRAY [INTEGER];
@@ -290,4 +239,56 @@ feature {NONE}
       s.generator /= Void
     do
     end
+
+
+  workers_reduce_live (workers: LINKED_LIST [separate REDUCE2D_WORKER])
+    do
+      from workers.start
+      until workers.after
+      loop
+        live_reduce (workers.item)
+        workers.forth
+      end
+    end
+
+  workers_reduce_join (workers: LINKED_LIST [separate REDUCE2D_WORKER])
+    do
+      from workers.start
+      until workers.after
+      loop
+        join_reduce (workers.item)
+        workers.forth
+      end
+    end
+
+  live_reduce (worker: separate REDUCE2D_WORKER)
+    do
+      worker.live
+    end
+
+  workers_parfor_live (workers: LINKED_LIST [separate PARFOR_WORKER])
+    do
+      from workers.start
+      until workers.after
+      loop
+        live_parfor (workers.item)
+        workers.forth
+      end
+    end
+
+  live_parfor (worker: separate PARFOR_WORKER)
+    do
+      worker.live
+    end
+
+  workers_parfor_join (workers: LINKED_LIST [separate PARFOR_WORKER])
+    do
+      from workers.start
+      until workers.after
+      loop
+        join_parfor (workers.item)
+        workers.forth
+      end
+    end
+  
   end -- class MAIN
