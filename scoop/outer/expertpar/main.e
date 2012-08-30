@@ -25,8 +25,11 @@ feature
       file_name := separate_character_option_value('i')
       create in.make_open_read(separate_character_option_value('i'))
 
+      is_bench := index_of_word_option ("is_bench") > 0
+      
       nelts := read_integer
 
+      
       create x_points.make (1, nelts)
       create y_points.make (1, nelts)
       read_vector_of_points(nelts, x_points, y_points)
@@ -36,30 +39,32 @@ feature
 
       local_matrix := outer (nelts)
 
-      print(nelts.out + " " + nelts.out + "%N")
-      from i := 1
-      until i > nelts
-      loop
-        from j := 1
-        until j > nelts
+      if not is_bench then
+        print(nelts.out + " " + nelts.out + "%N")
+        from i := 1
+        until i > nelts
         loop
-          print (local_matrix [i, j].out + " ")
-          j := j + 1
+          from j := 1
+          until j > nelts
+          loop
+            print (local_matrix [i, j].out + " ")
+            j := j + 1
+          end
+          print ("%N")
+          i := i + 1
         end
-        print ("%N")
-        i := i + 1
-      end
-      print("%N")
+        print("%N")
 
-      local_vector := get_vector (nelts, result_vector)
-      print(nelts.out + "%N")
-      from i := 1
-      until i> nelts
-      loop
-        print(local_vector[i].out + " ")
-        i := i + 1
+        local_vector := get_vector (nelts, result_vector)
+        print(nelts.out + "%N")
+        from i := 1
+        until i> nelts
+        loop
+          print(local_vector[i].out + " ")
+          i := i + 1
+        end
+        print("%N")
       end
-      print("%N")
     end
 
 
@@ -92,10 +97,16 @@ feature
       x, y: INTEGER
     do      
       from i := 1
-      until i > nelts
+      until i > nelts 
       loop
-        x := read_integer
-        y := read_integer
+        if is_bench then
+          x := 0
+          y := 0
+        else
+          x := read_integer
+          y := read_integer
+        end
+        
         x_vector [i] := x
         y_vector [i] := y
         i := i + 1
@@ -226,6 +237,8 @@ feature {NONE}
 
 feature {NONE}
   in: PLAIN_TEXT_FILE
+  is_bench: BOOLEAN
+  
   x_points: separate ARRAY[INTEGER]
   y_points: separate ARRAY[INTEGER]
   result_vector: separate ARRAY[REAL_64]
