@@ -21,11 +21,12 @@ feature
       k: INTEGER
     do
       create in.make_open_read(separate_character_option_value('i'))
+
+      is_bench := index_of_word_option ("is_bench") > 0
       
       nrows := read_integer
       ncols := read_integer
       
-
       create v_vector.make_empty
       create x_vector.make_empty
       create y_vector.make_empty
@@ -215,7 +216,8 @@ feature {NONE}
   
 feature {NONE}
   in: PLAIN_TEXT_FILE
-
+  is_bench: BOOLEAN
+  
   matrix, mask: separate ARRAY2[INTEGER]
   v_vector, x_vector, y_vector: separate ARRAY [INTEGER]
   
