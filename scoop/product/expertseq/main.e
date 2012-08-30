@@ -8,6 +8,7 @@
 -- output:
 --   res: a real vector, whose values are the result of the product
 
+
 class MAIN
   
 inherit
