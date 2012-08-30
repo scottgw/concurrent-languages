@@ -47,21 +47,22 @@ feature
     create mask.make(nrows, ncols)
     thresh(nrows, ncols, matrix, percent, mask)
 
-    print (nrows.out + " " + ncols.out + "%N")
-    
-    from i := 1
-    until i > nrows
-    loop
-      from j := 1
-      until j > ncols
-      loop
-        print (mask [i, j].out + " ")
-        j := j + 1
-      end
-      print ("%N")
-      i := i + 1
-    end
+    if not is_bench then
+      print (nrows.out + " " + ncols.out + "%N")
 
+      from i := 1
+      until i > nrows
+      loop
+        from j := 1
+        until j > ncols
+        loop
+          print (mask [i, j].out + " ")
+          j := j + 1
+        end
+        print ("%N")
+        i := i + 1
+      end
+    end
   end
 
   is_bench: BOOLEAN
