@@ -187,6 +187,7 @@ feature {NONE}
 
 feature {NONE}
   in: PLAIN_TEXT_FILE
+  is_bench: BOOLEAN
   matrix: separate ARRAY2[REAL_64]
   vector: separate ARRAY[REAL_64]
   result_vector: separate ARRAY[REAL_64]
