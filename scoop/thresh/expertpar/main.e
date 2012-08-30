@@ -21,10 +21,9 @@ feature
       i, j: INTEGER
     do
       file_name := separate_character_option_value ('i')
-      create in.make_open_read (file_name)
-
       is_bench := index_of_word_option ("is_bench") > 0
-      
+
+      create in.make_open_read (file_name)      
       in.read_integer
       nrows := in.last_integer
 
