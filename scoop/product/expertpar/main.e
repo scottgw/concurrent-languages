@@ -24,6 +24,7 @@ feature
       res: ARRAY[REAL_64]
     do
       create in.make_open_read(separate_character_option_value('i'))
+      is_bench := index_of_word_option ("is_bench") > 0
       in.read_integer
       nelts := in.last_integer
 
@@ -31,19 +32,23 @@ feature
       create vector.make_filled (0, 1, nelts)
       create result_vector.make_filled (0, 1, nelts)
 
-      read_matrix (nelts, matrix)
-      read_vector (nelts, vector)
+      if not is_bench then
+        read_matrix (nelts, matrix)
+        read_vector (nelts, vector)
+      end
       
       res := product(nelts)
 
-      print(nelts.out + "%N")
-      from i := 1
-      until i > nelts
-      loop
-        print (res [i].out + " ")
-        i := i + 1
+      if not is_bench then
+        print(nelts.out + "%N")
+        from i := 1
+        until i > nelts
+        loop
+          print (res [i].out + " ")
+          i := i + 1
+        end
+        print("%N")
       end
-      print("%N");
     end
 
   read_vector (nelts: INTEGER; a_vector: separate ARRAY[REAL_64])
