@@ -15,7 +15,12 @@ feature {NONE}
       winnow_nelts := winnow_nelts_
 
       create matrix.make (start, final)
+      create mask.make (start, final)
     end
+
+feature -- Attributes
+  start, final: INTEGER
+  matrix: ARRAY2 [INTEGER]
 
 feature -- Random matrix generation
   live_randmat
@@ -43,7 +48,7 @@ feature -- Random matrix generation
     end
 
 feature {NONE}
-  matrix: ARRAY2 [INTEGER]
+  seed: INTEGER
 
 feature -- Thresholding computations
   live_thresh_reduce
@@ -74,9 +79,9 @@ feature -- Thresholding computations
     end
 
   update_histogram (max: INTEGER;
-                               acc: separate ARRAY [INTEGER];
-                               hist: ARRAY [INTEGER];
-                               sep_hist: separate ARRAY [INTEGER])
+                    acc: separate ARRAY [INTEGER];
+                    hist: ARRAY [INTEGER];
+                    sep_hist: separate ARRAY [INTEGER])
     require
       acc.generator /= Void and sep_hist.generator /= Void
     local
@@ -87,9 +92,6 @@ feature -- Thresholding computations
       i := acc.item (1)
       newmax := i.max (max)
 
-      if newmax > 100 then
-      	(1 / (i-i)).do_nothing
-      end
       acc.put (newmax, 1)
 
       from i := 0
@@ -101,12 +103,78 @@ feature -- Thresholding computations
       end
     end
 
-  start, final: INTEGER
+  live_thresh_map (threshold: INTEGER)
+    local
+      i, j: INTEGER
+    do
+      from i := 1
+      until i > nelts
+      loop
+        from j := 1
+        until j > nelts
+        loop
+          if matrix [i, j] >= threshold then
+            mask [i, j] = 1
+          end
+          j := j + 1
+        end
+        i := i + 1
+      end
+    end
 
 feature {NONE}
+  mask: ARRAY2 [INTEGER]
   histogram: separate ARRAY [INTEGER]
   accum: separate ARRAY [INTEGER]
 
+feature -- Winnowing procedure
+  
+  live_winnow
+    local
+      vector: ARRAYED_LIST [TUPLE[INTEGER, INTEGER, INTEGER]]
+      i, j: INTEGER
+      count: INTEGER
+    do
+      create vector.make_empty
+
+      from i := start
+      until i > final
+      loop
+        from j := 1
+        until j > ncols
+        loop
+          if mask [i, j] = 1 then
+            vector.extend ([matrix [i, j], i, j])
+          end
+          j := j + 1
+        end
+        i := i + 1
+      end
+
+      put_vectors (vector, v_vector, x_vector, y_vector)
+    end
+
+  put_vector (a_vector: ARRAY [TUPLE[v,x,y: INTEGER]];
+              vs, xs, ys: separate ARRAY [INTEGER])
+    local
+      i: INTEGER
+      n: INTEGER
+      t: TUPLE [v,x,y: INTEGER]
+    do
+      n := xs.count
+      from i := 1
+      until i > a_vector.count
+      loop
+        t := a_vector [i]
+        vs [n + i] := t.v
+        xs [n + i] := t.x
+        ys [n + i] := t.y
+        i := i + 1
+      end
+    end
+
+feature {NONE} -- Winnow attributes
+  v_vector, x_vector, y_vector: separate ARRAY [INTEGER]
 
 end
 
