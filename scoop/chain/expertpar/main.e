@@ -89,6 +89,7 @@ feature
 
   live_all (workers: LINKED_LIST [separate WORKER])
     do
+      -- Randmat creation
       from workers.start
       until workers.after
       loop
@@ -96,10 +97,12 @@ feature
           workers.forth
       end
 
+
+      -- Threshold discovery
       from workers.start
       until workers.after
       loop
-          live_thresh (workers.item)
+          live_thresh_reduce (workers.item)
           workers.forth
       end
 
@@ -108,10 +111,22 @@ feature
       from workers.start
       until workers.after
       loop
+          live_thresh_map (workers.item)
+          workers.forth
+      end
+
+
+      -- Winnow point collection and sorting
+      from workers.start
+      until workers.after
+      loop
           live_winnow (workers.item)
           workers.forth
       end
 
+      sort_winnow
+
+      -- Outer processing
       from workers.start
       until workers.after
       loop
@@ -119,6 +134,7 @@ feature
           workers.forth
       end
 
+      -- Matrix-vector product
       from workers.start
       until workers.after
       loop
@@ -137,9 +153,14 @@ feature
       worker.live_randmat
     end
 
-  live_thresh (worker: separate WORKER)
+  live_thresh_reduce (worker: separate WORKER)
     do
-      worker.live_thresh
+      worker.live_thresh_reduce
+    end
+
+  live_thresh_map (worker: separate WORKER)
+    do
+      worker.live_thresh_map
     end
 
   live_winnow (worker: separate WORKER)

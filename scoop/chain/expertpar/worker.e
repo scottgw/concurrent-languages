@@ -88,7 +88,7 @@ feature -- Thresholding computations
                     hist: ARRAY [INTEGER];
                     sep_hist: separate ARRAY [INTEGER])
     require
-      acc.generator /= Void and sep_hist.generator /= Void
+      max.generator /= Void and sep_hist.generator /= Void
     local
       i: INTEGER
       h: INTEGER
@@ -240,8 +240,6 @@ feature {NONE} -- Outer attributes
       from i := 1
       until i > nelts
       loop
-        -- SCOOP bug: this doesn't work if I don't store these into
-        -- local variables explicitly.
         x := xs_ [i]
         y := ys_ [i]
         Result [i] := [x, y]
