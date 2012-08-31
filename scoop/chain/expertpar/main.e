@@ -28,7 +28,12 @@ feature
       percent := read_integer
       winnow_nelts := read_integer
 
-      create result_vector (1, winnow_nelts)
+      create result_vector.make (1, winnow_nelts)
+      create vs.make (1, 20000)
+      create xs.make (1, 20000)
+      create ys.make (1, 20000)
+      create winnow_xs.make (1, 20000)
+      create winnow_ys.make (1, 20000)
 
       run  (nelts, s, percent, winnow_nelts)
 
@@ -45,7 +50,6 @@ feature
       end
     end
 
-  matrix: ARRAY2[INTEGER]
   
   read_integer: INTEGER
     do
@@ -75,7 +79,9 @@ feature
 
         if height /= 0 then
           create worker.make (start + 1, start + height, ncols, seed,
-                              max, histogram, result_vector)
+                              max, histogram, vs, xs, ys,
+                              winnow_xs, winnow_ys,
+                              result_vector)
           Result.extend(worker)
         end
           
@@ -84,7 +90,7 @@ feature
       end
 
       -- parallel for on rows
-      Result.do_all(agent live_worker)
+      liva_all (workers)
     end
 
   live_all (workers: LINKED_LIST [separate WORKER])
@@ -115,7 +121,6 @@ feature
           workers.forth
       end
 
-
       -- Winnow point collection and sorting
       from workers.start
       until workers.after
@@ -124,7 +129,8 @@ feature
           workers.forth
       end
 
-      sort_winnow
+      sort_winnow (import_winnow (vs, xs, ys))
+      
 
       -- Outer processing
       from workers.start
@@ -148,6 +154,35 @@ feature
       
     end
 
+  sort_winnow (points_: ARRAY [TUPLE [x,y,z: INTEGER]]
+               winnow_xs_, winnow_ys_: separate ARRAY [INTEGER])
+    local
+      points: ARRAY [TUPLE [v,x,y: INTEGER]]
+      trim_points: ARRAY [TUPLE [v,x,y: INTEGER]]
+
+      sorter: TUPLE_SORTER
+
+      i, n, chunk, index: INTEGER
+    do
+      create sorter.make
+      
+      points := sorter.sort (points_)
+
+      n     := points.count
+      chunk := n // winnow_nelts
+
+      create points.make (1, winnow_nelts)
+      from i := 1
+      until i > winnow_nelts
+      loop
+        index := (i - 1) * chunk + 1
+        winnow_xs_ [i] := points [index].x
+        winnow_ys_ [i] := points [index].y
+        i := i + 1
+      end
+    end
+
+feature -- Living routines
   live_randmat (worker: separate WORKER)
     do
       worker.live_randmat
@@ -205,6 +240,8 @@ feature
 
 feature {NONE}
   in: PLAIN_TEXT_FILE
+  vs, xs, ys: separate ARRAY [INTEGER]
+  winnow_xs, winnow_ys: separate ARRAY [INTEGER]
   histogram: separate ARRAY [INTEGER]
   max: separate ARRAY [INTEGER]
   result_vector: separate ARRAY [DOUBLE]

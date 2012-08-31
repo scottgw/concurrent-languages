@@ -6,7 +6,9 @@ create
 
 feature {NONE}
   make (start_, final_, nelts_, seed_, percent_, winnow_nelts_: INTEGER;
-       histogram_, max_, vs_, xs_, ys_: separate ARRAY [INTEGER])
+        histogram_, max_, vs_, xs_, ys_: separate ARRAY [INTEGER];
+        winnow_xs_, winnow_ys_: separate ARRAY [INTEGER];
+        result_vector_: separate ARRAY [DOUBLE])
     do
       start := start_
       final := final_
@@ -18,6 +20,11 @@ feature {NONE}
       vs := vs_
       xs := xs_
       ys := ys_
+
+      winnow_xs := winnow_xs_
+      winnow_ys := winnow_ys_
+
+      result_vector := result_vector_
 
       create matrix.make (start, final)
       create mask.make (start, final)
@@ -177,6 +184,7 @@ feature -- Winnowing procedure
 
 feature {NONE} -- Winnow attributes
   vs, xs, ys: separate ARRAY [INTEGER]
+  winnow_xs, winnow_ys: separate ARRAY [INTEGER]
 
 feature -- Outer procedure
   set_outer_vectors (xs_, ys_: separate ARRAY[INTEGER])
