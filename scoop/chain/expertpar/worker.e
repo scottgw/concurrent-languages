@@ -59,7 +59,7 @@ feature -- Thresholding computations
   live_thresh_reduce
     local
       i, j: INTEGER
-      max: INTEGER
+      local_max: INTEGER
       hist: ARRAY [INTEGER]
       e: INTEGER
     do
@@ -74,13 +74,13 @@ feature -- Thresholding computations
         loop
           e        := a_array [i, j]
           hist [e] := hist [e] + 1
-          max      := e.max (max)
+          local_max := e.max (local_max)
 
           j := j + 1
         end
         i := i + 1
       end
-      update_histogram (max, accum, hist, histogram)
+      update_histogram (local_max, max, hist, histogram)
     end
 
   update_histogram (local_max: INTEGER;
@@ -157,7 +157,7 @@ feature -- Winnowing procedure
     end
 
   put_vector (a_vector: ARRAY [TUPLE[v,x,y: INTEGER]];
-              vs, xs, ys: separate ARRAY [INTEGER])
+              vs_, xs_, ys_: separate ARRAY [INTEGER])
     local
       i: INTEGER
       n: INTEGER
@@ -168,15 +168,93 @@ feature -- Winnowing procedure
       until i > a_vector.count
       loop
         t := a_vector [i]
-        vs [n + i] := t.v
-        xs [n + i] := t.x
-        ys [n + i] := t.y
+        vs_ [n + i] := t.v
+        xs_ [n + i] := t.x
+        ys_ [n + i] := t.y
         i := i + 1
       end
     end
 
 feature {NONE} -- Winnow attributes
   vs, xs, ys: separate ARRAY [INTEGER]
+
+feature -- Outer procedure
+  set_outer_vectors (xs_, ys_: separate ARRAY[INTEGER])
+    do
+      outer_xs := xs
+      outer_ys := ys
+    end
+
+  live_outer
+    require
+      outer_xs /= Void and outer_ys /= Void
+    do
+      live_outer_sep (fetch_vector (outer_xs, outer_ys))
+    end
+
+  live_outer_sep (a_points: ARRAY[TUPLE[x,y: INTEGER]])
+    local
+      nmax: DOUBLE
+      d: DOUBLE
+      p1, p2: TUPLE [x,y : INTEGER]
+      i, j: INTEGER
+      matrix: ARRAY2[DOUBLE]
+      vector: ARRAY [DOUBLE]
+    do
+      create matrix.make (to_local_row (final), nelts)
+      create vector.make (start, final)
+
+      from i := start
+      until i > final
+      loop
+        nmax := -1
+        p1 := a_points [i]
+        from j := 1
+        until j > nelts
+        loop
+          if i /= j then
+            p2 := a_points [j]
+            d := distance (p1, p2)
+            matrix [to_local_row (i), j] := d
+            nmax := nmax.max (d)
+          end
+          j := j + 1
+        end
+        matrix [to_local_row (i), i] := nmax * nelts
+        vector [i] := distance ([0,0], a_points [i])
+        i := i + 1
+      end
+    end
+
+feature {NONE} -- Outer attributes
+  outer_xs, outer_ys: separate ARRAY [INTEGER]
+
+  fetch_array (xs_, ys_: separate ARRAY[INTEGER]):
+      ARRAY [TUPLE[INTEGER, INTEGER]]
+    local
+      i: INTEGER
+      x, y: INTEGER
+    do
+      create Result.make (1, nelts)
+
+      from i := 1
+      until i > nelts
+      loop
+        -- SCOOP bug: this doesn't work if I don't store these into
+        -- local variables explicitly.
+        x := xs_ [i]
+        y := ys_ [i]
+        Result [i] := [x, y]
+        i := i + 1
+      end
+    end
+
+
+feature -- Product procedure
+  live_product
+    do
+
+    end
 
 end
 
