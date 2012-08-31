@@ -5,7 +5,8 @@ create
   make
 
 feature {NONE}
-  make (start_, final_, nelts_, seed_, percent_, winnow_nelts_: INTEGER)
+  make (start_, final_, nelts_, seed_, percent_, winnow_nelts_: INTEGER;
+       histogram_, max_, vs_, xs_, ys_: separate ARRAY [INTEGER])
     do
       start := start_
       final := final_
@@ -13,6 +14,10 @@ feature {NONE}
       seed  := seed_
       percent := percent_
       winnow_nelts := winnow_nelts_
+
+      vs := vs_
+      xs := xs_
+      ys := ys_
 
       create matrix.make (start, final)
       create mask.make (start, final)
@@ -78,8 +83,8 @@ feature -- Thresholding computations
       update_histogram (max, accum, hist, histogram)
     end
 
-  update_histogram (max: INTEGER;
-                    acc: separate ARRAY [INTEGER];
+  update_histogram (local_max: INTEGER;
+                    max: separate ARRAY [INTEGER];
                     hist: ARRAY [INTEGER];
                     sep_hist: separate ARRAY [INTEGER])
     require
@@ -89,10 +94,7 @@ feature -- Thresholding computations
       h: INTEGER
       newmax: INTEGER
     do
-      i := acc.item (1)
-      newmax := i.max (max)
-
-      acc.put (newmax, 1)
+      max.put (max [1].max (local_max), 1)
 
       from i := 0
       until i > 100
@@ -125,7 +127,7 @@ feature -- Thresholding computations
 feature {NONE}
   mask: ARRAY2 [INTEGER]
   histogram: separate ARRAY [INTEGER]
-  accum: separate ARRAY [INTEGER]
+  max: separate ARRAY [INTEGER]
 
 feature -- Winnowing procedure
   
@@ -174,7 +176,7 @@ feature -- Winnowing procedure
     end
 
 feature {NONE} -- Winnow attributes
-  v_vector, x_vector, y_vector: separate ARRAY [INTEGER]
+  vs, xs, ys: separate ARRAY [INTEGER]
 
 end
 
