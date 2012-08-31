@@ -15,44 +15,39 @@ create make
 feature
   make
     local
-      nrows, ncols, s: INTEGER
+      nelts, s, percent, winnow_nelts: INTEGER
       is_bench: BOOLEAN
-      i, j: INTEGER
-      workers: LINKED_LIST[separate RANDMAT_PARFOR_WORKER]
+      i: INTEGER
+      vector: ARRAY [DOUBLE]
     do
       create in.make_open_read(separate_character_option_value('i'))
       is_bench := index_of_word_option ("bench") > 0
 
-      nrows := read_integer
-      ncols := read_integer
+      nelts := read_integer
       s := read_integer
+      percent := read_integer
+      winnow_nelts := read_integer
 
-      create matrix.make (nrows,ncols)
-      workers := randmat(nrows, ncols, s)
+      create result_vector (1, winnow_nelts)
+
+      run  (nelts, s, percent, winnow_nelts)
 
       if not is_bench then
-        workers.do_all (agent fetch_submatrix (ncols, ?))
-        workers.do_all (agent join)
+        vector := fetch_vector (nelts, result_vector)
         
         from i := 1
-        until i > nrows
+        until i > nelts
         loop
-          from j := 1
-          until j > ncols
-          loop
-            print (matrix [i,j].out + " ")
-            j := j + 1
-          end
-          
-          print ("%N")
+          print (vector [i].out + " ")
           i := i + 1
         end
+        print ("%N")
       end
     end
 
   matrix: ARRAY2[INTEGER]
   
-  read_integer(): INTEGER
+  read_integer: INTEGER
     do
       in.read_integer
       Result := in.last_integer
@@ -61,10 +56,10 @@ feature
   num_workers: INTEGER = 32
   
   -- parallel for on matrix
-  randmat(nrows, ncols, seed: INTEGER):
-    LINKED_LIST[separate RANDMAT_PARFOR_WORKER]
+  run (nelts, seed, percent, winnow_nelts: INTEGER):
     local
-      worker: separate RANDMAT_PARFOR_WORKER
+      workers: LINKED_LIST[separate WORKER]
+      worker: separate WORKER
       i: INTEGER
       start: INTEGER
       height: INTEGER
@@ -79,7 +74,8 @@ feature
         height := (nrows - start) // (num_workers - i)
 
         if height /= 0 then
-          create worker.make (start + 1, height, ncols, seed)
+          create worker.make (start + 1, start + height, ncols, seed,
+                              max, histogram, result_vector)
           Result.extend(worker)
         end
           
@@ -91,40 +87,105 @@ feature
       Result.do_all(agent live_worker)
     end
 
-  
-  join (obj: separate RANDMAT_PARFOR_WORKER)
+  live_all (workers: LINKED_LIST [separate WORKER])
+    do
+      from workers.start
+      until workers.after
+      loop
+          live_randmat (workers.item)
+          workers.forth
+      end
+
+      from workers.start
+      until workers.after
+      loop
+          live_thresh (workers.item)
+          workers.forth
+      end
+
+      process_histogram (max, histogram)
+
+      from workers.start
+      until workers.after
+      loop
+          live_winnow (workers.item)
+          workers.forth
+      end
+
+      from workers.start
+      until workers.after
+      loop
+          live_outer (workers.item)
+          workers.forth
+      end
+
+      from workers.start
+      until workers.after
+      loop
+          live_product (workers.item)
+          workers.forth
+      end
+    end
+
+  process_histogram (max_, histogram_: separate ARRAY [INTEGER])
+    do
+      
+    end
+
+  live_randmat (worker: separate WORKER)
+    do
+      worker.live_randmat
+    end
+
+  live_thresh (worker: separate WORKER)
+    do
+      worker.live_thresh
+    end
+
+  live_winnow (worker: separate WORKER)
+    do
+        worker.live_winnow
+    end
+
+  live_outer (worker: separate WORKER)
+    do
+      worker.live_outer
+    end
+
+  live_product (worker: separate WORKER)
+    do
+      worker.live_product
+    end
+
+  join (obj: separate WORKER)
     require obj.generator /= Void
     do
     end
   
-  fetch_submatrix (ncols: INTEGER;
-                   worker: separate RANDMAT_PARFOR_WORKER)
+  fetch_vector (nelts: INTEGER; s_vector: separate ARRAY[DOUBLE]):
+      ARRAY [DOUBLE]
     local
-      i, j: INTEGER
-      iend: INTEGER
+      i: INTEGER
     do
-      from
-        i := worker.start
-        iend := i + worker.height
-      until i >= iend
+      create Result.make (1, nelts)
+      from i := 1
+      until i > nelts
       loop
-        from j := 1
-        until j > ncols
-        loop
-          matrix [i,j] := worker.get (i, j)
-          j := j + 1
-        end
+        Result [i] := s_vector [i]
         i := i + 1
       end
     end
   
 
-  live_worker(worker: separate RANDMAT_PARFOR_WORKER)
+  live_worker(worker: separate WORKER)
     do
       worker.live
     end
 
 feature {NONE}
   in: PLAIN_TEXT_FILE
+  histogram: separate ARRAY [INTEGER]
+  max: separate ARRAY [INTEGER]
+  result_vector: separate ARRAY [DOUBLE]
 
 end
