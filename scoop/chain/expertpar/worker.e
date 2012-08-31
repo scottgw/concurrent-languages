@@ -187,17 +187,9 @@ feature {NONE} -- Winnow attributes
   winnow_xs, winnow_ys: separate ARRAY [INTEGER]
 
 feature -- Outer procedure
-  set_outer_vectors (xs_, ys_: separate ARRAY[INTEGER])
-    do
-      outer_xs := xs
-      outer_ys := ys
-    end
-
   live_outer
-    require
-      outer_xs /= Void and outer_ys /= Void
     do
-      live_outer_sep (fetch_vector (outer_xs, outer_ys))
+      live_outer_sep (fetch_vector (winnow_xs, winnow_ys))
     end
 
   live_outer_sep (a_points: ARRAY[TUPLE[x,y: INTEGER]])
@@ -218,7 +210,7 @@ feature -- Outer procedure
         nmax := -1
         p1 := a_points [i]
         from j := 1
-        until j > nelts
+        until j > winnow_nelts
         loop
           if i /= j then
             p2 := a_points [j]
@@ -232,6 +224,8 @@ feature -- Outer procedure
         vector [i] := distance ([0,0], a_points [i])
         i := i + 1
       end
+
+      share_vector (vector, shared_vector)
     end
 
 feature {NONE} -- Outer attributes
@@ -243,10 +237,10 @@ feature {NONE} -- Outer attributes
       i: INTEGER
       x, y: INTEGER
     do
-      create Result.make (1, nelts)
+      create Result.make (1, winnow_nelts)
 
       from i := 1
-      until i > nelts
+      until i > winnow_nelts
       loop
         x := xs_ [i]
         y := ys_ [i]
@@ -255,12 +249,41 @@ feature {NONE} -- Outer attributes
       end
     end
 
+  share_vector (vector_: ARRAY [DOUBLE]
+               ;shared_vector_: separate ARRAY [DOUBLE])
+    local
+      i: INTEGER
+    do
+      from i := 1
+      until i > winnow_nelts
+      loop
+        shared_vector_ [i] : = vector_ [i]
+        i := i + 1
+      end
+    end
 
 feature -- Product procedure
   live_product
     do
 
     end
+
+feature {NONE}
+  shared_vector: separate ARRAY [DOUBLE]
+
+  import_vector (shared_vector_: separate ARRAY [DOUBLE])
+    local
+      i: INTEGER
+    do
+      create Result.make (1, winnow_nelts)
+      from i := 1
+      until i > winnow_nelts
+      loop
+        shared_vector_ [i] : = vector_ [i]
+        i := i + 1
+      end
+    end
+
 
 end
 

@@ -129,8 +129,7 @@ feature
           workers.forth
       end
 
-      sort_winnow (import_winnow (vs, xs, ys))
-      
+      sort_winnow (import_winnow (vs, xs, ys)) 
 
       -- Outer processing
       from workers.start
@@ -149,7 +148,7 @@ feature
       end
     end
 
-  calculate_threshold (a_max: separate ARRAY [INTEGER];
+  process_historgram (a_max: separate ARRAY [INTEGER];
                        a_histogram: separate ARRAY [INTEGER])
     require
       a_max.generator /= Void and a_histogram.generator /= Void
@@ -166,17 +165,14 @@ feature
       prefixsum := 0
       threshold := nmax
 
-      from i := nmax until not(i >= 0 and prefixsum <= count) loop
+      from i := nmax
+      until i < 0 or prefixsum > count
+      loop
       	h := a_histogram.item (i)
         prefixsum := prefixsum + h
         threshold := i;
         i := i - 1
       end
-    end
-
-  process_histogram (max_, histogram_: separate ARRAY [INTEGER])
-    do
-      
     end
 
   sort_winnow (points_: ARRAY [TUPLE [x,y,z: INTEGER]]
