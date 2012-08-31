@@ -149,6 +149,31 @@ feature
       end
     end
 
+  calculate_threshold (a_max: separate ARRAY [INTEGER];
+                       a_histogram: separate ARRAY [INTEGER])
+    require
+      a_max.generator /= Void and a_histogram.generator /= Void
+    local
+      count: INTEGER
+      nmax: INTEGER
+      prefixsum: INTEGER
+      i: INTEGER
+      h: INTEGER
+    do
+      nmax := a_max.item (1)
+      count := (nrows * ncols * percent) // 100
+
+      prefixsum := 0
+      threshold := nmax
+
+      from i := nmax until not(i >= 0 and prefixsum <= count) loop
+      	h := a_histogram.item (i)
+        prefixsum := prefixsum + h
+        threshold := i;
+        i := i - 1
+      end
+    end
+
   process_histogram (max_, histogram_: separate ARRAY [INTEGER])
     do
       
