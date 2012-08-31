@@ -70,10 +70,10 @@ feature -- Thresholding computations
         end
         i := i + 1
       end
-      update_separate_accumulator (max, accum, hist, histogram)
+      update_histogram (max, accum, hist, histogram)
     end
 
-  update_separate_accumulator (max: INTEGER;
+  update_histogram (max: INTEGER;
                                acc: separate ARRAY [INTEGER];
                                hist: ARRAY [INTEGER];
                                sep_hist: separate ARRAY [INTEGER])
