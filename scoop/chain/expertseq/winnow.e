@@ -11,45 +11,53 @@
 --   points: a vector of (x, y) points
 
 class WINNOW
-create make_empty
 feature
-  make_empty do end
-
   winnow(nrows, ncols: INTEGER; matrix, mask: ARRAY2[INTEGER];
-    nelts: INTEGER) : ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
-  local
-    points, values: ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
-    count: INTEGER
-    sorter: QUICK_SORTER[TUPLE[INTEGER, INTEGER, INTEGER]]
-    comparator: TUPLE_COMPARATOR
-    n, chunk, index: INTEGER
-  do
-    count := 1
-    create values.make_empty
-    across 1 |..| nrows as ic loop
-      across 1 |..| ncols as jc loop
-        if (mask.item(ic.item, jc.item) = 1) then
-          values.force([matrix.item(ic.item, jc.item), ic.item, jc.item],
-              count)
-          count := count + 1
+        nelts: INTEGER) : ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
+    local
+      points, values: ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
+      count: INTEGER
+      sorter: QUICK_SORTER[TUPLE[INTEGER, INTEGER, INTEGER]]
+      comparator: TUPLE_COMPARATOR
+      n, chunk, index: INTEGER
+      i, j: INTEGER
+    do
+      count := 1
+      create values.make_empty
+
+      from i := 1
+      until i > nrows
+      loop
+        from j := 1
+        until j > ncols
+        loop
+          if mask [i, j] = 1 then
+            values.force([matrix [i, j], i, j], count)
+            count := count + 1
+          end
+          j := j + 1
         end
+        i := i + 1
       end
+
+      create comparator
+      create sorter.make(comparator)
+      sorter.sort(values)
+
+      n := values.count
+      chunk := n // nelts
+
+      create points.make(1, nelts);
+      from i := 1
+      until i > nelts
+      loop
+        index := (i - 1) * chunk + 1
+        points[i] := values[index]
+      
+        i := i + 1
+      end
+
+      Result := points
     end
-
-    create comparator
-    create sorter.make(comparator)
-    sorter.sort(values)
-
-    n := values.count
-    chunk := n // nelts
-
-    create points.make(1, nelts);
-    across 1 |..| nelts as ic loop
-      index := (ic.item - 1) * chunk + 1
-      points[ic.item] := values[index]
-    end
-
-    Result := points
-  end
 
 end

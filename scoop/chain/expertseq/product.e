@@ -9,25 +9,32 @@
 --   res: a real vector, whose values are the result of the product
 
 class PRODUCT
-create make_empty
-feature
-  make_empty do end
 
+feature
   product(nelts: INTEGER; matrix: ARRAY2[DOUBLE]; vector: ARRAY[DOUBLE])
     : ARRAY[DOUBLE]
-  local
-    res: ARRAY[DOUBLE]
-    sum: DOUBLE
-  do
-    create res.make_filled(0.0, 1, nelts)
-    across 1 |..| nelts as ic loop
-      sum := 0
-      across 1 |..| nelts as jc loop
-        sum := sum + matrix.item(ic.item, jc.item) * vector.item(jc.item)
+    local
+      i, j: INTEGER
+      sum: DOUBLE
+    do
+      create Result.make_filled(0.0, 1, nelts)
+          
+      from i := 1
+      until i > nelts
+      loop
+        sum := 0
+        
+        from j := 1
+        until j > nelts
+        loop
+          sum := sum + matrix [i, j] * vector [j]
+          
+          j := j + 1
+        end
+        Result [i] := sum
+        
+        i := i + 1
       end
-      res.put(sum, ic.item)
     end
-    Result := res
-  end
-
+  
 end

@@ -8,9 +8,8 @@
 --   matrix: a nrows by ncols integer matrix
 
 class RANDMAT
-create make_empty
+
 feature
-  make_empty do end
 
   randmat(nrows, ncols:INTEGER;  s: NATURAL; matrix: ARRAY2[INTEGER])
     local

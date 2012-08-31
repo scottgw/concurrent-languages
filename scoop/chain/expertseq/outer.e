@@ -11,39 +11,42 @@
 --     distances
 
 class OUTER
-create make_empty
-feature
-  make_empty do end
 
+feature
   outer(nelts: INTEGER; points: ARRAY[TUPLE[INTEGER, INTEGER]];
-      matrix: ARRAY2[DOUBLE]; vector: ARRAY[DOUBLE])
-  local
-    nmax: DOUBLE
-  do
-    across 1 |..| nelts as ic loop
-      nmax := -1
-      across 1 |..| nelts as jc loop
-        if (not(ic.item = jc.item)) then
-          matrix.put(distance(points.item(ic.item), points.item(jc.item)),
-            ic.item, jc.item)
-          nmax := nmax.max(matrix.item(ic.item, jc.item))
+        matrix: ARRAY2[DOUBLE]; vector: ARRAY[DOUBLE])
+    local
+      nmax: DOUBLE
+      i, j: INTEGER
+    do
+      from i := 1
+      until i > nelts
+      loop
+        from j := 1
+        until j > nelts
+        loop
+          if i /= j then
+           
+            matrix [i, j] := distance(points [i], points [j])
+            nmax          := nmax.max(matrix [i, j])
+          end
+          matrix [i, i] := nmax * nelts
+          vector [i]    := distance([0, 0], points [i])
+          
+          j := j + 1
         end
-        matrix.put(nmax * nelts, ic.item, ic.item)
-        vector.put(distance([0, 0], points.item(ic.item)), ic.item)
+        i := i + 1
       end
     end
-  end
-
+  
   sqr(a: DOUBLE): DOUBLE
-  do
-    Result := a * a
-  end
-
-  distance(a, b: TUPLE[INTEGER, INTEGER]): DOUBLE
-  do
-    Result := {DOUBLE_MATH}.sqrt(
-      sqr(a.integer_32_item(1) - b.integer_32_item(1)) +
-      sqr(a.integer_32_item(2) - b.integer_32_item(2)));
+    do
+      Result := a * a
+    end
+  
+  distance(a, b: TUPLE[x,y: INTEGER]): DOUBLE
+    do
+      Result := {DOUBLE_MATH}.sqrt(sqr(a.x - b.x) + sqr(a.y - b.y));
   end
 
 end
