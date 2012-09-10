@@ -7,28 +7,33 @@ create
 feature {NONE}
   make (start_, final_, nelts_, seed_, percent_, 
         win_start_, win_final_, winnow_nelts_: INTEGER;
-        histogram_, max_, vs_, xs_, ys_: separate ARRAY [INTEGER];
-        winnow_xs_, winnow_ys_: separate ARRAY [INTEGER];
-        result_vector_: separate ARRAY [DOUBLE])
+        max_, histogram_: separate ARRAY [INTEGER]) 
+--         histogram_, vs_, xs_, ys_: separate ARRAY [INTEGER];
+--         winnow_xs_, winnow_ys_: separate ARRAY [INTEGER];
+--         result_vector_: separate ARRAY [DOUBLE])
     do
+      print ("making " + start_.out + "%N")
       start := start_
       final := final_
       nelts := nelts_
       seed  := seed_.to_natural_32
       percent := percent_
 
-      win_start := win_start_
-      win_final := win_final_
-      winnow_nelts := winnow_nelts_
+      max := max_
+--       histogram := histogram_
 
-      vs := vs_
-      xs := xs_
-      ys := ys_
-
-      winnow_xs := winnow_xs_
-      winnow_ys := winnow_ys_
-
-      result_vector := result_vector_
+--       win_start := win_start_
+--       win_final := win_final_
+--       winnow_nelts := winnow_nelts_
+-- 
+--       vs := vs_
+--       xs := xs_
+--       ys := ys_
+-- 
+--       winnow_xs := winnow_xs_
+--       winnow_ys := winnow_ys_
+-- 
+--       result_vector := result_vector_
 
       create matrix.make (1, to_local_row (final))
       create mask.make (1, to_local_row (final))

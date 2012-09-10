@@ -29,13 +29,15 @@ feature
       winnow_nelts := read_integer
 
       create result_vector.make (1, winnow_nelts)
+      create max.make (1,1)
       create vs.make (1, 20000)
       create xs.make (1, 20000)
       create ys.make (1, 20000)
       create winnow_xs.make (1, 20000)
       create winnow_ys.make (1, 20000)
 
-      run  (s)
+      print ("run%N")
+      run (s)
 
       if not is_bench then
         vector := fetch_vector (result_vector)
@@ -50,7 +52,19 @@ feature
       end
     end
 
-  
+feature {NONE}
+  in: PLAIN_TEXT_FILE
+  percent, threshold: INTEGER
+  winnow_nelts, nelts: INTEGER
+
+
+  vs, xs, ys: separate ARRAY [INTEGER]
+  winnow_xs, winnow_ys: separate ARRAY [INTEGER]
+  histogram: separate ARRAY [INTEGER]
+  max: separate ARRAY [INTEGER]
+  result_vector: separate ARRAY [DOUBLE]
+
+ 
   read_integer: INTEGER
     do
       in.read_integer
@@ -75,16 +89,23 @@ feature
         i := 0
       until i >= num_workers
       loop
+
         height := (nelts - start) // (num_workers - i)
         win_height := (winnow_nelts - win_start) // (num_workers - i)
 
+
         if height /= 0 then
+          print ("create " + start.out + "," + height.out + "%N")
           create worker.make (start + 1, start + height, nelts, seed, 
                               percent, winnow_nelts,
                               win_start + 1, win_start + win_height,
-                              max, histogram, vs, xs, ys,
-                              winnow_xs, winnow_ys,
-                              result_vector)
+                              max, Void)
+--                               , Void, Void, Void, Void,
+--                               Void, Void,
+--                               Void)
+-- --                               max, histogram, vs, xs, ys,
+--                               winnow_xs, winnow_ys,
+--                               result_vector)
           workers.extend(worker)
         end
           
@@ -99,6 +120,7 @@ feature
 
   live_all (workers: LINKED_LIST [separate WORKER])
     do
+      print ("randmat%N")
       -- Randmat creation
       from workers.start
       until workers.after
@@ -107,7 +129,7 @@ feature
           workers.forth
       end
 
-
+      print ("threshold%N")
       -- Threshold discovery
       from workers.start
       until workers.after
@@ -118,6 +140,7 @@ feature
 
       process_histogram (max, histogram)
 
+      print ("threshmap%N")
       from workers.start
       until workers.after
       loop
@@ -125,6 +148,7 @@ feature
           workers.forth
       end
 
+      print ("winnow%N")
       -- Winnow point collection and sorting
       from workers.start
       until workers.after
@@ -135,6 +159,7 @@ feature
 
       sort_winnow (import_winnow (vs, xs, ys), winnow_xs, winnow_ys) 
 
+      print ("outer%N")
       -- Outer processing
       from workers.start
       until workers.after
@@ -143,6 +168,7 @@ feature
           workers.forth
       end
 
+      print ("product%N")
       -- Matrix-vector product
       from workers.start
       until workers.after
@@ -280,17 +306,5 @@ feature -- Living routines
         i := i + 1
       end
     end
-
-feature {NONE}
-  in: PLAIN_TEXT_FILE
-  percent, threshold: INTEGER
-  winnow_nelts, nelts: INTEGER
-
-
-  vs, xs, ys: separate ARRAY [INTEGER]
-  winnow_xs, winnow_ys: separate ARRAY [INTEGER]
-  histogram: separate ARRAY [INTEGER]
-  max: separate ARRAY [INTEGER]
-  result_vector: separate ARRAY [DOUBLE]
 
 end
