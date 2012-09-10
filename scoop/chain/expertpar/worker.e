@@ -211,10 +211,9 @@ feature -- Outer procedure
       d: DOUBLE
       p1, p2: TUPLE [x,y : INTEGER]
       i, j: INTEGER
-      l_matrix: ARRAY2[DOUBLE]
       l_vector: ARRAY [DOUBLE]
     do
-      create l_matrix.make (to_local_win_row (win_final), winnow_nelts)
+      create outer_matrix.make (to_local_win_row (win_final), winnow_nelts)
       create l_vector.make (win_start, win_final)
 
       from i := win_start
@@ -228,12 +227,12 @@ feature -- Outer procedure
           if i /= j then
             p2 := a_points [j]
             d := distance (p1, p2)
-            l_matrix [to_local_win_row (i), j] := d
+            outer_matrix [to_local_win_row (i), j] := d
             nmax := nmax.max (d)
           end
           j := j + 1
         end
-        l_matrix [to_local_win_row (i), i] := nmax * nelts
+        outer_matrix [to_local_win_row (i), i] := nmax * nelts
         l_vector [i] := distance ([0,0], a_points [i])
         i := i + 1
       end
@@ -241,6 +240,7 @@ feature -- Outer procedure
     end
 
 feature {NONE} -- Outer attributes
+  outer_matrix: ARRAY2 [DOUBLE]
   outer_xs, outer_ys: separate ARRAY [INTEGER]
 
   to_local_win_row (i: INTEGER): INTEGER
@@ -320,6 +320,8 @@ feature -- Product procedure
   product (a_vector: ARRAY [DOUBLE])
     local
       i, j: INTEGER
+      sum: DOUBLE
+      res: ARRAY [DOUBLE]
     do
       create res.make_filled (0, 1, final - start + 1)
       
@@ -330,14 +332,14 @@ feature -- Product procedure
         from j := 1
         until j > nelts
         loop
-          sum := sum + a_matrix [to_local_win_row (i), j] * a_vector [j]
+          sum := sum + outer_matrix [to_local_win_row (i), j] * a_vector [j]
           j := j + 1
         end
         res [to_local_win_row (i)] := sum
         i := i + 1
       end
 
-      send_result (res, result_vector)
+      export_vector (res, result_vector)
     end
 
 feature {NONE}
@@ -355,6 +357,20 @@ feature {NONE}
         i := i + 1
       end
     end
+
+  export_vector (vector_: ARRAY [DOUBLE]
+                ;shared_vector_: separate ARRAY [DOUBLE])
+    local
+      i: INTEGER
+    do
+      from i := win_start
+      until i > win_final
+      loop
+        shared_vector_ [i] := vector_ [i]
+        i := i + 1
+      end
+    end
+
 
 end
 
