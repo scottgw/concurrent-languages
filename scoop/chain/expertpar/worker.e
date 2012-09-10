@@ -5,7 +5,8 @@ create
   make
 
 feature {NONE}
-  make (start_, final_, nelts_, seed_, percent_, winnow_nelts_: INTEGER;
+  make (start_, final_, nelts_, seed_, percent_, 
+        win_start_, win_final_, winnow_nelts_: INTEGER;
         histogram_, max_, vs_, xs_, ys_: separate ARRAY [INTEGER];
         winnow_xs_, winnow_ys_: separate ARRAY [INTEGER];
         result_vector_: separate ARRAY [DOUBLE])
@@ -13,8 +14,11 @@ feature {NONE}
       start := start_
       final := final_
       nelts := nelts_
-      seed  := seed_
+      seed  := seed_.to_natural_32
       percent := percent_
+
+      win_start := win_start_
+      win_final := win_final_
       winnow_nelts := winnow_nelts_
 
       vs := vs_
@@ -26,15 +30,21 @@ feature {NONE}
 
       result_vector := result_vector_
 
-      create matrix.make (start, final)
-      create mask.make (start, final)
+      create matrix.make (1, to_local_row (final))
+      create mask.make (1, to_local_row (final))
     end
 
 feature -- Attributes
+  nelts: INTEGER
   start, final: INTEGER
   matrix: ARRAY2 [INTEGER]
 
 feature -- Random matrix generation
+  to_local_row (i: INTEGER): INTEGER
+    do
+      Result := i - start + 1
+    end
+
   live_randmat
     local
       s, lcg_a, lcg_c, rand_max: NATURAL
@@ -60,7 +70,7 @@ feature -- Random matrix generation
     end
 
 feature {NONE}
-  seed: INTEGER
+  seed: NATURAL
 
 feature -- Thresholding computations
   live_thresh_reduce
@@ -71,15 +81,15 @@ feature -- Thresholding computations
       e: INTEGER
     do
       create hist.make_filled (0, 0, 100)
-      max := 0
+      local_max := 0
 
       from i := start
       until i > final
       loop
         from j := 1
-        until j > ncols
+        until j > nelts
         loop
-          e        := a_array [i, j]
+          e        := matrix [i, j]
           hist [e] := hist [e] + 1
           local_max := e.max (local_max)
 
@@ -91,17 +101,17 @@ feature -- Thresholding computations
     end
 
   update_histogram (local_max: INTEGER;
-                    max: separate ARRAY [INTEGER];
+                    max_: separate ARRAY [INTEGER];
                     hist: ARRAY [INTEGER];
                     sep_hist: separate ARRAY [INTEGER])
     require
-      max.generator /= Void and sep_hist.generator /= Void
+      max_.generator /= Void and sep_hist.generator /= Void
     local
       i: INTEGER
       h: INTEGER
       newmax: INTEGER
     do
-      max.put (max [1].max (local_max), 1)
+      max_.put (max_ [1].max (local_max), 1)
 
       from i := 0
       until i > 100
@@ -123,7 +133,7 @@ feature -- Thresholding computations
         until j > nelts
         loop
           if matrix [i, j] >= threshold then
-            mask [i, j] = 1
+            mask [i, j] := 1
           end
           j := j + 1
         end
@@ -132,6 +142,7 @@ feature -- Thresholding computations
     end
 
 feature {NONE}
+  percent: INTEGER
   mask: ARRAY2 [INTEGER]
   histogram: separate ARRAY [INTEGER]
   max: separate ARRAY [INTEGER]
@@ -144,13 +155,13 @@ feature -- Winnowing procedure
       i, j: INTEGER
       count: INTEGER
     do
-      create vector.make_empty
+      create vector.make (100)
 
       from i := start
       until i > final
       loop
         from j := 1
-        until j > ncols
+        until j > nelts
         loop
           if mask [i, j] = 1 then
             vector.extend ([matrix [i, j], i, j])
@@ -160,17 +171,17 @@ feature -- Winnowing procedure
         i := i + 1
       end
 
-      put_vectors (vector, v_vector, x_vector, y_vector)
+      put_vectors (vector, vs, xs, ys)
     end
 
-  put_vector (a_vector: ARRAY [TUPLE[v,x,y: INTEGER]];
-              vs_, xs_, ys_: separate ARRAY [INTEGER])
+  put_vectors (a_vector: ARRAYED_LIST [TUPLE[v,x,y: INTEGER]];
+               vs_, xs_, ys_: separate ARRAY [INTEGER])
     local
       i: INTEGER
       n: INTEGER
       t: TUPLE [v,x,y: INTEGER]
     do
-      n := xs.count
+      n := vs_.count
       from i := 1
       until i > a_vector.count
       loop
@@ -183,6 +194,8 @@ feature -- Winnowing procedure
     end
 
 feature {NONE} -- Winnow attributes
+  winnow_nelts: INTEGER
+  win_start, win_final: INTEGER
   vs, xs, ys: separate ARRAY [INTEGER]
   winnow_xs, winnow_ys: separate ARRAY [INTEGER]
 
@@ -198,14 +211,14 @@ feature -- Outer procedure
       d: DOUBLE
       p1, p2: TUPLE [x,y : INTEGER]
       i, j: INTEGER
-      matrix: ARRAY2[DOUBLE]
-      vector: ARRAY [DOUBLE]
+      l_matrix: ARRAY2[DOUBLE]
+      l_vector: ARRAY [DOUBLE]
     do
-      create matrix.make (to_local_row (final), nelts)
-      create vector.make (start, final)
+      create l_matrix.make (to_local_win_row (win_final), winnow_nelts)
+      create l_vector.make (win_start, win_final)
 
-      from i := start
-      until i > final
+      from i := win_start
+      until i > win_final
       loop
         nmax := -1
         p1 := a_points [i]
@@ -215,23 +228,39 @@ feature -- Outer procedure
           if i /= j then
             p2 := a_points [j]
             d := distance (p1, p2)
-            matrix [to_local_row (i), j] := d
+            l_matrix [to_local_win_row (i), j] := d
             nmax := nmax.max (d)
           end
           j := j + 1
         end
-        matrix [to_local_row (i), i] := nmax * nelts
-        vector [i] := distance ([0,0], a_points [i])
+        l_matrix [to_local_win_row (i), i] := nmax * nelts
+        l_vector [i] := distance ([0,0], a_points [i])
         i := i + 1
       end
-
-      share_vector (vector, shared_vector)
+      share_vector (l_vector, shared_vector)
     end
 
 feature {NONE} -- Outer attributes
   outer_xs, outer_ys: separate ARRAY [INTEGER]
 
-  fetch_array (xs_, ys_: separate ARRAY[INTEGER]):
+  to_local_win_row (i: INTEGER): INTEGER
+    do
+      Result := i - win_start + 1
+    end
+
+
+  distance(a, b: TUPLE[x,y: INTEGER]): DOUBLE
+    do
+      Result := {DOUBLE_MATH}.sqrt(sqr(a.x - b.x) + sqr(a.y - b.y));
+    end
+
+  sqr(a: DOUBLE): DOUBLE
+    do
+      Result := a * a
+    end
+ 
+
+  fetch_vector (xs_, ys_: separate ARRAY[INTEGER]):
       ARRAY [TUPLE[INTEGER, INTEGER]]
     local
       i: INTEGER
@@ -249,6 +278,26 @@ feature {NONE} -- Outer attributes
       end
     end
 
+  share_matrix (mat: ARRAY2[DOUBLE]; smat: separate ARRAY2[DOUBLE])
+    require
+      smat.generator /= Void
+    local
+      i, j: INTEGER
+    do
+      from i := win_start
+      until i > win_final
+      loop
+        from j := 1
+        until j > winnow_nelts
+        loop
+          smat [i, j] := mat [to_local_row (i), j] 
+          j := j + 1
+        end
+        i := i + 1
+      end
+    end
+
+
   share_vector (vector_: ARRAY [DOUBLE]
                ;shared_vector_: separate ARRAY [DOUBLE])
     local
@@ -257,7 +306,7 @@ feature {NONE} -- Outer attributes
       from i := 1
       until i > winnow_nelts
       loop
-        shared_vector_ [i] : = vector_ [i]
+        shared_vector_[i] := vector_[i]
         i := i + 1
       end
     end
@@ -265,13 +314,36 @@ feature {NONE} -- Outer attributes
 feature -- Product procedure
   live_product
     do
+      product (import_vector (shared_vector))
+    end
 
+  product (a_vector: ARRAY [DOUBLE])
+    local
+      i, j: INTEGER
+    do
+      create res.make_filled (0, 1, final - start + 1)
+      
+      from i := win_start
+      until i > win_final
+      loop
+        sum := 0
+        from j := 1
+        until j > nelts
+        loop
+          sum := sum + a_matrix [to_local_win_row (i), j] * a_vector [j]
+          j := j + 1
+        end
+        res [to_local_win_row (i)] := sum
+        i := i + 1
+      end
+
+      send_result (res, result_vector)
     end
 
 feature {NONE}
-  shared_vector: separate ARRAY [DOUBLE]
+  shared_vector, result_vector: separate ARRAY [DOUBLE]
 
-  import_vector (shared_vector_: separate ARRAY [DOUBLE])
+  import_vector (shared_vector_: separate ARRAY [DOUBLE]): ARRAY [DOUBLE]
     local
       i: INTEGER
     do
@@ -279,11 +351,10 @@ feature {NONE}
       from i := 1
       until i > winnow_nelts
       loop
-        shared_vector_ [i] : = vector_ [i]
+        Result [i] := shared_vector_ [i]
         i := i + 1
       end
     end
-
 
 end
 

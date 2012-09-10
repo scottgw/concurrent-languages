@@ -15,7 +15,7 @@ create make
 feature
   make
     local
-      nelts, s, percent, winnow_nelts: INTEGER
+      s: INTEGER
       is_bench: BOOLEAN
       i: INTEGER
       vector: ARRAY [DOUBLE]
@@ -35,10 +35,10 @@ feature
       create winnow_xs.make (1, 20000)
       create winnow_ys.make (1, 20000)
 
-      run  (nelts, s, percent, winnow_nelts)
+      run  (s)
 
       if not is_bench then
-        vector := fetch_vector (nelts, result_vector)
+        vector := fetch_vector (result_vector)
         
         from i := 1
         until i > nelts
@@ -60,37 +60,41 @@ feature
   num_workers: INTEGER = 32
   
   -- parallel for on matrix
-  run (nelts, seed, percent, winnow_nelts: INTEGER):
+  run (seed: INTEGER)
     local
       workers: LINKED_LIST[separate WORKER]
       worker: separate WORKER
       i: INTEGER
-      start: INTEGER
-      height: INTEGER
+      win_start, start: INTEGER
+      win_height, height: INTEGER
     do
-      create Result.make
+      create workers.make
 
       from
         start := 0
         i := 0
       until i >= num_workers
       loop
-        height := (nrows - start) // (num_workers - i)
+        height := (nelts - start) // (num_workers - i)
+        win_height := (winnow_nelts - win_start) // (num_workers - i)
 
         if height /= 0 then
-          create worker.make (start + 1, start + height, ncols, seed,
+          create worker.make (start + 1, start + height, nelts, seed, 
+                              percent, winnow_nelts,
+                              win_start + 1, win_start + win_height,
                               max, histogram, vs, xs, ys,
                               winnow_xs, winnow_ys,
                               result_vector)
-          Result.extend(worker)
+          workers.extend(worker)
         end
           
         start := start + height
+        win_start := win_start + win_height
         i := i + 1
       end
 
       -- parallel for on rows
-      liva_all (workers)
+      live_all (workers)
     end
 
   live_all (workers: LINKED_LIST [separate WORKER])
@@ -129,7 +133,7 @@ feature
           workers.forth
       end
 
-      sort_winnow (import_winnow (vs, xs, ys)) 
+      sort_winnow (import_winnow (vs, xs, ys), winnow_xs, winnow_ys) 
 
       -- Outer processing
       from workers.start
@@ -148,8 +152,8 @@ feature
       end
     end
 
-  process_historgram (a_max: separate ARRAY [INTEGER];
-                       a_histogram: separate ARRAY [INTEGER])
+  process_histogram (a_max: separate ARRAY [INTEGER];
+                     a_histogram: separate ARRAY [INTEGER])
     require
       a_max.generator /= Void and a_histogram.generator /= Void
     local
@@ -160,7 +164,7 @@ feature
       h: INTEGER
     do
       nmax := a_max.item (1)
-      count := (nrows * ncols * percent) // 100
+      count := (nelts * nelts * percent) // 100
 
       prefixsum := 0
       threshold := nmax
@@ -172,6 +176,30 @@ feature
         prefixsum := prefixsum + h
         threshold := i;
         i := i - 1
+      end
+    end
+
+  import_winnow (vs_, xs_, ys_: separate ARRAY[INTEGER]):
+      ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
+    require
+      xs_.generator /= Void
+    local
+      i: INTEGER
+      n: INTEGER
+      v,x,y: INTEGER
+    do
+      n := vs_.count
+      create Result.make (1, n)
+      
+      from i := 1
+      until i > n
+      loop
+        v := vs_ [i]
+        x := xs_ [i]
+        y := ys_ [i]
+        
+        Result [i] := [v, x, y]
+        i := i + 1
       end
     end
 
@@ -203,7 +231,6 @@ feature
       end
     end
 
-
 feature -- Living routines
   live_randmat (worker: separate WORKER)
     do
@@ -217,7 +244,7 @@ feature -- Living routines
 
   live_thresh_map (worker: separate WORKER)
     do
-      worker.live_thresh_map
+      worker.live_thresh_map (threshold)
     end
 
   live_winnow (worker: separate WORKER)
@@ -240,28 +267,26 @@ feature -- Living routines
     do
     end
   
-  fetch_vector (nelts: INTEGER; s_vector: separate ARRAY[DOUBLE]):
+  fetch_vector (s_vector: separate ARRAY[DOUBLE]):
       ARRAY [DOUBLE]
     local
       i: INTEGER
     do
       create Result.make (1, nelts)
       from i := 1
-      until i > nelts
+      until i > winnow_nelts
       loop
         Result [i] := s_vector [i]
         i := i + 1
       end
     end
-  
-
-  live_worker(worker: separate WORKER)
-    do
-      worker.live
-    end
 
 feature {NONE}
   in: PLAIN_TEXT_FILE
+  percent, threshold: INTEGER
+  winnow_nelts, nelts: INTEGER
+
+
   vs, xs, ys: separate ARRAY [INTEGER]
   winnow_xs, winnow_ys: separate ARRAY [INTEGER]
   histogram: separate ARRAY [INTEGER]
