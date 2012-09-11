@@ -12,5 +12,10 @@ main: main.e $(SRC)
 	ec -config main.ecf -target main -finalize -c_compile;
 	cp EIFGENs/main/F_code/main .
 
+mainw: main.e $(SRC)
+	ec -config main.ecf -target main -c_compile;
+	cp EIFGENs/main/W_code/main mainw
+
+
 clean:
 	@rm -rf EIFGENs

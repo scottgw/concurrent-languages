@@ -15,7 +15,7 @@ create make
 feature
   make
     local
-      nrows, ncols, s: INTEGER
+      nrows, s: INTEGER
       is_bench: BOOLEAN
       i, j: INTEGER
       workers: LINKED_LIST[separate RANDMAT_PARFOR_WORKER]
@@ -28,13 +28,12 @@ feature
       s := read_integer
 
       create matrix.make (nrows,ncols)
-      workers := randmat(nrows, ncols, s)
+      workers := randmat(nrows, s)
+
+      fetch_workers (workers)
+      join_workers (workers)
 
       if not is_bench then
-        workers.do_all (agent fetch_submatrix (ncols, ?))
-        workers.do_all (agent join)
-       
-
         from i := 1
         until i > nrows
         loop
@@ -51,6 +50,7 @@ feature
       end
     end
 
+  ncols: INTEGER
   matrix: ARRAY2[INTEGER]
   
   read_integer(): INTEGER
@@ -62,7 +62,7 @@ feature
   num_workers: INTEGER = 32
   
   -- parallel for on matrix
-  randmat(nrows, ncols, seed: INTEGER):
+  randmat(nrows, seed: INTEGER):
     LINKED_LIST[separate RANDMAT_PARFOR_WORKER]
     local
       worker: separate RANDMAT_PARFOR_WORKER
@@ -89,17 +89,35 @@ feature
       end
 
       -- parallel for on rows
-      Result.do_all(agent live_worker)
+      live_workers (Result)
     end
-
+  live_workers (workers: LIST [separate RANDMAT_PARFOR_WORKER])
+    do
+      across workers as wc loop
+        live_worker (wc.item)
+      end
+    end
+ 
+  fetch_workers (workers: LIST [separate RANDMAT_PARFOR_WORKER])
+    do
+      across workers as wc loop
+        fetch_submatrix (wc.item)
+      end
+    end
+ 
+  join_workers (workers: LIST [separate RANDMAT_PARFOR_WORKER])
+    do
+      across workers as wc loop
+        join (wc.item)
+      end
+    end
   
   join (obj: separate RANDMAT_PARFOR_WORKER)
     require obj.generator /= Void
     do
     end
   
-  fetch_submatrix (ncols: INTEGER;
-                   worker: separate RANDMAT_PARFOR_WORKER)
+  fetch_submatrix (worker: separate RANDMAT_PARFOR_WORKER)
     local
       i, j: INTEGER
       iend: INTEGER
