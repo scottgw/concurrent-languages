@@ -103,7 +103,7 @@ feature {NONE}
 --                               , Void, Void, Void, Void,
 --                               Void, Void,
 --                               Void)
--- --                               max, histogram, vs, xs, ys,
+--                               max, histogram, vs, xs, ys,
 --                               winnow_xs, winnow_ys,
 --                               result_vector)
           workers.extend(worker)
