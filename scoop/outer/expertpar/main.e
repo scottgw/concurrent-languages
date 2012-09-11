@@ -113,7 +113,7 @@ feature
       end
     end
 
-  num_workers: INTEGER = 1
+  num_workers: INTEGER = 32
   
   -- parallel for on nelts
   outer (nelts: INTEGER): ARRAY2[REAL_64]
