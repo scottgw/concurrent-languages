@@ -5,12 +5,8 @@ create
   make
 
 feature {NONE}
-  make (start_, final_, nelts_, seed_, percent_, 
-        win_start_, win_final_, winnow_nelts_: INTEGER;
-        max_, histogram_: separate ARRAY [INTEGER]) 
---         histogram_, vs_, xs_, ys_: separate ARRAY [INTEGER];
---         winnow_xs_, winnow_ys_: separate ARRAY [INTEGER];
---         result_vector_: separate ARRAY [DOUBLE])
+  make (start_, final_, nelts_, seed_, percent_,
+        win_start_, win_final_, winnow_nelts_: INTEGER)
     do
       print ("making " + start_.out + "%N")
       start := start_
@@ -19,25 +15,55 @@ feature {NONE}
       seed  := seed_.to_natural_32
       percent := percent_
 
-      max := max_
---       histogram := histogram_
-
---       win_start := win_start_
---       win_final := win_final_
---       winnow_nelts := winnow_nelts_
--- 
---       vs := vs_
---       xs := xs_
---       ys := ys_
--- 
---       winnow_xs := winnow_xs_
---       winnow_ys := winnow_ys_
--- 
---       result_vector := result_vector_
+      win_start := win_start_
+      win_final := win_final_
+      winnow_nelts := winnow_nelts_
 
       create matrix.make (1, to_local_row (final))
       create mask.make (1, to_local_row (final))
     end
+
+feature -- Setters
+  set_max (max_ : separate ARRAY [INTEGER])
+    do
+      max := max_
+    end
+
+  set_histogram (histogram_ : separate ARRAY [INTEGER])
+    do
+      histogram := histogram_
+    end
+
+  set_vs (vs_ : separate ARRAY [INTEGER])
+    do
+      vs := vs_
+    end
+
+  set_xs (xs_ : separate ARRAY [INTEGER])
+    do
+      xs := xs_
+    end
+
+  set_ys (ys_ : separate ARRAY [INTEGER])
+    do
+      ys := ys_
+    end
+
+  set_winnow_xs (winnow_xs_ : separate ARRAY [INTEGER])
+    do
+      winnow_xs := winnow_xs_
+    end
+
+  set_winnow_ys (winnow_ys_ : separate ARRAY [INTEGER])
+    do
+      winnow_ys := winnow_ys_
+    end
+
+  set_result_vector (result_vector_ : separate ARRAY [DOUBLE])
+    do
+      result_vector := result_vector_
+    end
+
 
 feature -- Attributes
   nelts: INTEGER
@@ -153,7 +179,7 @@ feature {NONE}
   max: separate ARRAY [INTEGER]
 
 feature -- Winnowing procedure
-  
+
   live_winnow
     local
       vector: ARRAYED_LIST [TUPLE[INTEGER, INTEGER, INTEGER]]
@@ -263,7 +289,7 @@ feature {NONE} -- Outer attributes
     do
       Result := a * a
     end
- 
+
 
   fetch_vector (xs_, ys_: separate ARRAY[INTEGER]):
       ARRAY [TUPLE[INTEGER, INTEGER]]
@@ -295,7 +321,7 @@ feature {NONE} -- Outer attributes
         from j := 1
         until j > winnow_nelts
         loop
-          smat [i, j] := mat [to_local_row (i), j] 
+          smat [i, j] := mat [to_local_row (i), j]
           j := j + 1
         end
         i := i + 1
@@ -329,7 +355,7 @@ feature -- Product procedure
       res: ARRAY [DOUBLE]
     do
       create res.make_filled (0, 1, final - start + 1)
-      
+
       from i := win_start
       until i > win_final
       loop

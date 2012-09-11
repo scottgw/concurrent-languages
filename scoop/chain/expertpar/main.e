@@ -96,16 +96,13 @@ feature {NONE}
 
         if height /= 0 then
           print ("create " + start.out + "," + height.out + "%N")
-          create worker.make (start + 1, start + height, nelts, seed, 
-                              percent, winnow_nelts,
+          create worker.make (start + 1, start + height, nelts, 
+                              seed, percent, 
                               win_start + 1, win_start + win_height,
-                              max, Void)
---                               , Void, Void, Void, Void,
---                               Void, Void,
---                               Void)
---                               max, histogram, vs, xs, ys,
---                               winnow_xs, winnow_ys,
---                               result_vector)
+                              winnow_nelts)
+                      
+          worker_setup (worker)
+
           workers.extend(worker)
         end
           
@@ -116,6 +113,18 @@ feature {NONE}
 
       -- parallel for on rows
       live_all (workers)
+    end
+
+  worker_setup (worker: separate WORKER)
+    do
+      worker.set_max (max)
+      worker.set_histogram (histogram)
+      worker.set_vs (vs)
+      worker.set_xs (xs)
+      worker.set_ys (ys)
+      worker.set_winnow_xs (winnow_xs)
+      worker.set_winnow_ys (winnow_ys)
+      worker.set_result_vector (result_vector)
     end
 
   live_all (workers: LINKED_LIST [separate WORKER])
