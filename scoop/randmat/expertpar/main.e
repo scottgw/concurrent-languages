@@ -33,7 +33,8 @@ feature
       if not is_bench then
         workers.do_all (agent fetch_submatrix (ncols, ?))
         workers.do_all (agent join)
-        
+       
+
         from i := 1
         until i > nrows
         loop
