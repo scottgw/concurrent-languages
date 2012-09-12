@@ -20,9 +20,7 @@
 #include <iostream>
 #include <vector>
 
-#include "tbb/blocked_range.h"
-#include "tbb/parallel_for.h"
-#include "tbb/task_scheduler_init.h"
+#include "tbb/tbb.h"
 
 using namespace std;
 using namespace tbb;
