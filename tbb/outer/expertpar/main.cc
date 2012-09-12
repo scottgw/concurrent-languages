@@ -43,8 +43,9 @@ double distance(const pair<int, int>& x, const pair<int, int>& y) {
 }
 
 void outer(int nelts) {
-  parallel_for(range(0, nelts),
-    [&](range r) {
+  parallel_for(
+    range(0, nelts),
+    [&,nelts](range r) {
       for (size_t i = r.begin(); i != r.end(); ++i) {
         double nmax = -1;
         for (int j = 0; j < nelts; j++) {
