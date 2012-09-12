@@ -19,11 +19,7 @@
 #include <iostream>
 #include <vector>
 
-#include "tbb/blocked_range.h"
-#include "tbb/parallel_for.h"
-#include "tbb/parallel_scan.h"
-#include "tbb/task_scheduler_init.h"
-#include "tbb/parallel_reduce.h"
+#include "tbb/tbb.h"
 
 using namespace std;
 using namespace tbb;
@@ -86,8 +82,7 @@ void winnow(int nrows, int ncols, int nelts) {
   ScanSum scan_sum;
   tbb::parallel_scan(
       range(0, nrows + 1),
-      scan_sum,
-      tbb::auto_partitioner());
+      scan_sum);
 
   tbb::parallel_for(
       range(0, nrows),
@@ -104,7 +99,8 @@ void winnow(int nrows, int ncols, int nelts) {
         }
       });
 
-  sort(values, values + count);
+
+  tbb::parallel_sort (values, values + count);
 
   size_t n = count;
   size_t chunk = n / nelts;
