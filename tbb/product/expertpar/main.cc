@@ -14,10 +14,7 @@
 #include <iostream>
 #include <vector>
 
-#include "tbb/blocked_range.h"
-#include "tbb/parallel_for.h"
-#include "tbb/task_scheduler_init.h"
-
+#include "tbb/tbb.h"
 
 using namespace std;
 using namespace tbb;
@@ -29,18 +26,18 @@ static double matrix[10000][10000];
 static double vec[10000];
 static double result[10000];
 
-typedef blocked_range<size_t> range;
+typedef blocked_range2d<size_t, size_t> range;
 
 void product(int nelts) {
   parallel_for(
-    range(0, nelts),
-    [&](range r) {
-      for (size_t i = r.begin(); i != r.end(); ++i) {
-        double sum = 0;
-        for (int j = 0; j < nelts; j++) {
-          sum += matrix[i][j] * vec[j];
+    range(0, nelts, 0, nelts),
+    [&, nelts](range r) {
+      auto r_end = r.rows().end();
+      for (size_t i = r.rows().begin(); i != r_end; ++i) {
+        auto c_end = r.cols().end();
+        for (size_t j = r.cols().begin(); j != c_end; ++j) {
+          result [i] += matrix[i][j] * vec[j];
         }
-        result[i] = sum;
       }
   });
 }
@@ -59,17 +56,17 @@ int main(int argc, char** argv) {
 
   task_scheduler_init init(n_threads);
 
-  scanf("%d", &nelts);
+  cin >> nelts;
 
   if (!is_bench) {
     for (int i = 0; i < nelts; i++) {
       for (int j = 0; j < nelts; j++) {
-        scanf("%f", &matrix[i][j]);
+        cin >> matrix[i][j];
       }
     }
 
     for (int i = 0; i < nelts; i++) {
-      scanf("%f", &vec[i]);
+      cin >> vec[i];
     }
   }
 
