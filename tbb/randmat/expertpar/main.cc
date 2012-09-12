@@ -30,8 +30,8 @@ void randmat(int nrows, int ncols, unsigned int s) {
   parallel_for(
     range(0, nrows),
     [=](range r) {
-      
-      for (size_t i = r.begin(); i != r.end(); ++i) {
+      auto end = r.end (); 
+      for (size_t i = r.begin(); i != end; ++i) {
         unsigned int seed = s + i;
         for (int j = 0; j < ncols; j++) {
           seed = LCG_A * seed + LCG_C;
