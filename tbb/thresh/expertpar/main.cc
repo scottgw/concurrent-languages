@@ -15,11 +15,7 @@
 
 #include <algorithm>
 
-#include "tbb/blocked_range.h"
-#include "tbb/parallel_for.h"
-#include "tbb/parallel_reduce.h"
-#include "tbb/parallel_scan.h"
-#include "tbb/task_scheduler_init.h"
+#include "tbb/tbb.h"
 
 using namespace std;
 using namespace tbb;
@@ -29,26 +25,34 @@ int n_threads = task_scheduler_init::default_num_threads();
 
 static unsigned char matrix[20000][20000];
 static unsigned char mask[20000][20000];
-static int histogram[20000][100];
+
+struct view {
+  int h[100];
+  view() {fill_n (h, 100, 0);}
+};
+
+typedef combinable<view> histogram_type;
 
 typedef tbb::blocked_range<size_t> range;
 
 void thresh(int nrows, int ncols, int percent) {
   int nmax = 0;
+  histogram_type histogram;
 
   nmax = tbb::parallel_reduce(
       range(0, nrows), 0,
-      [=](range r, int result)->int {
+      [=,&histogram](range r, int result)->int {
+        view& v =  histogram.local ();
         for (size_t i = r.begin(); i != r.end(); i++) {
           for (int j = 0; j < ncols; j++) {
-            int v;
+            int val;
             if (is_bench) {
               matrix[i][j] = (i * j) % 100;
             }
-            v = (int)matrix[i][j];
+            val = (int)matrix[i][j];
 
-            result = max(result, v);
-            histogram[i][v]++;
+            result = max(result, val);
+            v.h[val]++;
           }
         }
         return result;
@@ -57,25 +61,11 @@ void thresh(int nrows, int ncols, int percent) {
         return max(x, y);
       });
 
-  tbb::parallel_for(
-      range(0, nrows),
-      [=](range r) {
-        for (size_t i = r.begin(); i != r.end(); i++) {
-          for (int j = 0; j < ncols; j++) {
-            histogram[i][matrix[i][j]]++;
-          }
-        }
-      });
-
-  tbb::parallel_for(
-      range(0, nmax + 1),
-      [=](range r) {
-        for (size_t j = r.begin(); j != r.end(); j++) {
-          for (int i = 1; i < nrows; i++) {
-            histogram[0][j] += histogram[i][j];
-          }
-        }
-      });
+  view v;
+  histogram.combine_each( [=, &v] (const view& x) {
+      for (int i = 0; i <= nmax; ++i)
+        v.h[i] += x.h[i];
+    });
 
   int count = (nrows * ncols * percent) / 100;
 
@@ -83,7 +73,7 @@ void thresh(int nrows, int ncols, int percent) {
   int threshold = nmax;
 
   for (int i = nmax; i >= 0 && prefixsum <= count; i--) {
-    prefixsum += histogram[0][i];
+    prefixsum += v.h[i];
     threshold = i;
   }
 
