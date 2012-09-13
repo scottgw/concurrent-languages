@@ -26,19 +26,33 @@ static double matrix[10000][10000];
 static double vec[10000];
 static double result[10000];
 
-typedef blocked_range2d<size_t, size_t> range;
-
+typedef blocked_range<size_t> range;
 
 void product(int nelts) {
   parallel_for(
-    range(0, nelts, 0, nelts),
+    range(0, nelts),
     [&, nelts](range r) {
-      auto r_end = r.rows().end();
-      for (size_t i = r.rows().begin(); i != r_end; ++i) {
-        auto c_end = r.cols().end();
-        for (size_t j = r.cols().begin(); j != c_end; ++j) {
-          result [i] += matrix[i][j] * vec[j];
+      auto r_end = r.end();
+      for (size_t i = r.begin(); i != r_end; ++i) {
+        int j = 0;
+        double sum = 0;
+
+        for (; (nelts - j) & 3; ++j)
+          sum  += matrix [i][j]     * vec [j];
+
+        double acc1, acc2, acc3, acc4;
+        acc1 = acc2 = acc3 = acc4 = 0;
+
+        for (; j < nelts; j += 4) {
+          acc1 += matrix [i][j]     * vec [j];
+          acc2 += matrix [i][j + 1] * vec [j + 1];
+          acc3 += matrix [i][j + 2] * vec [j + 2];
+          acc4 += matrix [i][j + 3] * vec [j + 3];
         }
+
+        sum += acc1 + acc2 + acc3 + acc4;
+
+        result [i] = sum;
       }
   });
 }
