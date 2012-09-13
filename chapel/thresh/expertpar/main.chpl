@@ -10,24 +10,20 @@
  */
 
 config const is_bench = false;
+config const nrows = read(int),
+             ncols = read(int);
 
-var matrix: [1..20000, 1..20000]int;
-var mask: [1..20000, 1..20000]bool;
-var histogram: [1..20000, 0..99]int;
+const ProbSpace = [1..nrows, 1..ncols],
+      HistSpace = [0..100];
+var matrix: [ProbSpace] int; 
+var mask: [ProbSpace] int;
+var histogram: [HistSpace] atomic int;
 
 proc thresh(nrows: int, ncols: int, percent: int) {
   var nmax = max reduce matrix;
 
-  forall i in 1..nrows do {
-    for j in 1..ncols do {
-      histogram[i, matrix[i, j]] += 1;
-    }
-  }
-
-  forall j in 0..(nmax) do {
-    for i in 2..nrows do {
-      histogram[1, j] += histogram[i, j];
-    }
+  forall (i,j) in ProbSpace {
+    histogram[matrix[i,j]].fetchAdd (1);
   }
 
   var count: int = (nrows * ncols * percent) / 100;
@@ -35,29 +31,21 @@ proc thresh(nrows: int, ncols: int, percent: int) {
   var prefixsum: int = 0;
   var threshold: int = nmax;
 
-  for i in 0..nmax do {
+  for i in 0..100 {
     if (prefixsum > count) then break;
-    prefixsum += histogram[1, nmax - i];
-    threshold = nmax - i;
+    prefixsum += histogram[100 - i].read();
+    threshold = 100 - i ;
   }
 
-  forall i in 1..nrows do {
-    for j in 1..ncols do {
-      mask[i, j] = matrix[i, j] >= threshold;
-    }
-  }
+  mask = (matrix >= threshold);
 }
 
 proc main() {
-  var nrows: int;
-  var ncols: int;
   var percent: int;
 
-  read(nrows, ncols);
-
   if (!is_bench) {
-    for i in 1..nrows do {
-      for j in 1..ncols do {
+    for i in 1..nrows {
+      for j in 1..ncols {
         read(matrix[i,j]);
       }
     }
@@ -70,8 +58,8 @@ proc main() {
   if (!is_bench) {
     writeln(nrows, " ", ncols);
 
-    for i in 1..nrows do {
-      for j in 1..ncols do {
+    for i in 1..nrows {
+      for j in 1..ncols {
         if (mask[i, j]) {
           write("1", " ");
         } else {
