@@ -28,6 +28,7 @@ static double result[10000];
 
 typedef blocked_range2d<size_t, size_t> range;
 
+
 void product(int nelts) {
   parallel_for(
     range(0, nelts, 0, nelts),
