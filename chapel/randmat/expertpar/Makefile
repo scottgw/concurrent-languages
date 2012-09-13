@@ -1,6 +1,6 @@
 all: main
-	./main < main.in
-	./main --is_bench < main.in
+	./main --dataParTasksPerLocale=4 < main.in
+	./main --dataParTasksPerLocale=4 --is_bench < main.in
 
 main: main.chpl
-	chpl -O main.chpl -o main
+	chpl --fast main.chpl -o main
