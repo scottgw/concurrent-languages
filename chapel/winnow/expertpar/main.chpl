@@ -12,6 +12,8 @@
  */
 
 config const is_bench = false;
+config const nrows = read(int),
+             ncols = read(int);
 
 var matrix: [1..20000, 1..20000]int;
 var mask: [1..20000, 1..20000]bool;
@@ -19,7 +21,7 @@ var count_per_line: [1..20001]int;
 var points: [1..20000] (int, int);
 var values: [0..20000] (int, (int, int)); // (value, i, j))
 
-proc winnow(nrows: int, ncols: int, nelts: int) {
+proc winnow(nelts: int) {
   var n: int = 0;
 
   forall i in 1..nrows do {
@@ -56,7 +58,7 @@ proc winnow(nrows: int, ncols: int, nelts: int) {
   }
 }
 
-proc read_matrix(nrows, ncols: int) {
+proc read_matrix() {
   for i in 1..nrows do {
     for j in 1..ncols do {
       read(matrix[i, j]);
@@ -64,7 +66,7 @@ proc read_matrix(nrows, ncols: int) {
   }
 }
 
-proc read_mask(nrows, ncols: int) {
+proc read_mask() {
   for i in 1..nrows do {
     for j in 1..ncols do {
       var v: int;
@@ -75,20 +77,16 @@ proc read_mask(nrows, ncols: int) {
 }
 
 proc main() {
-  var nrows: int;
-  var ncols: int;
   var nelts: int;
 
-  read(nrows, ncols);
-
   if (!is_bench) {
-    read_matrix(nrows, ncols);
-    read_mask(nrows, ncols);
+    read_matrix();
+    read_mask();
   }
 
   read(nelts);
 
-  winnow(nrows, ncols, nelts);
+  winnow(nelts);
 
   if (!is_bench) {
     writeln(nelts);
