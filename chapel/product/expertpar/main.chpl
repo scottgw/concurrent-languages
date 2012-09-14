@@ -10,6 +10,7 @@
  */
 
 config const is_bench = false;
+config const nelts = read(int);
 
 var matrix: [1..10000, 1..10000]real;
 var vector: [1..10000]real;
@@ -26,9 +27,6 @@ proc product(nelts: int) {
 }
 
 proc main() {
-  var nelts: int;
-  read(nelts);
-
   if (!is_bench) {
     for i in 1..nelts do {
       for j in 1..nelts do {
