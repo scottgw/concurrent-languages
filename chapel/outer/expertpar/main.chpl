@@ -12,15 +12,16 @@
  */
 
 config const is_bench = false;
-
+config const nelts = read(int);
 var matrix: [1..10000, 1..10000]real;
 var vector: [1..10000]real;
 var points: [1..10000](int, int);
-
+inline
 proc sqr(x: real): real {
-  return x * x;
+  return x ** 2;
 }
 
+inline
 proc distance(l, r: (int, int)): real {
   var lx, ly, rx, ry: real;
   (lx, ly) = l;
@@ -51,9 +52,6 @@ proc read_vector_of_points(nelts: int) {
 }
 
 proc main() {
-  var nelts: int;
-  read(nelts);
-
   if (!is_bench) {
     read_vector_of_points(nelts);
   }
