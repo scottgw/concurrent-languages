@@ -18,23 +18,17 @@ config const nelts = read (int),
              winnow_nelts = read (int);
 
 proc main() {
-  var matrix: [randSpace] int;
-  var mask: [randSpace] bool;
-  var points: [pointSpace] (int, int);
-  var dists: [distSpace] real;
-  var vec, result: [vectorSpace] real;
-
   writeln (nelts, randmat_seed);
 
-  matrix = randmat(nelts, nelts, randmat_seed);
+  randmat(nelts, nelts, randmat_seed);
   writeln ("randmat");
-  mask = thresh(matrix, nelts, nelts, thresh_percent);
+  thresh(nelts, nelts, thresh_percent);
   writeln ("thresh");
-  points = winnow(matrix, mask, nelts, nelts, winnow_nelts);
+  winnow(nelts, nelts, winnow_nelts);
   writeln ("winnow");
-  (dists, vec) = outer(points, winnow_nelts);
+  outer(winnow_nelts);
   writeln ("outer");
-  result = product(dists, vec, winnow_nelts);
+  product(winnow_nelts);
   writeln ("product");
 
   if (!is_bench) {

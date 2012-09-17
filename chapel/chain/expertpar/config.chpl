@@ -4,4 +4,10 @@ module Config {
   const pointSpace = [1..20000];
   const distSpace = [1..10000, 1..10000];
   const vectorSpace = [1..10000];
+
+  var matrix: [randSpace] int;
+  var mask: [randSpace] bool;
+  var points: [pointSpace] (int, int);
+  var dists: [distSpace] real;
+  var vec, result: [vectorSpace] real;
 }
