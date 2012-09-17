@@ -32,12 +32,14 @@ proc outer(nelts: int)
 {
   forall i in 1..nelts do {
     var nmax: real = -1;
+
     for j in 1..nelts do {
       if (i != j) {
         dists[i, j] = distance(points[i], points[j]);
         nmax = max(nmax, dists[i, j]);
       }
     }
+
     dists[i, i] = nmax * nelts;
     vector[i] = distance((0, 0), points[i]);
   }
