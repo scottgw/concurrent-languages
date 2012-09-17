@@ -28,24 +28,18 @@ proc distance(l, r: (int, int)): real {
   return sqrt(sqr(lx - rx) + sqr(ly - ry));
 }
 
-proc outer(points: [pointSpace] (int, int), nelts: int):
-    ([distSpace] real, [vectorSpace] real)
+proc outer(nelts: int)
 {
-  var matrix: [distSpace] real;
-  var vector: [vectorSpace] real;
-
   forall i in 1..nelts do {
     var nmax: real = -1;
     for j in 1..nelts do {
       if (i != j) {
-        matrix[i, j] = distance(points[i], points[j]);
-        nmax = max(nmax, matrix[i, j]);
+        dists[i, j] = distance(points[i], points[j]);
+        nmax = max(nmax, dists[i, j]);
       }
     }
-    matrix[i, i] = nmax * nelts;
+    dists[i, i] = nmax * nelts;
     vector[i] = distance((0, 0), points[i]);
   }
- 
- return (matrix, vector);
 }
 }

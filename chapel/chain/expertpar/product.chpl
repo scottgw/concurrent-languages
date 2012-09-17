@@ -13,17 +13,14 @@ module Product {
 
 use Config;
 
-proc product(matrix: [distSpace] real,
-             vector: [vectorSpace] real,
-             nelts: int):
-            [vectorSpace] real 
+proc product(nelts: int)
 {
   var result: [vectorSpace] real;
 
   forall i in 1..nelts do {
     var sum: real = 0;
     for j in 1..nelts do {
-      sum += matrix[i, j] * vector[j];
+      sum += dists[i, j] * vector[j];
     }
     result[i] = sum;
   }

@@ -14,8 +14,7 @@ use Config;
 
 var histogram: [histSpace] atomic int;
 
-proc thresh(matrix: [randSpace] int,
-            nrows: int, ncols: int, percent: int): [randSpace] bool{
+proc thresh(nrows: int, ncols: int, percent: int) {
   var nmax = max reduce matrix;
 
   forall (i,j) in randSpace do {
@@ -33,7 +32,7 @@ proc thresh(matrix: [randSpace] int,
     threshold = 99 - i;
   }
 
-  return matrix >= threshold;
+  mask = matrix >= threshold;
 }
 
 }

@@ -16,12 +16,9 @@ config const is_bench = false;
 
 use Config;
 
-proc winnow(matrix: [randSpace] int,
-            mask: [randSpace] bool, 
-            nrows: int, ncols: int, nelts: int): [pointSpace] (int, int) {
+proc winnow(nrows: int, ncols: int, nelts: int) {
   var n: int = 0;
   var count_per_line: [1..20001] int;
-  var points: [pointSpace] (int, int);
   var values: [0..20000] (int, (int, int)); // (value, i, j))
 
 
@@ -57,7 +54,5 @@ proc winnow(matrix: [randSpace] int,
     ind = (i - 1) * chunk + 1;
     (, points[i]) = values[ind];
   }
-
-  return points;
 }
 }

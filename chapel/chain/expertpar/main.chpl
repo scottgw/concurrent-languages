@@ -18,18 +18,11 @@ config const nelts = read (int),
              winnow_nelts = read (int);
 
 proc main() {
-  writeln (nelts, randmat_seed);
-
   randmat(nelts, nelts, randmat_seed);
-  writeln ("randmat");
   thresh(nelts, nelts, thresh_percent);
-  writeln ("thresh");
   winnow(nelts, nelts, winnow_nelts);
-  writeln ("winnow");
   outer(winnow_nelts);
-  writeln ("outer");
   product(winnow_nelts);
-  writeln ("product");
 
   if (!is_bench) {
     writeln(winnow_nelts);

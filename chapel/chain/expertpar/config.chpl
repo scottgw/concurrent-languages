@@ -9,5 +9,5 @@ module Config {
   var mask: [randSpace] bool;
   var points: [pointSpace] (int, int);
   var dists: [distSpace] real;
-  var vec, result: [vectorSpace] real;
+  var vector, result: [vectorSpace] real;
 }
