@@ -15,10 +15,11 @@ config const is_bench = false;
 config const nrows = read(int),
              ncols = read(int);
 
+const MatrixSpace = [1..20000, 1..20000];
 
-var matrix: [1..20000, 1..20000]int;
-var mask: [1..20000, 1..20000]bool;
-var count_per_line: [1..20001]int;
+var matrix: [MatrixSpace] int;
+var mask: [MatrixSpace] bool;
+var count_per_line: [1..20001] int;
 var points: [1..20000] (int, int);
 var values: [0..20000] (int, (int, int)); // (value, i, j))
 
