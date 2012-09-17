@@ -15,6 +15,7 @@ config const is_bench = false;
 config const nrows = read(int),
              ncols = read(int);
 
+
 var matrix: [1..20000, 1..20000]int;
 var mask: [1..20000, 1..20000]bool;
 var count_per_line: [1..20001]int;
