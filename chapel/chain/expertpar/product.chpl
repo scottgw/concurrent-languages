@@ -11,11 +11,15 @@
 
 module Product {
 
-use Outer;
+use Config;
 
-var result: [1..10000]real;
+proc product(matrix: [distSpace] real,
+             vector: [vectorSpace] real,
+             nelts: int):
+            [vectorSpace] real 
+{
+  var result: [vectorSpace] real;
 
-proc product(nelts: int) {
   forall i in 1..nelts do {
     var sum: real = 0;
     for j in 1..nelts do {
@@ -23,6 +27,8 @@ proc product(nelts: int) {
     }
     result[i] = sum;
   }
+
+  return result;
 }
 
 }

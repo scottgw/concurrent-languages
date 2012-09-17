@@ -10,24 +10,16 @@
  */
 
 module Thresh {
-use Randmat;
+use Config;
 
-var mask: [1..20000, 1..20000]bool;
-var histogram: [1..20000, 0..99]int;
+var histogram: [histSpace] atomic int;
 
-proc thresh(nrows: int, ncols: int, percent: int) {
+proc thresh(matrix: [randSpace] int,
+            nrows: int, ncols: int, percent: int): [randSpace] bool{
   var nmax = max reduce matrix;
 
-  forall i in 1..nrows do {
-    for j in 1..ncols do {
-      histogram[i, matrix[i, j]] += 1;
-    }
-  }
-
-  forall j in 0..(nmax) do {
-    for i in 2..nrows do {
-      histogram[1, j] += histogram[i, j];
-    }
+  forall (i,j) in randSpace do {
+    histogram[matrix[i, j]].fetchAdd(1);
   }
 
   var count: int = (nrows * ncols * percent) / 100;
@@ -35,17 +27,13 @@ proc thresh(nrows: int, ncols: int, percent: int) {
   var prefixsum: int = 0;
   var threshold: int = nmax;
 
-  for i in 0..nmax do {
+  for i in histSpace do {
     if (prefixsum > count) then break;
-    prefixsum += histogram[1, nmax - i];
-    threshold = nmax - i;
+    prefixsum += histogram[99 - i].read();
+    threshold = 99 - i;
   }
 
-  forall i in 1..nrows do {
-    for j in 1..ncols do {
-      mask[i, j] = matrix[i, j] >= threshold;
-    }
-  }
+  return matrix >= threshold;
 }
 
 }

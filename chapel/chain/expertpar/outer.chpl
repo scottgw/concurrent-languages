@@ -13,15 +13,14 @@
 
 module Outer {
 
-use Winnow;
+use Config;
 
-var matrix: [1..10000, 1..10000]real;
-var vector: [1..10000]real;
-
+inline
 proc sqr(x: real): real {
-  return x * x;
+  return x ** 2;
 }
 
+inline
 proc distance(l, r: (int, int)): real {
   var lx, ly, rx, ry: real;
   (lx, ly) = l;
@@ -29,7 +28,12 @@ proc distance(l, r: (int, int)): real {
   return sqrt(sqr(lx - rx) + sqr(ly - ry));
 }
 
-proc outer(nelts: int) {
+proc outer(points: [pointSpace] (int, int), nelts: int):
+    ([distSpace] real, [vectorSpace] real)
+{
+  var matrix: [distSpace] real;
+  var vector: [vectorSpace] real;
+
   forall i in 1..nelts do {
     var nmax: real = -1;
     for j in 1..nelts do {
@@ -41,5 +45,7 @@ proc outer(nelts: int) {
     matrix[i, i] = nmax * nelts;
     vector[i] = distance((0, 0), points[i]);
   }
+ 
+ return (matrix, vector);
 }
 }

@@ -14,14 +14,16 @@
 module Winnow {
 config const is_bench = false;
 
-use Randmat, Thresh;
+use Config;
 
-var count_per_line: [1..20001]int;
-var points: [1..20000] (int, int);
-var values: [0..20000] (int, (int, int)); // (value, i, j))
-
-proc winnow(nrows: int, ncols: int, nelts: int) {
+proc winnow(matrix: [randSpace] int,
+            mask: [randSpace] bool, 
+            nrows: int, ncols: int, nelts: int): [pointSpace] (int, int) {
   var n: int = 0;
+  var count_per_line: [1..20001] int;
+  var points: [pointSpace] (int, int);
+  var values: [0..20000] (int, (int, int)); // (value, i, j))
+
 
   forall i in 1..nrows do {
     count_per_line[i + 1] = 0;
@@ -55,5 +57,7 @@ proc winnow(nrows: int, ncols: int, nelts: int) {
     ind = (i - 1) * chunk + 1;
     (, points[i]) = values[ind];
   }
+
+  return points;
 }
 }
