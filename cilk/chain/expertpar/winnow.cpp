@@ -38,12 +38,12 @@ int reduce_sum(int begin, int end, int ncols) {
   if (begin + 1 == end) {
     if (is_bench) {
       for (i = 0; i < ncols; i++) {
-        mask[begin][i] = ((begin * i) % (ncols + 1)) == 1;
+        thresh_mask[begin][i] = ((begin * i) % (ncols + 1)) == 1;
       }
     }
-    res = mask[begin][0];
+    res = thresh_mask[begin][0];
     for (i = 1; i < ncols; i++) {
-      res += mask[begin][i];
+      res += thresh_mask[begin][i];
     }
     return count_per_line[begin + 1] = res;
   }
@@ -95,8 +95,8 @@ void fill_values(int begin, int end, int ncols) {
   if (begin + 1 == end) {
     count = count_per_line[begin];
     for (j = 0; j < ncols; j++) {
-      if (mask[begin][j] == 1) {
-        values[count].first = matrix[begin][j];
+      if (thresh_mask[begin][j] == 1) {
+        values[count].first = randmat_matrix[begin][j];
         values[count].second.first = begin;
         values[count].second.second = j;
         count++;
@@ -126,6 +126,6 @@ void winnow(int nrows, int ncols, int nelts) {
 
   for (i = 0; i < nelts; i++) {
     index = i * chunk;
-    points[i] = values[index].second;
+    winnow_points[i] = values[index].second;
   }
 }
