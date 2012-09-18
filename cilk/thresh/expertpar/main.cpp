@@ -1,0 +1,150 @@
+/*
+ * thresh: histogram thresholding
+ *
+ * input:
+ *   matrix: the integer matrix to be thresholded
+ *   nrows, ncols: the number of rows and columns
+ *   percent: the percentage of cells to retain
+ *
+ * output:
+ *   mask: a boolean matrix filled with true for cells kept
+ */
+
+#include <cilk-lib.cilkh>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+int is_bench = 0;
+
+static unsigned char matrix[20000][20000];
+static unsigned char mask[20000][20000];
+static int histogram[16][100];
+
+int max(int a, int b) {
+  return a > b ? a : b;
+}
+
+// parallel max reduce on [begin, end)
+cilk int reduce_max(int begin, int end, int ncols) {
+  int middle = begin + (end - begin) / 2;
+  int left, right, res, i;
+  if (begin + 1 == end) {
+    res = matrix[begin][0];
+    for (i = 1; i < ncols; i++) {
+      res = max(res, matrix[begin][i]);
+    }
+    return res;
+  }
+  left = spawn reduce_max(begin, middle, ncols);
+  right = spawn reduce_max(middle, end, ncols);
+  sync;
+  return max(left, right);
+}
+
+cilk void fill_histogram(int begin, int end, int ncols) {
+  int middle = begin + (end - begin) / 2;
+  int i;
+  if (begin + 1 == end) {
+    for (i = 0; i < ncols; i++) {
+      histogram[Self][matrix[begin][i]]++;
+    }
+    return;
+  }
+  spawn fill_histogram(begin, middle, ncols);
+  spawn fill_histogram(middle, end, ncols);
+  sync;
+}
+
+cilk void merge_histogram(int begin, int end) {
+  int middle = begin + (end - begin) / 2;
+  int i;
+  if (begin + 1 == end) {
+    for (i = 1; i < Cilk_active_size; i++) {
+      histogram[0][begin] += histogram[i][begin];
+    }
+    return;
+  }
+  spawn merge_histogram(begin, middle);
+  spawn merge_histogram(middle, end);
+  sync;
+}
+
+cilk void fill_mask(int begin, int end, int ncols, int threshold) {
+  int middle = begin + (end - begin) / 2;
+  int i;
+  if (begin + 1 == end) {
+    for (i = 0; i < ncols; i++) {
+      mask[begin][i] = matrix[begin][i] >= threshold;
+    }
+    return;
+  }
+  spawn fill_mask(begin, middle, ncols, threshold);
+  spawn fill_mask(middle, end, ncols, threshold);
+  sync;
+}
+
+cilk void thresh(int nrows, int ncols, int percent) {
+  int i;
+  int nmax = 0;
+  int count, prefixsum, threshold;
+
+  nmax = spawn reduce_max(0, nrows, ncols);
+  sync;
+
+  spawn fill_histogram(0, nrows, ncols);
+  sync;
+  spawn merge_histogram(0, nmax + 1);
+  sync;
+
+  count = (nrows * ncols * percent) / 100;
+
+  prefixsum = 0;
+  threshold = nmax;
+
+  for (i = nmax; i >= 0 && prefixsum <= count; i--) {
+    prefixsum += histogram[0][i];
+    threshold = i;
+  }
+
+  spawn fill_mask(0, nrows, ncols, threshold);
+  sync;
+}
+
+cilk int main(int argc, char *argv[]) {
+  int nrows, ncols, percent, i, j;
+
+  if (argc == 2) {
+    if (!strcmp(argv[argc - 1], "--is_bench")) {
+      is_bench = 1;
+    }
+  }
+
+  scanf("%d%d", &nrows, &ncols);
+
+  if (!is_bench) {
+    for (i = 0; i < nrows; i++) {
+      for (j = 0; j < ncols; j++) {
+        scanf("%hhu", &matrix[i][j]);
+      }
+    }
+  }
+
+  scanf("%d", &percent);
+
+  spawn thresh(nrows, ncols, percent);
+  sync;
+
+  if (!is_bench) {
+    printf("%d %d\n", nrows, ncols);
+    for (i = 0; i < nrows; i++) {
+      for (j = 0; j < ncols; j++) {
+        printf("%hhu ", mask[i][j]);
+      }
+      printf("\n");
+    }
+    printf("\n");
+  }
+
+  return 0;
+}
