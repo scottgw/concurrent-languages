@@ -12,10 +12,15 @@
  *   points: a vector of (x, y) points
  */
 
-#include <cilk-lib.cilkh>
+#include <cilk/cilk.h>
+#include <cilk/reducer_opadd.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+#include <algorithm>
+
+using namespace std;
 
 static int is_bench = 0;
 
@@ -27,15 +32,15 @@ typedef struct sPoint {
   int value, i, j;
 } Point;
 
-static Point points[20000];
-static Point values[20000];
+static pair <int, pair <int, int> > points[20000];
+static pair <int, pair <int, int> > values [20000];
 
-int compare(const void* vl, const void* vr) {
+int compare(const Point* vl, const Point* vr) {
   const Point* l = vl, *r = vr;
   return (l->value - r->value);
 }
 
-cilk int reduce_sum(int begin, int end, int ncols) {
+int reduce_sum(int begin, int end, int ncols) {
   int middle = begin + (end - begin) / 2;
   int left, right, res, i;
   if (begin + 1 == end) {
@@ -50,13 +55,13 @@ cilk int reduce_sum(int begin, int end, int ncols) {
     }
     return count_per_line[begin + 1] = res;
   }
-  left = spawn reduce_sum(begin, middle, ncols);
-  right = spawn reduce_sum(middle, end, ncols);
-  sync;
+  left = cilk_spawn reduce_sum(begin, middle, ncols);
+  right = cilk_spawn reduce_sum(middle, end, ncols);
+  cilk_sync;
   return left + right;
 }
 
-cilk void scan_update_elements(int begin, int end, int* array, int size) {
+void scan_update_elements(int begin, int end, int* array, int size) {
   int middle, count;
   if (end - begin <= size) {
     return;
@@ -67,64 +72,63 @@ cilk void scan_update_elements(int begin, int end, int* array, int size) {
     count /= 2;
     count += count % 2;  // to ensure it is even
     middle = begin + count * size;
-    spawn scan_update_elements(begin, middle, array, size);
-    spawn scan_update_elements(middle, end, array, size);
+    cilk_spawn scan_update_elements(begin, middle, array, size);
+    cilk_spawn scan_update_elements(middle, end, array, size);
   }
 }
 
 // Ladner-Fischer
 // parallel scan on [begin, end)
-cilk void scan_impl(int begin, int end, int* array, int size) {
+void scan_impl(int begin, int end, int* array, int size) {
   if (end - begin > size) {
-    spawn scan_update_elements(begin, end, array, size);
-    sync;
-    spawn scan_impl(begin + size, end, array, 2 * size);
-    sync;
-    spawn scan_update_elements(begin + size, end, array, size);
-    sync;
+    cilk_spawn scan_update_elements(begin, end, array, size);
+    cilk_sync;
+    cilk_spawn scan_impl(begin + size, end, array, 2 * size);
+    cilk_sync;
+    cilk_spawn scan_update_elements(begin + size, end, array, size);
   }
 }
 
-cilk void scan(int n, int* array) {
-  spawn scan_impl(0, n, array, 1);
+void scan(int n, int* array) {
+  cilk_spawn scan_impl(0, n, array, 1);
 }
 
-cilk void prefix_sum(int n) {
-  spawn scan(n, count_per_line);
+void prefix_sum(int n) {
+  cilk_spawn scan(n, count_per_line);
 }
 
-cilk void fill_values(int begin, int end, int ncols) {
+void fill_values(int begin, int end, int ncols) {
   int middle = begin + (end - begin) / 2;
   int count, j;
   if (begin + 1 == end) {
     count = count_per_line[begin];
     for (j = 0; j < ncols; j++) {
       if (mask[begin][j] == 1) {
-        values[count].value = matrix[begin][j];
-        values[count].i = begin;
-        values[count].j = j;
+        values[count].first = matrix[begin][j];
+        values[count].second.first = begin;
+        values[count].second.second = j;
         count++;
       }
     }
     return;
   }
-  spawn fill_values(begin, middle, ncols);
-  spawn fill_values(middle, end, ncols);
+  cilk_spawn fill_values(begin, middle, ncols);
+  cilk_spawn fill_values(middle, end, ncols);
 }
 
-cilk void winnow(int nrows, int ncols, int nelts) {
+void winnow(int nrows, int ncols, int nelts) {
   int i, n =  0, chunk, index;
 
-  n = spawn reduce_sum(0, nrows, ncols);
-  sync;
+  n = cilk_spawn reduce_sum(0, nrows, ncols);
+  cilk_sync;
 
-  spawn prefix_sum(nrows + 1);
-  sync;
+  cilk_spawn prefix_sum(nrows + 1);
+  cilk_sync;
 
-  spawn fill_values(0, nrows, ncols);
-  sync;
+  cilk_spawn fill_values(0, nrows, ncols);
+  cilk_sync;
 
-  qsort(values, n, sizeof(*values), compare);
+  sort(values, values + n);
 
   chunk = n / nelts;
 
@@ -152,7 +156,7 @@ void read_mask(int nrows, int ncols) {
   }
 }
 
-cilk int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
   int nrows, ncols, nelts, i;
 
   if (argc == 2) {
@@ -170,13 +174,13 @@ cilk int main(int argc, char *argv[]) {
 
   scanf("%d", &nelts);
 
-  spawn winnow(nrows, ncols, nelts);
-  sync;
+  cilk_spawn winnow(nrows, ncols, nelts);
+  cilk_sync;
 
   if (!is_bench) {
     printf("%d\n", nelts);
     for (i = 0; i < nelts; i++) {
-      printf("%d %d\n", points[i].i, points[i].j);
+      printf("%d %d\n", points[i].second.first, points[i].second.second);
     }
     printf("\n");
   }
