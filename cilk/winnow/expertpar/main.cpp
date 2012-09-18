@@ -32,6 +32,7 @@ typedef struct sPoint {
   int value, i, j;
 } Point;
 
+
 static pair <int, pair <int, int> > points[20000];
 static pair <int, pair <int, int> > values [20000];
 
