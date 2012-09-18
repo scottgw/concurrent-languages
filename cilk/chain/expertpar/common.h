@@ -2,7 +2,9 @@
 #define __COMMON_H__
 #include <algorithm>
 
-typedef std::pair <int, std::pair <int, int> > point;
+using namespace std; 
+
+typedef pair <int, pair <int, int> > point;
 
 typedef int (*Operator)(int, int);
 typedef void* ReduceFilter;
