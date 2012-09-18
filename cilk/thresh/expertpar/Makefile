@@ -13,4 +13,4 @@ all: main
 	diff main6.out main6.gold
 	./main --nproc 4 --is_bench < main.in 
 main: main.cpp
-	g++ ${CFLAGS} -O2 -o main main.cpp -fcilkplus -lcilk -lcilkrts
+	icpc ${CFLAGS} -O2 -o main main.cpp
