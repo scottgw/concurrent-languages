@@ -28,18 +28,8 @@ static unsigned char matrix[20000][20000];
 static unsigned char mask[20000][20000];
 static int count_per_line[20001];
 
-typedef struct sPoint {
-  int value, i, j;
-} Point;
-
-
-static pair <int, pair <int, int> > points[20000];
+static pair <int, int> points[20000];
 static pair <int, pair <int, int> > values [20000];
-
-int compare(const Point* vl, const Point* vr) {
-  const Point* l = vl, *r = vr;
-  return (l->value - r->value);
-}
 
 int reduce_sum(int begin, int end, int ncols) {
   int middle = begin + (end - begin) / 2;
@@ -135,7 +125,7 @@ void winnow(int nrows, int ncols, int nelts) {
 
   for (i = 0; i < nelts; i++) {
     index = i * chunk;
-    points[i] = values[index];
+    points[i] = values[index].second;
   }
 }
 
@@ -181,7 +171,7 @@ int main(int argc, char *argv[]) {
   if (!is_bench) {
     printf("%d\n", nelts);
     for (i = 0; i < nelts; i++) {
-      printf("%d %d\n", points[i].second.first, points[i].second.second);
+      printf("%d %d\n", points[i].first, points[i].second);
     }
     printf("\n");
   }
