@@ -18,7 +18,6 @@
 #include <string.h>
 
 int is_bench = 0;
-
 static unsigned char matrix[20000][20000];
 static unsigned char mask[20000][20000];
 static int histogram[16][200];
