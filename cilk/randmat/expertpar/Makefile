@@ -7,6 +7,5 @@ all: main
 	echo "2 5 9" | ./main --nproc 4 --is_bench
 
 # flags: -cilk-profile, -cilk-span -nproc 4
-main: main.cilk
-	#cilkc ${CFLAGS} -O2 -o main main.cilk
-	cilkc ${CFLAGS} -O2 -mcmodel=medium -o main main.cilk
+main: main.cpp
+	g++ ${CFLAGS} -O2 -mcmodel=medium -o main main.cpp -fcilkplus -lcilk -lcilkrts
