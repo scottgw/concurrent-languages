@@ -129,7 +129,7 @@ total_times = {}
 
 problems = set()
 languages = set()
-variations = ["seq", "par"]
+variations = ["seq", "par", "expertseq", "expertpar"]
 result = {}
 wc_result = {}
 table_types = {"loc" : "-l", "now" : "-w"}
@@ -145,21 +145,24 @@ def system(cmd, timeout=False):
 def load_data():
   f = open("log_reverse.txt", "r")
   for line in f:
-    bad_string = " -0300 "
-    bad_string_index = line.find(bad_string)
-    time_string = line[:bad_string_index]
+    words = line.split ()
+    tz_offset = 5
+    time_string = " ".join (words [:tz_offset])
+
     fmt = "%a %b %d %H:%M:%S %Y"
     parsed_date = datetime.strptime(time_string, fmt)
-    commit = line[bad_string_index + len(bad_string):]
-    words = commit.split()
+
+    words = words [tz_offset + 1:]
 
     if len(words) > 1:
       index = words[0]
       action = words[1]
       if action in start_actions:
+        # print (line)
         assert(index not in start_times);
         start_times[index] = parsed_date
       elif action in end_actions:
+        # print (line)
         assert (index in start_times)
         end_time = parsed_date
         diff = end_time - start_times[index]
@@ -173,9 +176,10 @@ def load_data():
       elif action in other_actions:
         pass
       else:
-        print action
-        print line
-        assert(False)
+        pass
+        # print action
+        # print line
+        # assert(False)
 
   assert(len(start_times) == 0)
 
@@ -220,8 +224,8 @@ def load_data():
       if problem != "chain":
         result[language][problem]["par"] += result[language][problem]["seq"]
 
-  result["erlang"]["chain"]["seq"] = result["erlang"]["chain"]["par"]
-  result["scoop"]["chain"]["seq"] = result["scoop"]["chain"]["par"]
+  # result["erlang"]["chain"]["seq"] = result["erlang"]["chain"]["par"]
+  # result["scoop"]["chain"]["seq"] = result["scoop"]["chain"]["par"]
 
 def output_tables():
   def create_table(table_name, output_value, extra):
@@ -252,6 +256,7 @@ def output_tables():
   ########## time tables ###############
 
   def time_table_output(language, problem, variation, extra):
+    print (result[language][problem])
     assert(variation in result[language][problem])
     print " & ",
     print("%.2f" % result[language][problem][variation])
@@ -306,7 +311,11 @@ def output_graphs():
   def create_graph(graph_name, values, max_value, pretty_name, is_relative=True):
     old_stdout = sys.stdout
 
-    variation_names = {"seq" : "Sequential", "par" : "Parallel"}
+    variation_names = {"seq" : "Sequential", 
+                       "par" : "Parallel",
+                       "expertseq" : "Expert sequential",
+                       "expertpar" : "Expert parallel"
+                       }
     for variation in variations:
       if is_relative:
         output_file = os.path.join (images_dir,"graph-%s-%s" % (

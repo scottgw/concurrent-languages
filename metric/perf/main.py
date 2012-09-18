@@ -38,31 +38,6 @@ def get_t(alpha, df):
   return table[x][y]
 
 def ttest(xa, xb, alpha):
-  '''
-  meana = mean(xa)
-  meanb = mean(xb)
-  sa = stddev(xa)
-  sb = stddev(xb)
-  meandif = meana - meanb
-  na = len(xa)
-  nb = len(xb)
-  sa2na = sa * sa / na
-  sb2nb = sb * sb / nb
-  s = math.sqrt(sa2na + sb2nb)
-  v = s * s * s * s / (
-      (sa2na * sa2na / (na - 1)) + (sb2nb * sb2nb / (nb - 1))) - 2
-  #print 'meana: %f\nsa2: %f\nna: %d\n' % (meana, sa * sa, na)
-  #print 'meanb: %f\nsb2: %f\nnb: %d\n' % (meanb, sb * sb, nb)
-  #print 'meandif: %f\ns: %f\nv: %f\n' % (meandif, s, v)
-  #print 't %f %f' % (1 - alpha / 2, v)
-  #t = float(raw_input())
-  t = get_t(1 - alpha / 2, v)
-  #print 't: %f\n' % t
-  left = meandif - t * s
-  right = meandif + t * s
-  #print '%f: [%f, %f]' % (alpha, left, right)
-  return left > 0
-'''
   conf = 1 - alpha
   f = open('input.data', 'w')
   f.write('x y\n')
@@ -70,13 +45,11 @@ def ttest(xa, xb, alpha):
     f.write('%.10f\t%.10f\n' % (xa[i], xb[i]))
   f.close()
   cmd = '../r/test.r %f > out.data' % conf
-  # cmd = '../r/test.r %f' % conf
+
   system(cmd)
+
   pvalue = read_file_values('out.data')[0]
-  # print '%f ' % pvalue,
-  # return pvalue <= alpha
   return pvalue
-  #os.exit(0)
 
 def get_tdelta(xa, alpha):
   meana = mean(xa)
@@ -119,7 +92,7 @@ def read_table():
 #languages = ["chapel", "cilk", "go", "tbb"]
 #languages = ["chapel", 'cilk']
 #languages = ["erlang"]
-languages = ["scoop"]
+languages = ["tbb","chapel"]
 #languages = ["chapel"]
 #languages = ["chapel", "cilk", "go", "tbb", 'erlang']
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
@@ -130,10 +103,11 @@ languages = ["scoop"]
 #languages = ["chapel", "cilk", "go", "tbb", 'erlang', 'scoop']
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
-problems = ["randmat"]
+#problems = ["randmat", "thresh", "winnow", "outer", "product", "chain"]
+problems = ["chain"]
 #variations = ["seq", "par"]
 #variations = ["seq"]
-variations = ["expertseq"]
+variations = ["expertpar", "par"]
 
 def system(cmd, timeout=False):
   ret = os.system(cmd)
@@ -426,7 +400,7 @@ def run_all(redirect_output=True):
         if language == "erlang":
           cmd += "main.sh"
         elif language == "scoop":
-          cmd += "main -e is_bench -i"
+          cmd += "main -bench -i"
         else:
           cmd += "main"
 
@@ -784,44 +758,44 @@ def create_graph(graph_name, values, pretty_name, use_subfigure=True, is_relativ
           GRAPH_SIZE, GRAPH_SIZE, output_file))
       system(cmd)
 
-      caption = "%s" % (variation_name)
-      if not is_sequential (variation):
-        caption += " (using %d threads)" % (threads[-1])
-      label = "fig:exec:time:%s:%d" % (variation, i)
-      if is_relative:
-        label = "fig:rel:exec:time:%s:%d" % (variation, i)
-      if use_subfigure:
-        latex_out.append((
-            "\\subfigure[%s]{\n"
-            "  \\includegraphics[width=65mm]{images/%s.png}\n"
-            "  \\label{%s}\n"
-            "}\n") % (caption, output_file_name, label))
-      else:
-        latex_out.append((
-            "\\begin{figure}[htbp]\n"
-            "  %%\\centering\n"
-            "  \\includegraphics[width=125mm]{images/%s.png}\n"
-            "  \\caption{%s}\n"
-            "  \\label{%s}\n"
-            "\\end{figure}\n") % (output_file_name, caption, label))
-
-      
-    if use_subfigure:
-      if is_relative:
-        latex_out.append('\\caption{Execution time (in seconds) relative to smallest}\n')
-      else:
-        latex_out.append('\\caption{Execution time (in seconds)}\n')
-      if is_relative:
-        latex_out.append('\\label{fig:rel:exec:time}\n')
-      else:
-        latex_out.append('\\label{fig:exec:time}\n')
-      latex_out.append('\\end{figure}\n')
-    latex_file_name = "%s/chapters/graph-%s-%d.tex" % (
-        output_dir, graph_name, i)
-    if is_relative:
-      latex_file_name = "%s/chapters/graph-rel-%s-%d.tex" % (
-          output_dir, graph_name, i)
-    write_to_file(latex_file_name, ''.join(latex_out))
+#      caption = "%s" % (variation_name)
+#      if not is_sequential (variation):
+#        caption += " (using %d threads)" % (threads[-1])
+#      label = "fig:exec:time:%s:%d" % (variation, i)
+#      if is_relative:
+#        label = "fig:rel:exec:time:%s:%d" % (variation, i)
+#      if use_subfigure:
+#        latex_out.append((
+#            "\\subfigure[%s]{\n"
+#            "  \\includegraphics[width=65mm]{images/%s.png}\n"
+#            "  \\label{%s}\n"
+#            "}\n") % (caption, output_file_name, label))
+#      else:
+#        latex_out.append((
+#            "\\begin{figure}[htbp]\n"
+#            "  %%\\centering\n"
+#            "  \\includegraphics[width=125mm]{images/%s.png}\n"
+#            "  \\caption{%s}\n"
+#            "  \\label{%s}\n"
+#            "\\end{figure}\n") % (output_file_name, caption, label))
+#
+#      
+#    if use_subfigure:
+#      if is_relative:
+#        latex_out.append('\\caption{Execution time (in seconds) relative to smallest}\n')
+#      else:
+#        latex_out.append('\\caption{Execution time (in seconds)}\n')
+#      if is_relative:
+#        latex_out.append('\\label{fig:rel:exec:time}\n')
+#      else:
+#        latex_out.append('\\label{fig:exec:time}\n')
+#      latex_out.append('\\end{figure}\n')
+#    latex_file_name = "%s/chapters/graph-%s-%d.tex" % (
+#        output_dir, graph_name, i)
+#    if is_relative:
+#      latex_file_name = "%s/chapters/graph-rel-%s-%d.tex" % (
+#          output_dir, graph_name, i)
+#    write_to_file(latex_file_name, ''.join(latex_out))
 
 def create_speedup_graph(graph_name, values, use_subfigure=True):
   """
@@ -834,65 +808,65 @@ plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title
   for problem in sorted(problems):
     for language in sorted(languages):
       for i in range(len(inputs)):
-        out = []
-        for nthreads in threads:
-            variation = "par"
-            if "seq" not in values[threads[-1]][problem] or "expertseq" not in values[threads[-1]][problem]: continue
-
-            
-            tseq = values[threads[-1]][problem]["seq"][language][i]
+        for variation in ["par","expertpar"]:
+          out = []
+          for nthreads in threads:
+            tseq = values[1][problem][variation][language][i]
             cur = values[nthreads][problem][variation][language][i]
-            if cur == INVALID or cur == 0: continue
+
+            print ("base: ", tseq, " current:", cur)
+
+            # if cur == INVALID or cur == 0: continue
             out.append("%d\t%.10f\t%.10f\t%d\t%.10f\t1\n" % (
                 nthreads, cur, tseq / cur, nthreads,
                 tseq / (nthreads * cur)))
 
-        output_file_name = "graph-%s-%s-%s-%d" % (
-            graph_name, language, problem, i)
-        output_file = "%s/images/%s" % (output_dir, output_file_name)
-        write_to_file("%s.dat" % output_file, ''.join(out))
-        cmd = "cp %s.dat plot.dat" % (output_file)
-        system(cmd)
-        print cmd
-        cmd = "gnuplot %s/plot.script" % (output_dir)
-        system(cmd)
-        cmd = "mv plot.png %s/images/%s.png" % (output_dir, output_file_name)
-        system(cmd)
-        cmd = "rm plot.dat"
-        system(cmd)
+          output_file_name = "graph-%s-%s-%s-%s-%d" % (
+              graph_name, language, problem, variation, i)
+          output_file = "%s/images/%s" % (output_dir, output_file_name)
+          write_to_file("%s.dat" % output_file, ''.join(out))
+          cmd = "cp %s.dat plot.dat" % (output_file)
+          system(cmd)
+          print cmd
+          cmd = "gnuplot %s/plot.script" % (output_dir)
+          system(cmd)
+          cmd = "mv plot.png %s/images/%s.png" % (output_dir, output_file_name)
+          system(cmd)
+          cmd = "rm plot.dat"
+          system(cmd)
 
-        latex_out = []
-        caption = (
-            "Speedup and efficiency for language %s in problem %s" % (
-            language, problem))
-        label = "fig:exec:spd:%s:%s:%d" % (language, problem, i)
-        if use_subfigure:
-          latex_out.append((
-              "\\subfigure[%s]{\n"
-              "  \\includegraphics[width=65mm]{images/%s.png}\n"
-              "  \\label{%s}\n"
-              "}\n") % (caption, output_file_name, label))
-        else:
-          latex_out.append((
-              "\\begin{figure}[htbp]\n"
-              "  %%\\centering\n"
-              "  \\includegraphics[width=100mm]{images/%s.png}\n"
-              "  \\caption{%s}\n"
-              "  \\label{%s}\n"
-              "\\end{figure}\n") % (output_file_name, caption, label))
-
-        latex_file_name = "%s/chapters/%s.tex" % (
-            output_dir, output_file_name)
-        write_to_file(latex_file_name, ''.join(latex_out))
-
-        latex_all.append("\input{chapters/%s.tex}\n" % output_file_name)
-        if len(latex_all) % 6 == 0:
-          latex_all.append("\clearpage\n")
-  if use_subfigure:
-    latex_all.append('\\end{figure}\n')
-  latex_all_file_name = "%s/chapters/graph-%s.tex" % (
-      output_dir, graph_name)
-  write_to_file(latex_all_file_name, ''.join(latex_all))
+#          latex_out = []
+#          caption = (
+#              "Speedup and efficiency for language %s in problem %s" % (
+#              language, problem))
+#          label = "fig:exec:spd:%s:%s:%d" % (language, problem, i)
+#          if use_subfigure:
+#            latex_out.append((
+#                "\\subfigure[%s]{\n"
+#                "  \\includegraphics[width=65mm]{images/%s.png}\n"
+#                "  \\label{%s}\n"
+#                "}\n") % (caption, output_file_name, label))
+#          else:
+#            latex_out.append((
+#                "\\begin{figure}[htbp]\n"
+#                "  %%\\centering\n"
+#                "  \\includegraphics[width=100mm]{images/%s.png}\n"
+#                "  \\caption{%s}\n"
+#                "  \\label{%s}\n"
+#                "\\end{figure}\n") % (output_file_name, caption, label))
+#
+#          latex_file_name = "%s/chapters/%s.tex" % (
+#              output_dir, output_file_name)
+#          write_to_file(latex_file_name, ''.join(latex_out))
+#
+#          latex_all.append("\input{chapters/%s.tex}\n" % output_file_name)
+#          if len(latex_all) % 6 == 0:
+#            latex_all.append("\clearpage\n")
+#  if use_subfigure:
+#    latex_all.append('\\end{figure}\n')
+#  latex_all_file_name = "%s/chapters/graph-%s.tex" % (
+#      output_dir, graph_name)
+#  write_to_file(latex_all_file_name, ''.join(latex_all))
 
 def create_problem_speedup_graph(graph_name, speedup_graph_name, use_subfigure=True):
   """
@@ -938,51 +912,51 @@ set key left
       cmd = 'rm %s' % script_name
       system(cmd)
 
-      latex_out = []
-      if use_subfigure:
-        caption = "%s" % (problem)
-      else:
-        caption = ("Speedup for problem %s in all languages" % (problem))
-      label = "fig:exec:spd:%s:%d" % (problem, i)
-      if use_subfigure:
-        latex_out.append((
-            "\\subfigure[%s]{\n"
-            "  \\includegraphics[width=65mm]{images/%s.png}\n"
-            "  \\label{%s}\n"
-            "}\n") % (caption, output_file_name, label))
-      else:
-        latex_out.append((
-            "\\begin{figure}[htbp]\n"
-            "  %%\\centering\n"
-            "  \\includegraphics[width=100mm]{images/%s.png}\n"
-            "  \\caption{%s}\n"
-            "  \\label{%s}\n"
-            "\\end{figure}\n") % (output_file_name, caption, label))
-
-      latex_file_name = "%s/chapters/%s.tex" % (
-          output_dir, output_file_name)
-      write_to_file(latex_file_name, ''.join(latex_out))
-
-      latex_all.append("\input{chapters/%s.tex}\n" % output_file_name)
-      if len(latex_all) % 6 == 0:
-        latex_all.append("\clearpage\n")
-
-  if use_subfigure:
-    latex_all.append('\\caption{Speedup per problem, in all languages}\n'
-                     '\\label{fig:speedup:problem}\n'
-                     '\\end{figure}\n')
-  latex_all_file_name = "%s/chapters/graph-%s.tex" % (
-    output_dir, graph_name)
-  write_to_file(latex_all_file_name, ''.join(latex_all))
+#      latex_out = []
+#      if use_subfigure:
+#        caption = "%s" % (problem)
+#      else:
+#        caption = ("Speedup for problem %s in all languages" % (problem))
+#      label = "fig:exec:spd:%s:%d" % (problem, i)
+#      if use_subfigure:
+#        latex_out.append((
+#            "\\subfigure[%s]{\n"
+#            "  \\includegraphics[width=65mm]{images/%s.png}\n"
+#            "  \\label{%s}\n"
+#            "}\n") % (caption, output_file_name, label))
+#      else:
+#        latex_out.append((
+#            "\\begin{figure}[htbp]\n"
+#            "  %%\\centering\n"
+#            "  \\includegraphics[width=100mm]{images/%s.png}\n"
+#            "  \\caption{%s}\n"
+#            "  \\label{%s}\n"
+#            "\\end{figure}\n") % (output_file_name, caption, label))
+#
+#      latex_file_name = "%s/chapters/%s.tex" % (
+#          output_dir, output_file_name)
+#      write_to_file(latex_file_name, ''.join(latex_out))
+#
+#      latex_all.append("\input{chapters/%s.tex}\n" % output_file_name)
+#      if len(latex_all) % 6 == 0:
+#        latex_all.append("\clearpage\n")
+#
+#  if use_subfigure:
+#    latex_all.append('\\caption{Speedup per problem, in all languages}\n'
+#                     '\\label{fig:speedup:problem}\n'
+#                     '\\end{figure}\n')
+#  latex_all_file_name = "%s/chapters/graph-%s.tex" % (
+#    output_dir, graph_name)
+#  write_to_file(latex_all_file_name, ''.join(latex_all))
 
 def create_language_speedup_graph(graph_name, speedup_graph_name, use_subfigure=True):
-  """
-plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title 'actual speedup' w lp, 'plot.dat' using 1:6 title "ideal efficiency" w lp, 'plot.dat' using 1:5 title "actual efficiency" w lp
-  """
-  latex_all = []
-  if use_subfigure:
-    latex_all.append('\\begin{figure}[ht]\n'
-                     '\\centering\n')
+#  """
+#plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title 'actual speedup' w lp, 'plot.dat' using 1:6 title "ideal efficiency" w lp, 'plot.dat' using 1:5 title "actual efficiency" w lp
+#  """
+#  latex_all = []
+#  if use_subfigure:
+#    latex_all.append('\\begin{figure}[ht]\n'
+#                     '\\centering\n')
   for language in sorted(languages):
     for i in range(len(inputs)):
       out = []
@@ -1010,9 +984,7 @@ set key left
         out.append(", ")
         out.append("'%s.dat' using 1:3 title '%s speedup' w lp" % (
             output_file, problem))
-        #out.append(", ")
-        #out.append("'%s.dat' using 1:3:($3*0.9):($3*1.1) title '%s error' w errorbars" % (
-            #output_file, problem))
+      
       output_file_name = "graph-%s-%s-%d" % (graph_name, language, i)
       script_name = 'other.script'
       write_to_file(script_name, ''.join(out))
@@ -1022,42 +994,42 @@ set key left
       cmd = 'rm %s' % script_name
       system(cmd)
 
-      latex_out = []
-      if use_subfigure:
-        caption = "%s" % (language)
-      else:
-        caption = ("Speedup for language %s in all problems" % (language))
-      label = "fig:exec:spd:%s:%d" % (language, i)
-      if use_subfigure:
-        latex_out.append((
-            "\\subfigure[%s]{\n"
-            "  \\includegraphics[width=65mm]{images/%s.png}\n"
-            "  \\label{%s}\n"
-            "}\n") % (caption, output_file_name, label))
-      else:
-        latex_out.append((
-            "\\begin{figure}[htbp]\n"
-            "  %%\\centering\n"
-            "  \\includegraphics[width=100mm]{images/%s.png}\n"
-            "  \\caption{%s}\n"
-            "  \\label{%s}\n"
-            "\\end{figure}\n") % (output_file_name, caption, label))
-
-      latex_file_name = "%s/chapters/%s.tex" % (
-          output_dir, output_file_name)
-      write_to_file(latex_file_name, ''.join(latex_out))
-
-      latex_all.append("\input{chapters/%s.tex}\n" % output_file_name)
-      if len(latex_all) % 6 == 0:
-        latex_all.append("\clearpage\n")
-
-  if use_subfigure:
-    latex_all.append('\\caption{Speedup per language, in all problems}\n'
-                     '\\label{fig:speedup:language}\n'
-                     '\\end{figure}\n')
-  latex_all_file_name = "%s/chapters/graph-%s.tex" % (
-    output_dir, graph_name)
-  write_to_file(latex_all_file_name, ''.join(latex_all))
+#      latex_out = []
+#      if use_subfigure:
+#        caption = "%s" % (language)
+#      else:
+#        caption = ("Speedup for language %s in all problems" % (language))
+#      label = "fig:exec:spd:%s:%d" % (language, i)
+#      if use_subfigure:
+#        latex_out.append((
+#            "\\subfigure[%s]{\n"
+#            "  \\includegraphics[width=65mm]{images/%s.png}\n"
+#            "  \\label{%s}\n"
+#            "}\n") % (caption, output_file_name, label))
+#      else:
+#        latex_out.append((
+#            "\\begin{figure}[htbp]\n"
+#            "  %%\\centering\n"
+#            "  \\includegraphics[width=100mm]{images/%s.png}\n"
+#            "  \\caption{%s}\n"
+#            "  \\label{%s}\n"
+#            "\\end{figure}\n") % (output_file_name, caption, label))
+#
+#      latex_file_name = "%s/chapters/%s.tex" % (
+#          output_dir, output_file_name)
+#      write_to_file(latex_file_name, ''.join(latex_out))
+#
+#      latex_all.append("\input{chapters/%s.tex}\n" % output_file_name)
+#      if len(latex_all) % 6 == 0:
+#        latex_all.append("\clearpage\n")
+#
+#  if use_subfigure:
+#    latex_all.append('\\caption{Speedup per language, in all problems}\n'
+#                     '\\label{fig:speedup:language}\n'
+#                     '\\end{figure}\n')
+#  latex_all_file_name = "%s/chapters/graph-%s.tex" % (
+#    output_dir, graph_name)
+#  write_to_file(latex_all_file_name, ''.join(latex_all))
 
 def output_graphs():
   read_table()
@@ -1139,10 +1111,10 @@ def main():
           #60. * 60), total_time / (60. * 60 * 24))
   #raw_input('press enter to start...')
   #generate_erlang_main()
-  make_all()
-  create_inputs()
-  for _ in range(TOTAL_EXECUTIONS):
-    run_all(redirect_output=False)  # TODO: remove outputs
+  # make_all()
+  # create_inputs()
+  # for _ in range(TOTAL_EXECUTIONS):
+  #   run_all(redirect_output=False)  # TODO: remove outputs
   get_results()
   #calculate()
   #test_significance()

@@ -1,6 +1,3 @@
-Wed Mar 21 09:45:40 2012 -0300 first commit
-Wed Mar 21 20:10:34 2012 -0300 cpp-randmat start
-Wed Mar 21 20:19:50 2012 -0300 cpp-randmat done
 Wed Mar 21 20:31:14 2012 -0300 chapel-randmat-seq started
 Wed Mar 21 20:32:04 2012 -0300 ignoring .fuse_hidden*
 Wed Mar 21 20:32:38 2012 -0300 Merge branch 'master' into chapel-randmat-seq
@@ -8,8 +5,8 @@ Wed Mar 21 21:10:31 2012 -0300 chapel-randmat-seq working
 Wed Mar 21 21:11:15 2012 -0300 ignoring .*.swp
 Wed Mar 21 21:11:31 2012 -0300 Merge branch 'master' into chapel-randmat-seq
 Wed Mar 21 21:28:53 2012 -0300 chapel-randmat-seq done
-Wed Mar 21 21:30:29 2012 -0300 cpp-randmat restart
-Wed Mar 21 21:39:22 2012 -0300 cpp-randmat done
+Wed Mar 21 21:30:29 2012 -0300 cpp-randmat-seq restart
+Wed Mar 21 21:39:22 2012 -0300 cpp-randmat-seq done
 Wed Mar 21 21:39:46 2012 -0300 Merge branch 'chapel-randmat-seq'
 Wed Mar 21 21:55:46 2012 -0300 chapel-randmat-par start
 Wed Mar 21 21:59:53 2012 -0300 chapel-randmat-par done
@@ -107,8 +104,7 @@ Fri Apr 20 13:14:03 2012 -0300 scoop-thresh-par restart
 Fri Apr 20 13:54:14 2012 -0300 scoop-thresh-par using across
 Fri Apr 20 15:07:42 2012 -0300 scoop-thresh-par with_filter
 Fri Apr 20 15:12:53 2012 -0300 scoop-thresh-par refac
-Fri Apr 20 16:13:04 2012 -0300 scoop-thresh-par pause
-Fri Apr 20 16:13:59 2012 -0300 scoop-thresh-par restart-done
+Fri Apr 20 16:13:59 2012 -0300 scoop-thresh-par done
 Fri Apr 20 16:14:19 2012 -0300 Merge branch 'scoop-thresh-par'
 Mon Apr 30 12:40:05 2012 -0300 cpp-winnow start
 Mon Apr 30 13:02:18 2012 -0300 cpp-winnow done
@@ -163,7 +159,6 @@ Wed May 2 10:47:07 2012 -0300 erlang-outer-par start
 Wed May 2 11:02:59 2012 -0300 erlang-outer-par done
 Wed May 2 11:04:38 2012 -0300 go-outer-seq start
 Wed May 2 11:23:24 2012 -0300 go-outer-seq done
-Wed May 2 11:23:24 2012 -0300 go-outer-seq restart-done
 Wed May 2 11:27:21 2012 -0300 go-outer-seq merged
 Wed May 2 12:32:58 2012 -0300 go-outer-par start
 Wed May 2 12:35:35 2012 -0300 go-outer-par done
@@ -197,33 +192,31 @@ Wed May 2 17:11:24 2012 -0300 tbb-product-par start
 Wed May 2 17:13:32 2012 -0300 tbb-product-par done
 Wed May 2 17:16:59 2012 -0300 cpp-chain start
 Wed May 2 17:54:23 2012 -0300 cpp-chain done
-Wed May 2 18:46:12 2012 -0300 chapel-chain-par start
-Wed May 2 19:18:58 2012 -0300 chapel-chain-par done
-Wed May 2 19:20:38 2012 -0300 cilk-chain-par start
-Wed May 2 19:52:25 2012 -0300 cilk-chain-par compiles
-Wed May 2 20:33:27 2012 -0300 cilk-chain-par done
-Wed May 2 20:35:14 2012 -0300 erlang-chain-par start
-Wed May 2 20:43:33 2012 -0300 erlang-chain-par compiles
-Wed May 2 20:56:56 2012 -0300 erlang-chain-par done
-Wed May 2 21:04:07 2012 -0300 go-chain-par start
-Wed May 2 21:28:43 2012 -0300 go-chain-par pause
-Thu May 3 09:00:23 2012 -0300 go-chain-par restart
-Thu May 3 09:30:01 2012 -0300 go-chain-par done
-Thu May 3 09:33:08 2012 -0300 tbb-chain-par start
-Thu May 3 09:35:18 2012 -0300 tbb-chain-par files
-Thu May 3 09:54:49 2012 -0300 tbb-chain-par done
-Thu May 3 09:58:05 2012 -0300 chapel-chain-par start
-Thu May 3 10:05:10 2012 -0300 chapel-chain-par done
-Thu May 3 10:06:05 2012 -0300 cilk-chain-par start
-Thu May 3 10:17:22 2012 -0300 cilk-chain-par done
-Thu May 3 10:18:40 2012 -0300 cpp-chain start
-Thu May 3 10:21:38 2012 -0300 cpp-chain done
-Thu May 3 10:22:23 2012 -0300 erlang-chain-par start
-Thu May 3 10:32:12 2012 -0300 erlang-chain-par done
-Thu May 3 10:34:05 2012 -0300 go-chain-par start
-Thu May 3 10:42:39 2012 -0300 go-chain-par done
-Thu May 3 10:44:08 2012 -0300 tbb-chain-par start
-Thu May 3 10:52:04 2012 -0300 tbb-chain-par done
+Wed May 2 18:46:12 2012 -0300 chapel-chain start
+Wed May 2 19:18:58 2012 -0300 chapel-chain done
+Wed May 2 19:20:38 2012 -0300 cilk-chain start
+Wed May 2 19:52:25 2012 -0300 cilk-chain compiles
+Wed May 2 20:33:27 2012 -0300 cilk-chain done
+Wed May 2 20:35:14 2012 -0300 erlang-chain start
+Wed May 2 20:43:33 2012 -0300 erlang-chain compiles
+Wed May 2 20:56:56 2012 -0300 erlang-chain done
+Wed May 2 21:04:07 2012 -0300 go-chain start
+Wed May 2 21:28:43 2012 -0300 go-chain pause
+Thu May 3 09:00:23 2012 -0300 go-chain restart
+Thu May 3 09:30:01 2012 -0300 go-chain done
+Thu May 3 09:33:08 2012 -0300 tbb-chain start
+Thu May 3 09:35:18 2012 -0300 tbb-chain files
+Thu May 3 09:54:49 2012 -0300 tbb-chain done
+Thu May 3 09:58:05 2012 -0300 chapel-refac start
+Thu May 3 10:05:10 2012 -0300 chapel-refac done
+Thu May 3 10:06:05 2012 -0300 cilk-refac start
+Thu May 3 10:17:22 2012 -0300 cilk-refac done
+Thu May 3 10:18:40 2012 -0300 cpp-refac start
+Thu May 3 10:21:38 2012 -0300 cpp-refac done
+Thu May 3 10:22:23 2012 -0300 erlang-refac start
+Thu May 3 10:32:12 2012 -0300 erlang-refac done
+Thu May 3 10:34:05 2012 -0300 go-refac start
+Thu May 3 10:42:39 2012 -0300 go-refac done
 Sat May 5 19:28:21 2012 -0300 comments
 Mon May 7 18:45:37 2012 -0300 scoop-thresh-par restart
 Mon May 7 19:00:04 2012 -0300 scoop-thresh-par done
@@ -238,9 +231,80 @@ Mon May 7 20:38:21 2012 -0300 scoop-product-seq start
 Mon May 7 20:51:40 2012 -0300 scoop-product-seq done
 Mon May 7 20:52:43 2012 -0300 scoop-product-par start
 Mon May 7 21:12:12 2012 -0300 scoop-product-par done
-Tue May 8 08:59:59 2012 -0300 scoop-chain-par restart
-Tue May 8 09:17:10 2012 -0300 scoop-chain-par compiles
-Tue May 8 09:53:45 2012 -0300 scoop-chain-par done
+Mon May 7 21:14:20 2012 -0300 scoop-chain start
+Mon May 7 21:31:21 2012 -0300 scoop-chain pause
+Tue May 8 08:59:59 2012 -0300 scoop-chain restart
+Tue May 8 10:17:10 2012 -0300 scoop-chain compiles
+Tue May 8 10:23:45 2012 -0300 scoop-chain done
+Tue May 8 18:31:47 2012 -0300 metric-time time_difference
+Tue May 8 19:43:28 2012 -0300 total_times dict
+Tue May 8 20:38:47 2012 -0300 generating time tables
+Tue May 8 21:27:15 2012 -0300 tables LoC
+Tue May 8 21:33:05 2012 -0300 now-noc tables
+Wed May 9 08:46:29 2012 -0300 refac wc tables
+Wed May 9 08:49:14 2012 -0300 table-time renamed
+Wed May 9 09:06:15 2012 -0300 table refac done
+Wed May 9 09:29:33 2012 -0300 main() created
+Wed May 9 10:25:32 2012 -0300 time images
+Wed May 9 10:56:15 2012 -0300 wc graphs
+Wed May 9 13:42:57 2012 -0300 changed parallel time to code
+Wed May 9 21:02:52 2012 -0300 total_lines
+Tue May 15 19:35:50 2012 -0300 old perf main
+Tue May 15 20:10:45 2012 -0300 generating .in
+Tue May 15 20:29:47 2012 -0300 generating input files
+Tue May 15 21:20:05 2012 -0300 running and getting results
+Tue May 15 21:47:21 2012 -0300 generating exec-time graphs
+Tue May 15 22:05:48 2012 -0300 with chain
+Wed May 16 07:45:51 2012 -0300 before erlang
+Wed May 16 08:28:02 2012 -0300 delete *-*.out
+Wed May 16 10:10:43 2012 -0300 with erlang
+Wed May 16 10:23:57 2012 -0300 make_all only makes main
+Wed May 16 11:30:19 2012 -0300 bigger test case, fixed chapl maxThreads
+Wed May 16 19:25:40 2012 -0300 fix erlang startup time
+Wed May 16 19:39:15 2012 -0300 rm *.in
+Wed May 16 20:22:59 2012 -0300 input 2 fixed
+Wed May 16 21:07:54 2012 -0300 tbb-thresh fixed
+Wed May 16 21:32:22 2012 -0300 cilk-thresh fixed
+Wed May 23 19:30:05 2012 -0300 before isolating language
+Wed May 23 20:18:00 2012 -0300 chapel inputs for speedup
+Thu May 24 07:45:46 2012 -0300 cilk inputs for speedup
+Thu May 24 08:10:47 2012 -0300 tbb inputs for speedup
+Thu May 24 09:02:58 2012 -0300 go inputs for speedup
+Thu May 24 09:30:14 2012 -0300 erlang inputs for speedup
+Mon May 28 19:36:40 2012 -0300 scoop inputs for speedup
+Mon May 28 20:01:09 2012 -0300 chapel inputs thresh
+Mon May 28 21:41:19 2012 -0300 before refac
+Tue May 29 12:41:12 2012 -0300 test generate erlang main
+Tue May 29 12:48:58 2012 -0300 test make all
+Tue May 29 13:17:31 2012 -0300 test create inputs
+Tue May 29 13:34:24 2012 -0300 test run all
+Tue May 29 13:50:01 2012 -0300 test get results
+Tue May 29 19:23:53 2012 -0300 class Problem and ProblemInput
+Tue May 29 19:35:50 2012 -0300 class ThreshProblem
+Tue May 29 19:52:31 2012 -0300 class DumbProblem
+Tue May 29 20:01:24 2012 -0300 create inputs file exists
+Tue May 29 20:23:11 2012 -0300 problem_map
+Tue May 29 21:18:40 2012 -0300 run_all and generate_graph working
+Tue May 29 21:20:27 2012 -0300 redirect_output
+Tue May 29 21:31:37 2012 -0300 change file from dos to unix
+Wed May 30 09:17:32 2012 -0300 test output graph
+Wed May 30 09:37:16 2012 -0300 generating png
+Wed May 30 10:06:44 2012 -0300 generating latex
+Wed May 30 11:10:25 2012 -0300 added timeout
+Wed May 30 11:56:18 2012 -0300 except ValueError
+Wed May 30 14:06:22 2012 -0300 chapel speedup and efficiency graphs
+Wed May 30 14:47:15 2012 -0300 eff randmat all
+Wed May 30 14:53:59 2012 -0300 add scoop
+Wed May 30 16:11:14 2012 -0300 speedup randmat all
+Wed May 30 16:49:53 2012 -0300 speedup thresh
+Wed May 30 17:10:06 2012 -0300 speedup-all
+Wed May 30 18:59:10 2012 -0300 spd eff all
+Wed May 30 19:06:33 2012 -0300 estimated total time
+Wed May 30 19:16:32 2012 -0300 desktop notification
+Wed May 30 20:11:14 2012 -0300 problem-speedup
+Wed May 30 20:30:02 2012 -0300 problem-speedup
+Wed May 30 20:42:58 2012 -0300 language speedup
+Wed May 30 21:07:59 2012 -0300 language-speedup
 Thu May 31 07:41:00 2012 -0300 chapel-randmat-par restart
 Thu May 31 07:55:13 2012 -0300 chapel-randmat-par done
 Thu May 31 08:00:41 2012 -0300 chapel-thresh-par restart
@@ -248,12 +312,15 @@ Thu May 31 08:07:07 2012 -0300 chapel-thresh-par tests
 Thu May 31 08:33:05 2012 -0300 chapel-thresh-par done
 Thu May 31 08:35:53 2012 -0300 chapel-winnow-par restart
 Thu May 31 09:39:10 2012 -0300 chapel-winnow-par done
+Thu May 31 09:46:18 2012 -0300 metric-perf fix tests
 Thu May 31 09:47:05 2012 -0300 chapel-outer-par restart
 Thu May 31 10:22:06 2012 -0300 chapel-outer-par done
 Thu May 31 10:26:08 2012 -0300 chapel-product-par restart
-Thu May 31 11:01:45 2012 -0300 chapel-product-par done
-Thu May 31 13:03:01 2012 -0300 chapel-chain-par restart
-Thu May 31 13:46:21 2012 -0300 chapel-chain-par done
+Thu May 31 13:01:45 2012 -0300 chapel-product-par done
+Thu May 31 13:03:01 2012 -0300 chapel-chain restart
+Thu May 31 13:46:21 2012 -0300 chapel-chain done
+Thu May 31 16:57:43 2012 -0300 testing all
+Thu May 31 19:08:28 2012 -0300 perf new input
 Mon Jun 4 16:18:41 2012 -0300 cilk-randmat-par restart
 Mon Jun 4 16:48:45 2012 -0300 cilk-randmat-par done
 Mon Jun 4 21:44:36 2012 -0300 cilk-thresh-par restart
@@ -264,10 +331,18 @@ Tue Jun 5 13:56:31 2012 -0300 cilk-outer-par restart
 Tue Jun 5 13:59:28 2012 -0300 cilk-outer-par done
 Tue Jun 5 14:22:09 2012 -0300 cilk-product-par restart
 Tue Jun 5 14:23:29 2012 -0300 cilk-product-par done
+Tue Jun 5 14:37:56 2012 -0300 perf comments
+Tue Jun 5 14:43:37 2012 -0300 create cilk-chain-seq
 Tue Jun 5 14:44:34 2012 -0300 cilk-chain-seq start
 Tue Jun 5 15:05:52 2012 -0300 cilk-chain-seq done
+Tue Jun 5 15:42:46 2012 -0300 perf input randmat
 Tue Jun 5 16:07:18 2012 -0300 cilk-chain-par restart
 Tue Jun 5 16:11:49 2012 -0300 cilk-chain-par done
+Tue Jun 5 16:47:22 2012 -0300 perf cilk-all
+Tue Jun 5 17:12:44 2012 -0300 ignoring .out
+Tue Jun 5 17:12:50 2012 -0300 Merge branch 'cilk'
+Tue Jun 5 17:17:30 2012 -0300 fix tests
+Tue Jun 5 18:31:32 2012 -0300 fix-create-inputs
 Tue Jun 5 20:10:03 2012 -0300 tbb-randmat-par restart
 Tue Jun 5 20:12:03 2012 -0300 tbb-randmat-par done
 Tue Jun 5 21:28:09 2012 -0300 tbb-thresh-par restart
@@ -278,12 +353,15 @@ Wed Jun 6 11:59:21 2012 -0300 tbb-outer-par restart
 Wed Jun 6 12:01:31 2012 -0300 tbb-outer-par done
 Wed Jun 6 12:10:13 2012 -0300 tbb-product-par restart
 Wed Jun 6 12:15:35 2012 -0300 tbb-product-par done
+Wed Jun 6 12:18:04 2012 -0300 test-chain-moved
 Wed Jun 6 12:18:38 2012 -0300 tbb-chain-seq start
 Wed Jun 6 12:30:30 2012 -0300 tbb-chain-seq done
 Wed Jun 6 12:54:18 2012 -0300 tbb-chain-par restart
 Wed Jun 6 12:56:44 2012 -0300 tbb-chain-par done
 Wed Jun 6 13:52:51 2012 -0300 go-randmat-par restart
 Wed Jun 6 13:55:30 2012 -0300 go-randmat-par done
+Wed Jun 6 14:08:14 2012 -0300 go-thresh-par gold files
+Wed Jun 6 15:23:51 2012 -0300 logn pafor
 Wed Jun 6 17:44:38 2012 -0300 go-thresh-par restart
 Wed Jun 6 17:48:48 2012 -0300 go-thresh-par done
 Thu Jun 7 13:55:31 2012 -0300 go-winnow-par restart
@@ -292,9 +370,114 @@ Thu Jun 7 14:20:34 2012 -0300 go-outer-par restart
 Thu Jun 7 14:22:47 2012 -0300 go-outer-par done
 Thu Jun 7 14:40:40 2012 -0300 go-product-par restart
 Thu Jun 7 14:51:33 2012 -0300 go-product-par done
+Thu Jun 7 15:11:50 2012 -0300 refac go chain
 Thu Jun 7 15:14:12 2012 -0300 go-chain-seq start
 Thu Jun 7 15:58:17 2012 -0300 go-chain-seq done
 Thu Jun 7 17:26:26 2012 -0300 go-chain-par restart
 Thu Jun 7 17:28:25 2012 -0300 go-chain-par done
+Thu Jun 7 19:05:45 2012 -0300 refac chapel par
 Thu Jun 7 19:06:09 2012 -0300 chapel-chain-seq start
 Thu Jun 7 19:12:27 2012 -0300 chapel-chain-seq done
+Thu Jun 7 20:05:10 2012 -0300 fix chapel randmat
+Thu Jun 7 20:38:53 2012 -0300 fix chapel thresh
+Thu Jun 7 22:23:57 2012 -0300 fix chapel winnow
+Thu Jun 7 22:29:28 2012 -0300 fix outer chapel
+Thu Jun 7 22:33:05 2012 -0300 fix chapel product
+Thu Jun 7 22:50:08 2012 -0300 fix chapel chain
+Sun Jun 10 01:34:40 2012 -0300 change graph captions
+Sun Jun 10 02:28:34 2012 -0300 graph captions
+Sun Jun 10 02:52:01 2012 -0300 using subfigure
+Sun Jun 10 15:49:57 2012 -0300 graph time to code
+Sun Jun 10 16:11:49 2012 -0300 timetocode with chain-seq
+Sun Jun 10 16:33:41 2012 -0300 execution time graph caption
+Mon Jun 11 08:06:55 2012 -0300 perf weekend
+Mon Jun 11 17:38:22 2012 -0300 graph labels
+Fri Jun 15 16:25:12 2012 -0300 ignoring tar.gz
+Fri Jun 15 17:21:21 2012 -0300 fix perf tbb chapel
+Fri Jun 15 17:21:21 2012 -0300 fix perf tbb chapel
+Fri Jun 15 18:52:20 2012 -0300 fix tbb randmat perf
+Mon Jun 18 14:37:06 2012 -0300 ttest for speedups
+Mon Jun 18 15:44:08 2012 -0300 ttest execution time
+Mon Jun 18 19:08:14 2012 -0300 exec-time errorbars
+Mon Jun 18 20:06:54 2012 -0300 paired analisys
+Tue Jun 19 14:56:54 2012 -0300 ylabel speedup
+Fri Jun 22 17:32:40 2012 -0300 p-values tables
+Fri Jun 22 18:07:44 2012 -0300 p-values-time tables
+Sat Jun 23 18:30:22 2012 -0300 aggreagated metrics
+Sun Jun 24 12:04:03 2012 -0300 erlang-randmat is_bench
+Sun Jun 24 12:18:08 2012 -0300 erlang-randmat-seq lcg
+Sun Jun 24 23:03:21 2012 -0300 erlang
+Mon Jun 25 11:10:21 2012 -0300 erlang main.sh with nthreads
+Mon Jun 25 17:11:28 2012 -0300 scoop-randmat lcg
+Mon Jun 25 17:20:39 2012 -0300 generate erlang graphs
+Thu Jun 28 12:28:02 2012 -0300 added sixth color to graphs
+Thu Jun 28 13:17:10 2012 -0300 other source-graphs
+Thu Jun 28 13:26:31 2012 -0300 graph legend (in minutes)
+Thu Jun 28 13:47:03 2012 -0300 scoop-chain-seq start
+Thu Jun 28 13:55:49 2012 -0300 scoop-chain-seq done
+Thu Jun 28 15:16:19 2012 -0300 graphs with scoop
+Thu Jun 28 16:31:55 2012 -0300 relative time-graphs
+Thu Jun 28 19:31:00 2012 -0300 fix test_significance
+Fri Jun 29 16:30:55 2012 -0300 global code review
+Fri Jun 29 18:28:23 2012 -0300 move table captions
+Fri Jun 29 20:19:43 2012 -0300 table captions lower case
+Tue Jul 3 12:52:46 2012 -0300 added eiffel ecf files
+Tue Jul 10 16:02:01 2012 -0300 added scoop -finalize
+Thu Jul 12 03:08:03 2012 -0300 using taskset
+Tue Aug 21 10:45:39 2012 +0200 Making time metric script more local.
+Tue Aug 21 10:47:48 2012 +0200 Get scripts running on my system.
+Tue Aug 21 12:50:15 2012 +0200 Adding requirements comment in time/main.py.
+Tue Aug 21 12:51:03 2012 +0200 Using standard Makefile name.
+Tue Aug 21 15:34:06 2012 +0200 Updating python performance gathering scripts.
+Tue Aug 21 15:36:47 2012 +0200 Updating randmat scoop compilation settings.
+Tue Aug 21 15:37:38 2012 +0200 Giving standard names to Makefiles.
+Wed Aug 22 09:11:20 2012 +0200 Adding CFLAGS to cilk compilation.
+Wed Aug 22 09:38:45 2012 +0200 Rewriting TBB makefiles.
+Wed Aug 22 09:56:28 2012 +0200 Fixing the 6l/6g calls to go through the 'go' tool.
+Wed Aug 22 12:50:21 2012 +0200 scoop-randmat-expertseq start
+Wed Aug 22 12:59:05 2012 +0200 scoop-randmat-expertseq pause
+Wed Aug 22 13:46:56 2012 +0200 scoop-randmat-expertseq resume
+Wed Aug 22 13:58:44 2012 +0200 scoop-randmat-expertseq done
+Wed Aug 22 14:40:39 2012 +0200 scoop-randmat-expertpar start
+Wed Aug 22 15:47:21 2012 +0200 scoop-randmat-expertpar pause
+Wed Aug 22 16:16:56 2012 +0200 scoop-randmat-expertpar resume
+Wed Aug 22 16:39:56 2012 +0200 scoop-randmat-expertpar pause
+Thu Aug 23 07:48:33 2012 +0200 scoop-randmat-expertpar resume
+Thu Aug 23 08:01:32 2012 +0200 scoop-randmat-expertpar done
+Thu Aug 23 09:51:13 2012 +0200 scoop-randmat-expertseq start
+Thu Aug 23 09:52:56 2012 +0200 scoop-randmat-expertseq done
+Thu Aug 23 09:56:10 2012 +0200 scoop-thresh-expertseq start
+Thu Aug 23 10:05:34 2012 +0200 scoop-thresh-expertseq done
+Thu Aug 23 14:04:09 2012 +0200 scoop-thresh-expertpar start
+Thu Aug 23 16:02:25 2012 +0200 scoop-thresh-expertpar pause
+Fri Aug 24 07:31:09 2012 +0200 scoop-thresh-expertpar resume
+Fri Aug 24 08:43:27 2012 +0200 scoop-thresh-expertpar pause
+Fri Aug 24 09:10:53 2012 +0200 scoop-thresh-expertpar resume
+Fri Aug 24 09:34:36 2012 +0200 scoop-thresh-expertpar pause
+Fri Aug 24 09:55:09 2012 +0200 scoop-thresh-expertpar resume
+Fri Aug 24 09:57:03 2012 +0200 scoop-thresh-expertpar pause
+Fri Aug 24 10:27:17 2012 +0200 scoop-thresh-expertpar resume
+Fri Aug 24 11:10:16 2012 +0200 scoop-thresh-expertpar pause
+Fri Aug 24 13:07:32 2012 +0200 scoop-thresh-expertpar resume
+Fri Aug 24 14:27:05 2012 +0200 scoop-thresh-expertpar pause
+Fri Aug 24 15:16:56 2012 +0200 scoop-thresh-expertpar resume
+Fri Aug 24 15:20:14 2012 +0200 scoop-thresh-expertpar done
+Mon Aug 27 08:27:02 2012 +0200 scoop-product-expertseq start
+Mon Aug 27 08:45:27 2012 +0200 scoop-product-expertseq done
+Mon Aug 27 09:05:49 2012 +0200 scoop-product-expertpar start
+Mon Aug 27 09:45:41 2012 +0200 scoop-product-expertpar done
+Mon Aug 27 10:41:37 2012 +0200 scoop-winnow-expertseq start
+Mon Aug 27 11:02:34 2012 +0200 scoop-winnow-expertseq done
+Mon Aug 27 12:24:49 2012 +0200 scoop-winnow-expertpar start
+Mon Aug 27 12:41:27 2012 +0200 scoop-winnow-expertpar pause
+Mon Aug 27 13:14:43 2012 +0200 scoop-winnow-expertpar resume
+Mon Aug 27 14:10:57 2012 +0200 scoop-winnow-expertpar done
+Mon Aug 27 14:46:09 2012 +0200 perf test script update
+Mon Aug 27 15:37:12 2012 +0200 scoop-outer-expertseq start
+Mon Aug 27 15:49:20 2012 +0200 scoop-outer-expertseq done
+Mon Aug 27 15:54:31 2012 +0200 scoop-outer-expertpar start
+Mon Aug 27 16:22:56 2012 +0200 scoop-outer-expertpar pause
+Tue Aug 28 15:27:09 2012 +0200 scoop-outer-expertpar resume
+Tue Aug 28 16:18:15 2012 +0200 scoop-outer-expertpar done
+Wed Aug 29 07:51:32 2012 +0200 scoop-winnow-expertpar resume
+Wed Aug 29 08:05:08 2012 +0200 scoop-winnow-expertpar pause
