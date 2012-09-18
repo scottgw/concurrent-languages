@@ -12,69 +12,57 @@
  *     distances
  */
 
-#include <cilk-lib.cilkh>
+#include <cilk/cilk.h>
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+#include <algorithm>
+
+using namespace std;
 
 static int is_bench = 0;
 
 static double matrix[10000][10000];
 static double vector[10000];
 
-typedef struct sPoint {
-  int i, j;
-} Point;
-
-static Point points[10000];
+typedef std::pair<int, int> point;
+static point points[10000];
 
 double sqr(double x) {
   return x * x;
 }
 
-double distance(Point a, Point b) {
-  return sqrt(sqr(a.i - b.i) + sqr(a.j - b.j));
-}
-
-double max(double a, double b) {
-  return a > b ? a : b;
+double distance(point a, point b) {
+  return sqrt(sqr(a.first - b.first) + sqr(a.second - b.second));
 }
 
 // parallel for on [begin, end)
-cilk void fill_matrix(int begin, int end, int ncols) {
-  int middle = begin + (end - begin) / 2;
-  double nmax = -1;
-  int j;
-  if (begin + 1 == end) {
-    for (j = 0; j < ncols; j++) {
-      if (begin != j) {
-        matrix[begin][j] = distance(points[begin], points[j]);
-        nmax = max(nmax, matrix[begin][j]);
-      }
-      matrix[begin][begin] = nmax * ncols;
-      vector[begin] = distance((Point){0, 0}, points[begin]);
+void outer (int nelts) {
+  cilk_for (int i = 0; i < nelts; ++i) {
+    double nmax = 0;
+    for (int j = 0; j < nelts; ++j) {
+      if (i != j) {
+        matrix [i][j] = ::distance (points [i], points [j]);
+        nmax = max (nmax, matrix [i][j]);
+      }      
     }
-    return;
+    matrix [i][i] = nmax * nelts;
+    vector [i] = ::distance (make_pair (0,0), points [i]);
   }
-  spawn fill_matrix(begin, middle, ncols);
-  spawn fill_matrix(middle, end, ncols);
 }
 
-cilk void outer(int nelts) {
-  spawn fill_matrix(0, nelts, nelts);
-}
 
 void read_vector_of_points(int nelts) {
   int i, a, b;
   for (i =  0; i < nelts; i++) {
     scanf("%d %d", &a, &b);
-    points[i].i = a;
-    points[i].j = b;
+    points[i] = make_pair (a, b);
   }
 }
 
-cilk int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
   int nelts, i, j;
 
   if (argc == 2) {
@@ -89,8 +77,7 @@ cilk int main(int argc, char *argv[]) {
     read_vector_of_points(nelts);
   }
 
-  spawn outer(nelts);
-  sync;
+  outer(nelts);
 
   if (!is_bench) {
     printf("%d %d\n", nelts, nelts);
