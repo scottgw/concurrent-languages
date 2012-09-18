@@ -1,0 +1,71 @@
+/*
+ * randmat: random number generation
+ *
+ * input:
+ *   nrows, ncols: the number of rows and columns
+ *   s: the seed
+ *
+ * output:
+ *   matrix: an nrows x ncols integer matrix
+ */
+
+#include <cilk-lib.cilkh>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+static unsigned char matrix[30000][30000];
+
+int is_bench = 0;
+
+cilk void fill_row(int begin, int ncols, int seed) {
+  int j;
+  const int LCG_A = 1664525, LCG_C = 1013904223;
+  for (j = 0; j < ncols; j++) {
+    seed = LCG_A * seed + LCG_C;
+    matrix[begin][j] = seed % 100;
+  }
+}
+
+// parallel for on [begin, end), calling f()
+cilk void fill_matrix(int begin, int end, int ncols, int seed) {
+  int middle = begin + (end - begin) / 2;
+  if (begin + 1 == end) {
+    spawn fill_row(begin, ncols, seed + begin);
+  } else {
+    spawn fill_matrix(begin, middle, ncols, seed);
+    spawn fill_matrix(middle, end, ncols, seed);
+  }
+}
+
+cilk void randmat(int nrows, int ncols, int s) {
+  // parallel for on rows
+  spawn fill_matrix(0, nrows, ncols, s);
+}
+
+cilk int main(int argc, char *argv[]) {
+  int nrows, ncols, s, i, j;
+
+  if (argc == 2) {
+    if (!strcmp(argv[argc -1], "--is_bench")) {
+      is_bench = 1;
+    }
+  }
+
+  scanf("%d%d%d", &nrows, &ncols, &s);
+
+  spawn randmat(nrows, ncols, s);
+  sync;
+
+  if (!is_bench) {
+    for (i = 0; i < nrows; i++) {
+      for (j = 0; j < ncols; j++) {
+        printf("%d ", matrix[i][j]);
+      }
+      printf("\n");
+    }
+    printf("\n");
+  }
+
+  return 0;
+}
