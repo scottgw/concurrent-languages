@@ -12,5 +12,5 @@ all: main
 	./$< < $<6.in > main6.out
 	diff main6.out main6.gold
 	./main --nproc 4 --is_bench < main.in 
-main: main.cilk
-	cilkc ${CFLAGS} -O2 -o main main.cilk
+main: main.cpp
+	g++ ${CFLAGS} -O2 -o main main.cpp -fcilkplus -lcilk -lcilkrts

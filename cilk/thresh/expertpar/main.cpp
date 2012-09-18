@@ -10,7 +10,9 @@
  *   mask: a boolean matrix filled with true for cells kept
  */
 
-#include <cilk-lib.cilkh>
+#include <cilk/cilk.h>
+#include <cilk/reducer_max.h>
+#include <cilk/cilk_api.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -19,83 +21,57 @@ int is_bench = 0;
 
 static unsigned char matrix[20000][20000];
 static unsigned char mask[20000][20000];
-static int histogram[16][100];
+static int histogram[16][200];
 
-int max(int a, int b) {
-  return a > b ? a : b;
-}
+int reduce_max (int nrows, int ncols) {
+  cilk::reducer_max <int> max_reducer (0);
 
-// parallel max reduce on [begin, end)
-cilk int reduce_max(int begin, int end, int ncols) {
-  int middle = begin + (end - begin) / 2;
-  int left, right, res, i;
-  if (begin + 1 == end) {
-    res = matrix[begin][0];
-    for (i = 1; i < ncols; i++) {
-      res = max(res, matrix[begin][i]);
+  cilk_for (int i = 0; i < nrows; i++) {
+    int begin = i;
+
+    for (int j = 0; j < ncols; j++) {
+      max_reducer.calc_max (matrix [begin][j]);
     }
-    return res;
   }
-  left = spawn reduce_max(begin, middle, ncols);
-  right = spawn reduce_max(middle, end, ncols);
-  sync;
-  return max(left, right);
+
+  return max_reducer.get_value ();
 }
 
-cilk void fill_histogram(int begin, int end, int ncols) {
-  int middle = begin + (end - begin) / 2;
-  int i;
-  if (begin + 1 == end) {
-    for (i = 0; i < ncols; i++) {
-      histogram[Self][matrix[begin][i]]++;
+void fill_histogram(int nrows, int ncols) {
+  int P = __cilkrts_get_nworkers();
+  cilk_for (int r = 0; r < nrows; ++r) {
+    int Self = __cilkrts_get_worker_number();
+    for (int i = 0; i < ncols; i++) {
+      histogram [Self][matrix[r][i]]++;
     }
-    return;
   }
-  spawn fill_histogram(begin, middle, ncols);
-  spawn fill_histogram(middle, end, ncols);
-  sync;
 }
 
-cilk void merge_histogram(int begin, int end) {
-  int middle = begin + (end - begin) / 2;
-  int i;
-  if (begin + 1 == end) {
-    for (i = 1; i < Cilk_active_size; i++) {
-      histogram[0][begin] += histogram[i][begin];
+void merge_histogram () {
+  int P = __cilkrts_get_nworkers();
+  cilk_for (int v = 0; v < 100; ++v) {
+    int merge_val = __sec_reduce_add (histogram [1:(P-1)][v]);
+    histogram [0][v] += merge_val;
+  }
+}
+
+void fill_mask (int nrows, int ncols, int threshold) {
+  cilk_for (int i = 0; i < nrows; ++i) {
+    for (int j = 0; j < ncols; ++j) {
+      mask[i][j] = matrix [i][j] >= threshold;
     }
-    return;
   }
-  spawn merge_histogram(begin, middle);
-  spawn merge_histogram(middle, end);
-  sync;
 }
 
-cilk void fill_mask(int begin, int end, int ncols, int threshold) {
-  int middle = begin + (end - begin) / 2;
-  int i;
-  if (begin + 1 == end) {
-    for (i = 0; i < ncols; i++) {
-      mask[begin][i] = matrix[begin][i] >= threshold;
-    }
-    return;
-  }
-  spawn fill_mask(begin, middle, ncols, threshold);
-  spawn fill_mask(middle, end, ncols, threshold);
-  sync;
-}
-
-cilk void thresh(int nrows, int ncols, int percent) {
+void thresh(int nrows, int ncols, int percent) {
   int i;
   int nmax = 0;
   int count, prefixsum, threshold;
 
-  nmax = spawn reduce_max(0, nrows, ncols);
-  sync;
+  nmax = reduce_max(nrows, ncols);
 
-  spawn fill_histogram(0, nrows, ncols);
-  sync;
-  spawn merge_histogram(0, nmax + 1);
-  sync;
+  fill_histogram(nrows, ncols);
+  merge_histogram();
 
   count = (nrows * ncols * percent) / 100;
 
@@ -107,11 +83,10 @@ cilk void thresh(int nrows, int ncols, int percent) {
     threshold = i;
   }
 
-  spawn fill_mask(0, nrows, ncols, threshold);
-  sync;
+  fill_mask(nrows, ncols, threshold);
 }
 
-cilk int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
   int nrows, ncols, percent, i, j;
 
   if (argc == 2) {
@@ -132,8 +107,7 @@ cilk int main(int argc, char *argv[]) {
 
   scanf("%d", &percent);
 
-  spawn thresh(nrows, ncols, percent);
-  sync;
+  thresh(nrows, ncols, percent);
 
   if (!is_bench) {
     printf("%d %d\n", nrows, ncols);
