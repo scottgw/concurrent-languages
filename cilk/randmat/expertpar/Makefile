@@ -7,4 +7,4 @@ all: main
 	echo "2 5 9" | ./main --nproc 4 --is_bench
 
 main: main.cpp
-	g++ ${CFLAGS} -O2 -mcmodel=medium -o main main.cpp -fcilkplus -lcilk -lcilkrts
+	icpc ${CFLAGS} -O2 -o main main.cpp
