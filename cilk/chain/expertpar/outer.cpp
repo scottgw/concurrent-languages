@@ -12,53 +12,41 @@
  *     distances
  */
 
-#include <cilk-lib.cilkh>
+#include <cilk/cilk.h>
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
+#include <algorithm>
+
+using namespace std;
+
 double outer_matrix[10000][10000];
 double outer_vector[10000];
 
-typedef struct sPoint {
-  int i, j;
-} Point;
+typedef std::pair <int, int> point; 
 
-extern Point winnow_points[10000];
+extern point winnow_points[10000];
 
 double sqr(double x) {
   return x * x;
 }
 
-double distance(Point a, Point b) {
-  return sqrt(sqr(a.i - b.i) + sqr(a.j - b.j));
+double distance(point a, point b) {
+  return sqrt(sqr(a.first - b.first) + sqr(a.second - b.second));
 }
 
-static double max(double a, double b) {
-  return a > b ? a : b;
-}
-
-// parallel for on [begin, end)
-static cilk void fill_matrix(int begin, int end, int ncols) {
-  int middle = begin + (end - begin) / 2;
-  double nmax = -1;
-  int j;
-  if (begin + 1 == end) {
-    for (j = 0; j < ncols; j++) {
-      if (begin != j) {
-        outer_matrix[begin][j] = distance(winnow_points[begin], winnow_points[j]);
-        nmax = max(nmax, outer_matrix[begin][j]);
-      }
-      outer_matrix[begin][begin] = nmax * ncols;
-      outer_vector[begin] = distance((Point){0, 0}, winnow_points[begin]);
+void outer (int nelts) {
+  cilk_for (int i = 0; i < nelts; ++i) {
+    double nmax = 0;
+    for (int j = 0; j < nelts; ++j) {
+      if (i != j) {
+        outer_matrix [i][j] = ::distance (winnow_points [i], winnow_points [j]);
+        nmax = max (nmax, outer_matrix [i][j]);
+      }      
     }
-    return;
+    outer_matrix [i][i] = nmax * nelts;
+    outer_vector [i] = ::distance (make_pair (0,0), winnow_points [i]);
   }
-  spawn fill_matrix(begin, middle, ncols);
-  spawn fill_matrix(middle, end, ncols);
-}
-
-cilk void outer(int nelts) {
-  spawn fill_matrix(0, nelts, nelts);
 }

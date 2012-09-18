@@ -10,24 +10,18 @@
  * output:
  *   result: a real vector, whose values are the result of the final product
  */
-#include <cilk-lib.cilkh>
+#include <cilk/cilk.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
-#include "common.cilkh"
+#include "common.h"
 
 int is_bench = 0;
 
-cilk void randmat(int, int, int);
-cilk void thresh(int, int, int);
-cilk void winnow(int, int, int);
-cilk void outer(int);
-cilk void product(int);
-
 extern double product_result[10000];
 
-cilk int main(int argc, char** argv) {
+int main(int argc, char** argv) {
   int nelts, randmat_seed, thresh_percent, winnow_nelts, i;
 
   if (argc == 2) {
@@ -38,11 +32,11 @@ cilk int main(int argc, char** argv) {
 
   scanf("%d%d%d%d", &nelts, &randmat_seed, &thresh_percent, &winnow_nelts);
 
-  spawn randmat(nelts, nelts, randmat_seed); sync;
-  spawn thresh(nelts, nelts, thresh_percent); sync;
-  spawn winnow(nelts, nelts, winnow_nelts); sync;
-  spawn outer(winnow_nelts); sync;
-  spawn product(winnow_nelts); sync;
+  randmat(nelts, nelts, randmat_seed);
+  cilk_spawn thresh(nelts, nelts, thresh_percent); cilk_sync;
+  cilk_spawn winnow(nelts, nelts, winnow_nelts); cilk_sync;
+  cilk_spawn outer(winnow_nelts); cilk_sync;
+  cilk_spawn product(winnow_nelts); cilk_sync;
 
   if (!is_bench) {
     printf("%d\n", winnow_nelts);

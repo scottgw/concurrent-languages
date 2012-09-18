@@ -1,9 +1,8 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
+#include <algorithm>
 
-typedef struct sPoint {
-  int value, i, j;
-} Point;
+typedef std::pair <int, std::pair <int, int> > point;
 
 typedef int (*Operator)(int, int);
 typedef void* ReduceFilter;
@@ -23,9 +22,9 @@ typedef struct sSplitState {
   int row;
   int** mask;
   int threshold;
-  Point* values;
+  point* values;
   int* count;
-  Point* points;
+  point* points;
   int chunk;
   int nelts;
   double** matrix_double;
@@ -33,25 +32,33 @@ typedef struct sSplitState {
   double* result;
 } SplitState;
 
-typedef cilk int (*GenericReduceFunction)(int index, ReduceState state);
-typedef cilk void (*SplitFunction)(int index, SplitState state);
+typedef int (*GenericReduceFunction)(int index, ReduceState state);
+typedef void (*SplitFunction)(int index, SplitState state);
 
-cilk void split(int begin, int end, SplitFunction f, SplitState state);
+void split(int begin, int end, SplitFunction f, SplitState state);
 
-cilk int generic_reduce(int begin, int end, Operator op,
+int generic_reduce(int begin, int end, Operator op,
     GenericReduceFunction f, ReduceState state);
 
-cilk int reduce2d_identity_filter(int col, ReduceState state);
+int reduce2d_identity_filter(int col, ReduceState state);
 
-cilk int reduce2d_start_cols(int row, ReduceState state);
+int reduce2d_start_cols(int row, ReduceState state);
 
-cilk int reduce2d_with_filter(int nrows, int ncols, int** matrix,
+int reduce2d_with_filter(int nrows, int ncols, int** matrix,
     Operator op, GenericReduceFunction filter, int extra);
 
-cilk int reduce2d(int nrows, int ncols, int** matrix, Operator op);
+int reduce2d(int nrows, int ncols, int** matrix, Operator op);
 
-cilk int filter_matrix(int col, ReduceState state);
+int filter_matrix(int col, ReduceState state);
 
 int sum(int a, int b);
+
+// Prototypes for the individual pieces of the pipeline
+void randmat(int, int, int);
+void thresh(int, int, int);
+void winnow(int, int, int);
+void outer(int);
+void product(int);
+
 
 #endif

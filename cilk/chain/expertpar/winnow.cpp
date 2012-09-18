@@ -12,7 +12,7 @@
  *   winnow_points: a vector of (x, y) points
  */
 
-#include <cilk-lib.cilkh>
+#include <cilk/cilk.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -22,12 +22,8 @@ extern unsigned char randmat_matrix[20000][20000];
 extern unsigned char thresh_mask[20000][20000];
 static int count_per_line[20001];
 
-typedef struct sPoint {
-  int value, i, j;
-} Point;
-
-Point winnow_points[20000];
-static Point values[20000];
+point winnow_points[20000];
+static point values[20000];
 
 int compare(const void* vl, const void* vr) {
   const Point* l = vl, *r = vr;
