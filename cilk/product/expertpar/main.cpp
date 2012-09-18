@@ -10,7 +10,7 @@
  *   result: a real vector, whose values are the result of the product
  */
 
-#include <cilk-lib.cilkh>
+#include <cilk/cilk.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,23 +22,14 @@ static double vector[10000];
 static double result[10000];
 
 // parallel for on [begin, end)
-cilk void fill_result(int begin, int end, int ncols) {
-  int middle = begin + (end - begin) / 2;
-  double sum = 0;
-  int j;
-  if (begin + 1 == end) {
-    for (j = 0; j < ncols; j++) {
-      sum += matrix[begin][j] * vector[j];
+void product (int nelts) {
+  cilk_for (int i = 0; i < nelts; ++i) {
+    double sum = 0;
+    for (int j = 0; j < nelts; ++j) {
+      sum += matrix [i][j] * vector [j];
     }
-    result[begin] = sum;
-    return;
+    result [i] = sum;
   }
-  spawn fill_result(begin, middle, ncols);
-  spawn fill_result(middle, end, ncols);
-}
-
-cilk void product(int nelts) {
-  spawn fill_result(0, nelts, nelts);
 }
 
 void read_matrix(int nelts) {
@@ -57,7 +48,7 @@ void read_vector(int nelts) {
   }
 }
 
-cilk int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
   int nelts, i;
 
   if (argc == 2) {
@@ -72,8 +63,7 @@ cilk int main(int argc, char *argv[]) {
     read_vector(nelts);
   }
 
-  spawn product(nelts);
-  sync;
+  product(nelts);
 
   if (!is_bench) {
     printf("%d\n", nelts);
