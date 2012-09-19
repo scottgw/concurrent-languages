@@ -15,6 +15,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"runtime"
 )
 
 var is_bench = flag.Bool("is_bench", false, "")
@@ -43,10 +44,37 @@ func (m *ByteMatrix) Bytes() []byte {
 var mask [20000][20000]bool
 
 func thresh(m *ByteMatrix, nrows, ncols, percent uint32) {
+	NP := runtime.GOMAXPROCS(0)
+
+	hist_work := make(chan uint32)
+	hist_parts := make(chan []int)
+	go func() {
+		for i := uint32(0); i < nrows; i++ {
+			hist_work <- i
+		}
+		close(hist_work)
+	}()
+
+	for i := 0; i < NP; i++ {
+		go func() {
+			my_hist := make([]int, 100)
+			for i := range hist_work {
+				row := m.Row(i)
+				for j := range row {
+					my_hist[row[j]]++
+				}
+			}
+			hist_parts <- my_hist
+		}()
+	}
+
 	var hist [100]int
 
-	for _, v := range m.Bytes() {
-		hist[v]++
+	for i := 0; i < NP; i++ {
+		my_hist := <-hist_parts
+		for j := range my_hist {
+			hist[j] += my_hist[j]
+		}
 	}
 
 	count := (nrows * ncols * percent) / 100
@@ -59,11 +87,31 @@ func thresh(m *ByteMatrix, nrows, ncols, percent uint32) {
 			break
 		}
 	}
-	for i := uint32(0); i < nrows; i++ {
-		row := m.Row(i)
-		for j := range row {
-			mask[i][j] = row[j] >= byte(threshold)
+
+	mask_work := make(chan uint32)
+
+	go func() {
+		for i := uint32(0); i < nrows; i++ {
+			mask_work <- i
 		}
+		close(mask_work)
+	}()
+
+	mask_done := make(chan bool)
+	for i := 0; i < NP; i++ {
+		go func() {
+			for i := range mask_work {
+				row := m.Row(i)
+				for j := range row {
+					mask[i][j] = row[j] >= byte(threshold)
+				}
+			}
+			mask_done <- true
+		}()
+	}
+
+	for i := 0; i < NP; i++ {
+		<-mask_done
 	}
 }
 
