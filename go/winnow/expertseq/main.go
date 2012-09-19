@@ -72,6 +72,8 @@ func Winnow(m *ByteMatrix,
 	values.m = m
 	values.e = make([]uint32, 10000)
 
+  count := uint32 (0)
+
 	for i := uint32(0); i < nrows; i++ {
 		for j := uint32(0); j < ncols; j++ {
 			if *is_bench {
@@ -81,6 +83,7 @@ func Winnow(m *ByteMatrix,
 			if mask[i][j] {
 				idx := i*(nrows + 1) + j
 				values.e[idx] = idx
+        count++
 			}
 		}
 	}
