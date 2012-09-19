@@ -39,7 +39,6 @@ int main(int argc, char** argv) {
   cilk_spawn product(winnow_nelts); cilk_sync;
 
   if (!is_bench) {
-    printf("%d\n", winnow_nelts);
     for (i = 0; i < winnow_nelts; i++) {
       printf("%g ", product_result[i]);
     }

@@ -4,5 +4,8 @@ all: main
 	./main --nproc 4 < main.in
 	./main --nproc 4 --is_bench < main.in
 
-main: main.cpp randmat.cpp thresh.cpp winnow.cpp outer.cpp product.cpp
+.cpp.o:
+	icpc ${CFLAGS} -O2 -c $<
+
+main: main.o randmat.o thresh.o winnow.o outer.o product.o
 	icpc ${CFLAGS} -O2 -o main $^

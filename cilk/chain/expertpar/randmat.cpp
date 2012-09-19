@@ -26,6 +26,4 @@ void randmat(int nrows, int ncols, int seed) {
       randmat_matrix[begin][j] = ((unsigned)s) % 100;
     }
   }
-
-  printf ("%d\n", randmat_matrix[nrows-1][ncols-1]);
 }
