@@ -23,13 +23,6 @@ var matrix [20000][20000]byte
 var mask [20000][20000]bool
 var histogram [100]int
 
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
 func thresh(nrows, ncols int, percent int) {
 	for i := 0; i < nrows; i++ {
 		for j := 0; j < ncols; j++ {
