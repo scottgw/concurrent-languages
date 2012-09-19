@@ -35,8 +35,8 @@ func Distance(ax, ay, bx, by int) float64 {
 	return math.Sqrt(float64(Sqr(float64(ax-bx)) + Sqr(float64(ay-by))))
 }
 
-func Outer(wp []Point, nelts int) (m [][]float64, vec []float64) {
-	m = make([][]float64, nelts)
+func Outer(wp []Point, nelts int) (m []float64, vec []float64) {
+	m = make([]float64, nelts*nelts)
 	vec = make([]float64, nelts)
 	for i, v := range wp {
 		m[i] = make([]float64, nelts)
@@ -47,10 +47,10 @@ func Outer(wp []Point, nelts int) (m [][]float64, vec []float64) {
 				if d > nmax {
 					nmax = d
 				}
-				m[i][j] = d
+				m[i*(nelts + 1) + j] = d
 			}
 		}
-		m[i][i] = float64(nelts) * nmax
+		m[i*(nelts + 2)] = float64(nelts) * nmax
 		vec[i] = Distance(0, 0, v.x, v.y)
 	}
 	return
@@ -90,11 +90,11 @@ func main() {
 
 	if !*is_bench {
 		fmt.Printf("%d %d\n", nelts, nelts)
-		for i := 0; i < nelts; i++ {
-			for j := 0; j < nelts; j++ {
-				fmt.Printf("%g ", matrix[i][j])
-			}
-			fmt.Printf("\n")
+		for i := 0; i < nelts*nelts; i++ {
+			if i % nelts = 0 {
+        fmt.Printf("\n")
+      }
+			fmt.Printf("%g ", matrix[i])
 		}
 		fmt.Printf("\n")
 
