@@ -17,23 +17,24 @@ package main
 import (
 	"flag"
 	"fmt"
+	"runtime"
 	"sort"
 )
 
 type ByteMatrix struct {
-	Rows, Cols uint32
+	Rows, Cols int
 	array      []byte
 }
 
-func WrapBytes(r, c uint32, bytes []byte) *ByteMatrix {
+func WrapBytes(r, c int, bytes []byte) *ByteMatrix {
 	return &ByteMatrix{r, c, bytes}
 }
 
-func NewByteMatrix(r, c uint32) *ByteMatrix {
+func NewByteMatrix(r, c int) *ByteMatrix {
 	return &ByteMatrix{r, c, make([]byte, r*c)}
 }
 
-func (m *ByteMatrix) Row(i uint32) []byte {
+func (m *ByteMatrix) Row(i int) []byte {
 	return m.array[i*m.Cols : (i+1)*m.Cols]
 }
 
@@ -44,11 +45,11 @@ func (m *ByteMatrix) Bytes() []byte {
 var is_bench = flag.Bool("is_bench", false, "")
 var matrix []byte
 var mask [20000][20000]bool
-var points []uint32
+var points []int
 
 type WinnowPoints struct {
 	m *ByteMatrix
-	e []uint32 // indexes into the ByteMatrix 'm'
+	e []int // indexes into the ByteMatrix 'm'
 }
 
 func (p *WinnowPoints) Len() int {
@@ -67,29 +68,75 @@ func (p *WinnowPoints) Less(i, j int) bool {
 	return p.e[i] < p.e[j]
 }
 
-func Winnow(m *ByteMatrix, nrows, ncols, nelts uint32) {
+func Winnow(m *ByteMatrix, nrows, ncols, nelts int) {
+	NP := runtime.GOMAXPROCS(0)
 	var values WinnowPoints
 	values.m = m
 
-	for i := uint32(0); i < nrows; i++ {
-		for j := uint32(0); j < ncols; j++ {
-			if *is_bench {
-				mask[i][j] = ((i * j) % (ncols + 1)) == 1
-			}
+	values_work := make(chan int)
+	values_done := make(chan []int)
 
-			if mask[i][j] {
-				idx := i*(nrows+1) + j
-				values.e = append(values.e, idx)
-			}
+	go func() {
+		for i := 0; i < nrows; i++ {
+			values_work <- i
 		}
+		close(values_work)
+	}()
+
+	for i := 0; i < NP; i++ {
+		go func() {
+      var local_indexes []int
+			for i := range values_work {
+				for j := 0; j < ncols; j++ {
+					if *is_bench {
+						mask[i][j] = ((i * j) % (ncols + 1)) == 1
+					}
+
+					if mask[i][j] {
+						idx := i*(nrows+1) + j
+						local_indexes = append(local_indexes, idx)
+					}
+				}
+			}
+			values_done <- local_indexes
+		}()
 	}
+
+  var accum []int
+	for i := 0; i < NP; i++ {
+		local_indexes := <-values_done
+    temp_slice := make ([]int, len(accum) + len (local_indexes))
+    copy (temp_slice, accum)
+    copy (temp_slice [len(accum):], local_indexes)
+    accum = temp_slice
+	}
+
+  values.e = accum
 
 	sort.Sort(&values)
 
-	chunk := uint32(values.Len()) / nelts
+	chunk := values.Len() / nelts
 
-	for i := uint32(0); i < nelts; i++ {
-		points[i] = values.e[i*chunk]
+	point_work := make(chan int)
+	point_done := make(chan bool)
+	go func() {
+		for i := 0; i < nelts; i++ {
+			point_work <- i
+		}
+		close(point_work)
+	}()
+
+	for i := 0; i < NP; i++ {
+		go func() {
+			for i := range point_work {
+				points[i] = values.e[i*chunk]
+			}
+			point_done <- true
+		}()
+	}
+
+	for i := 0; i < NP; i++ {
+		<-point_done
 	}
 }
 
@@ -104,32 +151,32 @@ func read_integer() int {
 	return value
 }
 
-func read_matrix(nrows, ncols uint32) {
-	for i := uint32(0); i < nrows; i++ {
-		for j := uint32(0); j < ncols; j++ {
+func read_matrix(nrows, ncols int) {
+	for i := 0; i < nrows; i++ {
+		for j := 0; j < ncols; j++ {
 			matrix[i*(nrows+1)+j] = byte(read_integer())
 		}
 	}
 }
 
-func read_mask(nrows, ncols uint32) {
-	for i := uint32(0); i < nrows; i++ {
-		for j := uint32(0); j < ncols; j++ {
+func read_mask(nrows, ncols int) {
+	for i := 0; i < nrows; i++ {
+		for j := 0; j < ncols; j++ {
 			mask[i][j] = (read_integer() == 1)
 		}
 	}
 }
 
 func main() {
-	var nrows, ncols, nelts uint32
+	var nrows, ncols, nelts int
 
 	flag.Parse()
 
-	nrows = uint32(read_integer())
-	ncols = uint32(read_integer())
+	nrows = int(read_integer())
+	ncols = int(read_integer())
 
 	m := NewByteMatrix(nrows, ncols)
-	points = make([]uint32, 10000)
+	points = make([]int, 10000)
 	matrix = m.array
 
 	if !*is_bench {
@@ -137,13 +184,13 @@ func main() {
 		read_mask(nrows, ncols)
 	}
 
-	nelts = uint32(read_integer())
+	nelts = int(read_integer())
 
 	Winnow(m, nrows, ncols, nelts)
 
 	if !*is_bench {
 		fmt.Printf("%d\n", nelts)
-		for i := uint32(0); i < nelts; i++ {
+		for i := 0; i < nelts; i++ {
 			fmt.Printf("%d %d\n", points[i]/ncols, points[i]%ncols)
 		}
 		fmt.Printf("\n")
