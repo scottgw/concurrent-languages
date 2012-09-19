@@ -39,7 +39,6 @@ func Outer(wp []Point, nelts int) (m []float64, vec []float64) {
 	m = make([]float64, nelts*nelts)
 	vec = make([]float64, nelts)
 	for i, v := range wp {
-		m[i] = make([]float64, nelts)
 		nmax := float64(0)
 		for j, w := range wp {
 			if i != j {
@@ -47,10 +46,10 @@ func Outer(wp []Point, nelts int) (m []float64, vec []float64) {
 				if d > nmax {
 					nmax = d
 				}
-				m[i*(nelts + 1) + j] = d
+				m[i*nelts + j] = d
 			}
 		}
-		m[i*(nelts + 2)] = float64(nelts) * nmax
+		m[i*(nelts + 1)] = float64(nelts) * nmax
 		vec[i] = Distance(0, 0, v.x, v.y)
 	}
 	return
@@ -89,14 +88,14 @@ func main() {
 	matrix, vector := Outer(points[0:nelts], nelts)
 
 	if !*is_bench {
-		fmt.Printf("%d %d\n", nelts, nelts)
+		fmt.Printf("%d %d", nelts, nelts)
 		for i := 0; i < nelts*nelts; i++ {
-			if i % nelts = 0 {
+			if i % nelts == 0 {
         fmt.Printf("\n")
       }
 			fmt.Printf("%g ", matrix[i])
 		}
-		fmt.Printf("\n")
+		fmt.Printf("\n\n")
 
 		fmt.Printf("%d\n", nelts)
 		for i := 0; i < nelts; i++ {
