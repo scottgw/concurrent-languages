@@ -19,18 +19,34 @@ import (
 
 var is_bench = flag.Bool("is_bench", false, "")
 
-var matrix [20000][20000]byte
-var mask [20000][20000]bool
-var histogram [100]int
+type ByteMatrix struct {
+	Rows, Cols uint32
+	array      []byte
+}
 
-func thresh(nrows, ncols int, percent int) {
-	for i := 0; i < nrows; i++ {
-		for j := 0; j < ncols; j++ {
-			if *is_bench {
-				matrix[i][j] = byte((i * j) % 100)
-			}
-			histogram[matrix[i][j]]++
-		}
+func NewByteMatrix(r, c uint32) *ByteMatrix {
+	return &ByteMatrix{r, c, make([]byte, r*c)}
+}
+
+func WrapBytes(r, c uint32, bytes []byte) *ByteMatrix {
+	return &ByteMatrix{r, c, bytes}
+}
+
+func (m *ByteMatrix) Row(i uint32) []byte {
+	return m.array[i*m.Cols : (i+1)*m.Cols]
+}
+
+func (m *ByteMatrix) Bytes() []byte {
+	return m.array[0 : m.Rows*m.Cols]
+}
+
+var mask [20000][20000]bool
+
+func thresh(m *ByteMatrix, nrows, ncols, percent uint32) {
+	var hist [100]int
+
+	for _, v := range m.Bytes() {
+		hist[v]++
 	}
 
 	count := (nrows * ncols * percent) / 100
@@ -38,40 +54,44 @@ func thresh(nrows, ncols int, percent int) {
 	threshold := 99
 
 	for ; threshold > 0; threshold-- {
-		prefixsum += histogram[threshold]
-		if prefixsum > count {
+		prefixsum += hist[threshold]
+		if prefixsum > int(count) {
 			break
 		}
 	}
-	for i := 0; i < nrows; i++ {
-		for j := 0; j < ncols; j++ {
-			mask[i][j] = matrix[i][j] >= byte(threshold)
+	for i := uint32(0); i < nrows; i++ {
+		row := m.Row(i)
+		for j := range row {
+			mask[i][j] = row[j] >= byte(threshold)
 		}
 	}
 }
 
 func main() {
-	var nrows, ncols, percent int
+	var nrows, ncols, percent uint32
 
 	flag.Parse()
 
 	fmt.Scanf("%d%d", &nrows, &ncols)
 
+	m := WrapBytes(nrows, ncols, make([]byte, 20000*20000))
+
 	if !*is_bench {
-		for i := 0; i < nrows; i++ {
-			for j := 0; j < ncols; j++ {
-				fmt.Scanf("%d", &matrix[i][j])
+		for i := uint32(0); i < nrows; i++ {
+			row := m.Row(i)
+			for j := range row {
+				fmt.Scanf("%d", &row[j])
 			}
 		}
 	}
 
 	fmt.Scanf("%d", &percent)
 
-	thresh(nrows, ncols, percent)
+	thresh(m, nrows, ncols, percent)
 
 	if !*is_bench {
-		for i := 0; i < nrows; i++ {
-			for j := 0; j < ncols; j++ {
+		for i := uint32(0); i < nrows; i++ {
+			for j := uint32(0); j < ncols; j++ {
 				if mask[i][j] {
 					fmt.Printf("1 ")
 				} else {
