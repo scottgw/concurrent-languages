@@ -63,16 +63,13 @@ func (p *WinnowPoints) Less(i, j int) bool {
 	if p.m.array[p.e[i]] != p.m.array[p.e[j]] {
 		return p.m.array[p.e[i]] < p.m.array[p.e[j]]
 	}
+
 	return p.e[i] < p.e[j]
 }
 
-func Winnow(m *ByteMatrix,
-	nrows, ncols, nelts uint32) {
+func Winnow(m *ByteMatrix, nrows, ncols, nelts uint32) {
 	var values WinnowPoints
 	values.m = m
-	values.e = make([]uint32, 10000)
-
-  count := uint32 (0)
 
 	for i := uint32(0); i < nrows; i++ {
 		for j := uint32(0); j < ncols; j++ {
@@ -81,22 +78,17 @@ func Winnow(m *ByteMatrix,
 			}
 
 			if mask[i][j] {
-				idx := i*(nrows + 1) + j
-				values.e[idx] = idx
-        count++
+				idx := i*(nrows+1) + j
+				values.e = append(values.e, idx)
 			}
 		}
 	}
 
 	sort.Sort(&values)
 
-	total := uint32(values.Len())
-	chunk := total / nelts
+	chunk := uint32(values.Len()) / nelts
 
-
-  fmt.Printf("chunk: %d\n", chunk)
 	for i := uint32(0); i < nelts; i++ {
-	  fmt.Printf("hit! %d %d %d\n", i,  i*chunk)
 		points[i] = values.e[i*chunk]
 	}
 }
@@ -115,7 +107,7 @@ func read_integer() int {
 func read_matrix(nrows, ncols uint32) {
 	for i := uint32(0); i < nrows; i++ {
 		for j := uint32(0); j < ncols; j++ {
-			matrix[i*nrows+j] = byte(read_integer())
+			matrix[i*(nrows+1)+j] = byte(read_integer())
 		}
 	}
 }
@@ -152,7 +144,6 @@ func main() {
 	if !*is_bench {
 		fmt.Printf("%d\n", nelts)
 		for i := uint32(0); i < nelts; i++ {
-			fmt.Printf("%d - ", points[i])
 			fmt.Printf("%d %d\n", points[i]/ncols, points[i]%ncols)
 		}
 		fmt.Printf("\n")
