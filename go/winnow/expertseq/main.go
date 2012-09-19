@@ -11,134 +11,147 @@
  * output:
  *   points: a vector of (x, y) points
  *
- */
+ :b*/
 package main
 
 import (
-  "fmt"
-  "sort"
-  "flag"
+	"flag"
+	"fmt"
+	"sort"
 )
 
+type ByteMatrix struct {
+	Rows, Cols uint32
+	array      []byte
+}
+
+func WrapBytes(r, c uint32, bytes []byte) *ByteMatrix {
+	return &ByteMatrix{r, c, bytes}
+}
+
+func NewByteMatrix(r, c uint32) *ByteMatrix {
+	return &ByteMatrix{r, c, make([]byte, r*c)}
+}
+
+func (m *ByteMatrix) Row(i uint32) []byte {
+	return m.array[i*m.Cols : (i+1)*m.Cols]
+}
+
+func (m *ByteMatrix) Bytes() []byte {
+	return m.array[0 : m.Rows*m.Cols]
+}
+
 var is_bench = flag.Bool("is_bench", false, "")
-var matrix [20000][20000]byte;
-var mask [20000][20000]byte;
+var matrix []byte
+var mask [20000][20000]bool
+var points []uint32
 
-type Point struct {
-  value byte;
-  i, j int;
+type WinnowPoints struct {
+	m *ByteMatrix
+	e []uint32 // indexes into the ByteMatrix 'm'
 }
 
-type Points []Point;
-
-var points [10000]Point;
-
-func (p Points) Len() int { return len(p) }
-func (p Points) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
-func (p Points) Less(i, j int) bool {
-  if p[i].value < p[j].value {
-    return true;
-  }
-  if p[i].value > p[j].value {
-    return false;
-  }
-  if p[i].i < p[j].i {
-    return true;
-  }
-  if p[i].i > p[j].i {
-    return false;
-  }
-  return p[i].j < p[j].j;
+func (p *WinnowPoints) Len() int {
+	return len(p.e)
 }
 
-func winnow(nrows, ncols, nelts int) {
-  var n = 0;
+func (p *WinnowPoints) Swap(i, j int) {
+	p.e[i], p.e[j] = p.e[j], p.e[i]
+}
 
-  for i := 0; i < nrows; i++ {
-    for j := 0; j < ncols; j++ {
-      if (*is_bench) {
-        if (((i * j) % (ncols + 1)) == 1) {
-          mask[i][j] = 1;
-        }
-      }
-      if mask[i][j] == 1 {
-        n++;
-      }
-    }
-  }
+func (p *WinnowPoints) Less(i, j int) bool {
+	if p.m.array[p.e[i]] != p.m.array[p.e[j]] {
+		return p.m.array[p.e[i]] < p.m.array[p.e[j]]
+	}
+	return p.e[i] < p.e[j]
+}
 
-  values := make(Points, n);
+func Winnow(m *ByteMatrix,
+	nrows, ncols, nelts uint32) {
+	var values WinnowPoints
+	values.m = m
+	values.e = make([]uint32, 10000)
 
-  var count = 0;
-  for i := 0; i < nrows; i++ {
-    for j := 0; j < ncols; j++ {
-      if mask[i][j] == 1 {
-        values[count] = Point{matrix[i][j], i, j};
-        count++;
-      }
-    }
-  }
-  
-  sort.Sort(values);
+	for i := uint32(0); i < nrows; i++ {
+		for j := uint32(0); j < ncols; j++ {
+			if *is_bench {
+				mask[i][j] = ((i * j) % (ncols + 1)) == 1
+			}
 
-  var total = len(values);
-  var chunk int = total / nelts;
+			if mask[i][j] {
+				idx := i*(nrows + 1) + j
+				values.e[idx] = idx
+			}
+		}
+	}
 
-  for i := 0; i < nelts; i++ {
-    var index = i * chunk;
-    points[i] = values[index];
-  }
+	sort.Sort(&values)
+
+	total := uint32(values.Len())
+	chunk := total / nelts
+
+
+  fmt.Printf("chunk: %d\n", chunk)
+	for i := uint32(0); i < nelts; i++ {
+	  fmt.Printf("hit! %d %d %d\n", i,  i*chunk)
+		points[i] = values.e[i*chunk]
+	}
 }
 
 func read_integer() int {
-  var value int;
-  for true {
-    var read, _ = fmt.Scanf("%d", &value);
-    if read == 1 {
-      break;
-    }
-  }
-  return value;
+	var value int
+	for true {
+		var read, _ = fmt.Scanf("%d", &value)
+		if read == 1 {
+			break
+		}
+	}
+	return value
 }
 
-func read_matrix(nrows, ncols int) {
-  for i := 0; i < nrows; i++ {
-    for j := 0; j < ncols; j++ {
-      matrix[i][j] = byte(read_integer());
-    }
-  }
+func read_matrix(nrows, ncols uint32) {
+	for i := uint32(0); i < nrows; i++ {
+		for j := uint32(0); j < ncols; j++ {
+			matrix[i*nrows+j] = byte(read_integer())
+		}
+	}
 }
 
-func read_mask(nrows, ncols int) {
-  for i := 0; i < nrows; i++ {
-    for j := 0; j < ncols; j++ {
-      mask[i][j] = byte(read_integer());
-    }
-  }
+func read_mask(nrows, ncols uint32) {
+	for i := uint32(0); i < nrows; i++ {
+		for j := uint32(0); j < ncols; j++ {
+			mask[i][j] = (read_integer() == 1)
+		}
+	}
 }
 
 func main() {
-  var nrows, ncols, nelts int;
+	var nrows, ncols, nelts uint32
 
-  flag.Parse();
+	flag.Parse()
 
-  nrows = read_integer();
-  ncols = read_integer();
+	nrows = uint32(read_integer())
+	ncols = uint32(read_integer())
 
-  if (!*is_bench) {
-    read_matrix(nrows, ncols);
-    read_mask(nrows, ncols);
-  }
+	m := NewByteMatrix(nrows, ncols)
+	points = make([]uint32, 10000)
+	matrix = m.array
 
-  nelts = read_integer();
+	if !*is_bench {
+		read_matrix(nrows, ncols)
+		read_mask(nrows, ncols)
+	}
 
-  winnow(nrows, ncols, nelts);
+	nelts = uint32(read_integer())
 
-  if (!*is_bench) {
-    fmt.Printf("%d\n", nelts);
-    for i := 0; i < nelts; i++ {
-      fmt.Printf("%d %d\n", points[i].i, points[i].j);
-    }
-    fmt.Printf("\n");
-  }
+	Winnow(m, nrows, ncols, nelts)
+
+	if !*is_bench {
+		fmt.Printf("%d\n", nelts)
+		for i := uint32(0); i < nelts; i++ {
+			fmt.Printf("%d - ", points[i])
+			fmt.Printf("%d %d\n", points[i]/ncols, points[i]%ncols)
+		}
+		fmt.Printf("\n")
+	}
 }
