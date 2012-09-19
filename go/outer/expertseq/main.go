@@ -44,23 +44,15 @@ func Distance(ax, ay, bx, by int) float64 {
 	return math.Sqrt(float64(Sqr(float64(ax-bx)) + Sqr(float64(ay-by))))
 }
 
-func ToCoord(v, width int) (x, y int) {
-	 x, y = v/width, v%width
-   return
-}
-
 func Outer(wp []Point, nelts int) (m [][]float64, vec []float64) {
 	m = make([][]float64, nelts)
   vec = make ([]float64, nelts)
 	for i, v := range wp {
     m [i] = make ([]float64, nelts)
 		nmax := float64(0)
-		vx, vy := ToCoord(v, nelts)
 		for j, w := range wp {
-			wx, wy := ToCoord(w, nelts)
 			if i != j {
-        fmt.Printf("%d-(%d,%d) %d-(%d,%d)\n", v, vx, vy, w, wx, wy)
-				d := Distance(vx, vy, wx, wy)
+				d := Distance(v.x, v.y, w.x, w.y)
         nmax = Max (nmax, d)
         m [i][j] = d
 			}
