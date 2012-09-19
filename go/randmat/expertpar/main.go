@@ -14,6 +14,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"runtime"
 )
 
 type ByteMatrix struct {
@@ -44,15 +45,34 @@ var (
 func randmat(nrows, ncols, s uint32) *ByteMatrix {
 	matrix := NewByteMatrix(nrows, ncols)
 
-	var i uint32
-	for i = 0; i < nrows; i++ {
-		var seed uint32
-		seed = s + i
-		row := matrix.Row(i)
-		for j := range row {
-			seed = LCG_A*seed + LCG_C
-			row[j] = byte(seed%100) % 100
+	work := make(chan uint32)
+
+	go func() {
+		for i := uint32(0); i < nrows; i++ {
+			work <- i
 		}
+		close(work)
+	}()
+
+	done := make(chan bool)
+	NP := runtime.GOMAXPROCS(0)
+
+	for i := 0; i < NP; i++ {
+		go func() {
+			for i := range work {
+				seed := s + i
+				row := matrix.Row(i)
+				for j := range row {
+					seed = LCG_A*seed + LCG_C
+					row[j] = byte(seed%100) % 100
+				}
+			}
+			done <- true
+		}()
+	}
+
+	for i := 0; i < NP; i++ {
+		<-done
 	}
 
 	return matrix
