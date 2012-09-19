@@ -21,19 +21,10 @@ import (
 
 var is_bench = flag.Bool("is_bench", false, "")
 
-var points [10000]int
-//var matrix [10000][10000]float64
-//var vector [10000]float64
+var points [10000]Point
 
 type Point struct {
-  x, y int
-}
-
-func Max(a, b float64) float64 {
-	if a > b {
-		return a
-	}
-	return b
+	x, y int
 }
 
 func Sqr(x float64) float64 {
@@ -46,22 +37,23 @@ func Distance(ax, ay, bx, by int) float64 {
 
 func Outer(wp []Point, nelts int) (m [][]float64, vec []float64) {
 	m = make([][]float64, nelts)
-  vec = make ([]float64, nelts)
+	vec = make([]float64, nelts)
 	for i, v := range wp {
-    m [i] = make ([]float64, nelts)
+		m[i] = make([]float64, nelts)
 		nmax := float64(0)
 		for j, w := range wp {
 			if i != j {
 				d := Distance(v.x, v.y, w.x, w.y)
-        nmax = Max (nmax, d)
-        m [i][j] = d
+				if d > nmax {
+					nmax = d
+				}
+				m[i][j] = d
 			}
 		}
-
-    m [i][i] = float64(nelts) * nmax
-    vec [i] = Distance (0, 0, vx, vy)
+		m[i][i] = float64(nelts) * nmax
+		vec[i] = Distance(0, 0, v.x, v.y)
 	}
-  return
+	return
 }
 
 func read_integer() int {
@@ -79,7 +71,7 @@ func read_vector_of_points(nelts int) {
 	for i := 0; i < nelts; i++ {
 		a := read_integer()
 		b := read_integer()
-		points[i] = Point {a, b}
+		points[i] = Point{a, b}
 	}
 }
 
