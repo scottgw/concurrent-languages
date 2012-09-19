@@ -8,6 +8,7 @@
  *   matrix: an nrows x ncols integer matrix
  */
 
+
 use Random;
 
 config const is_bench = false;
