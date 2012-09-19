@@ -17,8 +17,8 @@ config const nrows = read(int (32)),
 var matrix: [1..20000, 1..20000] int (32);
 
 proc randmat() {
-  const LCG_A: int(32) = 1664525,
-        LCG_C: int(32)= 1013904223;
+  const LCG_A: uint(32) = 1664525,
+        LCG_C: uint(32) = 1013904223;
   for i in 1..nrows do {
     var seed: int(32) = s + i - 1;
     for j in 1..ncols do {
