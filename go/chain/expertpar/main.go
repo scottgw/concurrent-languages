@@ -16,6 +16,7 @@ import (
 	"fmt"
 	"math"
 	"sort"
+  "runtime"
 )
 
 type ByteMatrix struct {
@@ -51,43 +52,113 @@ var (
 func Randmat(nelts int, s uint32) *ByteMatrix {
 	matrix := NewByteMatrix(nelts, nelts)
 
-	for i := 0; i < nelts; i++ {
-		var seed = s + uint32(i)
-		row := matrix.Row(i)
-		for j := range row {
-			seed = LCG_A*seed + LCG_C
-			row[j] = byte(seed%100) % 100
+	work := make(chan int)
+
+	go func() {
+		for i := 0; i < nelts; i++ {
+			work <- i
 		}
+		close(work)
+	}()
+
+	done := make(chan bool)
+	NP := runtime.GOMAXPROCS(0)
+
+	for i := 0; i < NP; i++ {
+		go func() {
+			for i := range work {
+				seed := s + uint32(i)
+				row := matrix.Row(i)
+				for j := range row {
+					seed = LCG_A*seed + LCG_C
+					row[j] = byte(seed%100) % 100
+				}
+			}
+			done <- true
+		}()
 	}
+
+	for i := 0; i < NP; i++ {
+		<-done
+	}
+
 	return matrix
+
 }
 
 func Thresh(m *ByteMatrix, nelts, percent int) (mask []bool) {
+	NP := runtime.GOMAXPROCS(0)
+
+	hist_work := make(chan int)
+	hist_parts := make(chan []int)
+	go func() {
+		for i := 0; i < nelts; i++ {
+			hist_work <- i
+		}
+		close(hist_work)
+	}()
+
+	for i := 0; i < NP; i++ {
+		go func() {
+			my_hist := make([]int, 100)
+			for i := range hist_work {
+				row := m.Row(i)
+				for j := range row {
+					my_hist[row[j]]++
+				}
+			}
+			hist_parts <- my_hist
+		}()
+	}
+
 	var hist [100]int
-	mask = make([]bool, nelts*nelts)
-	for _, v := range m.Bytes() {
-		hist[v]++
+
+	for i := 0; i < NP; i++ {
+		my_hist := <-hist_parts
+		for j := range my_hist {
+			hist[j] += my_hist[j]
+		}
 	}
 
 	count := (nelts * nelts * percent) / 100
 	prefixsum := 0
-	var threshold int
+	threshold := 99
 
-	for threshold = 99; threshold > 0; threshold-- {
+	for ; threshold > 0; threshold-- {
 		prefixsum += hist[threshold]
 		if prefixsum > count {
 			break
 		}
 	}
 
-	for i := 0; i < nelts; i++ {
-		row := m.Row(i)
-		for j := range row {
-			mask[i*nelts+j] = row[j] >= byte(threshold)
+	mask_work := make(chan int)
+
+	go func() {
+		for i := 0; i < nelts; i++ {
+			mask_work <- i
 		}
+		close(mask_work)
+	}()
+
+  mask = make ([]bool, nelts*nelts)
+	mask_done := make(chan bool)
+	for i := 0; i < NP; i++ {
+		go func() {
+			for i := range mask_work {
+				row := m.Row(i)
+				for j := range row {
+					mask[i*nelts + j] = row[j] >= byte(threshold)
+				}
+			}
+			mask_done <- true
+		}()
 	}
 
-	return
+	for i := 0; i < NP; i++ {
+		<-mask_done
+	}
+
+  return
 }
 
 // Winnow structure and sorting helpers
@@ -117,29 +188,74 @@ type Point struct {
 }
 
 func Winnow(m *ByteMatrix, mask []bool, nelts, winnow_nelts int) (points []Point) {
+	NP := runtime.GOMAXPROCS(0)
 	var values WinnowPoints
 	values.m = m
 
-	for i := 0; i < nelts; i++ {
-		for j := 0; j < nelts; j++ {
-			idx := i*nelts + j
-			if mask[idx] {
-				values.e = append(values.e, idx)
-			}
+	values_work := make(chan int)
+	values_done := make(chan []int)
+
+	go func() {
+		for i := 0; i < nelts; i++ {
+			values_work <- i
 		}
+		close(values_work)
+	}()
+
+	for i := 0; i < NP; i++ {
+		go func() {
+      var local_indexes []int
+			for i := range values_work {
+				for j := 0; j < nelts; j++ {
+				  idx := i*nelts + j
+					if mask[idx] {
+						local_indexes = append(local_indexes, idx)
+					}
+				}
+			}
+			values_done <- local_indexes
+		}()
 	}
+
+  var accum []int
+	for i := 0; i < NP; i++ {
+		local_indexes := <-values_done
+    temp_slice := make ([]int, len(accum) + len (local_indexes))
+    copy (temp_slice, accum)
+    copy (temp_slice [len(accum):], local_indexes)
+    accum = temp_slice
+	}
+
+  values.e = accum
+
 	sort.Sort(&values)
 
-	chunk := values.Len() / winnow_nelts
+	chunk := values.Len() / nelts
 
-	points = make([]Point, winnow_nelts)
-	for i := 0; i < winnow_nelts; i++ {
-		v := values.e[i*chunk]
-		p := Point{v / nelts, v % nelts}
-		points[i] = p
+  points = make([]Point, winnow_nelts)
+	point_work := make(chan int)
+	point_done := make(chan bool)
+	go func() {
+		for i := 0; i < winnow_nelts; i++ {
+			point_work <- i
+		}
+		close(point_work)
+	}()
+
+	for i := 0; i < NP; i++ {
+		go func() {
+			for i := range point_work {
+        v := values.e[i*chunk]
+				points[i] = Point {v/nelts, v%nelts}
+			}
+			point_done <- true
+		}()
 	}
 
-	return
+	for i := 0; i < NP; i++ {
+		<-point_done
+	}
+  return
 }
 
 func Sqr(x float64) float64 {
@@ -153,33 +269,76 @@ func Distance(ax, ay, bx, by int) float64 {
 func Outer(wp []Point, nelts int) (m []float64, vec []float64) {
 	m = make([]float64, nelts*nelts)
 	vec = make([]float64, nelts)
-	for i, v := range wp {
-		nmax := float64(0)
-		for j, w := range wp {
-			if i != j {
-				d := Distance(v.x, v.y, w.x, w.y)
-				if d > nmax {
-					nmax = d
-				}
-				m[i*nelts+j] = d
-			}
+
+	NP := runtime.GOMAXPROCS(0)
+	work := make(chan int)
+	done := make(chan bool)
+
+	go func() {
+		for i := range wp {
+			work <- i
 		}
-		m[i*(nelts+1)] = float64(nelts) * nmax
-		vec[i] = Distance(0, 0, v.x, v.y)
+		close(work)
+	}()
+
+	for i := 0; i < NP; i++ {
+		go func() {
+			for i := range work {
+				v := wp[i]
+				nmax := float64(0)
+				for j, w := range wp {
+					if i != j {
+						d := Distance(v.x, v.y, w.x, w.y)
+						if d > nmax {
+							nmax = d
+						}
+						m[i*nelts+j] = d
+					}
+				}
+				m[i*(nelts+1)] = float64(nelts) * nmax
+				vec[i] = Distance(0, 0, v.x, v.y)
+			}
+			done <- true
+		}()
+	}
+
+	for i := 0; i < NP; i++ {
+		<-done
 	}
 	return
 }
 
 func Product(m, vec []float64, nelts int) (result []float64) {
 	result = make([]float64, nelts)
-	for i := 0; i < nelts; i++ {
-		sum := 0.0
-		for j := 0; j < nelts; j++ {
-			sum += m[i*nelts+j] * vec[j]
+  NP := runtime.GOMAXPROCS(0)
+	work := make(chan int)
+	done := make(chan bool)
+
+	go func() {
+		for i := 0; i < nelts; i++ {
+			work <- i
 		}
-		result[i] = sum
+		close(work)
+	}()
+
+	for i := 0; i < NP; i++ {
+		go func() {
+			for i := range work {
+        sum := 0.0
+				for j:= 0; j < nelts; j++ {
+          sum += m[i*nelts + j] * vec[j]
+        }
+        result [i] = sum
+			}
+			done <- true
+		}()
+	}
+
+	for i := 0; i < NP; i++ {
+		<-done
 	}
 	return
+
 }
 
 
