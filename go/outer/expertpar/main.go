@@ -17,6 +17,7 @@ import (
 	"flag"
 	"fmt"
 	"math"
+	"runtime"
 )
 
 var is_bench = flag.Bool("is_bench", false, "")
@@ -38,19 +39,41 @@ func Distance(ax, ay, bx, by int) float64 {
 func Outer(wp []Point, nelts int) (m []float64, vec []float64) {
 	m = make([]float64, nelts*nelts)
 	vec = make([]float64, nelts)
-	for i, v := range wp {
-		nmax := float64(0)
-		for j, w := range wp {
-			if i != j {
-				d := Distance(v.x, v.y, w.x, w.y)
-				if d > nmax {
-					nmax = d
-				}
-				m[i*nelts + j] = d
-			}
+
+	NP := runtime.GOMAXPROCS(0)
+	work := make(chan int)
+	done := make(chan bool)
+
+	go func() {
+		for i := range wp {
+			work <- i
 		}
-		m[i*(nelts + 1)] = float64(nelts) * nmax
-		vec[i] = Distance(0, 0, v.x, v.y)
+		close(work)
+	}()
+
+	for i := 0; i < NP; i++ {
+		go func() {
+			for i := range work {
+				v := wp[i]
+				nmax := float64(0)
+				for j, w := range wp {
+					if i != j {
+						d := Distance(v.x, v.y, w.x, w.y)
+						if d > nmax {
+							nmax = d
+						}
+						m[i*nelts+j] = d
+					}
+				}
+				m[i*(nelts+1)] = float64(nelts) * nmax
+				vec[i] = Distance(0, 0, v.x, v.y)
+			}
+			done <- true
+		}()
+	}
+
+	for i := 0; i < NP; i++ {
+		<-done
 	}
 	return
 }
@@ -90,9 +113,9 @@ func main() {
 	if !*is_bench {
 		fmt.Printf("%d %d", nelts, nelts)
 		for i := 0; i < nelts*nelts; i++ {
-			if i % nelts == 0 {
-        fmt.Printf("\n")
-      }
+			if i%nelts == 0 {
+				fmt.Printf("\n")
+			}
 			fmt.Printf("%g ", matrix[i])
 		}
 		fmt.Printf("\n\n")
