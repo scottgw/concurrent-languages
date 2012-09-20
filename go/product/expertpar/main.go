@@ -14,6 +14,7 @@ package main
 import (
   "fmt"
   "flag"
+  "runtime"
 )
 
 var is_bench = flag.Bool("is_bench", false, "")
@@ -23,14 +24,35 @@ var vector [10000]float64;
 
 func product(m,vec []float64, nelts int) (result []float64) {
   result = make ([]float64, nelts)
-  for i := 0; i < nelts; i++ {
-    sum := 0.0;
-    for j := 0; j < nelts; j++ {
-      sum += m[i*nelts + j] * vec[j];
-    }
-    result[i] = sum;
-  }
-  return
+
+  NP := runtime.GOMAXPROCS(0)
+	work := make(chan int)
+	done := make(chan bool)
+
+	go func() {
+		for i := 0; i < nelts; i++ {
+			work <- i
+		}
+		close(work)
+	}()
+
+	for i := 0; i < NP; i++ {
+		go func() {
+			for i := range work {
+        sum := 0.0
+				for j:= 0; j < nelts; j++ {
+          sum += m[i*nelts + j] * vec[j]
+        }
+        result [i] = sum
+			}
+			done <- true
+		}()
+	}
+
+	for i := 0; i < NP; i++ {
+		<-done
+	}
+	return
 }
 
 func read_integer() int {
