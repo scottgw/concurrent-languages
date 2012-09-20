@@ -186,19 +186,21 @@ func Product(m, vec []float64, nelts int) (result []float64) {
 func main() {
 	flag.Parse()
 
-  nelts          = flag.Int("N", 10, "nelts")
-	seed           = flag.Uint("S", 8, "seed")
-	thresh_percent = flag.Int("P", 100, "threshold_percent")
-	winnow_nelts   = flag.Int("WN", 9, "winnow_nelts")
+  var nelts, thresh_percent, seed, winnow_nelts int
 
-	rand_matrix := Randmat(*nelts, uint32(*seed))
-	mask := Thresh(rand_matrix, *nelts, *thresh_percent)
-	win_pts := Winnow(rand_matrix, mask, *nelts, *winnow_nelts)
-	out_matrix, out_vec := Outer(win_pts, *winnow_nelts)
-	result := Product(out_matrix, out_vec, *winnow_nelts)
+  fmt.Scan(&nelts)
+  fmt.Scan(&seed)
+  fmt.Scan(&thresh_percent)
+  fmt.Scan(&winnow_nelts)
+
+	rand_matrix := Randmat(nelts, uint32(seed))
+	mask := Thresh(rand_matrix, nelts, thresh_percent)
+	win_pts := Winnow(rand_matrix, mask, nelts, winnow_nelts)
+	out_matrix, out_vec := Outer(win_pts, winnow_nelts)
+	result := Product(out_matrix, out_vec, winnow_nelts)
 
 	if !*is_bench {
-    for i := 0; i < *winnow_nelts; i++{
+    for i := 0; i < winnow_nelts; i++{
 			fmt.Printf("%.3f ", result[i])
 		}
     fmt.Printf("\n")
