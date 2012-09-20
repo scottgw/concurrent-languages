@@ -14,6 +14,7 @@ package main
 import (
 	"flag"
 	"fmt"
+  "sort"
 )
 
 type ByteMatrix struct {
@@ -72,10 +73,11 @@ func Thresh(m *ByteMatrix, nelts, percent int) (mask[]bool) {
 
 	count := (nelts * nelts * percent) / 100
 	prefixsum := 0
+  var threshold int
 
-	for	threshold := 99 ; threshold > 0; threshold-- {
+	for	threshold = 99 ; threshold > 0; threshold-- {
 		prefixsum += hist[threshold]
-		if prefixsum > int(count) {
+		if prefixsum > count {
 			break
 		}
 	}
@@ -90,6 +92,57 @@ func Thresh(m *ByteMatrix, nelts, percent int) (mask[]bool) {
   return
 }
 
+// Winnow structure and sorting helpers
+type WinnowPoints struct {
+	m *ByteMatrix
+	e []int // indexes into the ByteMatrix 'm'
+}
+
+func (p *WinnowPoints) Len() int {
+	return len(p.e)
+}
+
+func (p *WinnowPoints) Swap(i, j int) {
+	p.e[i], p.e[j] = p.e[j], p.e[i]
+}
+
+func (p *WinnowPoints) Less(i, j int) bool {
+	if p.m.array[p.e[i]] != p.m.array[p.e[j]] {
+		return p.m.array[p.e[i]] < p.m.array[p.e[j]]
+	}
+
+	return p.e[i] < p.e[j]
+}
+
+type Point struct {
+	x, y int
+}
+
+
+func Winnow(m *ByteMatrix, mask[]bool,
+            nelts, winnow_nelts int) (points []Point) {
+	var values WinnowPoints
+	values.m = m
+
+	for i := 0; i < nelts; i++ {
+		for j := 0; j < nelts; j++ {
+      idx := i*(nelts+1) + j
+			if mask[idx] {
+				values.e = append(values.e, idx)
+			}
+		}
+	}
+
+	sort.Sort(&values)
+
+	chunk := values.Len() / nelts
+
+	for i := 0; i < nelts; i++ {
+    v := values.e [i*chunk]
+		points[i] = Point {v / nelts, v % nelts}
+	}
+  return
+}
 
 func main() {
 	flag.Parse()
@@ -98,7 +151,7 @@ func main() {
   mask := Thresh (rand_matrix, *nelts, *thresh_percent)
   win_pts := Winnow (rand_matrix, mask, *nelts, *winnow_nelts)
 
-  mask[0] = true
+  win_pts[0] = Point {5,5}
   var result []float64
 	if !*is_bench {
 		for _, v := range result {
