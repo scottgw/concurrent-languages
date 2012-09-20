@@ -132,7 +132,6 @@ func Winnow(m *ByteMatrix, mask[]bool,
 			}
 		}
 	}
-
 	sort.Sort(&values)
 
 	chunk := values.Len() / nelts
