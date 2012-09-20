@@ -14,4 +14,4 @@ all: main
 
 CXXFLAGS+=-std=c++0x -O2
 LDFLAGS+=-ltbb
-CXX=g++
+CXX=icpc

@@ -8,4 +8,4 @@ main: randmat.o thresh.o winnow.o outer.o product.o
 
 CXXFLAGS+=-std=c++0x -O2 -m64 -ltbb -lpthread -lrt
 LDFLAGS+=-ltbb
-CXX=g++
+CXX=icpc

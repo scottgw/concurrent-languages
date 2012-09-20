@@ -15,4 +15,4 @@ all: main
 	./$< < $<.in
 	./$< < $<.in --is_bench
 CXXFLAGS+=-std=c++0x -O2
-CXX=g++
+CXX=icpc

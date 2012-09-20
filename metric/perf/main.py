@@ -92,7 +92,7 @@ def read_table():
 #languages = ["chapel", "cilk", "go", "tbb"]
 #languages = ["chapel", 'cilk']
 #languages = ["erlang"]
-languages = ["tbb","chapel"]
+languages = ["tbb"] 
 #languages = ["chapel"]
 #languages = ["chapel", "cilk", "go", "tbb", 'erlang']
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
@@ -103,8 +103,10 @@ languages = ["tbb","chapel"]
 #languages = ["chapel", "cilk", "go", "tbb", 'erlang', 'scoop']
 #problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
 #problems = ["randmat", "thresh"]
-#problems = ["randmat", "thresh", "winnow", "outer", "product", "chain"]
-problems = ["chain"]
+problems = ["randmat", "thresh", "winnow", "outer", "product", "chain"]
+#problems = ["outer"]
+#problems = ["randmat"]
+#problems = ["chain"]
 #variations = ["seq", "par"]
 #variations = ["seq"]
 variations = ["expertpar", "par"]
@@ -381,7 +383,7 @@ def run_all(redirect_output=True):
         # TODO: refactor variations
         #print time_output
         cmd = ""
-        if language == "go" and variation == 'par':
+        if language == "go" and (variation == 'par' or variation == 'expertpar'):
           cmd += "GOMAXPROCS=%d " % nthreads
 
         #cmd += "timeout %d " % (TIMEOUT)
@@ -1103,21 +1105,11 @@ def calculate():
 
 
 def main():
-  #total_time = (
-      #len(languages) * len(problems) * TOTAL_EXECUTIONS * len(threads) *
-      #TIMEOUT * len(inputs))
-  #print "%fs or %fm or %fh or %fd" % (
-      #total_time, total_time / 60., total_time / (
-          #60. * 60), total_time / (60. * 60 * 24))
-  #raw_input('press enter to start...')
-  #generate_erlang_main()
-  # make_all()
-  # create_inputs()
-  # for _ in range(TOTAL_EXECUTIONS):
-  #   run_all(redirect_output=False)  # TODO: remove outputs
+  make_all()
+  create_inputs()
+  for _ in range(TOTAL_EXECUTIONS):
+    run_all(redirect_output=False)  # TODO: remove outputs
   get_results()
-  #calculate()
-  #test_significance()
   output_graphs()
   system('xmessage " ALL DONE " -nearmouse -timeout 1')
   raw_input("done! press enter to continue...")

@@ -7,4 +7,4 @@ all: main
 CXXFLAGS+=-std=c++0x -O2 -m64 -ltbb -lpthread -lrt -lrt
 LDFLAGS+=-ltbb
 LDFLAGS+=-ltbb
-CXX=g++
+CXX=icpc

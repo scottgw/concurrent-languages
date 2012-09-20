@@ -7,4 +7,4 @@ all: main
 	./$< < $<.in --threads 4 --is_bench
 
 CXXFLAGS+=-std=c++0x -O2
-CXX=g++
+CXX=icpc

@@ -36,12 +36,13 @@ func Distance(ax, ay, bx, by int) float64 {
 	return math.Sqrt(float64(Sqr(float64(ax-bx)) + Sqr(float64(ay-by))))
 }
 
-func Outer(wp []Point, nelts int) (m []float64, vec []float64) {
-	m = make([]float64, nelts*nelts)
+func Outer(wp []Point, nelts int) (m [][]float64, vec []float64) {
+	m = make([][]float64, nelts)
 	vec = make([]float64, nelts)
 
 	NP := runtime.GOMAXPROCS(0)
 	work := make(chan int)
+
 	done := make(chan bool)
 
 	go func() {
@@ -52,9 +53,10 @@ func Outer(wp []Point, nelts int) (m []float64, vec []float64) {
 	}()
 
 	for i := 0; i < NP; i++ {
-		go func() {
+		go func(){
 			for i := range work {
-				v := wp[i]
+        m [i] = make ([]float64, nelts)
+        v := wp[i]
 				nmax := float64(0)
 				for j, w := range wp {
 					if i != j {
@@ -62,10 +64,10 @@ func Outer(wp []Point, nelts int) (m []float64, vec []float64) {
 						if d > nmax {
 							nmax = d
 						}
-						m[i*nelts+j] = d
+						m[i][j] = d
 					}
 				}
-				m[i*(nelts+1)] = float64(nelts) * nmax
+				m[i][i] = float64(nelts) * nmax
 				vec[i] = Distance(0, 0, v.x, v.y)
 			}
 			done <- true
