@@ -14,7 +14,8 @@ package main
 import (
 	"flag"
 	"fmt"
-  "sort"
+	"math"
+	"sort"
 )
 
 type ByteMatrix struct {
@@ -37,23 +38,24 @@ func WrapBytes(r, c int, bytes []byte) *ByteMatrix {
 func (m *ByteMatrix) Bytes() []byte {
 	return m.array[0 : m.Rows*m.Cols]
 }
+
 const (
 	LCG_A = 1664525
 	LCG_C = 1013904223
 )
 
 var (
-	is_bench = flag.Bool("is_bench", false, "")
-	nelts   = flag.Int("N", 10, "nelts")
-	seed     = flag.Uint("S", 8, "seed")
-  thresh_percent =  flag.Int ("P", 100, "threshold_percent")
-	winnow_nelts    = flag.Int("WN", 9, "winnow_nelts")
+	is_bench       = flag.Bool("is_bench", false, "")
+	nelts          = flag.Int("N", 10, "nelts")
+	seed           = flag.Uint("S", 8, "seed")
+	thresh_percent = flag.Int("P", 100, "threshold_percent")
+	winnow_nelts   = flag.Int("WN", 9, "winnow_nelts")
 )
 
 func Randmat(nelts int, s uint32) *ByteMatrix {
 	matrix := NewByteMatrix(nelts, nelts)
 
-  for i := 0; i < nelts; i++ {
+	for i := 0; i < nelts; i++ {
 		var seed = s + uint32(i)
 		row := matrix.Row(i)
 		for j := range row {
@@ -64,32 +66,32 @@ func Randmat(nelts int, s uint32) *ByteMatrix {
 	return matrix
 }
 
-func Thresh(m *ByteMatrix, nelts, percent int) (mask[]bool) {
+func Thresh(m *ByteMatrix, nelts, percent int) (mask []bool) {
 	var hist [100]int
-
+	mask = make([]bool, nelts*nelts)
 	for _, v := range m.Bytes() {
 		hist[v]++
 	}
 
 	count := (nelts * nelts * percent) / 100
 	prefixsum := 0
-  var threshold int
+	var threshold int
 
-	for	threshold = 99 ; threshold > 0; threshold-- {
+	for threshold = 99; threshold > 0; threshold-- {
 		prefixsum += hist[threshold]
 		if prefixsum > count {
 			break
 		}
 	}
 
-  for i := 0; i < nelts; i++ {
+	for i := 0; i < nelts; i++ {
 		row := m.Row(i)
 		for j := range row {
-			mask[i*nelts + j] = row[j] >= byte(threshold)
+			mask[i*nelts+j] = row[j] >= byte(threshold)
 		}
 	}
 
-  return
+	return
 }
 
 // Winnow structure and sorting helpers
@@ -118,15 +120,13 @@ type Point struct {
 	x, y int
 }
 
-
-func Winnow(m *ByteMatrix, mask[]bool,
-            nelts, winnow_nelts int) (points []Point) {
+func Winnow(m *ByteMatrix, mask []bool, nelts, winnow_nelts int) (points []Point) {
 	var values WinnowPoints
 	values.m = m
 
 	for i := 0; i < nelts; i++ {
 		for j := 0; j < nelts; j++ {
-      idx := i*(nelts+1) + j
+			idx := i*nelts + j
 			if mask[idx] {
 				values.e = append(values.e, idx)
 			}
@@ -134,27 +134,71 @@ func Winnow(m *ByteMatrix, mask[]bool,
 	}
 	sort.Sort(&values)
 
-	chunk := values.Len() / nelts
+	chunk := values.Len() / winnow_nelts
 
-	for i := 0; i < nelts; i++ {
-    v := values.e [i*chunk]
-		points[i] = Point {v / nelts, v % nelts}
+	points = make([]Point, winnow_nelts)
+	for i := 0; i < winnow_nelts; i++ {
+		v := values.e[i*chunk]
+		p := Point{v / nelts, v % nelts}
+		points[i] = p
 	}
-  return
+
+	return
+}
+
+func Sqr(x float64) float64 {
+	return x * x
+}
+
+func Distance(ax, ay, bx, by int) float64 {
+	return math.Sqrt(float64(Sqr(float64(ax-bx)) + Sqr(float64(ay-by))))
+}
+
+func Outer(wp []Point, nelts int) (m []float64, vec []float64) {
+	m = make([]float64, nelts*nelts)
+	vec = make([]float64, nelts)
+	for i, v := range wp {
+		nmax := float64(0)
+		for j, w := range wp {
+			if i != j {
+				d := Distance(v.x, v.y, w.x, w.y)
+				if d > nmax {
+					nmax = d
+				}
+				m[i*nelts+j] = d
+			}
+		}
+		m[i*(nelts+1)] = float64(nelts) * nmax
+		vec[i] = Distance(0, 0, v.x, v.y)
+	}
+	return
+}
+
+func Product(m, vec []float64, nelts int) (result []float64) {
+	result = make([]float64, nelts)
+	for i := 0; i < nelts; i++ {
+		sum := 0.0
+		for j := 0; j < nelts; j++ {
+			sum += m[i*nelts+j] * vec[j]
+		}
+		result[i] = sum
+	}
+	return
 }
 
 func main() {
 	flag.Parse()
 
 	rand_matrix := Randmat(*nelts, uint32(*seed))
-  mask := Thresh (rand_matrix, *nelts, *thresh_percent)
-  win_pts := Winnow (rand_matrix, mask, *nelts, *winnow_nelts)
+	mask := Thresh(rand_matrix, *nelts, *thresh_percent)
+	win_pts := Winnow(rand_matrix, mask, *nelts, *winnow_nelts)
+	out_matrix, out_vec := Outer(win_pts, *winnow_nelts)
+	result := Product(out_matrix, out_vec, *winnow_nelts)
 
-  win_pts[0] = Point {5,5}
-  var result []float64
 	if !*is_bench {
-		for _, v := range result {
-      fmt.Printf("%g ", v)
-    }
+    for i := 0; i < *winnow_nelts; i++{
+			fmt.Printf("%.3f ", result[i])
+		}
+    fmt.Printf("\n")
 	}
 }
