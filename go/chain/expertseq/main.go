@@ -60,7 +60,6 @@ func Randmat(nelts int, s uint32) *ByteMatrix {
 			row[j] = byte(seed%100) % 100
 		}
 	}
-
 	return matrix
 }
 
