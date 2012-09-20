@@ -87,6 +87,7 @@ func Thresh(m *ByteMatrix, nelts, percent int) (mask[]bool) {
 			mask[i*nelts + j] = row[j] >= byte(threshold)
 		}
 	}
+
   return
 }
 
