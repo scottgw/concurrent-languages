@@ -18,20 +18,19 @@ import (
 
 var is_bench = flag.Bool("is_bench", false, "")
 
-type double float64;
+var matrix [10000*10000]float64;
+var vector [10000]float64;
 
-var matrix [10000][10000]double;
-var vector [10000]double;
-var result [10000]double;
-
-func product(nelts int) {
+func product(m,vec []float64, nelts int) (result []float64) {
+  result = make ([]float64, nelts)
   for i := 0; i < nelts; i++ {
-    var sum double = 0;
+    sum := 0.0;
     for j := 0; j < nelts; j++ {
-      sum += matrix[i][j] * vector[j];
+      sum += m[i*nelts + j] * vec[j];
     }
     result[i] = sum;
   }
+  return
 }
 
 func read_integer() int {
@@ -45,8 +44,8 @@ func read_integer() int {
   return value;
 }
 
-func read_double() double {
-  var value double;
+func read_float64() float64 {
+  var value float64;
   for true {
     var read, _ = fmt.Scanf("%g", &value);
     if read == 1 {
@@ -57,16 +56,14 @@ func read_double() double {
 }
 
 func read_matrix(nelts int) {
-  for i := 0; i < nelts; i++ {
-    for j := 0; j < nelts; j++ {
-      matrix[i][j] = read_double();
-    }
+  for i := 0; i < nelts*nelts; i++ {
+    matrix[i] = read_float64();
   }
 }
 
 func read_vector(nelts int) {
   for i := 0; i < nelts; i++ {
-    vector[i] = read_double();
+    vector[i] = read_float64();
   }
 }
 
@@ -82,7 +79,7 @@ func main() {
     read_vector(nelts);
   }
 
-  product(nelts);
+  result := product(matrix[0:nelts*nelts], vector[0:nelts], nelts);
 
   if (!*is_bench) {
     fmt.Printf("%d\n", nelts);
