@@ -46,10 +46,6 @@ const (
 
 var (
 	is_bench       = flag.Bool("is_bench", false, "")
-	nelts          = flag.Int("N", 10, "nelts")
-	seed           = flag.Uint("S", 8, "seed")
-	thresh_percent = flag.Int("P", 100, "threshold_percent")
-	winnow_nelts   = flag.Int("WN", 9, "winnow_nelts")
 )
 
 func Randmat(nelts int, s uint32) *ByteMatrix {
@@ -186,8 +182,14 @@ func Product(m, vec []float64, nelts int) (result []float64) {
 	return
 }
 
+
 func main() {
 	flag.Parse()
+
+  nelts          = flag.Int("N", 10, "nelts")
+	seed           = flag.Uint("S", 8, "seed")
+	thresh_percent = flag.Int("P", 100, "threshold_percent")
+	winnow_nelts   = flag.Int("WN", 9, "winnow_nelts")
 
 	rand_matrix := Randmat(*nelts, uint32(*seed))
 	mask := Thresh(rand_matrix, *nelts, *thresh_percent)
