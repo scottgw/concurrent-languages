@@ -16,10 +16,12 @@
 
 unsigned char randmat_matrix[20000][20000];
 
-cilk void fill_row(int begin, int ncols, int seed) {
+cilk void fill_row(int begin, int ncols, unsigned int seed) {
   int j;
+  const int LCG_A = 1664525, LCG_C = 1013904223;
   for (j = 0; j < ncols; j++) {
-    randmat_matrix[begin][j] = (unsigned char) (rand_r(&seed) % 100);
+    seed = LCG_A * seed + LCG_C;
+    randmat_matrix[begin][j] = ((unsigned)seed) % 100;
   }
 }
 

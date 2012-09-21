@@ -38,7 +38,7 @@ proc outer(nelts: int) {
       }
     }
     matrix[i, i] = nmax * nelts;
-    vector[i] = distance((0, 0), points[i]);
+    vector[i] = distance((1, 1), points[i]);
   }
 }
 

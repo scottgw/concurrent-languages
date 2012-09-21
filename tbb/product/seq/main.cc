@@ -46,12 +46,12 @@ int main(int argc, char** argv) {
   if (!is_bench) {
     for (int i = 0; i < nelts; i++) {
       for (int j = 0; j < nelts; j++) {
-        scanf("%g", &matrix[i][j]);
+        scanf("%lf", &matrix[i][j]);
       }
     }
 
     for (int i = 0; i < nelts; i++) {
-      scanf("%g", &vec[i]);
+      scanf("%lf", &vec[i]);
     }
   }
 

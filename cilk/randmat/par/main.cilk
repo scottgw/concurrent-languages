@@ -18,12 +18,12 @@ static unsigned char matrix[30000][30000];
 
 int is_bench = 0;
 
-cilk void fill_row(int begin, int ncols, int seed) {
+cilk void fill_row(int begin, int ncols, unsigned int seed) {
   int j;
   const int LCG_A = 1664525, LCG_C = 1013904223;
   for (j = 0; j < ncols; j++) {
     seed = LCG_A * seed + LCG_C;
-    matrix[begin][j] = seed % 100;
+    matrix[begin][j] = ((unsigned)seed) % 100;
   }
 }
 

@@ -14,11 +14,11 @@ config const is_bench = false;
 
 var matrix: [1..20000, 1..20000]int;
 
-proc randmat(nrows: int, ncols: int, s: int) {
-  const LCG_A: int = 1664525;
-  const LCG_C: int = 1013904223;
+proc randmat(nrows: int, ncols: int, s: uint(32)) {
+  const LCG_A: uint(32) = 1664525;
+  const LCG_C: uint(32) = 1013904223;
   for i in 1..nrows do {
-    var seed = s + i;
+    var seed: uint(32) = s + (i : uint(32)) - 1;
     for j in 1..ncols do {
       seed = LCG_A * seed + LCG_C;
       matrix[i, j] = abs(seed) % 100;
@@ -29,7 +29,7 @@ proc randmat(nrows: int, ncols: int, s: int) {
 proc main() {
   var nrows: int;
   var ncols: int;
-  var s: int;
+  var s: uint (32);
 
   read(nrows, ncols, s);
 

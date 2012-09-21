@@ -22,7 +22,7 @@ double outer_matrix[10000][10000];
 double outer_vector[10000];
 
 typedef struct sPoint {
-  int i, j;
+  int v, i, j;
 } Point;
 
 extern Point winnow_points[10000];
@@ -51,7 +51,7 @@ static cilk void fill_matrix(int begin, int end, int ncols) {
         nmax = max(nmax, outer_matrix[begin][j]);
       }
       outer_matrix[begin][begin] = nmax * ncols;
-      outer_vector[begin] = distance((Point){0, 0}, winnow_points[begin]);
+      outer_vector[begin] = distance((Point){0, 0, 0}, winnow_points[begin]);
     }
     return;
   }
