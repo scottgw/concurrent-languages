@@ -2,164 +2,60 @@ import os
 import math
 import time
 
-def mean(x):
-  n = len(x)
-  total = 0
-  for xi in x:
-    total += xi
-  if n == 0:
-    print all_values
-  return total / n
-
-def stddev(x):
-  n = len(x)
-  total = 0
-  meansq = mean([xi * xi for xi in x])
-  meanx = mean(x)
-  sqmean = meanx * meanx
-  return math.sqrt((n * meansq - n * sqmean) / (n - 1))
-
-yindex = []
-xindex = []
-table = []
-
-def get_t(alpha, df):
-  alpha *= 100
-  y = -1
-  for i in range(len(yindex)):
-    if yindex[i] >= alpha:
-      y = i
-      break
-  x = -1
-  for i in range(len(xindex)):
-    if xindex[i] > df:
-      x = i
-      break
-  return table[x][y]
-
-def ttest(xa, xb, alpha):
-  conf = 1 - alpha
-  f = open('input.data', 'w')
-  f.write('x y\n')
-  for i in range(min(len(xa), len(xb))):
-    f.write('%.10f\t%.10f\n' % (xa[i], xb[i]))
-  f.close()
-  cmd = '../r/test.r %f > out.data' % conf
-
-  system(cmd)
-
-  pvalue = read_file_values('out.data')[0]
-  return pvalue
-
-def get_tdelta(xa, alpha):
-  meana = mean(xa)
-  sa = stddev(xa)
-  na = len(xa)
-  t = get_t(1 - alpha / 2, na - 2)
-  #print 'meana: %f\nsa2: %f\nna: %d\nt: %f' % (meana, sa * sa, na, t)
-  return t * sa / math.sqrt(na)
-
-def read_table():
-  f = open('tdist.txt', 'r')
-  linenum = 0
-  for line in f:
-    linenum += 1
-    words = line.split()
-    if linenum == 1:
-      for i in range(len(words)):
-        if i == 0:
-          continue
-        words[i] = words[i][0:-1]
-        f = float(words[i])
-        yindex.append(f)
-    elif linenum == 2:
-      continue;
-    else:
-      line = []
-      for i in range(len(words)):
-        if i == 0:
-          xindex.append(float(words[i]))
-        else:
-          line.append(float(words[i]))
-      table.append(line)
-    #print words
-  #f.close()
-  #print yindex
-  #print table
+from stats import *
+from problems import *
+from graphs import *
+from utils import *
 
 
-#languages = set(["chapel", "cilk", "erlang", "go", "scoop", "tbb"])
-#languages = ["chapel", "cilk", "go", "tbb"]
-#languages = ["chapel", 'cilk']
-#languages = ["erlang"]
-languages = ["tbb"] 
-#languages = ["chapel"]
-#languages = ["chapel", "cilk", "go", "tbb", 'erlang']
-#problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
-#problems = ["randmat", "thresh"]
-#problems = ["randmat"]
-#problems = ["outer"]
-#languages = ["chapel", "cilk", "go", "tbb", 'erlang']
-#languages = ["chapel", "cilk", "go", "tbb", 'erlang', 'scoop']
-#problems = set(["chain", "outer", "product", "randmat", "thresh", "winnow"])
-#problems = ["randmat", "thresh"]
-problems = ["randmat", "thresh", "winnow", "outer", "product", "chain"]
-#problems = ["outer"]
-#problems = ["randmat"]
-#problems = ["chain"]
+languages = ["chapel", "cilk", "go", "tbb"]
+#problems = ["randmat", "thresh", "winnow", "outer", "product", "chain"]
+problems = ["randmat","chain"]
 #variations = ["seq", "par"]
-#variations = ["seq"]
-variations = ["expertpar", "par"]
+variations = ["seq","expertpar", "par"]
+threads = [1, 2, 3, 4]
+ALPHA = 0.001
+GRAPH_SIZE = 700
+output_dir = "output"
 
-def system(cmd, timeout=False):
-  ret = os.system(cmd)
-  if ret != 0 and not timeout:
-    print cmd
-    assert(False)
 
-def write_to_file(output, content):
-  f = open(output, 'w')
-  f.write(content)
-  f.close()
+inputs = [
+    #ProblemInput(20000, 20000, 666, 1, 1),
+    #ProblemInput(20000, 20000, 666, 1, 10000),
+    ProblemInput(32, 8000, 666, 1, 10000),
+  ]
 
-def read_from_file(file_name):
-  f = open(file_name, 'r')
-  content = f.read()
-  f.close()
-  return content
+all_values = {}
 
-def read_file_values(file_name):
-  result = []
-  f = open(file_name, 'r')
-  for line in f:
-    try:
-      value = float(line)
-      result.append(value)
-    except ValueError:
-      f.close()
-      return []
-  f.close()
-  return result
+class Config:
+  def __init__ (self):
+    self.languages = languages
+    self.problems = problems
+    self.variations = variations
+    self.inputs = inputs
+    self.threads = threads
+    self.all_values = all_values
+    self.alpha = ALPHA
+    self.output_dir = output_dir
+    self.graph_size = GRAPH_SIZE
 
-def get_directory(language, problem, variation=""):
-  directory = "../../%s/%s" % (language, problem);
-  if language != "cpp":
-    directory += "/%s" % variation;
-  return directory
+cfg = Config ()
+
+ERLANG_MAIN = ("#!/bin/sh\n"
+               "cd ~/lucia/metric/perf/%s\n"
+               "erl -noshell +S $1 -s main main is_bench -s init stop\n")
+
 
 def get_problems_with_variations():
   for problem in sorted(problems):
     for variation in sorted(variations):
       yield (problem, variation)
 
-ERLANG_MAIN = ("#!/bin/sh\n"
-               "cd ~/lucia/metric/perf/%s\n"
-               "erl -noshell +S $1 -s main main is_bench -s init stop\n")
-
 def get_all():
   for (problem, variation) in get_problems_with_variations():
     for language in sorted(languages):
       yield (language, problem, variation)
+
 
 def generate_erlang_main():
   for (problem, variation) in get_problems_with_variations():
@@ -177,183 +73,6 @@ def make_all():
     print cmd
     system(cmd)
 
-class Problem(object):
-  def __init__(self):
-    self.name = "problem"
-
-  def input_file_name(self, data):
-    return self.file_name(data) + ".in"
-
-  def output_file_name(self, data):
-    return self.file_name(data) + ".out"
-
-  def file_name(self, data):
-    return "%s_%d_%d_%d_%d_%d" % (self.name, data.nrows, data.ncols,
-        data.seed, data.percent, data.nelts)
-
-class RandmatProblem(Problem):
-  def __init__(self):
-    self.name = "randmat"
-
-  def file_name(self, data):
-    return "%s_%d_%d_%d" % (self.name, data.nrows, data.ncols, data.seed)
-
-  def get_input(self, data):
-    return "%d %d %d\n" % (data.nrows, data.ncols, data.seed)
-
-class ThreshProblem(Problem):
-  def __init__(self):
-      self.name = "thresh"
-
-  def file_name(self, data):
-    return "%s_%d_%d_%d" % (self.name, data.nrows, data.ncols, data.percent)
-
-  def get_input(self, data):
-    return "%d %d %d\n" % (data.nrows, data.ncols, data.percent)
-
-class WinnowProblem(Problem):
-  def __init__(self):
-      self.name = "winnow"
-
-  def file_name(self, data):
-    return "%s_%d_%d_%d_%d" % (
-        self.name, data.nrows, data.ncols, data.percent, data.nelts)
-
-  def get_input(self, data):
-    return "%d %d %d\n" % (data.nrows, data.ncols, data.nelts)
-
-class OuterProblem(Problem):
-  def __init__(self):
-      self.name = "outer"
-
-  def file_name(self, data):
-    return "%s_%d" % (self.name, data.nelts)
-
-  def get_input(self, data):
-    return "%d\n" % (data.nelts)
-
-class ProductProblem(Problem):
-  def __init__(self):
-      self.name = "product"
-
-  def file_name(self, data):
-    return "%s_%d" % (self.name, data.nelts)
-
-  def get_input(self, data):
-    return "%d\n" % (data.nelts)
-
-class ChainProblem(Problem):
-  def __init__(self):
-      self.name = "chain"
-
-  def file_name(self, data):
-    return "%s_%d_%d_%d_%d" % (self.name, data.nrows, data.seed,
-        data.percent, data.nelts)
-
-  def get_input(self, data):
-    return "%d\n%d\n%d\n%d\n" % (data.nrows, data.seed, data.percent,
-        data.nelts)
-
-problem_classes = [RandmatProblem(), ThreshProblem(), WinnowProblem(),
-    OuterProblem(), ProductProblem(), ChainProblem()]
-
-problem_map = { Problem().name: Problem() }
-for p in problem_classes:
-  problem_map[p.name] = p
-
-class ProblemInput(object):
-  def __init__(self, nrows, ncols, seed, percent, nelts):
-    self.nrows = nrows
-    self.ncols = ncols
-    self.seed = seed
-    self.percent = percent
-    self.nelts = nelts
-
-# histogram size is 256, so other input values should probably be bigger
-inputs = [
-    #ProblemInput(100, 100, 666, 50, 100),
-    #ProblemInput(250, 250, 666, 50, 125),
-    #ProblemInput(250, 250, 666, 1, 25 * (2500 / 100.)),
-# chapel-all
-    #ProblemInput(250, 250, 666, 10, 25 * (2500 / 100.)),
-    #ProblemInput(500, 500, 666, 50, 250),
-    #ProblemInput(1000, 1000, 666, 50, 1000),
-# scoop-randmat
-    #ProblemInput(2, 100000, 666, 50, 1000),
-# chapel-all
-    #ProblemInput(500, 500, 666, 10, 500 * (500 / 100.)),
-# chapel-outer, chapel-product, chapel-chain
-    #ProblemInput(500, 500, 666, 1, 500 * (500 / 100.)),
-# chapel-outer, chapel-product, chapel-chain
-    #ProblemInput(500, 500, 666, 2, 2 * 500 * (500 / 100.)),
-    #ProblemInput(1000, 1000, 666, 1, 500 * (1000 / 100.)),
-# chapel-winnow
-    #ProblemInput(1000, 1000, 666, 1, 1000 * (1000 / 100.)),
-    #ProblemInput(1000, 1000, 666, 2, 1500 * (1000 / 100.)),
-# chapel-winnow
-    #ProblemInput(2000, 2000, 666, 1, 2000 * (2000 / 100.)),
-# chapel-randmat, chapel-thresh
-    #ProblemInput(2000, 2000, 666, 50, 2000),
-# chapel-randmat, chapel-thresh
-    #ProblemInput(3000, 3000, 666, 50, 3000),
-    #ProblemInput(10000, 10000, 666, 50, 10000),
-# cilk-thresh
-    #ProblemInput(20000, 20000, 666, 1, 1),
-# cilk-winnow, cilk-outer, cilk-product, cilk-randmat?, cilk-chain
-# cilk-all, tbb-all, all-all
-    #ProblemInput(20000, 20000, 666, 1, 10000),
-    ProblemInput(32, 8000, 666, 1, 10000),
-    #ProblemInput(2000, 20000, 666, 1, 10000),
-# cilk-randmat
-    #ProblemInput(30000, 30000, 666, 1, 1),
-  ]
-
-#threads = [1, 2, 3, 4, 5, 6, 7, 8]
-threads = [1, 2, 3, 4]
-#threads = [2, 4]
-#threads = [1, 2, 8]
-#threads = [1, 4]
-#threads = [4]
-#threads = [1, 2]
-#threads = [1]
-
-##
-
-# ===== general =====
-#inputs = ["10 10 55", "100 100 666", "100 250 777"] #, "100 1000 888"] #, "100 1000 888"]
-#input_thresh = ["55", "66", "77", "55"]
-#input_winnow = ["10", "100", "125", "250"]
-
-# ===== chapel =====
-#inputs = ["10000 10000 888"]
-#input_thresh = ["55"]
-#input_winnow = ["250"]
-
-# ===== cilk =====
-#inputs = ["10000 100000 888"]
-#input_thresh = ["55"]
-#input_winnow = ["250"]
-
-# ===== tbb =====
-#inputs = ["10000 100000 888"]
-#input_thresh = ["55"]
-#input_winnow = ["250"]
-
-# ===== go =====
-#inputs = ["10000 10000 888"]
-#input_thresh = ["55"]
-#input_winnow = ["250"]
-
-# ===== erlang =====
-#inputs = ["10000 1000 888"]
-#input_thresh = ["55"]
-#input_winnow = ["250"]
-
-# ===== scoop =====
-#inputs = ["4 25000 888"]
-#input_thresh = ["55"]
-#input_winnow = ["250"]
-
 def create_inputs():
   for i in range(len(problem_classes)):
     problem = problem_classes[i]
@@ -361,8 +80,6 @@ def create_inputs():
       cur = inputs[j]
       file_name = problem.input_file_name(cur)
       write_to_file(file_name, problem.get_input(cur))
-
-TIMEOUT = 3
 
 def get_time_output(language, problem, variation, i, nthreads):
   return "time-%s-%s-%s-%d-%d.out" % (
@@ -386,7 +103,6 @@ def run_all(redirect_output=True):
         if language == "go" and (variation == 'par' or variation == 'expertpar'):
           cmd += "GOMAXPROCS=%d " % nthreads
 
-        #cmd += "timeout %d " % (TIMEOUT)
         if is_sequential (variation) or nthreads == 1:
           cmd += "taskset -c 0 "
         else:
@@ -448,7 +164,6 @@ def run_all(redirect_output=True):
         print tdiff
 
 results = {}
-all_values = {}
 INVALID = 999
 
 def get_results():
@@ -491,7 +206,6 @@ def get_results():
   #print results
   #print all_values
 
-ALPHA = 0.001
 
 ttest_res = {}
 
@@ -545,37 +259,6 @@ def test_significance_speedup():
                 nthreads, problem, variation, language, i, t)
 
   pretty = {'spseq' : 'sequential', 'spprev' : 'previous parallel'}
-  for language in sorted(languages):
-    for t in ['spseq', 'spprev']:
-      # print '%s:%s' % (language, t)
-      out = []
-      out.append(
-'''
-\\begin{table}[htbp]
-  \\caption{p-values for speedup of language %s vs %s time}
-  \\label{tab:spd-pv-%s-%s}
-  \\centering
-  \\begin{tabular}{c|cccccc}
-nthreads''' % (language, pretty[t], language, t))
-      for problem in sorted(problems):
-        out.append(' & %s' % problem)
-      out.append('\\\\\n\\hline\n')
-      for nthreads in threads:
-        if nthreads == 1:
-          continue
-        out.append('%d' % nthreads)
-        for problem in sorted(problems):
-          out.append(' & %.3e' %  (
-              ttest_res[t][nthreads][problem]['par'][language][0]))
-        out.append('\\\\\n')
-      out.append('''
-  \\end{tabular}
-\\end{table}''')
-      outstr = ''.join(out)
-      output_file_name = "table-pvalue-%s-%s.tex" % (language, t)
-      output_file = "%s/chapters/%s" % (
-              output_dir, output_file_name)
-      write_to_file(output_file, outstr)
 
 def test_significance():
   ttest_types = ['spseq', 'spprev', 'seq', 'par']
@@ -643,404 +326,18 @@ def test_significance():
             , 'expertseq' : 'expert sequential'
             , 'expertpar' : 'expert parallel'
             }
-  for problem in sorted(problems):
-    for t in ['seq', 'par', 'expertseq', 'expertpar']:
-      out = []
-      out.append(
-'''
-\\begin{table}[htbp]
-  \\caption{p-values for %s execution time in problem %s}
-  \\label{tab:exec-pv-%s-%s}
-  \\centering
-  \\begin{tabular}{c|cccccc}
-language''' % (pretty[t], problem, problem, t))
-      for language in sorted(languages):
-        out.append(' & %s' % language)
-      out.append('\\\\\n\\hline\n')
-      for la in sorted(languages):
-        out.append('%s' % la)
-        for lb in sorted(languages):
-          if la == lb:
-            out.append(' & --')
-          else:
-            out.append(' & %.3e' %  (ttest_res[t][problem][la][lb][0]))
-        out.append('\\\\\n')
-      out.append('''
-  \\end{tabular}
-\\end{table}''')
-      outstr = ''.join(out)
-      output_file_name = "table-pvalue-%s-%s.tex" % (problem, t)
-      output_file = "%s/chapters/%s" % (
-              output_dir, output_file_name)
-      write_to_file(output_file, outstr)
 
-
-GRAPH_SIZE = 700
-
-output_dir = "output"
-bargraph_dir = os.path.abspath("../time/graph")
-
-def create_graph(graph_name, values, pretty_name, use_subfigure=True, is_relative=False):
-  variation_names = {"seq" : "Sequential"
-                     , "par" : "Parallel"
-                     , "expertseq": "Expert sequential"
-                     , "expertpar": "Expert parallel"
-                     }
-  for i in range(len(inputs)):
-    nmax = 0
-    for (language, problem, variation) in get_all():
-      cur = values[problem][variation][language][i]
-      if cur == INVALID: continue
-      if cur > nmax: nmax = cur
-
-    if is_relative:
-      nmax = 16
-
-    latex_out = []
-    if use_subfigure:
-      latex_out.append('\\begin{figure}[ht]\n'
-                       '\\centering\n')
-    for variation in variations:
-      out = []
-      out.append("=cluster")
-      for language in sorted(languages):
-        out.append(";" + language)
-      out.append((
-          "\n"
-          "colors=light_green,yellow,red,med_blue,cyan,dark_green\n"
-          "=table\n"
-          "yformat=%g\n"
-          "=norotate\n"
-          "xscale=1\n"))
-      variation_name = variation_names[variation]
-      if nmax == 0: nmax = 1
-      out.append("max=%f\n" % (nmax * 1.1))
-      if is_relative:
-        out.append(
-            "ylabel=%s %sexecution time (in seconds) relative to smallest\n" % (
-                variation_name, pretty_name))
-      else:
-        out.append(
-            "ylabel=%s %sexecution time (in seconds)\n" % (
-                variation_name, pretty_name))
-      for problem in sorted(problems):
-        out.append(problem)
-        nmin = 1
-        if is_relative:
-          nmin = min(float(values[problem][variation][l][i]) for l in languages)
-        for language in sorted(languages):
-          out.append(" %.10f" % (
-            float(values[problem][variation][language][i]) / nmin))
-        out.append("\n")
-
-      if not is_relative:
-        out.append("\n=yerrorbars\n")
-        for problem in sorted(problems):
-          out.append(problem)
-          for language in sorted(languages):
-            out.append(" %.10f" % (get_tdelta(
-                all_values[threads[-1]][problem][variation][language][i],
-                ALPHA)))
-          out.append("\n")
-
-      output_file_name = "graph-%s-%s-%d" % (graph_name, variation, i)
-      if is_relative:
-        output_file_name = "graph-rel-%s-%s-%d" % (
-            graph_name, variation, i)
-      output_file = "%s/images/%s" % (
-              output_dir, output_file_name)
-      write_to_file("%s.perf" % (output_file), ''.join(out))
-
-      cmd = (os.path.join (bargraph_dir, "bargraph.pl") + " -fig %s.perf | fig2dev -L ppm -m 4 > %s.ppm" % (output_file, output_file))
-      print cmd
-      system(cmd)
-      cmd = ("mogrify -reverse -flatten %s.ppm" % output_file)
-      system(cmd)
-      cmd = ("mogrify -resize %dx%d -format png %s.ppm" % (
-          GRAPH_SIZE, GRAPH_SIZE, output_file))
-      system(cmd)
-
-#      caption = "%s" % (variation_name)
-#      if not is_sequential (variation):
-#        caption += " (using %d threads)" % (threads[-1])
-#      label = "fig:exec:time:%s:%d" % (variation, i)
-#      if is_relative:
-#        label = "fig:rel:exec:time:%s:%d" % (variation, i)
-#      if use_subfigure:
-#        latex_out.append((
-#            "\\subfigure[%s]{\n"
-#            "  \\includegraphics[width=65mm]{images/%s.png}\n"
-#            "  \\label{%s}\n"
-#            "}\n") % (caption, output_file_name, label))
-#      else:
-#        latex_out.append((
-#            "\\begin{figure}[htbp]\n"
-#            "  %%\\centering\n"
-#            "  \\includegraphics[width=125mm]{images/%s.png}\n"
-#            "  \\caption{%s}\n"
-#            "  \\label{%s}\n"
-#            "\\end{figure}\n") % (output_file_name, caption, label))
-#
-#      
-#    if use_subfigure:
-#      if is_relative:
-#        latex_out.append('\\caption{Execution time (in seconds) relative to smallest}\n')
-#      else:
-#        latex_out.append('\\caption{Execution time (in seconds)}\n')
-#      if is_relative:
-#        latex_out.append('\\label{fig:rel:exec:time}\n')
-#      else:
-#        latex_out.append('\\label{fig:exec:time}\n')
-#      latex_out.append('\\end{figure}\n')
-#    latex_file_name = "%s/chapters/graph-%s-%d.tex" % (
-#        output_dir, graph_name, i)
-#    if is_relative:
-#      latex_file_name = "%s/chapters/graph-rel-%s-%d.tex" % (
-#          output_dir, graph_name, i)
-#    write_to_file(latex_file_name, ''.join(latex_out))
-
-def create_speedup_graph(graph_name, values, use_subfigure=True):
-  """
-plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title 'actual speedup' w lp, 'plot.dat' using 1:6 title "ideal efficiency" w lp, 'plot.dat' using 1:5 title "actual efficiency" w lp
-  """
-  latex_all = []
-  if use_subfigure:
-    latex_all.append('\\begin{figure}[ht]\n'
-                     '\\centering\n')
-  for problem in sorted(problems):
-    for language in sorted(languages):
-      for i in range(len(inputs)):
-        for variation in ["par","expertpar"]:
-          out = []
-          for nthreads in threads:
-            tseq = values[1][problem][variation][language][i]
-            cur = values[nthreads][problem][variation][language][i]
-
-            print ("base: ", tseq, " current:", cur)
-
-            # if cur == INVALID or cur == 0: continue
-            out.append("%d\t%.10f\t%.10f\t%d\t%.10f\t1\n" % (
-                nthreads, cur, tseq / cur, nthreads,
-                tseq / (nthreads * cur)))
-
-          output_file_name = "graph-%s-%s-%s-%s-%d" % (
-              graph_name, language, problem, variation, i)
-          output_file = "%s/images/%s" % (output_dir, output_file_name)
-          write_to_file("%s.dat" % output_file, ''.join(out))
-          cmd = "cp %s.dat plot.dat" % (output_file)
-          system(cmd)
-          print cmd
-          cmd = "gnuplot %s/plot.script" % (output_dir)
-          system(cmd)
-          cmd = "mv plot.png %s/images/%s.png" % (output_dir, output_file_name)
-          system(cmd)
-          cmd = "rm plot.dat"
-          system(cmd)
-
-#          latex_out = []
-#          caption = (
-#              "Speedup and efficiency for language %s in problem %s" % (
-#              language, problem))
-#          label = "fig:exec:spd:%s:%s:%d" % (language, problem, i)
-#          if use_subfigure:
-#            latex_out.append((
-#                "\\subfigure[%s]{\n"
-#                "  \\includegraphics[width=65mm]{images/%s.png}\n"
-#                "  \\label{%s}\n"
-#                "}\n") % (caption, output_file_name, label))
-#          else:
-#            latex_out.append((
-#                "\\begin{figure}[htbp]\n"
-#                "  %%\\centering\n"
-#                "  \\includegraphics[width=100mm]{images/%s.png}\n"
-#                "  \\caption{%s}\n"
-#                "  \\label{%s}\n"
-#                "\\end{figure}\n") % (output_file_name, caption, label))
-#
-#          latex_file_name = "%s/chapters/%s.tex" % (
-#              output_dir, output_file_name)
-#          write_to_file(latex_file_name, ''.join(latex_out))
-#
-#          latex_all.append("\input{chapters/%s.tex}\n" % output_file_name)
-#          if len(latex_all) % 6 == 0:
-#            latex_all.append("\clearpage\n")
-#  if use_subfigure:
-#    latex_all.append('\\end{figure}\n')
-#  latex_all_file_name = "%s/chapters/graph-%s.tex" % (
-#      output_dir, graph_name)
-#  write_to_file(latex_all_file_name, ''.join(latex_all))
-
-def create_problem_speedup_graph(graph_name, speedup_graph_name, use_subfigure=True):
-  """
-plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title 'actual speedup' w lp, 'plot.dat' using 1:6 title "ideal efficiency" w lp, 'plot.dat' using 1:5 title "actual efficiency" w lp
-  """
-  latex_all = []
-  if use_subfigure:
-    latex_all.append('\\begin{figure}[ht]\n'
-                     '\\centering\n')
-  for problem in sorted(problems):
-    for i in range(len(inputs)):
-      out = []
-      out.append('''
-set xrange [0:8]
-set xtics 1
-set yrange [0:8]
-set ytics 1
-set xlabel "threads"
-set ylabel "speedup"
-set terminal png
-set output "plot.png"
-set key left
-''')
-      out.append("plot ")
-      first = True
-      for language in sorted(languages):
-        output_file_name = "graph-%s-%s-%s-%d" % (
-            speedup_graph_name, language, problem, i)
-        output_file = "%s/images/%s" % (output_dir, output_file_name)
-        if first:
-          first = False
-          out.append("'%s.dat' using 1:4 title 'ideal speedup' w lp" % (
-              output_file))
-        out.append(", ")
-        out.append("'%s.dat' using 1:3 title '%s speedup' w lp" % (
-            output_file, language))
-      output_file_name = "graph-%s-%s-%d" % (graph_name, problem, i)
-      script_name = 'other.script'
-      write_to_file(script_name, ''.join(out))
-      system('gnuplot %s' % script_name)
-      cmd = "mv plot.png %s/images/%s.png" % (output_dir, output_file_name)
-      system(cmd)
-      cmd = 'rm %s' % script_name
-      system(cmd)
-
-#      latex_out = []
-#      if use_subfigure:
-#        caption = "%s" % (problem)
-#      else:
-#        caption = ("Speedup for problem %s in all languages" % (problem))
-#      label = "fig:exec:spd:%s:%d" % (problem, i)
-#      if use_subfigure:
-#        latex_out.append((
-#            "\\subfigure[%s]{\n"
-#            "  \\includegraphics[width=65mm]{images/%s.png}\n"
-#            "  \\label{%s}\n"
-#            "}\n") % (caption, output_file_name, label))
-#      else:
-#        latex_out.append((
-#            "\\begin{figure}[htbp]\n"
-#            "  %%\\centering\n"
-#            "  \\includegraphics[width=100mm]{images/%s.png}\n"
-#            "  \\caption{%s}\n"
-#            "  \\label{%s}\n"
-#            "\\end{figure}\n") % (output_file_name, caption, label))
-#
-#      latex_file_name = "%s/chapters/%s.tex" % (
-#          output_dir, output_file_name)
-#      write_to_file(latex_file_name, ''.join(latex_out))
-#
-#      latex_all.append("\input{chapters/%s.tex}\n" % output_file_name)
-#      if len(latex_all) % 6 == 0:
-#        latex_all.append("\clearpage\n")
-#
-#  if use_subfigure:
-#    latex_all.append('\\caption{Speedup per problem, in all languages}\n'
-#                     '\\label{fig:speedup:problem}\n'
-#                     '\\end{figure}\n')
-#  latex_all_file_name = "%s/chapters/graph-%s.tex" % (
-#    output_dir, graph_name)
-#  write_to_file(latex_all_file_name, ''.join(latex_all))
-
-def create_language_speedup_graph(graph_name, speedup_graph_name, use_subfigure=True):
-#  """
-#plot 'plot.dat' using 1:4 title "ideal speedup" w lp, 'plot.dat' using 1:3 title 'actual speedup' w lp, 'plot.dat' using 1:6 title "ideal efficiency" w lp, 'plot.dat' using 1:5 title "actual efficiency" w lp
-#  """
-#  latex_all = []
-#  if use_subfigure:
-#    latex_all.append('\\begin{figure}[ht]\n'
-#                     '\\centering\n')
-  for language in sorted(languages):
-    for i in range(len(inputs)):
-      out = []
-      out.append('''
-set xrange [0:8]
-set xtics 1
-set yrange [0:8]
-set ytics 1
-set xlabel "threads"
-set ylabel "speedup"
-set terminal png
-set output "plot.png"
-set key left
-''')
-      out.append("plot ")
-      first = True
-      for problem in sorted(problems):
-        output_file_name = "graph-%s-%s-%s-%d" % (
-            speedup_graph_name, language, problem, i)
-        output_file = "%s/images/%s" % (output_dir, output_file_name)
-        if first:
-          first = False
-          out.append("'%s.dat' using 1:4 title 'ideal speedup' w lp" % (
-              output_file))
-        out.append(", ")
-        out.append("'%s.dat' using 1:3 title '%s speedup' w lp" % (
-            output_file, problem))
-      
-      output_file_name = "graph-%s-%s-%d" % (graph_name, language, i)
-      script_name = 'other.script'
-      write_to_file(script_name, ''.join(out))
-      system('gnuplot %s' % script_name)
-      cmd = "mv plot.png %s/images/%s.png" % (output_dir, output_file_name)
-      system(cmd)
-      cmd = 'rm %s' % script_name
-      system(cmd)
-
-#      latex_out = []
-#      if use_subfigure:
-#        caption = "%s" % (language)
-#      else:
-#        caption = ("Speedup for language %s in all problems" % (language))
-#      label = "fig:exec:spd:%s:%d" % (language, i)
-#      if use_subfigure:
-#        latex_out.append((
-#            "\\subfigure[%s]{\n"
-#            "  \\includegraphics[width=65mm]{images/%s.png}\n"
-#            "  \\label{%s}\n"
-#            "}\n") % (caption, output_file_name, label))
-#      else:
-#        latex_out.append((
-#            "\\begin{figure}[htbp]\n"
-#            "  %%\\centering\n"
-#            "  \\includegraphics[width=100mm]{images/%s.png}\n"
-#            "  \\caption{%s}\n"
-#            "  \\label{%s}\n"
-#            "\\end{figure}\n") % (output_file_name, caption, label))
-#
-#      latex_file_name = "%s/chapters/%s.tex" % (
-#          output_dir, output_file_name)
-#      write_to_file(latex_file_name, ''.join(latex_out))
-#
-#      latex_all.append("\input{chapters/%s.tex}\n" % output_file_name)
-#      if len(latex_all) % 6 == 0:
-#        latex_all.append("\clearpage\n")
-#
-#  if use_subfigure:
-#    latex_all.append('\\caption{Speedup per language, in all problems}\n'
-#                     '\\label{fig:speedup:language}\n'
-#                     '\\end{figure}\n')
-#  latex_all_file_name = "%s/chapters/graph-%s.tex" % (
-#    output_dir, graph_name)
-#  write_to_file(latex_all_file_name, ''.join(latex_all))
 
 def output_graphs():
   read_table()
-  create_graph("exec-time", results[threads[-1]], "")
-  create_graph("exec-time", results[threads[-1]], "", is_relative=True)
-  speedup_graph_name = 'speedup'
-  create_speedup_graph(speedup_graph_name, results)
-  create_problem_speedup_graph("problem-speedup", speedup_graph_name)
-  create_language_speedup_graph("language-speedup", speedup_graph_name)
+  # create_graphs2(cfg,results[threads[-1]])
+  speedup_lang_var (cfg, results)  
+#  create_graph(cfg, "exec-time", results[threads[-1]], "")
+#  create_graph(cfg, "exec-time", results[threads[-1]], "", is_relative=True)
+#  speedup_graph_name = 'speedup'
+#  create_speedup_graph(cfg, speedup_graph_name, results)
+#  create_problem_speedup_graph(cfg, "problem-speedup", speedup_graph_name)
+#  create_language_speedup_graph(cfg, "language-speedup", speedup_graph_name)
 
 TOTAL_EXECUTIONS = 3
 
@@ -1105,15 +402,15 @@ def calculate():
 
 
 def main():
-  make_all()
-  create_inputs()
-  for _ in range(TOTAL_EXECUTIONS):
-    run_all(redirect_output=False)  # TODO: remove outputs
+#  make_all()
+#  create_inputs()
+#  for _ in range(TOTAL_EXECUTIONS):
+#    run_all(redirect_output=False)  # TODO: remove outputs
   get_results()
   output_graphs()
-  system('xmessage " ALL DONE " -nearmouse -timeout 1')
-  raw_input("done! press enter to continue...")
-  system('cd %s && make' % output_dir)
+  # system('xmessage " ALL DONE " -nearmouse -timeout 1')
+  # raw_input("done! press enter to continue...")
+  # system('cd %s && make' % output_dir)
 
 if __name__ == '__main__':
   main()
