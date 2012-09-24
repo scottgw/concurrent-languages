@@ -89,13 +89,3 @@ class ProblemInput(object):
     self.seed = seed
     self.percent = percent
     self.nelts = nelts
-
-def get_problems_with_variations(cfg):
-  for problem in sorted(cfg.problems):
-    for variation in sorted(cfg.variations):
-      yield (problem, variation)
-
-def get_all(cfg):
-  for (problem, variation) in get_problems_with_variations(cfg):
-    for language in sorted(cfg.languages):
-      yield (language, problem, variation)

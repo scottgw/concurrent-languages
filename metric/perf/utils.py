@@ -36,4 +36,13 @@ def get_directory(language, problem, variation=""):
     directory += "/%s" % variation;
   return directory
 
+def is_sequential (variation):
+  return  variation.find('seq') >= 0
 
+def is_parallel (variation):
+  return  variation.find('par') >= 0
+
+
+def get_time_output(language, problem, variation, i, nthreads):
+  return "time-%s-%s-%s-%d-%d.out" % (
+      language, problem, variation, i, nthreads)

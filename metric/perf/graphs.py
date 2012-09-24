@@ -1,7 +1,9 @@
+#!/usr/bin/env python
 from rpy import r 
 
 from problems import *
 from utils import *
+from config import *
 
 r.library ("gplots")
 
@@ -11,6 +13,45 @@ variation_names = {"seq" : "Sequential"
                    ,"expertseq": "Expert sequential"
                    , "expertpar": "Expert parallel"
                    }
+
+results = {}
+
+
+def main():
+  get_results()
+
+  create_graphs2(cfg, results[threads[-1]])
+  speedup_lang_var (cfg, results)
+  speedup_prob_var (cfg, results)
+#  create_graph(cfg, "exec-time", results[threads[-1]], "")
+#  create_graph(cfg, "exec-time", results[threads[-1]], "", is_relative=True)
+#  speedup_graph_name = 'speedup'
+#  create_speedup_graph(cfg, speedup_graph_name, results)
+#  create_problem_speedup_graph(cfg, "problem-speedup", speedup_graph_name)
+#  create_language_speedup_graph(cfg, "language-speedup", speedup_graph_name)
+
+
+def get_results():
+  for nthreads in threads:
+    if nthreads not in results:
+      results[nthreads] = {}
+    for (language, problem, variation) in get_all():
+      if is_sequential (variation) and nthreads != threads[-1]: continue
+      if problem not in results[nthreads]:
+        results[nthreads][problem] = {}
+      if variation not in results[nthreads][problem]:
+        results[nthreads][problem][variation] = {}
+      if language not in results[nthreads][problem][variation]:
+        results[nthreads][problem][variation][language] = {}
+
+      for i in range(len(inputs)):
+        time_output = get_time_output(
+            language, problem, variation, i, nthreads)
+        #print time_output
+        cur = read_file_values(time_output)
+        data = Data (r.mean (cur), r.sd (cur))
+
+        results[nthreads][problem][variation][language][i] = data
 
 def create_graphs2 (cfg, values):
   for var in cfg.variations:
@@ -93,3 +134,6 @@ def speedup_lang_var (cfg, values):
         r.legend ("topright", None, legend=cfg.problems, 
                   pch=range(len(cfg.problems)))
         r.dev_off()
+
+if __name__ == '__main__':
+  main ()
