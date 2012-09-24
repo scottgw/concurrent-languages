@@ -1,0 +1,43 @@
+from problems import *
+
+languages = ["chapel", "cilk", "go", "tbb"]
+#problems = ["randmat", "thresh", "winnow", "outer", "product", "chain"]
+problems = ["randmat","chain"]
+#variations = ["seq", "par"]
+variations = ["seq","expertpar", "par"]
+threads = [1, 2, 3, 4]
+output_dir = "output"
+
+
+inputs = [
+    #ProblemInput(20000, 20000, 666, 1, 1),
+    #ProblemInput(20000, 20000, 666, 1, 10000),
+    ProblemInput(32, 8000, 666, 1, 10000),
+  ]
+
+class Config:
+  def __init__ (self):
+    self.languages = languages
+    self.problems = problems
+    self.variations = variations
+    self.inputs = inputs
+    self.threads = threads
+    self.output_dir = output_dir
+
+cfg = Config ()
+
+def get_problems_with_variations():
+  for problem in sorted(cfg.problems):
+    for variation in sorted(cfg.variations):
+      yield (problem, variation)
+
+def get_all():
+  for (problem, variation) in get_problems_with_variations():
+    for language in sorted(cfg.languages):
+      yield (language, problem, variation)
+
+# Data to pass around contains the average and standard deviation.
+class Data:
+  def __init__ (self, avg, std_dev):
+    self.avg = avg
+    self.std_dev = std_dev
