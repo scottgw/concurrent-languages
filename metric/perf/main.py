@@ -39,9 +39,10 @@ class Config:
 cfg = Config ()
 
 class Data:
-  def __init__ (self, avg, std_dev):
+  def __init__ (self, avg, std_dev, ci):
     self.avg = avg
     self.std_dev = std_dev
+    self.ci = ci
 
 ERLANG_MAIN = ("#!/bin/sh\n"
                "cd ~/lucia/metric/perf/%s\n"
@@ -187,12 +188,13 @@ def get_results():
             language, problem, variation, i, nthreads)
         #print time_output
         cur = read_file_values(time_output)
-        data = Data (r.mean (cur), r.sd (cur))
+        ci = r.t_test (cur, **{"conf.level": 0.975})
+        data = Data (r.mean (cur), r.sd (cur), ci)
 
         results[nthreads][problem][variation][language][i] = data
 
 def output_graphs():
-  create_graphs2(cfg, results[threads[-1]])
+  hist_graphs(cfg, results[threads[-1]])
   speedup_lang_var (cfg, results)
   speedup_prob_var (cfg, results)
 #  create_graph(cfg, "exec-time", results[threads[-1]], "")
@@ -205,10 +207,10 @@ def output_graphs():
 TOTAL_EXECUTIONS = 3
 
 def main():
-  make_all()
-  create_inputs()
-  for _ in range(TOTAL_EXECUTIONS):
-    run_all(redirect_output=False)  # TODO: remove outputs
+  # make_all()
+  # create_inputs()
+  # for _ in range(TOTAL_EXECUTIONS):
+  #   run_all(redirect_output=False)  # TODO: remove outputs
   get_results()
   output_graphs()
 
