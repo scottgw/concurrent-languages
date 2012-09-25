@@ -38,6 +38,6 @@ def get_all():
 
 # Data to pass around contains the average and standard deviation.
 class Data:
-  def __init__ (self, avg, std_dev):
+  def __init__ (self, avg, ci):
     self.avg = avg
-    self.std_dev = std_dev
+    self.ci = ci

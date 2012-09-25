@@ -49,7 +49,8 @@ def get_results():
             language, problem, variation, i, nthreads)
         #print time_output
         cur = read_file_values(time_output)
-        data = Data (r.mean (cur), r.sd (cur))
+        ci = r.t_test (cur, **{"conf.level": 0.975})
+        data = Data (r.mean (cur), ci)
 
         results[nthreads][problem][variation][language][i] = data
 
