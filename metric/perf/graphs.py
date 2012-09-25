@@ -6,19 +6,17 @@ from utils import *
 from config import *
 
 r.library ("gplots")
+r.library ("ggplot2")
 
 bargraph_dir = os.path.abspath("../time/graph")
-pretty_names = {"seq" : "Sequential"
-                   ,"par" : "Parallel"
-                   ,"expertseq": "Expert sequential"
-                   , "expertpar": "Expert parallel"
-                   }
-
-results = {}
-
+pretty_names = {"seq"      : "Sequential",
+                "par"      : "Parallel",
+                "expertseq": "Expert sequential",
+                "expertpar": "Expert parallel"
+                }
 
 def main():
-  get_results()
+  results = get_results()
 
   hist_graphs(cfg, results[threads[-1]])
   speedup_lang_var (cfg, results)
@@ -32,6 +30,7 @@ def main():
 
 
 def get_results():
+  results = {}
   for nthreads in threads:
     if nthreads not in results:
       results[nthreads] = {}
@@ -49,10 +48,26 @@ def get_results():
             language, problem, variation, i, nthreads)
         #print time_output
         cur = read_file_values(time_output)
-        ci = r.t_test (cur, **{"conf.level": 0.975})
-        data = Data (r.mean (cur), ci)
 
-        results[nthreads][problem][variation][language][i] = data
+        results[nthreads][problem][variation][language][i] = cur
+  return results
+
+# fieller's method for calculating confidence intervals
+# for ratios of means.
+def fieller (aa, bb):
+  mean_a = r.mean (aa)
+  mean_b = r.mean (bb)
+
+  q   = mean_a/mean_b
+
+  sem_a = r.sd (aa) / sqrt (len (aa))
+  sem_b = r.sd (bb) / sqrt (len (bb))
+
+  t   = r.qt (0.975, len (aa))
+  se_q = q * sqrt (sem_a^2/mean_a^2 + sem_b^2/mean_b^2)
+
+  return (q - t * se_q, q + t * se_q)
+
 
 def hist_graphs (cfg, values):
   for var in cfg.variations:
@@ -64,9 +79,10 @@ def hist_graphs (cfg, values):
       # aggregate by problems
       for lang in cfg.languages:
         # each problem displays a list of language times for that problem
-        v = values[prob][var][lang][0]
-        avgs.append (v.avg)
-        cis.append (v.ci)
+        data = values[prob][var][lang][0]
+        
+        avgs.append (r.mean (data))
+        cis.append (r.t_test (data, **{"conf.level": 0.975}))
 
     def lang_matrix (v):
       return r.matrix (v, len (cfg.languages), len (cfg.problems))
@@ -79,12 +95,15 @@ def hist_graphs (cfg, values):
     upper_bound = lang_matrix (uppers)
 
     r.pdf ('bargraph-time-' + var + '.pdf')
-    r.barplot2 (counts, beside=True, names=cfg.problems, xpd=False, 
-                legend=cfg.languages,
-                **{"plot.grid" : True, "plot.ci": True, 
-                   "ci.l": lower_bound, "ci.u": upper_bound})
+    # r.barplot2 (counts, beside=True, names=cfg.problems, xpd=False, 
+    #             legend=cfg.languages,
+    #             **{"plot.grid" : True, "plot.ci": True, 
+    #                "ci.l": lower_bound, "ci.u": upper_bound})
 
-    r.title (main = pretty_names [var] + ' execution time (seconds)')
+    # r.title (main = pretty_names [var] + ' execution time (seconds)')
+    r.ggplot (counts, 
+              r.aes (x="dose", y="len", fill="supp") +
+              r["geom_bar"] (position=r["position_dodge"]()))
     r.dev_off()
 
 
@@ -125,9 +144,10 @@ def line_plot (cfg, var, control, changing, selector):
   for c in changing:
     cluster = []
     sel     = selector (c)
-    thread1 = sel(1).avg
-    for thread in cfg.threads:
-      cluster.append (thread1 / sel(thread).avg)
+    thr_1_data = sel(1)
+
+    for n in cfg.threads:
+      cluster.append (r.mean (sel(1)) / r.mean (sel(n)))
     r.lines (cfg.threads, cluster, type='o', pch=changing.index (c))
 
   r.legend ("topright", None, legend=changing, pch=range(len(changing)))

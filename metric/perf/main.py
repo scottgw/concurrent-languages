@@ -37,25 +37,6 @@ def create_inputs():
       file_name = problem.input_file_name(cur)
       write_to_file(file_name, problem.get_input(cur))
 
-def get_time_output(language, problem, variation, i, nthreads):
-  return "time-%s-%s-%s-%d-%d.out" % (
-      language, problem, variation, i, nthreads)
-
-
-def fieller (aa, bb):
-  mean_a = r.mean (aa)
-  mean_b = r.mean (bb)
-
-  q   = mean_a/mean_b
-
-  sem_a = r.sd (aa) / sqrt (len (aa))
-  sem_b = r.sd (bb) / sqrt (len (bb))
-
-  t   = r.qt (0.975, len (aa))
-  se_q = q * sqrt (sem_a^2/mean_a^2 + sem_b^2/mean_b^2)
-
-  return (q - t * se_q, q + t * se_q)
-
 def run_all(redirect_output=True):
   # TODO: check processor usage
   for nthreads in threads:

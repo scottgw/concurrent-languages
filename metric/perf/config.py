@@ -35,9 +35,3 @@ def get_all():
   for (problem, variation) in get_problems_with_variations():
     for language in sorted(cfg.languages):
       yield (language, problem, variation)
-
-# Data to pass around contains the average and standard deviation.
-class Data:
-  def __init__ (self, avg, ci):
-    self.avg = avg
-    self.ci = ci
