@@ -2,7 +2,6 @@
 import os
 import math
 import time
-from rpy import r
 
 from problems import *
 from graphs import *
@@ -74,15 +73,15 @@ def run_all(redirect_output=True):
           cmd += " --numLocales=1 --numThreadsPerLocale=%d" % (
               nthreads)
         elif language == "cilk":
-          if variation == 'par':
+          if is_parallel (variation):
             cmd += " --nproc %d" % nthreads
           else:
             pass # must NOT pass --nproc here (because of --is_bench)
         elif language == 'tbb':
-          if variation == 'par':
+          if is_parallel (variation):
             cmd += ' --threads %d' % nthreads
         elif language == 'erlang':
-          if variation == 'par':
+          if is_parallel (variation):
             cmd += ' %d' % nthreads
           else:
             cmd += ' 1'
@@ -114,8 +113,11 @@ def run_all(redirect_output=True):
 TOTAL_EXECUTIONS = 3
 
 def main():
+  print "Building all programs"
   make_all()
+  print "Creating inputs"
   create_inputs()
+  print "Running tests"
   for _ in range(TOTAL_EXECUTIONS):
     run_all(redirect_output=False)  # TODO: remove outputs
 
