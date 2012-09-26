@@ -22,6 +22,7 @@ def main():
   hist_graphs(cfg, results[threads[-1]])
   speedup_lang_var (cfg, results)
   speedup_prob_var (cfg, results)
+  mem_usage_graph (cfg)
 
 def get_results():
   results = {}
@@ -44,6 +45,42 @@ def get_results():
 
         results[nthreads][problem][variation][language][i] = cur
   return results
+
+def mem_usage_graph (cfg):
+  r = robjects.r
+  varis = []
+  langs = []
+  probs = []
+  mems  = []
+  for var in cfg.variations:
+    for lang in cfg.languages:
+      for prob in cfg.problems:
+        mem_filename = get_mem_output (lang, prob, var)
+        with open (mem_filename, 'r') as mem_file:
+          mem = mem_file.readline()
+          mems.append (float (mem))
+        varis.append (var)
+        langs.append (lang)
+        probs.append (prob)
+
+
+  r.pdf ('mem_usage.pdf')
+  df = robjects.DataFrame({'Language': StrVector (langs),
+                           'Problem': StrVector (probs),
+                           'Variation' : StrVector (varis),
+                           'Mem' : FloatVector (mems)
+                           })
+
+  gp = ggplot2.ggplot (df)
+
+  pp = gp + \
+      ggplot2.aes_string (x='Problem', y='Mem', fill='Language') + \
+      ggplot2.geom_bar (position='dodge', stat='identity') + \
+      ggplot2.facet_wrap ('Variation') + \
+      ggplot2.scale_y_log10()
+  pp.plot ()
+  r['dev.off']()
+
 
 # fieller's method for calculating confidence intervals
 # for ratios of means.

@@ -46,3 +46,7 @@ def is_parallel (variation):
 def get_time_output(language, problem, variation, i, nthreads):
   return "time-%s-%s-%s-%d-%d.out" % (
       language, problem, variation, i, nthreads)
+
+def get_mem_output(language, problem, variation):
+  return "mem-%s-%s-%s.out" % (
+      language, problem, variation)

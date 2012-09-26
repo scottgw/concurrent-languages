@@ -1,10 +1,10 @@
 from problems import *
 
 languages = ["chapel", "cilk", "go", "tbb"]
-#problems = ["randmat", "thresh", "winnow", "outer", "product", "chain"]
-problems = ["randmat","chain"]
+problems = ["randmat", "thresh", "winnow", "outer", "product", "chain"]
+#problems = ["randmat","chain"]
 #variations = ["seq", "par"]
-variations = ["seq","expertpar", "par"]
+variations = ["seq","expertseq","expertpar", "par"]
 threads = [1, 2, 3, 4]
 output_dir = "output"
 

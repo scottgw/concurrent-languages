@@ -2,6 +2,7 @@
 import os
 import math
 import time
+from subprocess import Popen, call, PIPE
 
 from problems import *
 from graphs import *
@@ -47,13 +48,15 @@ def run_all(redirect_output=True):
         # TODO: refactor variations
         #print time_output
         cmd = ""
+        env = ""
         if language == "go" and is_parallel (variation):
-          cmd += "GOMAXPROCS=%d " % nthreads
+          env += "GOMAXPROCS=%d " % nthreads
 
+        cmd += "/usr/bin/taskset "
         if is_sequential (variation) or nthreads == 1:
-          cmd += "taskset -c 0 "
+          cmd += "-c 0 "
         else:
-          cmd += "taskset -c 0-%d " % (nthreads - 1)
+          cmd += "-c 0-%d " % (nthreads - 1)
 
         # using python timing below
         # directory = get_directory(language, problem, variation)
@@ -90,27 +93,34 @@ def run_all(redirect_output=True):
             or language == 'go'):
           cmd += " --is_bench"
 
-        if language != "scoop":
-          cmd += " <";
+        #if language != "scoop":
+        #  cmd += " <";
 
-        cmd += " %s" % (problem_map[problem].input_file_name(inputs[i]));
+        # cmd += " %s" % (problem_map[problem].input_file_name(inputs[i]));
 
-        if redirect_output:
-          cmd += " > /dev/null 1>&0 2>&0"
+        #if redirect_output:
+        #  cmd += " > /dev/null 1>&0 2>&0"
 
+        cmd = env + '/usr/bin/time -f "%M" ' + cmd
         print cmd
 
         t1 = time.time ()
-        system(cmd, timeout=True)
+        with open (problem_map[problem].input_file_name(inputs[i]), 'r') as input_file:
+          proc = Popen (cmd, stdin=input_file, stdout=PIPE, stderr=PIPE, shell=True)
+          (out, mem_usage) = proc.communicate ()
         t2 = time.time ()
         tdiff = t2 - t1
 
+        # divide GNU time memory measurement by 4 if it's GNU time V1.7
+
+        with open (get_mem_output (language, problem, variation), 'w') as output_file:
+          output_file.write (str (float (mem_usage.strip()) / 4))
         with open (time_output, 'a') as output_file:
           output_file.write (str (tdiff) + '\n')
 
         print tdiff
 
-TOTAL_EXECUTIONS = 3
+TOTAL_EXECUTIONS = 1
 
 def main():
   print "Building all programs"
