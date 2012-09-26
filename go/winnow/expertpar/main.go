@@ -93,7 +93,7 @@ func Winnow(m *ByteMatrix, nrows, ncols, nelts int) {
 					}
 
 					if mask[i][j] {
-						idx := i*(nrows+1) + j
+						idx := i*ncols + j
 						local_indexes = append(local_indexes, idx)
 					}
 				}
@@ -154,7 +154,7 @@ func read_integer() int {
 func read_matrix(nrows, ncols int) {
 	for i := 0; i < nrows; i++ {
 		for j := 0; j < ncols; j++ {
-			matrix[i*(nrows+1)+j] = byte(read_integer())
+			matrix[i*ncols+j] = byte(read_integer())
 		}
 	}
 }

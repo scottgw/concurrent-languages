@@ -78,7 +78,7 @@ func Winnow(m *ByteMatrix, nrows, ncols, nelts uint32) {
 			}
 
 			if mask[i][j] {
-				idx := i*(nrows+1) + j
+				idx := i*ncols + j
 				values.e = append(values.e, idx)
 			}
 		}
@@ -107,7 +107,7 @@ func read_integer() int {
 func read_matrix(nrows, ncols uint32) {
 	for i := uint32(0); i < nrows; i++ {
 		for j := uint32(0); j < ncols; j++ {
-			matrix[i*(nrows+1)+j] = byte(read_integer())
+			matrix[i*ncols+j] = byte(read_integer())
 		}
 	}
 }
