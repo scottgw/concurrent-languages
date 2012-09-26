@@ -24,9 +24,11 @@ extern double product_result[10000];
 int main(int argc, char** argv) {
   int nelts, randmat_seed, thresh_percent, winnow_nelts, i;
 
-  if (argc == 2) {
-    if (!strcmp(argv[argc - 1], "--is_bench")) {
-      is_bench = 1;
+  if (argc >= 2) {
+    for (int a = 0; a < argc; a++){
+      if (!strcmp(argv[a], "--is_bench")) {
+        is_bench = 1;
+      }
     }
   }
 

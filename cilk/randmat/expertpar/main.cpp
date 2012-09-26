@@ -33,9 +33,11 @@ void randmat(int nrows, int ncols, int seed) {
 int main(int argc, char *argv[]) {
   int nrows, ncols, s, i, j;
 
-  if (argc == 2) {
-    if (!strcmp(argv[argc -1], "--is_bench")) {
-      is_bench = 1;
+  if (argc >= 2) {
+    for (int a = 0; a < argc; a++) {
+      if (!strcmp(argv[a], "--is_bench")) {
+        is_bench = 1;
+      }
     }
   }
 

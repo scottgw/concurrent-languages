@@ -65,13 +65,15 @@ void read_vector_of_points(int nelts) {
 int main(int argc, char *argv[]) {
   int nelts, i, j;
 
-  if (argc == 2) {
-    if (!strcmp(argv[argc - 1], "--is_bench")) {
-      is_bench = 1;
+  if (argc >= 2) {
+    for (int a = 0; a < argc; a++){
+      if (!strcmp(argv[a], "--is_bench")) {
+        is_bench = 1;
+      }
     }
   }
 
-  scanf("%d", &nelts);
+ scanf("%d", &nelts);
 
   if (!is_bench) {
     read_vector_of_points(nelts);
