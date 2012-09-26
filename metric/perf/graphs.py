@@ -158,9 +158,9 @@ def line_plot (cfg, var, control, change_name, changing, selector):
                    })
 
   gg = ggplot2.ggplot (df)
-  pp = gg + ggplot2.geom_line() + \
+  pp = gg + ggplot2.geom_line() + ggplot2.geom_point() +\
       ggplot2.aes_string(x='Threads', y='Speedup', 
-                         group=change_name, color=change_name)
+                         group=change_name, color=change_name, shape=change_name)
 
   pp.plot()
 
