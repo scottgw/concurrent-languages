@@ -5,7 +5,6 @@ import time
 from subprocess import Popen, call, PIPE
 
 from problems import *
-from graphs import *
 from utils import *
 from config import *
 
@@ -52,7 +51,7 @@ def run_all(redirect_output=True):
         if language == "go" and is_parallel (variation):
           env += "GOMAXPROCS=%d " % nthreads
 
-        cmd += "/usr/bin/taskset "
+        cmd += "taskset "
         if is_sequential (variation) or nthreads == 1:
           cmd += "-c 0 "
         else:
