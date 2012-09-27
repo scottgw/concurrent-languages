@@ -36,8 +36,12 @@ proc thresh(nrows: int, ncols: int, percent: int) {
     prefixsum += histogram[100 - i].read();
     threshold = 100 - i ;
   }
-
-  mask = (matrix >= threshold);
+ 
+  forall i in 1..nrows do {
+    for j in 1..ncols do {
+      mask[i, j] = matrix[i, j] >= threshold;
+    }
+  }
 }
 
 proc main() {
