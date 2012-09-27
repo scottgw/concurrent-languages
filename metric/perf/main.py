@@ -73,8 +73,11 @@ def run_all(redirect_output=True):
           cmd += "main"
 
         if language == "chapel":
-          cmd += " --numLocales=1 --numThreadsPerLocale=%d" % (
-              nthreads)
+          cmd += " --numLocales=1"
+          if is_parallel (variation):
+            cmd += " --numThreadsPerLocale=%d" % (nthreads)
+          else:
+            cmd += " --numThreadsPerLocale=1"
         elif language == "cilk":
           if is_parallel (variation):
             cmd += " --nproc %d" % nthreads
@@ -120,7 +123,7 @@ def run_all(redirect_output=True):
 
         print tdiff
 
-TOTAL_EXECUTIONS = 1
+TOTAL_EXECUTIONS = 2
 
 def main():
   print "Building all programs"
