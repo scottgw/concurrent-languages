@@ -11,7 +11,7 @@
 %
 
 -module(main).
--export([main/0]).
+-export([main/0, main/1]).
 
 % worker, processes and sends the results back
 reduce2d_worker(Parent, X, Function) ->
@@ -36,9 +36,12 @@ count_equal(Matrix, Value) ->
   reduce2d(Matrix, fun lists:sum/1,
     fun(X) -> length(lists:filter(fun(Y) -> Y == Value end, X)) end).
 
-fill_histogram(Matrix, 0) -> [count_equal(Matrix, 0)];
-fill_histogram(Matrix, Nmax) ->
-  [count_equal(Matrix, Nmax) | fill_histogram(Matrix, Nmax - 1)].
+fill_histogram_acc (_, -1, Acc) ->
+    lists:reverse (Acc);
+fill_histogram_acc (Matrix, Nmax, Acc) ->
+    fill_histogram_acc (Matrix, Nmax -1, [count_equal (Matrix, Nmax)] ++ Acc).
+fill_histogram (Matrix, Nmax) ->
+    fill_histogram_acc (Matrix, Nmax, []).
 
 get_threshold(-1, [], _) -> 0;
 get_threshold(Index, [Head | Tail], Count) ->
@@ -57,6 +60,7 @@ thresh(Nrows, Ncols, Matrix, Percent) ->
   Threshold = get_threshold(Nmax, Histogram, Count),
   Mask = filter(Matrix, Threshold),
   Mask.
+
 
 read_vector(_, _, 0) -> [];
 read_vector(IsBench, Nrows, Ncols) -> 
