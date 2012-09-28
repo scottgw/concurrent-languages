@@ -29,12 +29,15 @@ get_values(Line, [MatrixHead | MatrixTail], [MaskHead | MaskTail]) ->
   get_values_vector(Line, 0, MatrixHead, MaskHead) ++ get_values(
     Line + 1, MatrixTail, MaskTail).
 
-drop(L, 0) -> L;
-drop([_ | T], I) -> drop (T, I - 1).
+get_points (Nelts, Ls, Chunk) ->
+  get_points_acc (Nelts, Ls, Chunk, []).
 
-get_points(0, _, _) -> [];
-get_points(Nelts, [{_, {I, J}} | Tail], Chunk) ->
-  [ {I, J} | get_points(Nelts - 1, drop(Tail, Chunk - 1), Chunk)].
+get_points_acc (0, _, _, Acc) -> lists:reverse (Acc);
+get_points_acc (Nelts, [{_, {I, J}} | Tail], Chunk, Acc) ->
+  get_points_acc (Nelts - 1, 
+    lists:nthtail (Chunk-1, Tail), 
+    Chunk, 
+    [{I,J}] ++ Acc).
 
 winnow(_, _, Matrix, Mask, Nelts) ->
   Values = get_values(0, Matrix, Mask),
@@ -49,7 +52,7 @@ read_vector(IsBench, Nrows, Ncols) ->
     Val = 
         if 
           IsBench -> 
-            (Nrows * Ncols rem (Ncols + 1)) == 1;
+            ((Nrows * Ncols) rem (Ncols + 1)) == 1;
           true -> 
             {ok, [Value]} = io:fread("", "~d"),
             Value
