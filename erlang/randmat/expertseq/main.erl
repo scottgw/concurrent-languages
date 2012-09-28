@@ -18,12 +18,15 @@
 
 randvet(0, _) -> [];
 randvet(Ncols, S) ->
-  NewS = (((?LCG_A * S) rem ?INT_MAX) + ?LCG_C) rem ?INT_MAX,
-  [NewS rem ?RAND_MAX | randvet(Ncols - 1, NewS rem ?INT_MAX)].
+  NewS = (?LCG_A * S + ?LCG_C) rem ?INT_MAX,
+  [NewS rem ?RAND_MAX | randvet(Ncols - 1, NewS)].
 
-randmat(0, _, _) -> [];
 randmat(Nrows, Ncols, S) ->
-  [randvet(Ncols, S) | randmat(Nrows - 1, Ncols, S + 1)].
+    randmat_acc (Nrows, Ncols, S, []).
+
+randmat_acc (0, _, _, Acc) -> lists:reverse (Acc);
+randmat_acc (Nrows, Ncols, S, Acc) -> 
+    randmat_acc (Nrows - 1, Ncols, S+1, [randvet (Ncols, S)] ++ Acc).
 
 main() -> main(['']).
 main(Args) ->

@@ -7,4 +7,4 @@ all: main
 	echo "2 5 9" | erl -noshell -s main main is_bench -s init stop
 
 main: main.erl
-	erl -compile main
+	erlc +native main.erl -o main.beam
