@@ -72,7 +72,6 @@ read_matrix(_, 0, _) -> [];
 read_matrix(IsBench, Nrows, Ncols) -> 
     [read_vector(IsBench, Nrows, Ncols) | read_matrix(IsBench, Nrows - 1, Ncols)].
 
-
 main() -> main(['']).
 main(Args) ->
   [Arg|_] = Args,
