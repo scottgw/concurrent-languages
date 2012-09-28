@@ -58,20 +58,27 @@ thresh(Nrows, Ncols, Matrix, Percent) ->
   Mask = filter(Matrix, Threshold),
   Mask.
 
-read_vector(0) -> [];
-read_vector(Ncols) -> {ok, [Value]} = io:fread("", "~d"),
-  [ Value | read_vector(Ncols - 1)].
+read_vector(_, _, 0) -> [];
+read_vector(IsBench, Nrows, Ncols) -> 
+    Val = 
+        if 
+            IsBench -> Nrows * Ncols rem 100;
+            true -> {ok, [Value]} = io:fread("", "~d"),
+                    Value
+        end,
+    [ Val | read_vector(IsBench, Nrows, Ncols - 1)].
 
-read_matrix(0, _) -> [];
-read_matrix(Nrows, Ncols) -> [read_vector(Ncols) |
-    read_matrix(Nrows - 1, Ncols)].
+read_matrix(_, 0, _) -> [];
+read_matrix(IsBench, Nrows, Ncols) -> 
+    [read_vector(IsBench, Nrows, Ncols) | read_matrix(IsBench, Nrows - 1, Ncols)].
+
 
 main() -> main(['']).
 main(Args) ->
   [Arg|_] = Args,
   IsBench = string:equal (Arg, 'is_bench'),
   {ok, [Nrows, Ncols]} = io:fread("","~d~d"),
-  Matrix = read_matrix(Nrows, Ncols),
+  Matrix = read_matrix(IsBench, Nrows, Ncols),
   {ok, [Percent]} = io:fread("", "~d"),
   if 
       not IsBench ->
