@@ -32,8 +32,9 @@ fill_histogram (Matrix, Nmax) ->
 
 get_threshold(-1, [], _) -> 0;
 get_threshold(Index, [Head | Tail], Count) ->
-  if Count - Head < 0 -> Index;
-    true -> get_threshold(Index - 1, Tail, Count - Head)
+  if 
+      Count - Head < 0 -> Index;
+      true -> get_threshold(Index - 1, Tail, Count - Head)
   end.
 
 filter(Matrix, Threshold) ->
