@@ -11,7 +11,7 @@
 
 -module(main).
 -export([main/0, main/1]).
--define(INT_MAX,2147483647).
+-define(INT_MAX,4294967296).
 -define(RAND_MAX,100).
 -define(LCG_A,1664525).
 -define(LCG_C,1013904223).
@@ -26,7 +26,7 @@ join(Pids) -> [receive {Pid, Result} -> Result end || Pid <- Pids].
 randmat(Nrows, Ncols, S) ->
   Parent = self(),
   % parallel_for on rows
-  join([spawn(fun() -> Parent ! {self(), randvet(Ncols, S + Row)} end) ||
+  join([spawn(fun() -> Parent ! {self(), randvet(Ncols, S + Row - 1)} end) ||
       Row <- lists:seq(1, Nrows)]).
 
 main() -> main(['']).
