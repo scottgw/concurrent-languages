@@ -16,8 +16,10 @@
 -define(LCG_A,1664525).
 -define(LCG_C,1013904223).
 
+randvet(0, _) -> [];
 randvet(Ncols, S) ->
-    randvet_acc (Ncols, S, []).
+  NewS = (?LCG_A * S + ?LCG_C) rem ?INT_MAX,
+  [NewS rem ?RAND_MAX | randvet(Ncols - 1, NewS)].
 
 randvet_acc (0, _, Acc) ->
     lists:reverse (Acc);
