@@ -34,28 +34,27 @@ get_values_worker(Parent, Line, Col, Values, Mask) ->
         Parent ! {self(), Result}
   end).
 
-get_values_impl(_, _, [], []) -> [];
+get_values_impl(_, _, [], [], Acc) -> lists:reverse (Acc);
 get_values_impl(Parent, Line, [MatrixHead | MatrixTail], [MaskHead |
-    MaskTail]) ->
+    MaskTail], Acc) ->
   % parallel for on rows
-  [get_values_worker(Parent, Line, 0, MatrixHead, MaskHead) |
-    get_values_impl(Parent, Line + 1, MatrixTail, MaskTail)].
+  Worker = get_values_worker (Parent, Line, 0, MatrixHead, MaskHead),
+  get_values_impl (Parent, Line + 1, MatrixTail, MaskTail, [Worker|Acc]).
+%  [get_values_worker(Parent, Line, 0, MatrixHead, MaskHead) |
+%    get_values_impl(Parent, Line + 1, MatrixTail, MaskTail)].
 
 append([]) -> [];
 append([Head | Tail]) -> Head ++ append(Tail).
 
 get_values(Line, Matrix, Mask) ->
   Parent = self(),
-  Pids = get_values_impl(Parent, Line, Matrix, Mask),
+  Pids = get_values_impl(Parent, Line, Matrix, Mask, []),
   Results = append(join(Pids)),
   Results.
 
-drop(L, 0) -> L;
-drop([_ | T], I) -> drop (T, I - 1).
-
 get_points(0, _, _) -> [];
 get_points(Nelts, [{_, {I, J}} | Tail], Chunk) ->
-  [ {I, J} | get_points(Nelts - 1, drop(Tail, Chunk - 1), Chunk)].
+  [ {I, J} | get_points(Nelts - 1, nthtail(Chunk - 1, Tail), Chunk)].
 
 sort_impl(L) ->
   Parent = self(),
