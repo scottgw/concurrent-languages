@@ -85,7 +85,7 @@ func Winnow(m *ByteMatrix, nrows, ncols, nelts int) {
 
 	for i := 0; i < NP; i++ {
 		go func() {
-      var local_indexes []int
+			var local_indexes []int
 			for i := range values_work {
 				for j := 0; j < ncols; j++ {
 					if *is_bench {
@@ -102,16 +102,16 @@ func Winnow(m *ByteMatrix, nrows, ncols, nelts int) {
 		}()
 	}
 
-  var accum []int
+	var accum []int
 	for i := 0; i < NP; i++ {
 		local_indexes := <-values_done
-    temp_slice := make ([]int, len(accum) + len (local_indexes))
-    copy (temp_slice, accum)
-    copy (temp_slice [len(accum):], local_indexes)
-    accum = temp_slice
+		temp_slice := make([]int, len(accum)+len(local_indexes))
+		copy(temp_slice, accum)
+		copy(temp_slice[len(accum):], local_indexes)
+		accum = temp_slice
 	}
 
-  values.e = accum
+	values.e = accum
 
 	sort.Sort(&values)
 

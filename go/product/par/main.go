@@ -12,101 +12,101 @@
 package main
 
 import (
-  "fmt"
-  "flag"
+	"flag"
+	"fmt"
 )
 
 var is_bench = flag.Bool("is_bench", false, "")
 
-type double float64;
+type double float64
 
-var matrix [10000][10000]double;
-var vector [10000]double;
-var result [10000]double;
+var matrix [10000][10000]double
+var vector [10000]double
+var result [10000]double
 
 func fill_result_impl(begin, end, ncols int, done chan bool) {
-  if (begin + 1 == end) {
-    var sum double = 0;
-    for j := 0; j < ncols; j++ {
-      sum += matrix[begin][j] * vector[j];
-    }
-    result[begin] = sum;
-    done <- true
-  } else {
-    middle := begin + (end - begin) / 2;
-    go fill_result_impl(begin, middle, ncols, done);
-    fill_result_impl(middle, end, ncols, done);
-  }
+	if begin+1 == end {
+		var sum double = 0
+		for j := 0; j < ncols; j++ {
+			sum += matrix[begin][j] * vector[j]
+		}
+		result[begin] = sum
+		done <- true
+	} else {
+		middle := begin + (end-begin)/2
+		go fill_result_impl(begin, middle, ncols, done)
+		fill_result_impl(middle, end, ncols, done)
+	}
 }
 
 func fill_result(nrows, ncols int) {
-  done := make(chan bool);
-  // parallel for on rows
-  go fill_result_impl(0, nrows, ncols, done);
-  for i := 0; i < nrows; i++ {
-    <-done;
-  }
+	done := make(chan bool)
+	// parallel for on rows
+	go fill_result_impl(0, nrows, ncols, done)
+	for i := 0; i < nrows; i++ {
+		<-done
+	}
 }
 
 func product(nelts int) {
-  fill_result(nelts, nelts);
+	fill_result(nelts, nelts)
 }
 
 func read_integer() int {
-  var value int;
-  for true {
-    var read, _ = fmt.Scanf("%d", &value);
-    if read == 1 {
-      break;
-    }
-  }
-  return value;
+	var value int
+	for true {
+		var read, _ = fmt.Scanf("%d", &value)
+		if read == 1 {
+			break
+		}
+	}
+	return value
 }
 
 func read_double() double {
-  var value double;
-  for true {
-    var read, _ = fmt.Scanf("%g", &value);
-    if read == 1 {
-      break;
-    }
-  }
-  return value;
+	var value double
+	for true {
+		var read, _ = fmt.Scanf("%g", &value)
+		if read == 1 {
+			break
+		}
+	}
+	return value
 }
 
 func read_matrix(nelts int) {
-  for i := 0; i < nelts; i++ {
-    for j := 0; j < nelts; j++ {
-      matrix[i][j] = read_double();
-    }
-  }
+	for i := 0; i < nelts; i++ {
+		for j := 0; j < nelts; j++ {
+			matrix[i][j] = read_double()
+		}
+	}
 }
 
 func read_vector(nelts int) {
-  for i := 0; i < nelts; i++ {
-    vector[i] = read_double();
-  }
+	for i := 0; i < nelts; i++ {
+		vector[i] = read_double()
+	}
 }
 
 func main() {
-  var nelts int;
+	var nelts int
 
-  flag.Parse();
+	flag.Parse()
 
-  nelts = read_integer();
+	nelts = read_integer()
 
-  if (!*is_bench) {
-    read_matrix(nelts);
-    read_vector(nelts);
-  }
+	if !*is_bench {
+		read_matrix(nelts)
+		read_vector(nelts)
+	}
 
-  product(nelts);
+	product(nelts)
 
-  if (!*is_bench) {
-    fmt.Printf("%d\n", nelts);
-    for i := 0; i < nelts; i++ {
-      fmt.Printf("%g ", result[i]);
-    }
-    fmt.Printf("\n");
-  }
+	if !*is_bench {
+		fmt.Printf("%d\n", nelts)
+		for i := 0; i < nelts; i++ {
+			fmt.Printf("%g ", result[i])
+		}
+		fmt.Printf("\n")
+	}
 }

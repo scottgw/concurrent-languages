@@ -53,10 +53,10 @@ func Outer(wp []Point, nelts int) (m [][]float64, vec []float64) {
 	}()
 
 	for i := 0; i < NP; i++ {
-		go func(){
+		go func() {
 			for i := range work {
-        m [i] = make ([]float64, nelts)
-        v := wp[i]
+				m[i] = make([]float64, nelts)
+				v := wp[i]
 				nmax := float64(0)
 				for j, w := range wp {
 					if i != j {
