@@ -7,6 +7,8 @@ all: main
 	diff main3.out main3.gold
 	erl -noshell -s main main -s init stop < main4.in > main4.out
 	diff main4.out main4.gold
+	erl -noshell -s main main is_bench -s init stop < main.in
+ 
 
 main: main.erl
 	erl -compile main

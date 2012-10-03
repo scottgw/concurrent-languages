@@ -13,7 +13,7 @@
 %
 
 -module(main).
--export([main/0]).
+-export([main/0, main/1]).
 
 get_values_vector(_, _, [], []) -> [];
 get_values_vector(Line, Col, [ValuesHead | ValuesTail], [
@@ -77,18 +77,32 @@ winnow(_, _, Matrix, Mask, Nelts) ->
   Points = get_points(Nelts, Sorted, Chunk),
   [Points].
 
-read_vector(0) -> [];
-read_vector(Ncols) -> {ok, [Value]} = io:fread("", "~d"),
-  [ Value | read_vector(Ncols - 1)].
+read_vector(_, _, 0) -> [];
+read_vector(IsBench, Nrows, Ncols) -> 
+    Val = 
+        if 
+          IsBench -> 
+            ((Nrows * Ncols) rem (Ncols + 1)) == 1;
+          true -> 
+            {ok, [Value]} = io:fread("", "~d"),
+            Value
+        end,
+    [ Val | read_vector(IsBench, Nrows, Ncols - 1)].
 
-read_matrix(0, _) -> [];
-read_matrix(Nrows, Ncols) -> [read_vector(Ncols) |
-    read_matrix(Nrows - 1, Ncols)].
+read_matrix(_, 0, _) -> [];
+read_matrix(IsBench, Nrows, Ncols) -> 
+    [read_vector(IsBench, Nrows, Ncols) | read_matrix(IsBench, Nrows - 1, Ncols)].
 
-main() ->
+main() -> main(['']).
+main(Args) ->
+  [Arg|_] = Args,
+  IsBench = string:equal (Arg, 'is_bench'),
   {ok, [Nrows, Ncols]} = io:fread("","~d~d"),
-  Matrix = read_matrix(Nrows, Ncols),
-  Mask = read_matrix(Nrows, Ncols),
+  Matrix = read_matrix(IsBench, Nrows, Ncols),
+  Mask = read_matrix(IsBench, Nrows, Ncols),
   {ok, [Nelts]} = io:fread("", "~d"),
-  io:format("~w~n\n", [winnow(Nrows, Ncols, Matrix, Mask, Nelts)]).
-
+  if 
+      not IsBench ->
+          io:format("~w~n\n", [winnow(Nrows, Ncols, Matrix, Mask, Nelts)]);
+      true -> ''
+  end. 
