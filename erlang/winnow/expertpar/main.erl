@@ -11,7 +11,6 @@
 % output:
 %   points: a vector of (x, y) points
 %
-
 -module(main).
 -export([main/0, main/1]).
 
