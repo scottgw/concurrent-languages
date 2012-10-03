@@ -66,12 +66,15 @@ read_matrix(0, _) -> [];
 read_matrix(Nrows, Ncols) -> [read_vector(Ncols) |
     read_matrix(Nrows - 1, Ncols)].
 
-main() ->
+main() -> main(['']).
+main(Args) ->
+  [Arg|_] = Args,
+  IsBench = string:equal (Arg, 'is_bench'),
   {ok, [Nrows, Ncols]} = io:fread("","~d~d"),
   Matrix = read_matrix(Nrows, Ncols),
   {ok, [Percent]} = io:fread("", "~d"),
-  io:format("~w~n\n", [
-      thresh(Nrows, Ncols, Matrix, Percent)
-  ])
-  .
-
+  if 
+      not IsBench ->
+          io:format("~w~n\n", [thresh(Nrows, Ncols, Matrix, Percent)]);
+      true -> ''
+  end.

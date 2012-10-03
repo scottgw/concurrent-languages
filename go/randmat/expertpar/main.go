@@ -58,7 +58,7 @@ func randmat(nrows, ncols int, s uint32) *ByteMatrix {
 		go func() {
 			for i := range work {
 				seed := s + uint32(i)
-        row := matrix.Row(i)
+				row := matrix.Row(i)
 				for j := range row {
 					seed = LCG_A*seed + LCG_C
 					row[j] = byte(seed%100) % 100
@@ -78,12 +78,12 @@ func randmat(nrows, ncols int, s uint32) *ByteMatrix {
 func main() {
 	flag.Parse()
 
-  var nrows, ncols int
-  var seed uint32
+	var nrows, ncols int
+	var seed uint32
 
-  fmt.Scan (&nrows)
-  fmt.Scan (&ncols)
-  fmt.Scan (&seed)
+	fmt.Scan(&nrows)
+	fmt.Scan(&ncols)
+	fmt.Scan(&seed)
 
 	matrix := randmat(nrows, ncols, seed)
 

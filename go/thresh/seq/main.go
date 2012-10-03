@@ -13,80 +13,80 @@
 package main
 
 import (
-  "fmt"
-  "flag"
+	"flag"
+	"fmt"
 )
 
 var is_bench = flag.Bool("is_bench", false, "")
-var matrix [20000][20000]byte;
-var mask [20000][20000]byte;
-var histogram [100]int;
+var matrix [20000][20000]byte
+var mask [20000][20000]byte
+var histogram [100]int
 
 func max(a, b int) int {
-  if a > b {
-    return a;
-  }
-  return b;
+	if a > b {
+		return a
+	}
+	return b
 }
 
 func thresh(nrows, ncols int, percent int) {
-  var nmax int = 0;
-  for i := 0; i < nrows; i++ {
-    for j := 0; j < ncols; j++ {
-      nmax = max(nmax, int(matrix[i][j]));
-    }
-  }
+	var nmax int = 0
+	for i := 0; i < nrows; i++ {
+		for j := 0; j < ncols; j++ {
+			nmax = max(nmax, int(matrix[i][j]))
+		}
+	}
 
-  for i := 0; i < nrows; i++ {
-    for j := 0; j < ncols; j++ {
-      histogram[matrix[i][j]]++;
-    }
-  }
+	for i := 0; i < nrows; i++ {
+		for j := 0; j < ncols; j++ {
+			histogram[matrix[i][j]]++
+		}
+	}
 
-  var count int = (nrows * ncols * percent) / 100;
-  var prefixsum int = 0;
-  var threshold int = nmax;
+	var count int = (nrows * ncols * percent) / 100
+	var prefixsum int = 0
+	var threshold int = nmax
 
-  for i := nmax; i >= 0 && prefixsum <= count; i-- {
-    prefixsum += histogram[i];
-    threshold = i;
-  }
+	for i := nmax; i >= 0 && prefixsum <= count; i-- {
+		prefixsum += histogram[i]
+		threshold = i
+	}
 
-  for i := 0; i < nrows; i++ {
-    for j := 0; j < ncols; j++ {
-      if int(matrix[i][j]) >= threshold {
-        mask[i][j] = 1;
-      }
-    }
-  }
+	for i := 0; i < nrows; i++ {
+		for j := 0; j < ncols; j++ {
+			if int(matrix[i][j]) >= threshold {
+				mask[i][j] = 1
+			}
+		}
+	}
 }
 
 func main() {
-  var nrows, ncols, percent int;
+	var nrows, ncols, percent int
 
-  flag.Parse();
+	flag.Parse()
 
-  fmt.Scanf("%d%d", &nrows, &ncols);
+	fmt.Scanf("%d%d", &nrows, &ncols)
 
-  if (!*is_bench) {
-    for i := 0; i < nrows; i++ {
-      for j := 0; j < ncols; j++ {
-        fmt.Scanf("%d", &matrix[i][j]);
-      }
-    }
-  }
+	if !*is_bench {
+		for i := 0; i < nrows; i++ {
+			for j := 0; j < ncols; j++ {
+				fmt.Scanf("%d", &matrix[i][j])
+			}
+		}
+	}
 
-  fmt.Scanf("%d", &percent);
+	fmt.Scanf("%d", &percent)
 
-  thresh(nrows, ncols, percent);
+	thresh(nrows, ncols, percent)
 
-  if (!*is_bench) {
-    for i := 0; i < nrows; i++ {
-      for j := 0; j < ncols; j++ {
-        fmt.Printf("%d ", mask[i][j]);
-      }
-      fmt.Printf("\n");
-    }
-    fmt.Printf("\n");
-  }
+	if !*is_bench {
+		for i := 0; i < nrows; i++ {
+			for j := 0; j < ncols; j++ {
+				fmt.Printf("%d ", mask[i][j])
+			}
+			fmt.Printf("\n")
+		}
+		fmt.Printf("\n")
+	}
 }

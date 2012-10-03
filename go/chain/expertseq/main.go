@@ -45,7 +45,7 @@ const (
 )
 
 var (
-	is_bench       = flag.Bool("is_bench", false, "")
+	is_bench = flag.Bool("is_bench", false, "")
 )
 
 func Randmat(nelts int, s uint32) *ByteMatrix {
@@ -182,16 +182,15 @@ func Product(m, vec []float64, nelts int) (result []float64) {
 	return
 }
 
-
 func main() {
 	flag.Parse()
 
-  var nelts, thresh_percent, seed, winnow_nelts int
+	var nelts, thresh_percent, seed, winnow_nelts int
 
-  fmt.Scan(&nelts)
-  fmt.Scan(&seed)
-  fmt.Scan(&thresh_percent)
-  fmt.Scan(&winnow_nelts)
+	fmt.Scan(&nelts)
+	fmt.Scan(&seed)
+	fmt.Scan(&thresh_percent)
+	fmt.Scan(&winnow_nelts)
 
 	rand_matrix := Randmat(nelts, uint32(seed))
 	mask := Thresh(rand_matrix, nelts, thresh_percent)
@@ -200,9 +199,9 @@ func main() {
 	result := Product(out_matrix, out_vec, winnow_nelts)
 
 	if !*is_bench {
-    for i := 0; i < winnow_nelts; i++{
+		for i := 0; i < winnow_nelts; i++ {
 			fmt.Printf("%.3f ", result[i])
 		}
-    fmt.Printf("\n")
+		fmt.Printf("\n")
 	}
 }
