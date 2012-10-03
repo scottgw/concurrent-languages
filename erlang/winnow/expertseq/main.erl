@@ -24,10 +24,14 @@ get_values_vector(Line, Col, [ValuesHead | ValuesTail], [
     true -> Rest
   end.
 
-get_values(_, [], []) -> [];
-get_values(Line, [MatrixHead | MatrixTail], [MaskHead | MaskTail]) ->
-  get_values_vector(Line, 0, MatrixHead, MaskHead) ++ get_values(
-    Line + 1, MatrixTail, MaskTail).
+get_values(Line, Matrix, Mask) ->
+    get_values_acc (Line, Matrix, Mask, []).
+
+get_values_acc(_, [], [], Acc) -> lists:flatten (lists:reverse (Acc));
+get_values_acc(Line, [MatrixHead | MatrixTail], [MaskHead | MaskTail], Acc) ->
+    Rest = get_values_vector(Line, 0, MatrixHead, MaskHead),
+    get_values_acc(Line + 1, MatrixTail, MaskTail, [Rest|Acc]).
+
 
 get_points (Nelts, Ls, Chunk) ->
   get_points_acc (Nelts, Ls, Chunk, []).
