@@ -12,18 +12,19 @@
  */
 
 module Winnow {
-config const is_bench = false;
 
 use Config;
 
-proc winnow(nrows: int, ncols: int, nelts: int) {
-  var values: [0..20000] (int, (int, int));
-  var count = 0;
+var values: [0..20000] (int, (int, int));
 
-  for (i, j) in [1..nrows, 1..ncols] {
-    if (mask[i, j]) {
-      values[count] = (matrix[i, j], (i, j));
-      count += 1;
+proc winnow(nrows: int, ncols: int, nelts: int) {
+  var count = 0;
+  for i in 1..nrows {
+    for j in 1..ncols {
+      if (mask[i, j]) {
+        values[count] = (matrix[i, j], (i, j));
+        count += 1;
+      }
     }
   }
 
