@@ -12,13 +12,14 @@ from rpy2.robjects import FloatVector, StrVector, IntVector, DataFrame
 bargraph_dir = os.path.abspath("../time/graph")
 pretty_names = {"seq"      : "Sequential",
                 "par"      : "Parallel",
-                "expertseq": "Expert sequential",
-                "expertpar": "Expert parallel"
+                "expertseq": "Sequential (expert)",
+                "expertpar": "Parallel (expert)"
                 }
 
 def main():
   results = get_results()
 
+  expert_compare_graphs (cfg, results[threads[-1]])
   hist_graphs(cfg, results[threads[-1]])
   speedup_lang_var (cfg, results)
   speedup_prob_var (cfg, results)
@@ -63,7 +64,7 @@ def mem_usage_graph (cfg):
         langs.append (lang)
         probs.append (prob)
 
-
+  # memory usage is a simple histogram with all information in one graph.
   r.pdf ('mem_usage.pdf')
   df = robjects.DataFrame({'Language': StrVector (langs),
                            'Problem': StrVector (probs),
@@ -73,14 +74,16 @@ def mem_usage_graph (cfg):
 
   gp = ggplot2.ggplot (df)
 
-  pp = gp + \
+
+  # we rotate the x labels to make sure they don't overlap
+  pp = gp  +\
+      ggplot2.opts (**{'axis.text.x': ggplot2.theme_text (angle = 90, hjust=1)}) + \
       ggplot2.aes_string (x='Problem', y='Mem', fill='Language') + \
       ggplot2.geom_bar (position='dodge', stat='identity') + \
-      ggplot2.facet_wrap ('Variation') + \
-      ggplot2.scale_y_log10()
+      ggplot2.facet_wrap ('Variation')# + \
+#      ggplot2.scale_y_log10()
   pp.plot ()
   r['dev.off']()
-
 
 # fieller's method for calculating confidence intervals
 # for ratios of means.
@@ -97,6 +100,45 @@ def fieller (aa, bb):
   se_q = q * sqrt (sem_a**2/mean_a**2 + sem_b**2/mean_b**2)
 
   return (q - t * se_q, q + t * se_q)
+
+def expert_compare_graphs (cfg, values):
+  r = robjects.r
+  for lang in cfg.languages:
+    times = []
+    varss = []
+    probs = []
+    ses   = []
+
+    for prob in cfg.problems:
+      for var in cfg.variations:
+        # we use the pretty names to make the 
+        varss.append (pretty_names [var])
+        probs.append (prob)
+
+        data = FloatVector (values[prob][var][lang][0])
+        times.append (r['mean'] (data)[0])
+
+        t_result = r['t.test'] (data, **{"conf.level": 0.975}).rx ('conf.int')[0]
+        ses.append ((t_result[1] - t_result[0])/2)
+
+    r.pdf ('compare-expert-time-' + lang + '.pdf')
+    df = robjects.DataFrame({'Variation': StrVector (varss),
+                             'Problem': StrVector (probs),
+                             'Time' : FloatVector (times),
+                             'SE' : FloatVector (ses)
+                             })
+
+    limits = ggplot2.aes (ymax = 'Time + SE', ymin = 'Time - SE')
+    dodge = ggplot2.position_dodge (width=0.9)
+
+    gp = ggplot2.ggplot (df)
+
+    pp = gp + \
+        ggplot2.aes_string (x='Problem', y='Time', fill='Variation') + \
+        ggplot2.geom_bar (position='dodge', stat='identity') + \
+        ggplot2.geom_errorbar (limits, position=dodge, width=0.25) 
+    pp.plot ()
+    r['dev.off']()
 
 
 def hist_graphs (cfg, values):
@@ -178,6 +220,11 @@ def line_plot (cfg, var, control, change_name, changing, selector):
   thrds = []
   changes = []
 
+  for n in cfg.threads:
+    speedups.append (n)
+    thrds.append (n)
+    changes.append ('ideal')
+
   for c in changing:
     sel     = selector (c)
     thr_1_data = sel(1)
@@ -194,10 +241,20 @@ def line_plot (cfg, var, control, change_name, changing, selector):
                    change_name: StrVector (changes)
                    })
 
+  ideal_changing = ['ideal']
+  ideal_changing.extend (changing)
+  legendVec = IntVector (range (len (ideal_changing)))
+  legendVec.names = StrVector (ideal_changing)
+
   gg = ggplot2.ggplot (df)
-  pp = gg + ggplot2.geom_line() + ggplot2.geom_point() +\
+
+  pp = gg + \
+      ggplot2.xlim (min(threads), max(threads)) + ggplot2.ylim(min(threads), max(threads)) +\
+      ggplot2.geom_line() + ggplot2.geom_point() +\
       ggplot2.aes_string(x='Threads', y='Speedup', 
-                         group=change_name, color=change_name, shape=change_name)
+                         group=change_name, color=change_name, 
+                         shape=change_name) +\
+      ggplot2.scale_shape_manual(values=legendVec)
 
   pp.plot()
 
