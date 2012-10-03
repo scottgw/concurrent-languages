@@ -46,16 +46,11 @@ get_values_impl(Parent, Line, [MatrixHead | MatrixTail], [MaskHead |
   % parallel for on rows
   Worker = get_values_worker (Parent, Line, 0, MatrixHead, MaskHead),
   get_values_impl (Parent, Line + 1, MatrixTail, MaskTail, [Worker|Acc]).
-%  [get_values_worker(Parent, Line, 0, MatrixHead, MaskHead) |
-%    get_values_impl(Parent, Line + 1, MatrixTail, MaskTail)].
-
-append([]) -> [];
-append([Head | Tail]) -> Head ++ append(Tail).
 
 get_values(Line, Matrix, Mask) ->
   Parent = self(),
   Pids = get_values_impl(Parent, Line, Matrix, Mask, []),
-  Results = append(join(Pids)),
+  Results = lists:flatten(join(Pids)),
   Results.
 
 get_points(0, _, _) -> [];
