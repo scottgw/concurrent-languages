@@ -15,14 +15,20 @@
 -module(main).
 -export([main/0, main/1]).
 
-get_values_vector(_, _, [], []) -> [];
-get_values_vector(Line, Col, [ValuesHead | ValuesTail], [
-    MaskHead | MaskTail]) ->
-  Rest = get_values_vector(Line, Col + 1, ValuesTail, MaskTail),
-  if MaskHead == 1 -> [
-        {ValuesHead, {Line, Col}} | Rest];
-    true -> Rest
-  end.
+get_values_vector(Line, Col, Values, Mask) ->
+    get_values_vector_acc (Line, Col, Values, Mask, []).
+
+get_values_vector_acc(_, _, [], [], Acc) -> lists:reverse (Acc);
+get_values_vector_acc(Line, Col, 
+                      [ValuesHead | ValuesTail], 
+                      [MaskHead | MaskTail], Acc) ->
+    case MaskHead of
+        1 -> 
+            get_values_vector_acc (Line, Col+1, ValuesTail, MaskTail,
+                                   [{ValuesHead, {Line, Col}} | Acc]);
+        _ -> 
+            get_values_vector_acc (Line, Col+1, ValuesTail, MaskTail, Acc)
+    end.
 
 join(Pids) ->
   [receive {Pid, Result} -> Result end || Pid <- Pids].
