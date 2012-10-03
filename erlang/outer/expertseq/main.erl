@@ -28,13 +28,17 @@ fix_diagonal_vector(Line, Col, [Head | Tail], Point, Nelts, Nmax) ->
           Line, Col + 1, Tail, Point, Nelts, Nmax)]
   end.
 
-fix_diagonal(_, [], _, _) -> [];
-fix_diagonal(Line, [Head | Tail], [HeadPoints | TailPoints], Nelts) ->
-  [ fix_diagonal_vector(Line, 0, Head, HeadPoints, Nelts, lists:max(Head)) |
-    fix_diagonal(Line + 1, Tail, TailPoints, Nelts)].
+fix_diagonal (Matrix, Points, Nelts) ->
+    lists:zipwith3 
+      (fun (Line, Vec, Point) ->
+           fix_diagonal_vector (Line, 0, Vec, Point, Nelts, lists:max (Vec))
+       end,
+       lists:seq (0, length (Matrix) - 1), Matrix, Points).
 
 outer(Nelts, Points) ->
-  {fix_diagonal(0, [ [ distance(A, B) || A <- Points] || B <- Points ], Points, Nelts), [distance({0, 0}, A) || A <- Points]}.
+  {fix_diagonal([ [ distance(A, B) || A <- Points] || B <- Points ], 
+                Points, Nelts), 
+   [distance({0, 0}, A) || A <- Points]}.
 
 read_vector_of_points(_,0) -> [];
 read_vector_of_points(IsBench,Nelts) -> 
@@ -52,8 +56,9 @@ main(Args) ->
     IsBench = string:equal (Arg, 'is_bench'),
     {ok, [Nelts]} = io:fread("","~d"),
     Points = read_vector_of_points(IsBench, Nelts),
+    Result = outer(Nelts, Points),
     case IsBench of
-        false -> io:format("~w~n\n", [outer(Nelts, Points)]);
+        false -> io:format("~w~n\n", [Result]);
         true -> ''
     end.
 
