@@ -14,16 +14,24 @@ config const nrows = read(int),
              ncols = read(int);
 
 const ProbSpace = [1..nrows, 1..ncols],
-      HistSpace = [0..100];
+      HistSpace = [1..nrows, 0..100];
 var matrix: [ProbSpace] int; 
 var mask: [ProbSpace] int;
-var histogram: [HistSpace] atomic int;
+var histogram: [HistSpace] int;
 
 proc thresh(nrows: int, ncols: int, percent: int) {
   var nmax = max reduce matrix;
 
-  forall (i,j) in ProbSpace {
-    histogram[matrix[i,j]].fetchAdd (1);
+  forall i in 1..nrows do {
+    for j in 1..ncols do {
+      histogram[i, matrix[i, j]] += 1;
+    }
+  }
+
+  forall j in 0..(nmax) do {
+    for i in 2..nrows do {
+      histogram[1, j] += histogram[i, j];
+    }
   }
 
   var count: int = (nrows * ncols * percent) / 100;
@@ -33,7 +41,7 @@ proc thresh(nrows: int, ncols: int, percent: int) {
 
   for i in 0..100 {
     if (prefixsum > count) then break;
-    prefixsum += histogram[100 - i].read();
+    prefixsum += histogram[1,100 - i];
     threshold = 100 - i ;
   }
  
