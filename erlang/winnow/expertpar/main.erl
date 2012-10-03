@@ -60,7 +60,7 @@ get_values(Line, Matrix, Mask) ->
 
 get_points(0, _, _) -> [];
 get_points(Nelts, [{_, {I, J}} | Tail], Chunk) ->
-  [ {I, J} | get_points(Nelts - 1, nthtail(Chunk - 1, Tail), Chunk)].
+  [ {I, J} | get_points(Nelts - 1, lists:nthtail(Chunk - 1, Tail), Chunk)].
 
 sort_impl(L) ->
   Parent = self(),
