@@ -4,5 +4,6 @@ all: main.beam
 	echo "10" | erl -noshell -s main main is_bench -s init stop 
 
 
+main: main.beam
 main.beam: main.erl
 	erl -compile main

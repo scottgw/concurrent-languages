@@ -1,5 +1,6 @@
 *~
 main
+*.6
 .fuse_hidden*
 .*.swp
 erl_crash.dump
