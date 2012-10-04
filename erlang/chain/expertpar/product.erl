@@ -16,9 +16,13 @@
 join(Pids) ->
   [receive {Pid, Result} -> Result end || Pid <- Pids].
 
+prod_row ([], [], Acc) ->
+    Acc;
+prod_row ([R|Row], [V|Vector], Acc) ->
+    prod_row (Row, Vector, Acc + (R*V)).
+
 product(_, Matrix, Vector) ->
   Parent = self(),
   % parallel for on rows
-  join([spawn(fun() -> Parent ! {self(),
-      lists:sum([ A * B || {A, B} <- lists:zip(L, Vector)])} end)
-    || L <- Matrix]).
+  join([spawn(fun() -> Parent ! {self(), prod_row (L, Vector,0)} end)
+        || L <- Matrix]).

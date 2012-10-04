@@ -31,19 +31,28 @@ fix_diagonal_vector(Line, Col, [Head | Tail], Point, Nelts, Nmax) ->
           Line, Col + 1, Tail, Point, Nelts, Nmax)]
   end.
 
-fix_diagonal(_, [], _, _) -> [];
-fix_diagonal(Line, [Head | Tail], [HeadPoints | TailPoints], Nelts) ->
-  Parent = self(),
-  % parallel for on rows
-  [spawn(fun() -> Parent ! {self(),
-            fix_diagonal_vector(Line, 0, Head, HeadPoints, Nelts,
-              lists:max(Head))} end) |
-    fix_diagonal(Line + 1, Tail, TailPoints, Nelts)].
+fix_diagonal(Matrix, Points, Nelts) ->
+    Parent = self(),
+    lists:zipwith3 
+      (fun (Line, Vec, Point) -> 
+               spawn (fun () -> 
+                              Parent ! {self(),
+                                        fix_diagonal_vector (Line, 0, Vec, 
+                                                             Point, Nelts, 
+                                                             lists:max (Vec))}
+                      end)
+       end,
+       lists:seq (0, length (Matrix) - 1), Matrix, Points).
+
 
 outer(Nelts, Points) ->
   Parent = self(),
   % parallel for on rows
-  {join(fix_diagonal(0, join([spawn(fun() -> Parent ! {self(),
-                  [distance(A, B) || A <- Points]} end) || B <- Points]),
-      Points, Nelts)),
+    {join(fix_diagonal(
+            join([spawn(fun() -> 
+                                Parent ! {self(),
+                                          [distance(A, B) || A <- Points]} 
+                        end) 
+                  || B <- Points]),
+            Points, Nelts)),
   [distance({0, 0}, A) || A <- Points]}.
