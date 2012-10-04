@@ -13,8 +13,15 @@
 -module(main).
 -export([main/0, main/1]).
 
-product(_, Matrix, Vector) ->
-  [ lists:sum([ A * B || {A, B} <- lists:zip(L, Vector)]) || L <- Matrix].
+prod_row ([], [], Acc) ->
+    Acc;
+prod_row ([R|Row], [V|Vector], Acc) ->
+    prod_row (Row, Vector, Acc + (R*V)).
+
+product (_, Matrix, Vector) ->
+    lists:map (
+      fun (Row) -> prod_row (Row, Vector, 0) end,
+      Matrix).
 
 read_vector(IsBench, 0) -> [];
 read_vector(IsBench, Nelts) -> 
@@ -29,9 +36,12 @@ read_matrix(IsBench, Nelts, Total) ->
 
 main() -> main(['']).
 main(Args) ->
-  [Head | _] = Args,
-  IsBench = string:equal(Head, 'is_bench'),
-  {ok, [Nelts]} = io:fread("","~d"),
-  Matrix = read_matrix(IsBench, Nelts, Nelts),
-  Vector = read_vector(IsBench, Nelts),
-  io:format("~w~n\n", [product(Nelts, Matrix, Vector)]).
+    [Head | _] = Args,
+    IsBench = string:equal(Head, 'is_bench'),
+    {ok, [Nelts]} = io:fread("","~d"),
+    Matrix = read_matrix(IsBench, Nelts, Nelts),
+    Vector = read_vector(IsBench, Nelts),
+    if IsBench -> '';
+       true -> io:format("~w~n\n", [product(Nelts, Matrix, Vector)])
+    end.
+
