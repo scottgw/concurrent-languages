@@ -18,7 +18,6 @@
 -import(outer, [outer/2]).
 -import(product, [product/3]).
 
-
 main() -> main(['']).
 main(Args) ->
   [Head | _] = Args,
