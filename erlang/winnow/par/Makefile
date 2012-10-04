@@ -1,4 +1,4 @@
-all: main
+all: main.beam
 	erl -noshell -s main main -s init stop < main.in > main.out
 	diff main.out main.gold
 	erl -noshell -s main main -s init stop < main2.in > main2.out
@@ -10,5 +10,5 @@ all: main
 	erl -noshell -s main main is_bench -s init stop < main.in
  
 
-main: main.erl
+main.beam: main.erl
 	erl -compile main

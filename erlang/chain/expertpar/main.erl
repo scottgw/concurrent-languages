@@ -20,15 +20,15 @@
 
 main() -> main(['']).
 main(Args) ->
-  [Head | _] = Args,
-  IsBench = string:equal(Head, 'is_bench'),
-  {ok, [Nelts, RandmatSeed, ThreshPercent, WinnowNelts]} =
-      io:fread("","~d~d~d~d"),
-  RandmatMatrix = randmat:randmat(Nelts, Nelts, RandmatSeed),
-  ThreshMask = thresh:thresh(Nelts, Nelts, RandmatMatrix, ThreshPercent),
-  WinnowPoints = winnow:winnow(Nelts, Nelts, RandmatMatrix, ThreshMask,
-    WinnowNelts),
-  {OuterMatrix, OuterVector} = outer:outer(WinnowNelts, WinnowPoints),
-  ProductResult = product:product(WinnowNelts, OuterMatrix, OuterVector),
-  case IsBench of false -> io:format("~w~n\n", [ProductResult]); true -> ''
-  end.
+    [Head | _] = Args,
+    IsBench = string:equal(Head, 'is_bench'),
+    {ok, [Nelts, RandmatSeed, ThreshPercent, WinnowNelts]} =
+        io:fread("","~d~d~d~d"),
+    RandmatMatrix = randmat:randmat(Nelts, Nelts, RandmatSeed),
+    ThreshMask = thresh:thresh(Nelts, Nelts, RandmatMatrix, ThreshPercent),
+    WinnowPoints = winnow:winnow(Nelts, Nelts, RandmatMatrix, ThreshMask,
+                                 WinnowNelts),
+    {OuterMatrix, OuterVector} = outer:outer(WinnowNelts, WinnowPoints),
+    ProductResult = product:product(WinnowNelts, OuterMatrix, OuterVector),
+    case IsBench of false -> io:format("~w~n\n", [ProductResult]); true -> ''
+    end.

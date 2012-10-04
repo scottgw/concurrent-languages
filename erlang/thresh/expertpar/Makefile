@@ -1,4 +1,4 @@
-all: main
+all: main.beam
 	erl -noshell -s main main -s init stop < main.in
 	erl -noshell -s main main -s init stop < main2.in
 	erl -noshell -s main main -s init stop < main3.in
@@ -7,5 +7,5 @@ all: main
 	erl -noshell -s main main -s init stop < main6.in
 	erl -noshell -s main main is_bench -s init stop < main.in
  
-main: main.erl
+main.beam: main.erl
 	erl -compile main

@@ -44,17 +44,12 @@ fix_diagonal(Matrix, Points, Nelts) ->
        end,
        lists:seq (0, length (Matrix) - 1), Matrix, Points).
 
-
 outer(Nelts, Points) ->
   Parent = self(),
   % parallel for on rows
-    {join(fix_diagonal(
-            join([spawn(fun() -> 
-                                Parent ! {self(),
-                                          [distance(A, B) || A <- Points]} 
-                        end) 
-                  || B <- Points]),
-            Points, Nelts)),
+  {join(fix_diagonal(join([spawn(fun() -> Parent ! {self(),
+                  [distance(A, B) || A <- Points]} end) || B <- Points]),
+      Points, Nelts)),
   [distance({0, 0}, A) || A <- Points]}.
 
 
