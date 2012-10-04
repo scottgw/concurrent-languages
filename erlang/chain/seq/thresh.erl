@@ -13,21 +13,17 @@
 -module(thresh).
 -export([thresh/4]).
 
-reduce2d_join(Pids) -> [receive {Pid, Result} -> Result end || Pid <- Pids].
-
-reduce2d(Matrix, Agregator, Function) ->
-  Parent = self(),
-  % parallel for on rows
-  Pids = [spawn(fun() -> Parent ! {self(), Function(X)} end) 
-    || X <- Matrix],
-  Agregator(reduce2d_join(Pids)).
+max(A, B) ->
+  if A > B -> A;
+    true -> B
+  end.
 
 max_matrix(Matrix) ->
-  reduce2d(Matrix, fun lists:max/1, fun lists:max/1).
+  lists:foldl(fun(X, Max) -> max(lists:max(X), Max) end, 0, Matrix).
 
 count_equal(Matrix, Value) ->
-  reduce2d(Matrix, fun lists:sum/1,
-    fun(X) -> length(lists:filter(fun(Y) -> Y == Value end, X)) end).
+  lists:foldl(fun(X, Count) -> Count + length(
+          lists:filter(fun(Y) -> Y == Value end, X)) end, 0, Matrix).
 
 fill_histogram(Matrix, 0) -> [count_equal(Matrix, 0)];
 fill_histogram(Matrix, Nmax) ->
@@ -40,8 +36,8 @@ get_threshold(Index, [Head | Tail], Count) ->
   end.
 
 filter(Matrix, Threshold) ->
-  reduce2d(Matrix, fun(X) -> X end, fun(X) ->
-        lists:map(fun(Y) -> Y >= Threshold end, X) end).
+  lists:map(fun(X) ->
+        lists:map(fun(Y) -> Y >= Threshold end, X) end, Matrix).
 
 thresh(Nrows, Ncols, Matrix, Percent) ->
   Nmax = max_matrix(Matrix),
