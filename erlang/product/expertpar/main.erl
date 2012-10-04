@@ -13,6 +13,7 @@
 -module(main).
 -export([main/0, main/1]).
 
+
 join(Pids) ->
   [receive {Pid, Result} -> Result end || Pid <- Pids].
 
