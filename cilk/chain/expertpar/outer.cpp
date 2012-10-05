@@ -22,12 +22,12 @@
 
 using namespace std;
 
-double outer_matrix[10000][10000];
-double outer_vector[10000];
+double *outer_matrix;
+double *outer_vector;
 
 typedef std::pair <int, int> point; 
 
-extern point winnow_points[10000];
+extern point *winnow_points;
 
 double sqr(double x) {
   return x * x;
@@ -38,15 +38,18 @@ double distance(point a, point b) {
 }
 
 void outer (int nelts) {
+  outer_matrix = (double*) malloc (sizeof(double) * nelts * nelts);
+  outer_vector = (double*) malloc (sizeof(double) * nelts);
+
   cilk_for (int i = 0; i < nelts; ++i) {
     double nmax = 0;
     for (int j = 0; j < nelts; ++j) {
       if (i != j) {
-        outer_matrix [i][j] = ::distance (winnow_points [i], winnow_points [j]);
-        nmax = max (nmax, outer_matrix [i][j]);
+        outer_matrix [i*nelts + j] = ::distance (winnow_points [i], winnow_points [j]);
+        nmax = max (nmax, outer_matrix [i*nelts + j]);
       }      
     }
-    outer_matrix [i][i] = nmax * nelts;
+    outer_matrix [i*nelts + i] = nmax * nelts;
     outer_vector [i] = ::distance (make_pair (0,0), winnow_points [i]);
   }
 }

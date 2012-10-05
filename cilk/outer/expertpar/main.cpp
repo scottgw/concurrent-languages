@@ -24,11 +24,11 @@ using namespace std;
 
 static int is_bench = 0;
 
-static double matrix[10000][10000];
-static double vector[10000];
+static double *matrix;
+static double *vector;
 
 typedef std::pair<int, int> point;
-static point points[10000];
+static point *points;
 
 double sqr(double x) {
   return x * x;
@@ -44,11 +44,11 @@ void outer (int nelts) {
     double nmax = 0;
     for (int j = 0; j < nelts; ++j) {
       if (i != j) {
-        matrix [i][j] = ::distance (points [i], points [j]);
-        nmax = max (nmax, matrix [i][j]);
+        matrix [i*nelts + j] = ::distance (points [i], points [j]);
+        nmax = max (nmax, matrix [i*nelts + j]);
       }      
     }
-    matrix [i][i] = nmax * nelts;
+    matrix [i*nelts + i] = nmax * nelts;
     vector [i] = ::distance (make_pair (0,0), points [i]);
   }
 }
@@ -73,7 +73,11 @@ int main(int argc, char *argv[]) {
     }
   }
 
- scanf("%d", &nelts);
+  scanf("%d", &nelts);
+  matrix = (double*) malloc (sizeof(double) * nelts * nelts);
+  vector = (double*) malloc (sizeof(double) * nelts);
+  points = (point*) malloc (sizeof(point) * nelts);
+
 
   if (!is_bench) {
     read_vector_of_points(nelts);
@@ -85,7 +89,7 @@ int main(int argc, char *argv[]) {
     printf("%d %d\n", nelts, nelts);
     for (i = 0; i < nelts; i++) {
       for (j = 0; j < nelts; j++) {
-        printf("%g ", matrix[i][j]);
+        printf("%g ", matrix[i*nelts + j]);
       }
       printf("\n");
     }

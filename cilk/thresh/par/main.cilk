@@ -17,8 +17,8 @@
 
 int is_bench = 0;
 
-static unsigned char matrix[20000][20000];
-static unsigned char mask[20000][20000];
+static int *matrix;
+static int *mask;
 static int histogram[16][100];
 
 int max(int a, int b) {
@@ -30,9 +30,9 @@ cilk int reduce_max(int begin, int end, int ncols) {
   int middle = begin + (end - begin) / 2;
   int left, right, res, i;
   if (begin + 1 == end) {
-    res = matrix[begin][0];
+    res = matrix[begin*ncols];
     for (i = 1; i < ncols; i++) {
-      res = max(res, matrix[begin][i]);
+      res = max(res, matrix[begin*ncols + i]);
     }
     return res;
   }
@@ -47,7 +47,7 @@ cilk void fill_histogram(int begin, int end, int ncols) {
   int i;
   if (begin + 1 == end) {
     for (i = 0; i < ncols; i++) {
-      histogram[Self][matrix[begin][i]]++;
+      histogram[Self][matrix[begin*ncols + i]]++;
     }
     return;
   }
@@ -75,7 +75,7 @@ cilk void fill_mask(int begin, int end, int ncols, int threshold) {
   int i;
   if (begin + 1 == end) {
     for (i = 0; i < ncols; i++) {
-      mask[begin][i] = matrix[begin][i] >= threshold;
+      mask[begin*ncols + i] = matrix[begin*ncols + i] >= threshold;
     }
     return;
   }
@@ -121,11 +121,14 @@ cilk int main(int argc, char *argv[]) {
   }
 
   scanf("%d%d", &nrows, &ncols);
+  matrix = (int*) malloc (sizeof(int) * ncols * nrows);
+  mask = (int*) malloc (sizeof(int) * ncols * nrows);
+
 
   if (!is_bench) {
     for (i = 0; i < nrows; i++) {
       for (j = 0; j < ncols; j++) {
-        scanf("%hhu", &matrix[i][j]);
+        scanf("%hhu", &matrix[i*ncols + j]);
       }
     }
   }
@@ -139,7 +142,7 @@ cilk int main(int argc, char *argv[]) {
     printf("%d %d\n", nrows, ncols);
     for (i = 0; i < nrows; i++) {
       for (j = 0; j < ncols; j++) {
-        printf("%hhu ", mask[i][j]);
+        printf("%hhu ", mask[i*ncols + j]);
       }
       printf("\n");
     }

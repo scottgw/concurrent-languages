@@ -22,15 +22,15 @@
 using namespace std;
 
 extern int is_bench;
-extern unsigned char randmat_matrix[20000][20000];
-extern unsigned char thresh_mask[20000][20000];
-static int count_per_line[20001];
+extern int *randmat_matrix;
+extern int *thresh_mask;
+static int *count_per_line;
 
 typedef pair <int, int> point2;
 
-point2 winnow_points[20000];
+point2 *winnow_points;
 
-static point values[20000];
+static point *values;
 
 int reduce_sum(int begin, int end, int ncols) {
   int middle = begin + (end - begin) / 2;
@@ -38,12 +38,12 @@ int reduce_sum(int begin, int end, int ncols) {
   if (begin + 1 == end) {
     if (is_bench) {
       for (i = 0; i < ncols; i++) {
-        thresh_mask[begin][i] = ((begin * i) % (ncols + 1)) == 1;
+        thresh_mask[begin*ncols +i] = ((begin * i) % (ncols + 1)) == 1;
       }
     }
-    res = thresh_mask[begin][0];
+    res = thresh_mask[begin*ncols +0];
     for (i = 1; i < ncols; i++) {
-      res += thresh_mask[begin][i];
+      res += thresh_mask[begin*ncols +i];
     }
     return count_per_line[begin + 1] = res;
   }
@@ -95,8 +95,8 @@ void fill_values(int begin, int end, int ncols) {
   if (begin + 1 == end) {
     count = count_per_line[begin];
     for (j = 0; j < ncols; j++) {
-      if (thresh_mask[begin][j] == 1) {
-        values[count].first = randmat_matrix[begin][j];
+      if (thresh_mask[begin*ncols +j] == 1) {
+        values[count].first = randmat_matrix[begin*ncols +j];
         values[count].second.first = begin;
         values[count].second.second = j;
         count++;
@@ -110,6 +110,10 @@ void fill_values(int begin, int end, int ncols) {
 
 void winnow(int nrows, int ncols, int nelts) {
   int i, n =  0, chunk, index;
+
+  values= (point*) malloc (sizeof(point) * nrows * ncols);
+  winnow_points = (point2*) malloc (sizeof(point2) * nelts);
+  count_per_line = (int*) malloc (sizeof(int) * (nrows + 1));
 
   n = cilk_spawn reduce_sum(0, nrows, ncols);
   cilk_sync;
@@ -128,4 +132,7 @@ void winnow(int nrows, int ncols, int nelts) {
     index = i * chunk;
     winnow_points[i] = values[index].second;
   }
+
+  free (count_per_line);
+  free (values);
 }

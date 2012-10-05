@@ -17,9 +17,10 @@
 
 static int is_bench = 0;
 
-static double matrix[10000][10000];
-static double vector[10000];
-static double result[10000];
+static double *matrix;
+static double *vector;
+static double *result;
+
 
 // parallel for on [begin, end)
 cilk void fill_result(int begin, int end, int ncols) {
@@ -28,7 +29,7 @@ cilk void fill_result(int begin, int end, int ncols) {
   int j;
   if (begin + 1 == end) {
     for (j = 0; j < ncols; j++) {
-      sum += matrix[begin][j] * vector[j];
+      sum += matrix[begin*ncols + j] * vector[j];
     }
     result[begin] = sum;
     return;
@@ -45,7 +46,7 @@ void read_matrix(int nelts) {
   int i, j;
   for (i = 0; i < nelts; i++) {
     for (j = 0; j < nelts; j++) {
-      scanf("%lf", &matrix[i][j]);
+      scanf("%lf", &matrix[i*nelts + j]);
     }
   }
 }
@@ -67,6 +68,10 @@ cilk int main(int argc, char *argv[]) {
   }
 
   scanf("%d", &nelts);
+  matrix = (double*) malloc (sizeof(double) * nelts * nelts);
+  vector = (double*) malloc (sizeof(double) * nelts);
+  result = (double*) malloc (sizeof(double) * nelts);
+
   if (!is_bench) {
     read_matrix(nelts);
     read_vector(nelts);

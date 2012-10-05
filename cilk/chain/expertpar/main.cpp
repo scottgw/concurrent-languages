@@ -19,7 +19,7 @@
 
 int is_bench = 0;
 
-extern double product_result[10000];
+extern double *product_result;
 
 int main(int argc, char** argv) {
   int nelts, randmat_seed, thresh_percent, winnow_nelts, i;

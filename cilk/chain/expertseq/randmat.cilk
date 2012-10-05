@@ -14,16 +14,17 @@
 #include <stdio.h>
 #include <string.h>
 
-unsigned char randmat_matrix[20000][20000];
+int *randmat_matrix;
 
 void randmat(int nrows, int ncols, unsigned int s) {
   const int LCG_A = 1664525, LCG_C = 1013904223;
   int i, j;
+  randmat_matrix = (int*) malloc (sizeof(int) * nrows * ncols);
   for (i = 0; i < nrows; i++) {
     unsigned seed = s + i;
     for (j = 0; j < ncols; j++) {
       seed = LCG_A * seed + LCG_C;
-      randmat_matrix[i][j] = ((unsigned)seed) % 100;
+      randmat_matrix[i*ncols + j] = ((unsigned)seed) % 100;
     }
   }
 }

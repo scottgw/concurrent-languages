@@ -18,8 +18,9 @@
 #include <string.h>
 
 int is_bench = 0;
-static unsigned char matrix[20000][20000];
-static unsigned char mask[20000][20000];
+static int *matrix;
+static int *mask;
+
 static int histogram[16][200];
 
 int reduce_max (int nrows, int ncols) {
@@ -29,7 +30,7 @@ int reduce_max (int nrows, int ncols) {
     int begin = i;
 
     for (int j = 0; j < ncols; j++) {
-      max_reducer.calc_max (matrix [begin][j]);
+      max_reducer.calc_max (matrix [begin*ncols + j]);
     }
   }
 
@@ -41,7 +42,7 @@ void fill_histogram(int nrows, int ncols) {
   cilk_for (int r = 0; r < nrows; ++r) {
     int Self = __cilkrts_get_worker_number();
     for (int i = 0; i < ncols; i++) {
-      histogram [Self][matrix[r][i]]++;
+      histogram [Self][matrix[r*ncols + i]]++;
     }
   }
 }
@@ -57,7 +58,7 @@ void merge_histogram () {
 void fill_mask (int nrows, int ncols, int threshold) {
   cilk_for (int i = 0; i < nrows; ++i) {
     for (int j = 0; j < ncols; ++j) {
-      mask[i][j] = matrix [i][j] >= threshold;
+      mask[i*ncols + j] = matrix [i*ncols + j] >= threshold;
     }
   }
 }
@@ -97,11 +98,13 @@ int main(int argc, char *argv[]) {
   }
 
   scanf("%d%d", &nrows, &ncols);
+  matrix = (int*) malloc (sizeof(int) * ncols * nrows);
+  mask = (int*) malloc (sizeof(int) * ncols * nrows);
 
   if (!is_bench) {
     for (i = 0; i < nrows; i++) {
       for (j = 0; j < ncols; j++) {
-        scanf("%hhu", &matrix[i][j]);
+        scanf("%hhu", &matrix[i*ncols + j]);
       }
     }
   }
@@ -114,7 +117,7 @@ int main(int argc, char *argv[]) {
     printf("%d %d\n", nrows, ncols);
     for (i = 0; i < nrows; i++) {
       for (j = 0; j < ncols; j++) {
-        printf("%hhu ", mask[i][j]);
+        printf("%hhu ", mask[i*ncols + j]);
       }
       printf("\n");
     }

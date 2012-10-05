@@ -24,12 +24,12 @@ using namespace std;
 
 static int is_bench = 0;
 
-static unsigned char matrix[20000][20000];
-static unsigned char mask[20000][20000];
-static int count_per_line[20001];
+static int *matrix;
+static int *mask;
+static int *count_per_line;
 
-static pair <int, int> points[20000];
-static pair <int, pair <int, int> > values [20000];
+static pair <int, int> *points;
+static pair <int, pair <int, int> > *values;
 
 int reduce_sum(int begin, int end, int ncols) {
   int middle = begin + (end - begin) / 2;
@@ -37,12 +37,12 @@ int reduce_sum(int begin, int end, int ncols) {
   if (begin + 1 == end) {
     if (is_bench) {
       for (i = 0; i < ncols; i++) {
-        mask[begin][i] = ((begin * i) % (ncols + 1)) == 1;
+        mask[begin*ncols +i] = ((begin * i) % (ncols + 1)) == 1;
       }
     }
-    res = mask[begin][0];
+    res = mask[begin*ncols +0];
     for (i = 1; i < ncols; i++) {
-      res += mask[begin][i];
+      res += mask[begin*ncols +i];
     }
     return count_per_line[begin + 1] = res;
   }
@@ -94,8 +94,8 @@ void fill_values(int begin, int end, int ncols) {
   if (begin + 1 == end) {
     count = count_per_line[begin];
     for (j = 0; j < ncols; j++) {
-      if (mask[begin][j] == 1) {
-        values[count].first = matrix[begin][j];
+      if (mask[begin*ncols +j] == 1) {
+        values[count].first = matrix[begin*ncols +j];
         values[count].second.first = begin;
         values[count].second.second = j;
         count++;
@@ -133,7 +133,7 @@ void read_matrix(int nrows, int ncols) {
   int i, j;
   for (i =  0; i < nrows; i++) {
     for (j = 0; j < ncols; j++) {
-      scanf("%hhu", &matrix[i][j]);
+      scanf("%hhu", &matrix[i*ncols +j]);
     }
   }
 }
@@ -142,7 +142,7 @@ void read_mask(int nrows, int ncols) {
   int i, j;
   for (i =  0; i < nrows; i++) {
     for (j = 0; j < ncols; j++) {
-      scanf("%hhu", &mask[i][j]);
+      scanf("%hhu", &mask[i*ncols +j]);
     }
   }
 }
@@ -159,6 +159,10 @@ int main(int argc, char *argv[]) {
   }
 
   scanf("%d%d", &nrows, &ncols);
+  matrix = (int*) malloc (sizeof(int) * nrows * ncols);
+  mask = (int*) malloc (sizeof(int) * nrows * ncols);
+  values= (pair<int, pair<int, int> >*) 
+    malloc (sizeof(pair<int, pair<int, int> >) * nrows * ncols);
 
   if (!is_bench) {
     read_matrix(nrows, ncols);
@@ -166,6 +170,9 @@ int main(int argc, char *argv[]) {
   }
 
   scanf("%d", &nelts);
+
+  count_per_line = (int*) malloc (sizeof(int) * (nrows + 1));
+  points = (pair<int, int>*) malloc (sizeof(pair<int, int>) * nelts);
 
   cilk_spawn winnow(nrows, ncols, nelts);
   cilk_sync;

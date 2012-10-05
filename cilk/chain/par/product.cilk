@@ -15,9 +15,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-extern double outer_matrix[10000][10000];
-extern double outer_vector[10000];
-double product_result[10000];
+extern double *outer_matrix;
+extern double *outer_vector;
+double *product_result;
 
 // parallel for on [begin, end)
 cilk void fill_result(int begin, int end, int ncols) {
@@ -26,7 +26,7 @@ cilk void fill_result(int begin, int end, int ncols) {
   int j;
   if (begin + 1 == end) {
     for (j = 0; j < ncols; j++) {
-      sum += outer_matrix[begin][j] * outer_vector[j];
+      sum += outer_matrix[begin*ncols + j] * outer_vector[j];
     }
     product_result[begin] = sum;
     return;
@@ -36,5 +36,6 @@ cilk void fill_result(int begin, int end, int ncols) {
 }
 
 cilk void product(int nelts) {
+  product_result = (double*) malloc (sizeof (double) * nelts);
   spawn fill_result(0, nelts, nelts);
 }

@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <string.h>
 
-static unsigned char matrix[20000][20000];
+static int *matrix;
 
 int is_bench = 0;
 
@@ -25,7 +25,7 @@ void randmat(int nrows, int ncols, int seed) {
     int s = seed + i;
     for (int j = 0; j < ncols; j++) {
       s = LCG_A * s + LCG_C;
-      matrix[begin][j] = ((unsigned)s) % 100;
+      matrix[begin*ncols + j] = ((unsigned)s) % 100;
     }
   }
 }
@@ -42,13 +42,13 @@ int main(int argc, char *argv[]) {
   }
 
   scanf("%d%d%d", &nrows, &ncols, &s);
-
+  matrix = (int*) malloc (sizeof(int) * nrows * ncols);
   randmat(nrows, ncols, s);
 
   if (!is_bench) {
     for (i = 0; i < nrows; i++) {
       for (j = 0; j < ncols; j++) {
-        printf("%d ", matrix[i][j]);
+        printf("%d ", matrix[i*ncols + j]);
       }
       printf("\n");
     }
