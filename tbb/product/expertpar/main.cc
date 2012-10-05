@@ -22,9 +22,9 @@ using namespace tbb;
 static int is_bench = 0;
 int n_threads = task_scheduler_init::default_num_threads();
 
-static double matrix[10000][10000];
-static double vec[10000];
-static double result[10000];
+static double *matrix;
+static double *vec;
+static double *result;
 
 typedef blocked_range<size_t> range;
 
@@ -38,16 +38,16 @@ void product(int nelts) {
         double sum = 0;
 
         for (; (nelts - j) & 3; ++j)
-          sum  += matrix [i][j]     * vec [j];
+          sum  += matrix [i*nelts + j]     * vec [j];
 
         double acc1, acc2, acc3, acc4;
         acc1 = acc2 = acc3 = acc4 = 0;
 
         for (; j < nelts; j += 4) {
-          acc1 += matrix [i][j]     * vec [j];
-          acc2 += matrix [i][j + 1] * vec [j + 1];
-          acc3 += matrix [i][j + 2] * vec [j + 2];
-          acc4 += matrix [i][j + 3] * vec [j + 3];
+          acc1 += matrix [i*nelts + j]     * vec [j];
+          acc2 += matrix [i*nelts + j + 1] * vec [j + 1];
+          acc3 += matrix [i*nelts + j + 2] * vec [j + 2];
+          acc4 += matrix [i*nelts + j + 3] * vec [j + 3];
         }
 
         sum += acc1 + acc2 + acc3 + acc4;
@@ -73,10 +73,14 @@ int main(int argc, char** argv) {
 
   cin >> nelts;
 
+  matrix = (double *) malloc (sizeof(double) * nelts * nelts);
+  vec = (double *) malloc (sizeof (double) * nelts);
+  result = (double *) malloc (sizeof (double) * nelts);
+
   if (!is_bench) {
     for (int i = 0; i < nelts; i++) {
       for (int j = 0; j < nelts; j++) {
-        cin >> matrix[i][j];
+        cin >> matrix[i*nelts + j];
       }
     }
 

@@ -21,13 +21,14 @@
 using namespace std;
 using namespace tbb;
 
-extern double outer_matrix[10000][10000];
-extern double outer_vector[10000];
-double product_result[10000];
+extern double *outer_matrix;
+extern double *outer_vector;
+double *product_result;
 
 typedef blocked_range<size_t> range;
 
 void product(int nelts) {
+  product_result = (double*) malloc (sizeof(double) * nelts);
   parallel_for(
     range(0, nelts),
     [&](range r) {
@@ -36,16 +37,16 @@ void product(int nelts) {
         double sum = 0;
 
         for (; (nelts - j) & 3; ++j)
-          sum  += outer_matrix [i][j]     * outer_vector [j];
+          sum  += outer_matrix [i*nelts + j]     * outer_vector [j];
 
         double acc1, acc2, acc3, acc4;
         acc1 = acc2 = acc3 = acc4 = 0;
 
         for (; j < nelts; j += 4) {
-          acc1 += outer_matrix [i][j]     * outer_vector [j];
-          acc2 += outer_matrix [i][j + 1] * outer_vector [j + 1];
-          acc3 += outer_matrix [i][j + 2] * outer_vector [j + 2];
-          acc4 += outer_matrix [i][j + 3] * outer_vector [j + 3];
+          acc1 += outer_matrix [i*nelts + j]     * outer_vector [j];
+          acc2 += outer_matrix [i*nelts + j + 1] * outer_vector [j + 1];
+          acc3 += outer_matrix [i*nelts + j + 2] * outer_vector [j + 2];
+          acc4 += outer_matrix [i*nelts + j + 3] * outer_vector [j + 3];
         }
 
         sum += acc1 + acc2 + acc3 + acc4;

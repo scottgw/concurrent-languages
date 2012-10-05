@@ -29,12 +29,12 @@ using namespace std;
 using namespace tbb;
 
 extern int is_bench;
-extern unsigned char randmat_matrix[20000][20000];
-extern unsigned char thresh_mask[20000][20000];
-static int count_per_line[20001];
-static int total_count[20001];
-pair<int, int> winnow_points[20000];
-static pair<int, pair<int, int> > values[20000];
+extern int *randmat_matrix;
+extern int *thresh_mask;
+static int *count_per_line;
+static int *total_count;
+pair<int, int> *winnow_points;
+static pair<int, pair<int, int> > *values;
 
 typedef blocked_range<size_t> range;
 
@@ -61,6 +61,12 @@ public:
 
 void winnow(int nrows, int ncols, int nelts) {
   int count = 0;
+  winnow_points = (pair<int,int> *) malloc (sizeof (pair<int, int>) * nelts);
+  values = (pair<int, pair<int, int> > *) 
+    malloc (sizeof (pair<int, pair<int, int> >) * nrows * ncols);
+
+  count_per_line = (int*) malloc (sizeof (int) * (nrows + 1));
+  total_count = (int*) malloc (sizeof (int) * (nrows + 1));
 
   count = parallel_reduce(
     range(0, nrows), 0,
@@ -69,9 +75,9 @@ void winnow(int nrows, int ncols, int nelts) {
         int cur = 0;
         for (int j = 0; j < ncols; j++) {
           if (is_bench) {
-            thresh_mask[i][j] = ((i * j) % (ncols + 1)) == 1;
+            thresh_mask[i*ncols + j] = ((i * j) % (ncols + 1)) == 1;
           }
-          cur += thresh_mask[i][j];
+          cur += thresh_mask[i*ncols + j];
         }
         result += count_per_line[i + 1] = cur;
       }
@@ -93,8 +99,8 @@ void winnow(int nrows, int ncols, int nelts) {
         for (size_t i = r.begin(); i != r.end(); i++) {
           int count = total_count[i];
           for (int j = 0; j < ncols; j++) {
-            if (thresh_mask[i][j]) {
-              values[count] = (make_pair(randmat_matrix[i][j],
+            if (thresh_mask[i*ncols + j]) {
+              values[count] = (make_pair(randmat_matrix[i*ncols + j],
                   make_pair(i, j)));
               count++;
             }
@@ -111,4 +117,8 @@ void winnow(int nrows, int ncols, int nelts) {
     int index = i * chunk;
     winnow_points[i] = values[index].second;
   }
+
+  free (values);
+  free (count_per_line);
+  free (total_count);
 }

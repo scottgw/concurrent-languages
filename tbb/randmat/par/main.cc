@@ -20,7 +20,7 @@ using namespace tbb;
 
 typedef blocked_range<size_t> range;
 
-static unsigned char matrix[20000][20000];
+static unsigned char* matrix;
 
 int is_bench = 0;
 int n_threads = task_scheduler_init::default_num_threads();
@@ -34,7 +34,7 @@ void randmat(int nrows, int ncols, unsigned int s) {
         unsigned int seed = s + i;
         for (int j = 0; j < ncols; j++) {
           seed = LCG_A * seed + LCG_C;
-          matrix[i][j] = seed % 100;
+          matrix[i*ncols + j] = seed % 100;
         }
       }
   });
@@ -55,14 +55,14 @@ int main(int argc, char** argv) {
   task_scheduler_init init(n_threads);
 
   scanf("%d%d%d", &nrows, &ncols, &s);
-
+  matrix = (unsigned char*) malloc (sizeof (unsigned char) * nrows * ncols);
   randmat(nrows, ncols, s);
 
   if (!is_bench) {
     printf("%d %d\n", nrows, ncols);
     for (int i = 0; i < nrows; i++) {
       for (int j = 0; j < ncols; j++) {
-        printf("%d ", matrix[i][j]);
+        printf("%d ", matrix[i*ncols + j]);
       }
       printf("\n");
     }

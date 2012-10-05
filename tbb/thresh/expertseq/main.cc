@@ -19,8 +19,8 @@ using namespace std;
 
 int is_bench = 0;
 
-static unsigned char matrix[20000][20000];
-static unsigned char mask[20000][20000];
+static unsigned char* matrix;
+static unsigned char* mask;
 static int histogram[100];
 
 void thresh(int nrows, int ncols, int percent) {
@@ -28,15 +28,15 @@ void thresh(int nrows, int ncols, int percent) {
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
       if (is_bench) {
-        matrix[i][j] = (i * j) % 100;
+        matrix[i*ncols + j] = (i * j) % 100;
       }
-      nmax = max(nmax, (int)matrix[i][j]);
+      nmax = max(nmax, (int)matrix[i*ncols + j]);
     }
   }
 
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
-      histogram[matrix[i][j]]++;
+      histogram[matrix[i*ncols + j]]++;
     }
   }
 
@@ -52,7 +52,7 @@ void thresh(int nrows, int ncols, int percent) {
 
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
-      mask[i][j] = matrix[i][j] >= threshold;
+      mask[i*ncols + j] = matrix[i*ncols + j] >= threshold;
     }
   }
 }
@@ -68,10 +68,13 @@ int main(int argc, char** argv) {
 
   scanf("%d%d", &nrows, &ncols);
 
+  matrix = (unsigned char *) malloc (sizeof (unsigned char) * nrows * ncols);
+  mask = (unsigned char *) malloc (sizeof (unsigned char) * nrows * ncols);
+
   if (!is_bench) {
     for (int i = 0; i < nrows; i++) {
       for (int j = 0; j < ncols; j++) {
-        scanf("%hhu", &matrix[i][j]);
+        scanf("%hhu", &matrix[i*ncols + j]);
       }
     }
   }
@@ -84,7 +87,7 @@ int main(int argc, char** argv) {
     printf("%d %d\n", nrows, ncols);
     for (int i = 0; i < nrows; i++) {
       for (int j = 0; j < ncols; j++) {
-        printf("%hhu ", mask[i][j]);
+        printf("%hhu ", mask[i*ncols + j]);
       }
       printf("\n");
     }

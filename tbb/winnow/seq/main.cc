@@ -22,20 +22,20 @@
 using namespace std;
 
 int is_bench = 0;
-static unsigned char matrix[20000][20000];
-static unsigned char mask[20000][20000];
-static pair<int, int> points[20000];
-static pair<int, pair<int, int> > values[20000];
+static unsigned char* matrix;
+static unsigned char* mask;
+static pair<int, int> *points;
+static pair<int, pair<int, int> > *values;
 
 void winnow(int nrows, int ncols, int nelts) {
   int count = 0;
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
       if (is_bench) {
-        mask[i][j] = ((i * j) % (ncols + 1)) == 1;
+        mask[i*ncols + j] = ((i * j) % (ncols + 1)) == 1;
       }
-      if (mask[i][j]) {
-        values[count++] = (make_pair(matrix[i][j], make_pair(i, j)));
+      if (mask[i*ncols + j]) {
+        values[count++] = (make_pair(matrix[i*ncols + j], make_pair(i, j)));
       }
     }
   }
@@ -56,7 +56,7 @@ void read_matrix(int nrows, int ncols) {
     for (int j = 0; j < ncols; j++) {
       int v;
       cin >> v;
-      matrix[i][j] = v;
+      matrix[i*ncols + j] = v;
     }
   }
 }
@@ -66,7 +66,7 @@ void read_mask(int nrows, int ncols) {
     for (int j = 0; j < ncols; j++) {
       int v;
       cin >> v;
-      mask[i][j] = v;
+      mask[i*ncols + j] = v;
     }
   }
 }
@@ -82,12 +82,18 @@ int main(int argc, char** argv) {
 
   scanf("%d%d", &nrows, &ncols);
 
+  matrix = (unsigned char *) malloc (sizeof (unsigned char) * nrows * ncols);
+  mask = (unsigned char *) malloc (sizeof (unsigned char) * nrows * ncols);
+
   if (!is_bench) {
     read_matrix(nrows, ncols);
     read_mask(nrows, ncols);
   }
 
   scanf("%d", &nelts);
+  points = (pair <int, int> *) malloc (sizeof (pair <int, int>) * nelts);
+  values = (pair <int, pair <int, int> > *) malloc (sizeof (pair <int, pair <int, int> >) * nelts);
+ 
 
   winnow(nrows, ncols, nelts);
 
