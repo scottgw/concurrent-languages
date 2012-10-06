@@ -1,4 +1,5 @@
 *~
+*.pdf
 main
 .fuse_hidden*
 .*.swp
