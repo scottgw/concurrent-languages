@@ -18,15 +18,15 @@ using namespace std;
 
 static int is_bench = 0;
 
-static double matrix[10000][10000];
-static double vec[10000];
-static double result[10000];
+static double *matrix;
+static double *vec;
+static double *result;
 
 void product(int nelts) {
   for (int i = 0; i < nelts; i++) {
     double sum = 0;
     for (int j = 0; j < nelts; j++) {
-      sum += matrix[i][j] * vec[j];
+      sum += matrix[i*nelts + j] * vec[j];
     }
     result[i] = sum;
   }
@@ -43,10 +43,14 @@ int main(int argc, char** argv) {
 
   scanf("%d", &nelts);
 
+  matrix = (double *) malloc (sizeof(double) * nelts * nelts);
+  vec = (double *) malloc (sizeof (double) * nelts);
+  result = (double *) malloc (sizeof (double) * nelts);
+
   if (!is_bench) {
     for (int i = 0; i < nelts; i++) {
       for (int j = 0; j < nelts; j++) {
-        scanf("%lf", &matrix[i][j]);
+        scanf("%lf", &matrix[i*nelts + j]);
       }
     }
 

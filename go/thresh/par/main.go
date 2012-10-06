@@ -18,9 +18,9 @@ import (
 )
 
 var is_bench = flag.Bool("is_bench", false, "")
-var matrix [20000][20000]byte
-var mask [20000][20000]byte
-var histogram [20000][100]int
+var matrix [][]byte
+var mask [][]byte
+var histogram [][100]int
 
 func max(a, b int) int {
 	if a > b {
@@ -146,6 +146,16 @@ func main() {
 	flag.Parse()
 
 	fmt.Scanf("%d%d", &nrows, &ncols)
+  matrix = make ([][]byte, nrows)
+  for i := range matrix {
+    matrix [i] = make ([]byte, ncols)
+  }
+
+  mask = make ([][]byte, nrows)
+  for i := range mask {
+    mask [i] = make ([]byte, ncols)
+  }
+  histogram = make ([][100]int, nrows)
 
 	if !*is_bench {
 		for i := 0; i < nrows; i++ {

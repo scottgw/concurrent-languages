@@ -17,8 +17,8 @@
 #include <stdio.h>
 #include <string.h>
 
-extern unsigned char randmat_matrix[20000][20000];
-unsigned char thresh_mask[20000][20000];
+extern int *randmat_matrix;
+int *thresh_mask;
 static int histogram[16][200];
 
 int reduce_max (int nrows, int ncols) {
@@ -28,7 +28,7 @@ int reduce_max (int nrows, int ncols) {
     int begin = i;
 
     for (int j = 0; j < ncols; j++) {
-      max_reducer.calc_max (randmat_matrix [begin][j]);
+      max_reducer.calc_max (randmat_matrix [begin*ncols +j]);
     }
   }
 
@@ -40,7 +40,7 @@ void fill_histogram(int nrows, int ncols) {
   cilk_for (int r = 0; r < nrows; ++r) {
     int Self = __cilkrts_get_worker_number();
     for (int i = 0; i < ncols; i++) {
-      histogram [Self][randmat_matrix[r][i]]++;
+      histogram [Self][randmat_matrix[r*ncols +i]]++;
     }
   }
 }
@@ -56,7 +56,7 @@ void merge_histogram () {
 void fill_thresh_mask (int nrows, int ncols, int threshold) {
   cilk_for (int i = 0; i < nrows; ++i) {
     for (int j = 0; j < ncols; ++j) {
-      thresh_mask[i][j] = randmat_matrix [i][j] >= threshold;
+      thresh_mask[i*ncols +j] = randmat_matrix [i*ncols +j] >= threshold;
     }
   }
 }
@@ -65,6 +65,8 @@ void thresh(int nrows, int ncols, int percent) {
   int i;
   int nmax = 0;
   int count, prefixsum, threshold;
+
+  thresh_mask = (int*) malloc (sizeof(int) * ncols * nrows);
 
   nmax = reduce_max(nrows, ncols);
 

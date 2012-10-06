@@ -11,18 +11,23 @@
 % output:
 %   points: a vector of (x, y) points
 %
-
 -module(main).
 -export([main/0, main/1]).
 
-get_values_vector(_, _, [], []) -> [];
-get_values_vector(Line, Col, [ValuesHead | ValuesTail], [
-    MaskHead | MaskTail]) ->
-  Rest = get_values_vector(Line, Col + 1, ValuesTail, MaskTail),
-  if MaskHead == 1 -> [
-        {ValuesHead, {Line, Col}} | Rest];
-    true -> Rest
-  end.
+get_values_vector(Line, Col, Values, Mask) ->
+    get_values_vector_acc (Line, Col, Values, Mask, []).
+
+get_values_vector_acc(_, _, [], [], Acc) -> lists:reverse (Acc);
+get_values_vector_acc(Line, Col, 
+                      [ValuesHead | ValuesTail], 
+                      [MaskHead | MaskTail], Acc) ->
+    case MaskHead of
+        1 -> 
+            get_values_vector_acc (Line, Col+1, ValuesTail, MaskTail,
+                                   [{ValuesHead, {Line, Col}} | Acc]);
+        _ -> 
+            get_values_vector_acc (Line, Col+1, ValuesTail, MaskTail, Acc)
+    end.
 
 join(Pids) ->
   [receive {Pid, Result} -> Result end || Pid <- Pids].
@@ -40,21 +45,16 @@ get_values_impl(Parent, Line, [MatrixHead | MatrixTail], [MaskHead |
   % parallel for on rows
   Worker = get_values_worker (Parent, Line, 0, MatrixHead, MaskHead),
   get_values_impl (Parent, Line + 1, MatrixTail, MaskTail, [Worker|Acc]).
-%  [get_values_worker(Parent, Line, 0, MatrixHead, MaskHead) |
-%    get_values_impl(Parent, Line + 1, MatrixTail, MaskTail)].
-
-append([]) -> [];
-append([Head | Tail]) -> Head ++ append(Tail).
 
 get_values(Line, Matrix, Mask) ->
   Parent = self(),
   Pids = get_values_impl(Parent, Line, Matrix, Mask, []),
-  Results = append(join(Pids)),
+  Results = lists:flatten(join(Pids)),
   Results.
 
 get_points(0, _, _) -> [];
 get_points(Nelts, [{_, {I, J}} | Tail], Chunk) ->
-  [ {I, J} | get_points(Nelts - 1, nthtail(Chunk - 1, Tail), Chunk)].
+  [ {I, J} | get_points(Nelts - 1, lists:nthtail(Chunk - 1, Tail), Chunk)].
 
 sort_impl(L) ->
   Parent = self(),

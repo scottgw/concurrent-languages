@@ -18,24 +18,26 @@
 using namespace std;
 
 extern int is_bench;
-extern unsigned char randmat_matrix[20000][20000];
-unsigned char thresh_mask[20000][20000];
+extern int *randmat_matrix;
+int *thresh_mask;
 static int histogram[100];
 
 void thresh(int nrows, int ncols, int percent) {
   int nmax = 0;
+  thresh_mask = (int*) malloc (sizeof(int) * nrows * ncols);
+
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
       if (is_bench) {
-        randmat_matrix[i][j] = (i * j) % 100;
+        randmat_matrix[i*ncols + j] = (i * j) % 100;
       }
-      nmax = max(nmax, (int)randmat_matrix[i][j]);
+      nmax = max(nmax, randmat_matrix[i*ncols + j]);
     }
   }
 
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
-      histogram[randmat_matrix[i][j]]++;
+      histogram[randmat_matrix[i*ncols + j]]++;
     }
   }
 
@@ -51,7 +53,7 @@ void thresh(int nrows, int ncols, int percent) {
 
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
-      thresh_mask[i][j] = randmat_matrix[i][j] >= threshold;
+      thresh_mask[i*ncols + j] = randmat_matrix[i*ncols + j] >= threshold;
     }
   }
 }

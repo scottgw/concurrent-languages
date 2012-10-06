@@ -1,6 +1,7 @@
 *~
 *.pdf
 main
+*.6
 .fuse_hidden*
 .*.swp
 erl_crash.dump
@@ -9,3 +10,4 @@ erl_crash.dump
 *.o
 *.out
 EIFGENs
+*.pdf

@@ -22,7 +22,7 @@ import (
 
 var is_bench = flag.Bool("is_bench", false, "")
 
-var points [10000]Point
+var points []Point
 
 type Point struct {
 	x, y int
@@ -105,6 +105,7 @@ func main() {
 	flag.Parse()
 
 	nelts = read_integer()
+  points = make ([]Point, nelts)
 
 	if !*is_bench {
 		read_vector_of_points(nelts)
@@ -113,14 +114,14 @@ func main() {
 	matrix, vector := Outer(points[0:nelts], nelts)
 
 	if !*is_bench {
-		fmt.Printf("%d %d", nelts, nelts)
-		for i := 0; i < nelts*nelts; i++ {
-			if i%nelts == 0 {
-				fmt.Printf("\n")
-			}
-			fmt.Printf("%g ", matrix[i])
-		}
-		fmt.Printf("\n\n")
+		fmt.Printf("%d %d\n", nelts, nelts)
+    for _, row := range matrix {
+      for _, elem := range row {
+        fmt.Printf("%g ", elem)
+      }
+      fmt.Printf("\n")
+    }
+		fmt.Printf("\n")
 
 		fmt.Printf("%d\n", nelts)
 		for i := 0; i < nelts; i++ {

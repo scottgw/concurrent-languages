@@ -16,15 +16,16 @@
 
 using namespace std;
 
-extern double outer_matrix[10000][10000];
-extern double outer_vector[10000];
-double product_result[10000];
+extern double *outer_matrix;
+extern double *outer_vector;
+double *product_result;
 
 void product(int nelts) {
+  product_result = (double*) malloc (sizeof(double) * nelts);
   for (int i = 0; i < nelts; i++) {
     double sum = 0;
     for (int j = 0; j < nelts; j++) {
-      sum += outer_matrix[i][j] * outer_vector[j];
+      sum += outer_matrix[i*nelts + j] * outer_vector[j];
     }
     product_result[i] = sum;
   }

@@ -28,7 +28,7 @@ type Point struct {
 
 type Points []Point;
 
-var Winnow_points [10000]Point;
+var Winnow_points []Point;
 var values Points;
 
 func (p Points) Len() int { return len(p) }
@@ -103,6 +103,7 @@ func fill_values(nrows, ncols, n int) {
 }
 
 func Winnow(nrows, ncols, nelts int) {
+  Winnow_points = make ([]Point, nelts)
   n := reduce_sum(nrows, ncols);
 
   values = make(Points, n);

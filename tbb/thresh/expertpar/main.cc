@@ -23,8 +23,8 @@ using namespace tbb;
 int is_bench = 0;
 int n_threads = task_scheduler_init::default_num_threads();
 
-static unsigned char matrix[20000][20000];
-static unsigned char mask[20000][20000];
+static unsigned char *matrix;
+static unsigned char *mask;
 
 struct view {
   int h[100];
@@ -47,9 +47,9 @@ void thresh(int nrows, int ncols, int percent) {
           for (int j = 0; j < ncols; j++) {
             int val;
             if (is_bench) {
-              matrix[i][j] = (i * j) % 100;
+              matrix[i*ncols + j] = (i * j) % 100;
             }
-            val = (int)matrix[i][j];
+            val = (int)matrix[i*ncols + j];
 
             result = max(result, val);
             v.h[val]++;
@@ -82,7 +82,7 @@ void thresh(int nrows, int ncols, int percent) {
       [=](range r) {
         for (size_t i = r.begin(); i != r.end(); ++i) {
           for (int j = 0; j < ncols; j++) {
-            mask[i][j] = matrix[i][j] >= threshold;
+            mask[i*ncols + j] = matrix[i*ncols + j] >= threshold;
           }
         }
       });
@@ -103,11 +103,14 @@ int main(int argc, char** argv) {
   task_scheduler_init init(n_threads);
 
   scanf("%d%d", &nrows, &ncols);
+  
+  matrix = (unsigned char*) malloc (sizeof (unsigned char) * nrows * ncols);
+  mask = (unsigned char*) malloc (sizeof (unsigned char) * nrows * ncols);
 
   if (!is_bench) {
     for (int i = 0; i < nrows; i++) {
       for (int j = 0; j < ncols; j++) {
-        scanf("%hhu", &matrix[i][j]);
+        scanf("%hhu", &matrix[i*ncols + j]);
       }
     }
   }
@@ -120,7 +123,7 @@ int main(int argc, char** argv) {
     printf("%d %d\n", nrows, ncols);
     for (int i = 0; i < nrows; i++) {
       for (int j = 0; j < ncols; j++) {
-        printf("%hhu ", mask[i][j]);
+        printf("%hhu ", mask[i*ncols + j]);
       }
       printf("\n");
     }

@@ -21,15 +21,13 @@ using namespace tbb;
 
 int is_bench = 0;
 int n_threads = task_scheduler_init::default_num_threads();
-extern double product_result[10000];
+extern double *product_result;
 
 void randmat(int, int, unsigned int);
 void thresh(int, int, int);
 void winnow(int, int, int);
 void outer(int);
 void product(int);
-
-extern double product_result[10000];
 
 int main(int argc, char** argv) {
   int nelts, randmat_seed, thresh_percent, winnow_nelts;

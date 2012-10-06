@@ -12,8 +12,8 @@
  */
 package all
 
-var Thresh_mask [20000][20000]byte;
-var histogram[20000][100]int;
+var Thresh_mask [][]byte;
+var histogram[][100]int;
 
 func max_int(a, b int) int {
   if a > b {
@@ -116,6 +116,12 @@ func fill_mask(nrows, ncols, threshold int) {
 }
 
 func Thresh(nrows, ncols int, percent int) {
+  Thresh_mask = make ([][]byte, nrows)
+  for i := range Thresh_mask {
+    Thresh_mask [i] = make ([]byte, ncols)
+  }
+  histogram = make ([][100]int, nrows)
+
   nmax := reduce_max(nrows, ncols);
 
   fill_histogram(nrows, ncols);

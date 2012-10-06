@@ -26,12 +26,12 @@ type Point struct {
 	i, j int
 }
 
-var points [10000]Point
+var points []Point
 
 type double float64
 
-var matrix [10000][10000]double
-var vector [10000]double
+var matrix [][]double
+var vector []double
 
 type Points []Point
 
@@ -108,6 +108,14 @@ func main() {
 	flag.Parse()
 
 	nelts = read_integer()
+  matrix = make ([][]double, nelts)
+  for i := range matrix {
+    matrix [i] = make ([]double, nelts)
+  }
+
+  vector = make ([]double, nelts)
+  points = make ([]Point, nelts)
+
 
 	if !*is_bench {
 		read_vector_of_points(nelts)

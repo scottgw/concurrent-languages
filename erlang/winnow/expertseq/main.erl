@@ -15,19 +15,30 @@
 -module(main).
 -export([main/0, main/1]).
 
-get_values_vector(_, _, [], []) -> [];
-get_values_vector(Line, Col, [ValuesHead | ValuesTail], [
-    MaskHead | MaskTail]) ->
-  Rest = get_values_vector(Line, Col + 1, ValuesTail, MaskTail),
-  if MaskHead == 1 -> [
-        {ValuesHead, {Line, Col}} | Rest];
-    true -> Rest
-  end.
+get_values_vector(Line, Col, Values, Mask) ->
+    get_values_vector_acc (Line, Col, Values, Mask, []).
 
-get_values(_, [], []) -> [];
-get_values(Line, [MatrixHead | MatrixTail], [MaskHead | MaskTail]) ->
-  get_values_vector(Line, 0, MatrixHead, MaskHead) ++ get_values(
-    Line + 1, MatrixTail, MaskTail).
+get_values_vector_acc(_, _, [], [], Acc) -> lists:reverse (Acc);
+get_values_vector_acc(Line, Col, 
+                      [ValuesHead | ValuesTail], 
+                      [MaskHead | MaskTail], Acc) ->
+    case MaskHead of
+        1 -> 
+            get_values_vector_acc (Line, Col+1, ValuesTail, MaskTail,
+                                   [{ValuesHead, {Line, Col}} | Acc]);
+        _ -> 
+            get_values_vector_acc (Line, Col+1, ValuesTail, MaskTail, Acc)
+    end.
+
+
+get_values(Line, Matrix, Mask) ->
+    get_values_acc (Line, Matrix, Mask, []).
+
+get_values_acc(_, [], [], Acc) -> lists:flatten (lists:reverse (Acc));
+get_values_acc(Line, [MatrixHead | MatrixTail], [MaskHead | MaskTail], Acc) ->
+    Rest = get_values_vector(Line, 0, MatrixHead, MaskHead),
+    get_values_acc(Line + 1, MatrixTail, MaskTail, [Rest|Acc]).
+
 
 get_points (Nelts, Ls, Chunk) ->
   get_points_acc (Nelts, Ls, Chunk, []).

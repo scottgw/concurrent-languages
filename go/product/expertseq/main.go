@@ -18,8 +18,8 @@ import (
 
 var is_bench = flag.Bool("is_bench", false, "")
 
-var matrix [10000 * 10000]float64
-var vector [10000]float64
+var matrix []float64
+var vector []float64
 
 func product(m, vec []float64, nelts int) (result []float64) {
 	result = make([]float64, nelts)
@@ -73,6 +73,8 @@ func main() {
 	flag.Parse()
 
 	nelts = read_integer()
+  matrix = make ([]float64, nelts*nelts)
+  vector = make ([]float64, nelts)
 
 	if !*is_bench {
 		read_matrix(nelts)

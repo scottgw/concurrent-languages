@@ -25,14 +25,18 @@ using namespace std;
 using namespace tbb;
 
 extern int is_bench;
-extern unsigned char randmat_matrix[20000][20000];
-unsigned char thresh_mask[20000][20000];
-static int histogram[20000][100];
+extern int *randmat_matrix;
+int *thresh_mask;
+static int *histogram[100];
 
 typedef tbb::blocked_range<size_t> range;
 
 void thresh(int nrows, int ncols, int percent) {
   int nmax = 0;
+
+  thresh_mask = (int*) malloc (sizeof(int) * nrows * ncols);
+  for (int i = 0; i < 100; i++)
+    histogram[i] = (int*) malloc (sizeof(int) * nrows);
 
   nmax = tbb::parallel_reduce(
       range(0, nrows), 0,
@@ -40,9 +44,9 @@ void thresh(int nrows, int ncols, int percent) {
         for (size_t i = r.begin(); i != r.end(); i++) {
           for (int j = 0; j < ncols; j++) {
             if (is_bench) {
-              randmat_matrix[i][j] = (i * j) % 100;
+              randmat_matrix[i*ncols + j] = (i * j) % 100;
             }
-            result = max(result , (int)randmat_matrix[i][j]);
+            result = max(result , randmat_matrix[i*ncols + j]);
           }
         }
         return result;
@@ -56,7 +60,7 @@ void thresh(int nrows, int ncols, int percent) {
       [=](range r) {
         for (size_t i = r.begin(); i != r.end(); i++) {
           for (int j = 0; j < ncols; j++) {
-            histogram[i][randmat_matrix[i][j]]++;
+            histogram[randmat_matrix[i*ncols + j]][i]++;
           }
         }
       });
@@ -66,7 +70,7 @@ void thresh(int nrows, int ncols, int percent) {
       [=](range r) {
         for (size_t j = r.begin(); j != r.end(); j++) {
           for (int i = 1; i < nrows; i++) {
-            histogram[0][j] += histogram[i][j];
+            histogram[j][0] += histogram[j][i];
           }
         }
       });
@@ -77,7 +81,7 @@ void thresh(int nrows, int ncols, int percent) {
   int threshold = nmax;
 
   for (int i = nmax; i >= 0 && prefixsum <= count; i--) {
-    prefixsum += histogram[0][i];
+    prefixsum += histogram[i][0];
     threshold = i;
   }
 
@@ -86,7 +90,7 @@ void thresh(int nrows, int ncols, int percent) {
       [=](range r) {
         for (size_t i = r.begin(); i != r.end(); ++i) {
           for (int j = 0; j < ncols; j++) {
-            thresh_mask[i][j] = randmat_matrix[i][j] >= threshold;
+            thresh_mask[i*ncols + j] = randmat_matrix[i*ncols + j] >= threshold;
           }
         }
       });

@@ -61,15 +61,16 @@ def run_all(redirect_output=True):
         # directory = get_directory(language, problem, variation)
         # cmd += "/usr/bin/time -a -f %%e -o %s %s/" % (time_output,
         #     directory)
+          
         directory = get_directory(language, problem, variation)
-        cmd += directory + '/'
+        # cmd += directory + '/'
 
         if language == "erlang":
-          cmd += "main.sh"
+          cmd += 'erl -noshell -pa ' + directory + '/ -s main main is_bench -s init stop'
         elif language == "scoop":
-          cmd += "main -bench -i"
+          cmd += directory + '/' + "main -bench -i"
         else:
-          cmd += "main"
+          cmd += directory + '/' + "main"
 
         if language == "chapel":
           cmd += " --numLocales=1"
@@ -87,9 +88,9 @@ def run_all(redirect_output=True):
             cmd += ' --threads %d' % nthreads
         elif language == 'erlang':
           if is_parallel (variation):
-            cmd += ' %d' % nthreads
+            cmd += ' +S %d' % nthreads
           else:
-            cmd += ' 1'
+            cmd += ' +S 1'
 
         if (language == "chapel" or language == "cilk" or language == "tbb"
             or language == 'go'):

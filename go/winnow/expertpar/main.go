@@ -44,7 +44,7 @@ func (m *ByteMatrix) Bytes() []byte {
 
 var is_bench = flag.Bool("is_bench", false, "")
 var matrix []byte
-var mask [20000][20000]bool
+var mask [][]bool
 var points []int
 
 type WinnowPoints struct {
@@ -176,15 +176,20 @@ func main() {
 	ncols = int(read_integer())
 
 	m := NewByteMatrix(nrows, ncols)
-	points = make([]int, 10000)
+
 	matrix = m.array
 
+  mask = make ([][]bool, nrows)
+  for i := range mask {
+    mask [i] = make ([]bool, ncols)
+  }
 	if !*is_bench {
 		read_matrix(nrows, ncols)
 		read_mask(nrows, ncols)
 	}
 
 	nelts = int(read_integer())
+	points = make([]int, nelts)
 
 	Winnow(m, nrows, ncols, nelts)
 

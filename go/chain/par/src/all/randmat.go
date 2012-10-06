@@ -11,16 +11,17 @@
  */
 package all
 
-var Randmat_matrix [20000][20000]byte;
+var Randmat_matrix [][]byte;
 
 func randvec(row, n, seed int, done chan bool) {
-  LCG_A := 1664525;
-  LCG_C := 1013904223;
+	LCG_A := uint32(1664525)
+	LCG_C := uint32(1013904223)
+  s := uint32(seed)
   for j := 0; j < n; j++ {
-    seed = LCG_A * seed + LCG_C;
-    Randmat_matrix[row][j] = byte(seed % 100) % 100;
-  }
-  done <- true;
+	  s = LCG_A*s + LCG_C
+		Randmat_matrix[row][j] = byte(s % 100)
+	}
+	done <- true
 }
 
 func parallel_for(begin, end, ncols, s int, done chan bool) {
@@ -34,6 +35,11 @@ func parallel_for(begin, end, ncols, s int, done chan bool) {
 }
 
 func Randmat(nrows, ncols, s int) {
+  Randmat_matrix = make ([][]byte, nrows)
+  for i := range Randmat_matrix {
+    Randmat_matrix [i] = make ([]byte, ncols)
+  }
+  
   done := make(chan bool);
   // parallel for on rows
   go parallel_for(0, nrows, ncols, s, done);

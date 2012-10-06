@@ -22,20 +22,20 @@
 using namespace std;
 
 extern int is_bench;
-extern unsigned char randmat_matrix[20000][20000];
-extern unsigned char thresh_mask[20000][20000];
-pair<int, int> winnow_points[20000];
-static pair<int, pair<int, int> > values[20000];
+extern int *randmat_matrix;
+extern int *thresh_mask;
+pair<int, int> *winnow_points;
+static pair<int, pair<int, int> >* values;
 
 void winnow(int nrows, int ncols, int nelts) {
   int count = 0;
+  winnow_points = (pair<int,int> *) malloc (sizeof (pair<int,int>) * nelts);
+  values = (pair<int, pair<int,int> > *) malloc (sizeof (pair<int, pair<int,int> >) * nrows  * ncols);
+
   for (int i = 0; i < nrows; i++) {
     for (int j = 0; j < ncols; j++) {
-      if (is_bench) {
-        thresh_mask[i][j] = ((i * j) % (ncols + 1)) == 1;
-      }
-      if (thresh_mask[i][j]) {
-        values[count++] = (make_pair(randmat_matrix[i][j], make_pair(i, j)));
+      if (thresh_mask[i*ncols + j]) {
+        values[count++] = make_pair(randmat_matrix[i*ncols + j], make_pair(i, j));
       }
     }
   }
@@ -49,4 +49,6 @@ void winnow(int nrows, int ncols, int nelts) {
     int index = i * chunk;
     winnow_points[i] = values[index].second;
   }
+
+  free (values);
 }

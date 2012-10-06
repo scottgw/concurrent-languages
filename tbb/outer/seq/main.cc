@@ -24,9 +24,9 @@ using namespace std;
 
 static int is_bench = 0;
 
-static pair<int, int> points[10000];
-static double matrix[10000][10000];
-static double vec[10000];
+static pair<int, int>* points;
+static double *matrix;
+static double *vec;
 
 
 double sqr(double x) {
@@ -42,18 +42,23 @@ void outer(int nelts) {
     double nmax = -1;
     for (int j = 0; j < nelts; j++) {
       if (i != j) {
-        matrix[i][j] = ::distance(points[i], points[j]);
-        nmax = max(nmax, matrix[i][j]);
+        double v = ::distance(points[i], points[j]);
+
+        matrix[i*nelts + j] = v;
+        nmax = max(nmax, matrix[i*nelts + j]);
       }
+      
     }
-    matrix[i][i] = nelts * nmax;
+    matrix[i*nelts + i] = nelts * nmax;
     vec[i] = ::distance(make_pair(0, 0), points[i]);
   }
 }
 
 void read_vector_of_points(int nelts) {
   for (int i = 0; i < nelts; i++) {
-    cin >> points[i].first >> points[i].second;
+    int x, y;
+    cin >> x >> y;
+    points [i] = make_pair (x,y);
   }
 }
 
@@ -67,6 +72,9 @@ int main(int argc, char** argv) {
   }
 
   scanf("%d", &nelts);
+  matrix = (double *) malloc (sizeof (double) * nelts * nelts);
+  vec = (double *) malloc (sizeof (double) * nelts);
+  points = (pair<int, int>*) malloc (sizeof (pair<int, int>) * nelts);
 
   if (!is_bench) {
     read_vector_of_points(nelts);
@@ -78,7 +86,7 @@ int main(int argc, char** argv) {
     printf("%d %d\n", nelts, nelts);
     for (int i = 0; i < nelts; i++) {
       for (int j = 0; j < nelts; j++) {
-        printf("%g ", matrix[i][j]);
+        printf("%g ", matrix[i*nelts + j]);
       }
       printf("\n");
     }

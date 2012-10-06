@@ -12,7 +12,7 @@
  */
 package all
 
-var Thresh_mask [20000][20000]byte;
+var Thresh_mask [][]byte;
 var histogram [100]int;
 
 func max_int(a, b int) int {
@@ -23,6 +23,11 @@ func max_int(a, b int) int {
 }
 
 func Thresh(nrows, ncols int, percent int) {
+  Thresh_mask = make ([][]byte, nrows)
+  for i := range Thresh_mask {
+    Thresh_mask [i] = make ([]byte, ncols)
+  }
+
   var nmax int = 0;
   for i := 0; i < nrows; i++ {
     for j := 0; j < ncols; j++ {

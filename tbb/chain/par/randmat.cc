@@ -20,10 +20,11 @@ using namespace tbb;
 
 typedef blocked_range<size_t> range;
 
-unsigned char randmat_matrix[20000][20000];
+int *randmat_matrix;
 
 void randmat(int nrows, int ncols, unsigned int s) {
   const int LCG_A = 1664525, LCG_C = 1013904223;
+  randmat_matrix = (int*) malloc (sizeof(int) * nrows * ncols);
   parallel_for(
     range(0, nrows),
     [=](range r) {
@@ -31,7 +32,7 @@ void randmat(int nrows, int ncols, unsigned int s) {
         unsigned int seed = s + i;
         for (int j = 0; j < ncols; j++) {
           seed = LCG_A * seed + LCG_C;
-          randmat_matrix[i][j] = seed % 100;
+          randmat_matrix[i*ncols + j] = seed % 100;
         }
       }
   });

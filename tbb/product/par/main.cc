@@ -24,9 +24,9 @@ using namespace tbb;
 static int is_bench = 0;
 int n_threads = task_scheduler_init::default_num_threads();
 
-static double matrix[10000][10000];
-static double vec[10000];
-static double result[10000];
+static double *matrix;
+static double *vec;
+static double *result;
 
 typedef blocked_range<size_t> range;
 
@@ -37,7 +37,7 @@ void product(int nelts) {
       for (size_t i = r.begin(); i != r.end(); ++i) {
         double sum = 0;
         for (int j = 0; j < nelts; j++) {
-          sum += matrix[i][j] * vec[j];
+          sum += matrix[i*nelts + j] * vec[j];
         }
         result[i] = sum;
       }
@@ -60,15 +60,19 @@ int main(int argc, char** argv) {
 
   scanf("%d", &nelts);
 
+  matrix = (double *) malloc (sizeof(double) * nelts * nelts);
+  vec = (double *) malloc (sizeof (double) * nelts);
+  result = (double *) malloc (sizeof (double) * nelts);
+
   if (!is_bench) {
     for (int i = 0; i < nelts; i++) {
       for (int j = 0; j < nelts; j++) {
-        scanf("%f", &matrix[i][j]);
+        cin >> matrix[i*nelts + j];
       }
     }
 
     for (int i = 0; i < nelts; i++) {
-      scanf("%f", &vec[i]);
+      cin >> vec[i];
     }
   }
 

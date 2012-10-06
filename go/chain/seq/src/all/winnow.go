@@ -26,7 +26,7 @@ type WinnowPoint struct {
   i, j int;
 }
 
-var Winnow_points [10000]WinnowPoint;
+var Winnow_points []WinnowPoint;
 
 type WinnowPoints []WinnowPoint;
 
@@ -49,6 +49,7 @@ func (p WinnowPoints) Less(i, j int) bool {
 }
 
 func Winnow(nrows, ncols, nelts int) {
+  Winnow_points = make ([]WinnowPoint, nelts)
   var n = 0;
 
   for i := 0; i < nrows; i++ {

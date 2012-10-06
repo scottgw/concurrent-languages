@@ -13,7 +13,7 @@
 %
 
 -module(main).
--export([main/0]).
+-export([main/0, main/1]).
 
 sqr(X) ->
   X * X.
@@ -36,12 +36,24 @@ fix_diagonal(Line, [Head | Tail], [HeadPoints | TailPoints], Nelts) ->
 outer(Nelts, Points) ->
   {fix_diagonal(0, [ [ distance(A, B) || A <- Points] || B <- Points ], Points, Nelts), [distance({0, 0}, A) || A <- Points]}.
 
-read_vector_of_points(0) -> [];
-read_vector_of_points(Nelts) -> {ok, [X, Y]} = io:fread("", "~d~d"),
-  [ {X, Y} | read_vector_of_points(Nelts - 1)].
+read_vector_of_points(_,0) -> [];
+read_vector_of_points(IsBench,Nelts) -> 
+    Val = case IsBench of
+              true -> {0, 0};
+              false -> 
+                  {ok, [X, Y]} = io:fread("", "~d~d"),
+                  {X, Y}
+          end,
+    [ Val | read_vector_of_points(IsBench, Nelts - 1)].
 
-main() ->
-  {ok, [Nelts]} = io:fread("","~d"),
-  Points = read_vector_of_points(Nelts),
-  io:format("~w~n\n", [outer(Nelts, Points)]).
+main() -> main(['']).
+main(Args) ->
+    [Arg|_] = Args,
+    IsBench = string:equal (Arg, 'is_bench'),
+    {ok, [Nelts]} = io:fread("","~d"),
+    Points = read_vector_of_points(IsBench, Nelts),
+    case IsBench of
+        false -> io:format("~w~n\n", [outer(Nelts, Points)]);
+        true -> ''
+    end.
 

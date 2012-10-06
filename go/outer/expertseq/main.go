@@ -21,7 +21,7 @@ import (
 
 var is_bench = flag.Bool("is_bench", false, "")
 
-var points [10000]Point
+var points []Point
 
 type Point struct {
 	x, y int
@@ -80,6 +80,7 @@ func main() {
 	flag.Parse()
 
 	nelts = read_integer()
+  points = make ([]Point, nelts)
 
 	if !*is_bench {
 		read_vector_of_points(nelts)
