@@ -41,7 +41,7 @@ func (m *ByteMatrix) Bytes() []byte {
 	return m.array[0 : m.Rows*m.Cols]
 }
 
-var mask [20000][20000]bool
+var mask [][]bool
 
 func thresh(m *ByteMatrix, nrows, ncols, percent uint32) {
 	NP := runtime.GOMAXPROCS(0)
@@ -121,8 +121,13 @@ func main() {
 	flag.Parse()
 
 	fmt.Scanf("%d%d", &nrows, &ncols)
+  mask = make ([][]bool, nrows)
+  for i := range mask {
+    mask [i] = make ([]bool, ncols)
+  }
 
-	m := WrapBytes(nrows, ncols, make([]byte, 20000*20000))
+
+	m := WrapBytes(nrows, ncols, make([]byte, ncols*nrows))
 
 	if !*is_bench {
 		for i := uint32(0); i < nrows; i++ {

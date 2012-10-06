@@ -21,8 +21,8 @@ import (
 )
 
 var is_bench = flag.Bool("is_bench", false, "")
-var matrix [20000][20000]byte
-var mask [20000][20000]byte
+var matrix [][]byte
+var mask [][]byte
 
 type Point struct {
 	value byte
@@ -31,7 +31,7 @@ type Point struct {
 
 type Points []Point
 
-var points [10000]Point
+var points []Point
 
 func (p Points) Len() int      { return len(p) }
 func (p Points) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
@@ -125,13 +125,23 @@ func main() {
 	nrows = read_integer()
 	ncols = read_integer()
 
+  matrix = make ([][]byte, nrows)
+  for i := range matrix {
+    matrix [i] = make ([]byte, ncols)
+  }
+
+  mask = make ([][]byte, nrows)
+  for i := range mask {
+    mask [i] = make ([]byte, ncols)
+  }
+
 	if !*is_bench {
 		read_matrix(nrows, ncols)
 		read_mask(nrows, ncols)
 	}
 
 	nelts = read_integer()
-
+  points = make ([]Point, nelts)
 	winnow(nrows, ncols, nelts)
 
 	if !*is_bench {

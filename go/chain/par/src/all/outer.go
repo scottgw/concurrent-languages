@@ -20,8 +20,8 @@ import (
 
 type Double float64;
 
-var Outer_matrix [10000][10000]Double;
-var Outer_vector [10000]Double;
+var Outer_matrix [][]Double;
+var Outer_vector []Double;
 
 func max(a, b Double) Double {
   if a > b {
@@ -68,5 +68,12 @@ func fill_matrix(nrows, ncols int) {
 }
 
 func Outer(nelts int) {
+  Outer_matrix = make ([][]Double, nelts)
+  for i := range Outer_matrix {
+    Outer_matrix [i] = make ([]Double, nelts)
+  }
+
+  Outer_vector = make ([]Double, nelts)
+
   fill_matrix(nelts, nelts);
 }

@@ -64,7 +64,7 @@ func main() {
 	fmt.Scan(&ncols)
 	fmt.Scan(&seed)
 
-	matrix := randmat(nrows, ncols, seed)
+  matrix := randmat(nrows, ncols, seed)
 
 	if !*is_bench {
 		for i := 0; i < nrows; i++ {

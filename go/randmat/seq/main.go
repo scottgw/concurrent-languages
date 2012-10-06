@@ -17,16 +17,16 @@ import (
 )
 
 var is_bench = flag.Bool("is_bench", false, "")
-var matrix [20000][20000]int
+var matrix [][]int
 
 func randmat(nrows, ncols, s int) {
-	LCG_A := 1664525
-	LCG_C := 1013904223
+	LCG_A := uint32(1664525)
+	LCG_C := uint32(1013904223)
 	for i := 0; i < nrows; i++ {
-		seed := s + i
+		seed := uint32(s) + uint32(i)
 		for j := 0; j < ncols; j++ {
 			seed = LCG_A*seed + LCG_C
-			matrix[i][j] = ((seed % 100) + 100) % 100
+			matrix[i][j] = int(seed % 100)
 		}
 	}
 }
@@ -37,6 +37,10 @@ func main() {
 	flag.Parse()
 
 	fmt.Scanf("%d%d%d", &nrows, &ncols, &s)
+	matrix = make([][]int, nrows)
+	for i := range matrix {
+		matrix[i] = make([]int, ncols)
+	}
 
 	randmat(nrows, ncols, s)
 

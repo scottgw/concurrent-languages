@@ -20,9 +20,9 @@ var is_bench = flag.Bool("is_bench", false, "")
 
 type double float64
 
-var matrix [10000][10000]double
-var vector [10000]double
-var result [10000]double
+var matrix [][]double
+var vector []double
+var result []double
 
 func product(nelts int) {
 	for i := 0; i < nelts; i++ {
@@ -76,6 +76,13 @@ func main() {
 	flag.Parse()
 
 	nelts = read_integer()
+
+  matrix = make ([][]double, nelts)
+  for i := range matrix {
+    matrix [i] = make ([]double, nelts)
+  }
+  vector = make ([]double, nelts)
+  result = make ([]double, nelts)
 
 	if !*is_bench {
 		read_matrix(nelts)
