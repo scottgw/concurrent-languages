@@ -11,7 +11,7 @@
  */
 package all
 
-var Product_result [10000]Double;
+var Product_result []Double;
 
 func fill_result_impl(begin, end, ncols int, done chan bool) {
   if (begin + 1 == end) {
@@ -38,5 +38,6 @@ func fill_result(nrows, ncols int) {
 }
 
 func Product(nelts int) {
+  Product_result = make ([]Double, nelts)
   fill_result(nelts, nelts);
 }
