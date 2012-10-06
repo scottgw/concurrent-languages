@@ -11,9 +11,10 @@
  */
 package all
 
-var Product_result [10000]Double;
+var Product_result []Double;
 
 func Product(nelts int) {
+  Product_result = make ([]Double, nelts)
   for i := 0; i < nelts; i++ {
     var sum Double = 0;
     for j := 0; j < nelts; j++ {
