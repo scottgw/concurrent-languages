@@ -1,4 +1,9 @@
 module Config {
+  config const nelts = read (int),
+             randmat_seed = read (int),
+             thresh_percent = read (int),
+             winnow_nelts = read (int);
+
   const randSpace = [1..nelts, 1..nelts];
   const histSpace = [0..99];
   const pointSpace = [1..winnow_nelts];

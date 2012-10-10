@@ -12,8 +12,6 @@
  */
 
 module Winnow {
-config const is_bench = false;
-
 use Config;
 
 proc winnow(nrows: int, ncols: int, nelts: int) {
@@ -25,10 +23,7 @@ proc winnow(nrows: int, ncols: int, nelts: int) {
   forall i in 1..nrows do {
     count_per_line[i + 1] = 0;
     for j in 1..ncols do {
-      if (is_bench) {
-        mask[i, j] = (((i - 1) * (j - 1)) % (ncols + 1)) == 1;
-      }
-      count_per_line[i + 1] += mask[i, j];
+     count_per_line[i + 1] += mask[i, j];
     }
   }
 

@@ -12,7 +12,7 @@
 
 use Config, Randmat, Thresh, Winnow, Outer, Product;
 
-config const is_bench: bool;
+config const is_bench = false;
 
 proc main() {
   randmat(nelts, nelts, randmat_seed);
