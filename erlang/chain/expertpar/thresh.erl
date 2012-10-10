@@ -21,7 +21,10 @@ reduce2d_worker(Parent, X, Function) ->
   end).
 
 reduce2d_join(Pids) ->
-  [receive {Pid, Result} -> Result end || Pid <- Pids].
+  [receive 
+       {Pid, Result} -> Result 
+   end 
+   || Pid <- Pids].
 
 reduce2d(Matrix, Agregator, Function) ->
   Parent = self(),
@@ -33,25 +36,35 @@ max_matrix(Matrix) ->
   reduce2d(Matrix, fun lists:max/1, fun lists:max/1).
 
 count_equal(Matrix, Value) ->
-  reduce2d(Matrix, fun lists:sum/1,
-    fun(X) -> length(lists:filter(fun(Y) -> Y == Value end, X)) end).
+  reduce2d(Matrix, 
+           fun lists:sum/1,
+           fun(X) -> 
+                   length(lists:filter(fun(Y) -> Y == Value end, X))
+           end).
 
 fill_histogram_acc (_, -1, Acc) ->
     lists:reverse (Acc);
 fill_histogram_acc (Matrix, Nmax, Acc) ->
-    fill_histogram_acc (Matrix, Nmax -1, [count_equal (Matrix, Nmax)] ++ Acc).
+    fill_histogram_acc (Matrix, Nmax - 1 , [count_equal (Matrix, Nmax)] ++ Acc).
+
 fill_histogram (Matrix, Nmax) ->
     fill_histogram_acc (Matrix, Nmax, []).
 
 get_threshold(-1, [], _) -> 0;
+get_threshold(Index, [Head | _], Count) when Head > Count ->
+    Index;
 get_threshold(Index, [Head | Tail], Count) ->
-  if Count - Head < 0 -> Index;
-    true -> get_threshold(Index - 1, Tail, Count - Head)
-  end.
+    get_threshold (Index - 1, Tail, Count - Head).
 
 filter(Matrix, Threshold) ->
-  reduce2d(Matrix, fun(X) -> X end, fun(X) ->
-        lists:map(fun(Y) -> Y >= Threshold end, X) end).
+  reduce2d(Matrix, 
+           fun(X) -> X end, 
+           fun(X) ->
+                   lists:map(fun(Y) -> 
+                                     Y >= Threshold 
+                             end, 
+                             X) 
+           end).
 
 thresh(Nrows, Ncols, Matrix, Percent) ->
   Nmax = max_matrix(Matrix),
