@@ -10,12 +10,11 @@
  *   result: a real vector, whose values are the result of the final product
  */
 
-use Randmat, Thresh, Winnow, Outer, Product;
+use Config, Randmat, Thresh, Winnow, Outer, Product;
+
+config const is_bench: bool;
 
 proc main() {
-  var nelts, randmat_seed, thresh_percent, winnow_nelts: int;
-  read(nelts, randmat_seed, thresh_percent, winnow_nelts);
-
   randmat(nelts, nelts, randmat_seed);
   thresh(nelts, nelts, thresh_percent);
   winnow(nelts, nelts, winnow_nelts);

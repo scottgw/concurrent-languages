@@ -13,10 +13,7 @@
 
 module Outer {
 
-use Winnow;
-
-var matrix: [1..10000, 1..10000]real;
-var vector: [1..10000]real;
+use Config;
 
 proc sqr(x: real): real {
   return x * x;
@@ -34,12 +31,12 @@ proc outer(nelts: int) {
     var nmax: real = -1;
     for j in 1..nelts do {
       if (i != j) {
-        matrix[i, j] = distance(points[i], points[j]);
-        nmax = max(nmax, matrix[i, j]);
+        dists[i, j] = distance(points[i], points[j]);
+        nmax = max(nmax, dists[i, j]);
       }
     }
-    matrix[i, i] = nmax * nelts;
-    vector[i] = distance((0, 0), points[i]);
+    dists[i, i] = nmax * nelts;
+    vector[i] = distance((1, 1), points[i]);
   }
 }
 }

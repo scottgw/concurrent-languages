@@ -15,10 +15,10 @@ module Winnow {
 
 use Config;
 
-var values: [0..20000] (int, (int, int));
 
 proc winnow(nrows: int, ncols: int, nelts: int) {
   var count = 0;
+  var values: [0..nrows*ncols] (int, (int, int));
   for i in 1..nrows {
     for j in 1..ncols {
       if (mask[i, j]) {

@@ -11,15 +11,13 @@
 
 config const is_bench = false;
 config const nelts = read(int);
-
-const Space2 = [1..nelts, 1..nelts];
-
-var matrix: [Space2] real;
-var vector: [1..10000] real;
-var result: [1..10000] real;
+const Space = [1..nelts, 1..nelts];
+var matrix: [Space]real;
+var vector: [1..nelts]real;
+var result: [1..nelts]real;
 
 proc product(nelts: int) {
-  for (i,j) in Space2 do {
+  for (i,j) in Space do {
     result [i] += matrix [i, j] * vector [j];
   }
 }

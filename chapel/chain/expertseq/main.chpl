@@ -13,11 +13,6 @@
 use Config, Randmat, Thresh, Winnow, Outer, Product;
 
 config const is_bench = false;
-config const nelts = read (int),
-             randmat_seed = read (uint(32)),
-             thresh_percent = read (int),
-             winnow_nelts = read (int);
-
 proc main() {
   randmat(nelts, nelts, randmat_seed);
   thresh(nelts, nelts, thresh_percent);

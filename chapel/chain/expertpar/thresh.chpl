@@ -12,10 +12,9 @@
 module Thresh {
 use Config;
 
-var histogram: [1..20000, 0..99] int;
-
 proc thresh(nrows: int, ncols: int, percent: int) {
   var nmax = max reduce matrix;
+  var histogram: [1..nrows, 0..99] int;
 
   // it was recommended to use a 1D array of atomic ints,
   // but it was much slower

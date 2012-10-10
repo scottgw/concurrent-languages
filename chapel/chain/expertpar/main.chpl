@@ -11,7 +11,7 @@
  */
 
 use Config, Randmat, Thresh, Winnow, Outer, Product;
-
+config const is_bench: bool;
 config const nelts = read (int),
              randmat_seed = read (int),
              thresh_percent = read (int),

@@ -11,13 +11,11 @@
 
 module Thresh {
 
-use Randmat;
-
-var mask: [1..20000, 1..20000]bool;
-var histogram: [0..99]int;
+use Config;
 
 proc thresh(nrows: int, ncols: int, percent: int) {
   var nmax: int = 0;
+  var histogram: [histSpace] int;
 
   for i in 1..nrows do {
     for j in 1..ncols do {

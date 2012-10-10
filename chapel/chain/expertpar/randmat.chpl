@@ -12,7 +12,7 @@ module Randmat {
 
 use Config;
 
-proc randmat(nrows: int, ncols: int, s: int): [randSpace] int {
+proc randmat(nrows: int, ncols: int, s: int){
   const LCG_A: int = 1664525;
   const LCG_C: int = 1013904223;
 

@@ -10,9 +10,11 @@
  */
 
 config const is_bench = false;
+config const nrows = read(int),
+             ncols = read(int);
 
-var matrix: [1..20000, 1..20000]int;
-var mask: [1..20000, 1..20000]bool;
+var matrix: [1..nrows, 1..ncols]int;
+var mask: [1..nrows, 1..ncols]bool;
 var histogram: [0..99]int;
 
 proc thresh(nrows: int, ncols: int, percent: int) {
@@ -49,12 +51,7 @@ proc thresh(nrows: int, ncols: int, percent: int) {
 }
 
 proc main() {
-  var nrows: int;
-  var ncols: int;
   var percent: int;
-
-  read(nrows, ncols);
-
   if (!is_bench) {
     for i in 1..nrows do {
       for j in 1..ncols do {

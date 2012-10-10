@@ -12,23 +12,17 @@
  */
 
 module Winnow {
-config const is_bench = false;
 
-use Randmat, Thresh;
-
-var count_per_line: [1..20001]int;
-var points: [1..20000] (int, int);
-var values: [0..20000] (int, (int, int)); // (value, i, j))
+use Config;
 
 proc winnow(nrows: int, ncols: int, nelts: int) {
   var n: int = 0;
+  var count_per_line: [1..nrows+1]int;
+  var values: [0..nrows * ncols] (int, (int, int)); // (value, i, j))
 
   forall i in 1..nrows do {
     count_per_line[i + 1] = 0;
     for j in 1..ncols do {
-      if (is_bench) {
-        mask[i, j] = (((i - 1) * (j - 1)) % (ncols + 1)) == 1;
-      }
       count_per_line[i + 1] += mask[i, j];
     }
   }
@@ -47,7 +41,6 @@ proc winnow(nrows: int, ncols: int, nelts: int) {
   }
 
   QuickSort(values[0..n]);
-
   var chunk: int = n / nelts;
 
   forall i in 1..nelts do {
