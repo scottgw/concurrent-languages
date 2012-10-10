@@ -14,17 +14,18 @@
 config const is_bench = false;
 config const nrows = read(int),
              ncols = read(int);
-
-const MatrixSpace = [1..20000, 1..20000];
+const MatrixSpace = [1..nrows, 1..ncols];
 
 var matrix: [MatrixSpace] int;
 var mask: [MatrixSpace] bool;
-var count_per_line: [1..20001] int;
-var points: [1..20000] (int, int);
-var values: [0..20000] (int, (int, int)); // (value, i, j))
+
+var values: [0..nrows*ncols] (int, (int, int)); // (value, i, j))
+
+var count_per_line: [1..nrows+1] int;
 
 proc winnow(nelts: int) {
   var n: int = 0;
+  var points: [1..nelts] (int, int);
 
   forall i in 1..nrows do {
     count_per_line[i + 1] = 0;
@@ -58,6 +59,7 @@ proc winnow(nelts: int) {
     ind = (i - 1) * chunk + 1;
     (, points[i]) = values[ind];
   }
+  return points;
 }
 
 proc read_matrix() {
@@ -87,8 +89,9 @@ proc main() {
   }
 
   read(nelts);
+  var points: [1..nelts] (int, int);
 
-  winnow(nelts);
+  points = winnow(nelts);
 
   if (!is_bench) {
     writeln(nelts);

@@ -148,28 +148,63 @@ def hist_graphs (cfg, values):
     avgs = []
     ses = []
 
+    # normalized values
+    navgs = []
+    nses = []
+
     langs = []
     probs = []
 
     for prob in cfg.problems:
       # aggregate by problems
+      lavgs = []
+      lses = []
       for lang in cfg.languages:
         # each problem displays a list of language times for that problem
         data = FloatVector (values[prob][var][lang][0])
         
         langs.append (lang)
         probs.append (prob)
-        avgs.append (r['mean'] (data)[0])
+        mean = r['mean'] (data)[0]
+        lavgs.append (mean)
 
         t_result = r['t.test'] (data, **{"conf.level": 0.975}).rx ('conf.int')[0]
-        ses.append ((t_result[1] - t_result[0])/2)
+        lses.append ((t_result[1] - t_result[0])/2)
+        
+      avgs.extend (lavgs)
+      ses.extend (lses)
+        
+      lmin = min (lavgs)
+      navgs.extend ([(lambda x: x/lmin)(la) for la in lavgs])
+      nses.extend ([(lambda x: x/lmin)(ls) for ls in lses])
 
+    # plot histogram of actual times
     r.pdf ('bargraph-time-' + var + '.pdf')
 
     df = robjects.DataFrame({'Language': StrVector (langs),
                              'Problem': StrVector (probs),
                              'Time' : FloatVector (avgs),
                              'SE' : FloatVector (ses)
+                             })
+
+    limits = ggplot2.aes (ymax = 'Time + SE', ymin = 'Time - SE')
+    dodge = ggplot2.position_dodge (width=0.9)
+    gp = ggplot2.ggplot (df)
+
+    pp = gp + \
+        ggplot2.aes_string (x='Problem', y='Time', fill='Language') + \
+        ggplot2.geom_bar (position='dodge', stat='identity') + \
+        ggplot2.geom_errorbar (limits, position=dodge, width=0.25)
+ 
+    pp.plot ()
+
+    # plot histogram of times normalized with respect to fastest time for a problem
+    r.pdf ('bargraph-time-' + var + '-norm.pdf')
+
+    df = robjects.DataFrame({'Language': StrVector (langs),
+                             'Problem': StrVector (probs),
+                             'Time' : FloatVector (navgs),
+                             'SE' : FloatVector (nses)
                              })
 
     limits = ggplot2.aes (ymax = 'Time + SE', ymin = 'Time - SE')
@@ -194,9 +229,12 @@ def speedup_prob_var (cfg, values):
   for var in cfg.variations:
     if var.find ('par') >= 0:
       for prob in cfg.problems:
+        base_selector = lambda lang:\
+          values [cfg.threads[-1]][prob][var.replace ('par','seq')][lang][0]
+
         selector = lambda lang: lambda thread:\
             values [thread][prob][var][lang][0]
-        line_plot (cfg, var, prob, 'Language', cfg.languages, selector)
+        line_plot (cfg, var, prob, 'Language', cfg.languages, selector, base_selector)
 
 # produce a graph for each language/variation that shows all problems
 # speedups
@@ -204,14 +242,17 @@ def speedup_lang_var (cfg, values):
   for var in cfg.variations:
     if var.find ('par') >= 0:
       for lang in cfg.languages:
+        base_selector = lambda prob:\
+          values [cfg.threads[-1]][prob][var.replace ('par','seq')][lang][0]
+
         selector = lambda prob: lambda thread:\
             values [thread][prob][var][lang][0]
-        line_plot (cfg, var, lang, 'Problem', cfg.problems, selector)
+        line_plot (cfg, var, lang, 'Problem', cfg.problems, selector, base_selector)
 
 
 # Function to plot lines for a given dataset. Here these
 # datasets will be either per-problem or per-language.
-def line_plot (cfg, var, control, change_name, changing, selector):
+def line_plot (cfg, var, control, change_name, changing, selector, base_selector):
   r = robjects.r
 
   r.pdf ('speedup-' + var + '-' + control + '.pdf')
@@ -226,13 +267,12 @@ def line_plot (cfg, var, control, change_name, changing, selector):
     changes.append ('ideal')
 
   for c in changing:
-    sel     = selector (c)
-    thr_1_data = sel(1)
+    sel  = selector (c)
+    base = robjects.r.mean (FloatVector (base_selector(c)))[0]
 
     for n in cfg.threads:
-      m1 = r.mean (FloatVector (sel(1)))[0]
       mn = r.mean (FloatVector (sel(n)))[0]
-      speedups.append (m1 / mn)
+      speedups.append (base / mn)
       thrds.append (n)
       changes.append (c)
 
@@ -240,7 +280,6 @@ def line_plot (cfg, var, control, change_name, changing, selector):
                    'Threads': IntVector (thrds),
                    change_name: StrVector (changes)
                    })
-
   ideal_changing = ['ideal']
   ideal_changing.extend (changing)
   legendVec = IntVector (range (len (ideal_changing)))
@@ -249,13 +288,13 @@ def line_plot (cfg, var, control, change_name, changing, selector):
   gg = ggplot2.ggplot (df)
 
   pp = gg + \
-      ggplot2.xlim (min(threads), max(threads)) + ggplot2.ylim(min(threads), max(threads)) +\
       ggplot2.geom_line() + ggplot2.geom_point() +\
       ggplot2.aes_string(x='Threads', y='Speedup', 
                          group=change_name, color=change_name, 
                          shape=change_name) +\
       ggplot2.scale_shape_manual(values=legendVec)
 
+      # ggplot2.xlim (min(threads), max(threads)) + ggplot2.ylim(min(threads), max(threads)) +\
   pp.plot()
 
   r['dev.off']()

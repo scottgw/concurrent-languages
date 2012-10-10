@@ -12,9 +12,8 @@ use Random;
 
 config const is_bench = false;
 
-var matrix: [1..20000, 1..20000]int;
-
 proc randmat(nrows: int, ncols: int, s: uint(32)) {
+  var matrix: [1..nrows, 1..ncols]int;
   const LCG_A: uint(32) = 1664525;
   const LCG_C: uint(32) = 1013904223;
   for i in 1..nrows do {
@@ -24,6 +23,7 @@ proc randmat(nrows: int, ncols: int, s: uint(32)) {
       matrix[i, j] = abs(seed) % 100;
     }
   }
+  return matrix;
 }
 
 proc main() {
@@ -33,7 +33,8 @@ proc main() {
 
   read(nrows, ncols, s);
 
-  randmat(nrows, ncols, s);
+  var matrix: [1..nrows, 1..ncols]int;
+  matrix = randmat(nrows, ncols, s);
 
   if (!is_bench) {
     writeln(nrows, " ", ncols);

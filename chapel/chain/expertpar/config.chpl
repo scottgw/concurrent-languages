@@ -1,9 +1,14 @@
 module Config {
-  const randSpace = [1..20000, 1..20000];
+  config const nelts = read (int),
+             randmat_seed = read (int),
+             thresh_percent = read (int),
+             winnow_nelts = read (int);
+
+  const randSpace = [1..nelts, 1..nelts];
   const histSpace = [0..99];
-  const pointSpace = [1..20000];
-  const distSpace = [1..10000, 1..10000];
-  const vectorSpace = [1..10000];
+  const pointSpace = [1..winnow_nelts];
+  const distSpace = [1..winnow_nelts, 1..winnow_nelts];
+  const vectorSpace = [1..winnow_nelts];
 
   var matrix: [randSpace] int;
   var mask: [randSpace] bool;

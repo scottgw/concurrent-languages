@@ -10,13 +10,11 @@
  */
 
 module Thresh {
-use Randmat;
-
-var mask: [1..20000, 1..20000]bool;
-var histogram: [1..20000, 0..99]int;
+use Config;
 
 proc thresh(nrows: int, ncols: int, percent: int) {
   var nmax = max reduce matrix;
+  var histogram: [1..nrows, 0..99]int;
 
   forall i in 1..nrows do {
     for j in 1..ncols do {
@@ -47,5 +45,4 @@ proc thresh(nrows: int, ncols: int, percent: int) {
     }
   }
 }
-
 }

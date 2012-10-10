@@ -37,10 +37,8 @@ proc thresh(nrows: int, ncols: int, percent: int) {
     threshold = 100 - i ;
   }
 
-  for i in 1..nrows do {
-    for j in 1..ncols do {
-      mask[i, j] = matrix[i, j] >= threshold;
-    }
+  for (i, j) in ProbSpace {
+    mask[i, j] = matrix[i, j] >= threshold;
   }
 }
 

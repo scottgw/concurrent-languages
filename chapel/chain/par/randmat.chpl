@@ -10,13 +10,14 @@
 
 module Randmat {
 
-var matrix: [1..20000, 1..20000]int;
+use Config;
 
 proc randmat(nrows: int, ncols: int, s: int) {
-  const LCG_A: int = 1664525;
-  const LCG_C: int = 1013904223;
+  const LCG_A: uint(32) = 1664525;
+  const LCG_C: uint(32) = 1013904223;
+
   forall i in 1..nrows do {
-    var seed = s + i;
+    var seed: uint(32) = (s + i - 1): uint(32);
     for j in 1..ncols do {
       seed = LCG_A * seed + LCG_C;
       matrix[i, j] = abs(seed) % 100;

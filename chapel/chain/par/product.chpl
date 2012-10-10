@@ -11,15 +11,13 @@
 
 module Product {
 
-use Outer;
-
-var result: [1..10000]real;
+use Config;
 
 proc product(nelts: int) {
   forall i in 1..nelts do {
     var sum: real = 0;
     for j in 1..nelts do {
-      sum += matrix[i, j] * vector[j];
+      sum += dists[i, j] * vector[j];
     }
     result[i] = sum;
   }

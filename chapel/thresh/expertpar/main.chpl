@@ -22,14 +22,14 @@ var histogram: [HistSpace] int;
 proc thresh(nrows: int, ncols: int, percent: int) {
   var nmax = max reduce matrix;
 
-  forall i in 1..nrows do {
-    for j in 1..ncols do {
+  forall i in 1..nrows {
+    for j in 1..ncols {
       histogram[i, matrix[i, j]] += 1;
     }
   }
 
-  forall j in 0..(nmax) do {
-    for i in 2..nrows do {
+  forall j in 0..(nmax) {
+    for i in 2..nrows {
       histogram[1, j] += histogram[i, j];
     }
   }
@@ -45,10 +45,8 @@ proc thresh(nrows: int, ncols: int, percent: int) {
     threshold = 100 - i ;
   }
  
-  forall i in 1..nrows do {
-    for j in 1..ncols do {
-      mask[i, j] = matrix[i, j] >= threshold;
-    }
+  forall (i, j) in ProbSpace {
+    mask[i, j] = matrix[i, j] >= threshold;
   }
 }
 

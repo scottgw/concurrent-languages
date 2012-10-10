@@ -16,43 +16,30 @@
 -export([outer/2]).
 
 join(Pids) ->
-  [receive {Pid, Result} -> Result end || Pid <- Pids].
+    [receive 
+         {Pid, Result} -> 
+             Result 
+     end 
+     || Pid <- Pids].
 
 sqr(X) ->
-  X * X.
+    X * X.
 
 distance({Ax, Ay}, {Bx, By}) ->
-  math:sqrt(sqr(Ax - Bx) + sqr(Ay - By)).
+    math:sqrt(sqr(Ax - Bx) + sqr(Ay - By)).
 
-fix_diagonal_vector(_, _, [], _, _, _) -> [];
-fix_diagonal_vector(Line, Col, [Head | Tail], Point, Nelts, Nmax) ->
-  if Line == Col -> [Nelts * Nmax | Tail];
-    true -> [ Head | fix_diagonal_vector(
-          Line, Col + 1, Tail, Point, Nelts, Nmax)]
-  end.
-
-fix_diagonal(Matrix, Points, Nelts) ->
-    Parent = self(),
-    lists:zipwith3 
-      (fun (Line, Vec, Point) -> 
-               spawn (fun () -> 
-                              Parent ! {self(),
-                                        fix_diagonal_vector (Line, 0, Vec, 
-                                                             Point, Nelts, 
-                                                             lists:max (Vec))}
-                      end)
-       end,
-       lists:seq (0, length (Matrix) - 1), Matrix, Points).
-
+calc_row (Parent, Nelts, {RowN, RowPairs}) ->
+    Dist =  [ distance (X,Y) || {X,Y} <- RowPairs ],
+    Max = lists:max (Dist),
+    {Pre, [_|Post]} = lists:split(RowN - 1, Dist),
+    Parent ! {self(), Pre ++ [Max*Nelts|Post]}.
 
 outer(Nelts, Points) ->
-  Parent = self(),
-  % parallel for on rows
-    {join(fix_diagonal(
-            join([spawn(fun() -> 
-                                Parent ! {self(),
-                                          [distance(A, B) || A <- Points]} 
-                        end) 
-                  || B <- Points]),
-            Points, Nelts)),
-  [distance({0, 0}, A) || A <- Points]}.
+    Parent = self(),
+    Pairs = [[ {A,B} || A <- Points] || B <- Points ],
+    Idxs = lists:seq(1, Nelts),
+    RowAndPairs = lists:zip(Idxs, Pairs),
+    Pids = [spawn(fun() -> calc_row(Parent, Nelts, Row) end)
+            || Row <- RowAndPairs ],
+    {join(Pids),
+     [distance ({0,0}, A) || A <- Points]}.

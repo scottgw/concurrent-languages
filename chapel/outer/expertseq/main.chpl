@@ -12,10 +12,13 @@
  */
 
 config const is_bench = false;
+
 config const nelts = read(int);
-var matrix: [1..10000, 1..10000]real;
-var vector: [1..10000]real;
-var points: [1..10000](int, int);
+var matrix: [1..nelts, 1..nelts]real;
+var vector: [1..nelts]real;
+var points: [1..nelts](int, int);
+
+
 inline
 proc sqr(x: real): real {
   return x ** 2;
@@ -39,7 +42,7 @@ proc outer(nelts: int) {
       }
     }
     matrix[i, i] = nmax * nelts;
-    vector[i] = distance((1, 1), points[i]);
+    vector[i] = distance((0, 0), points[i]);
   }
 }
 
