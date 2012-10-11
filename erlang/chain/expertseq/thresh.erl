@@ -24,11 +24,24 @@ max_matrix(Matrix) ->
 count_equal(Matrix, Value) ->
   lists:foldl(fun(X, Count) -> Count + length(
           lists:filter(fun(Y) -> Y == Value end, X)) end, 0, Matrix).
+empty_hist () ->
+    orddict:from_list ([{X,0} || X <- lists:seq (0, 99)]).    
+
+row_hist (Row) ->
+    lists:foldl (fun (Elem, HistAcc) ->
+                         orddict:update_counter (Elem, 1, HistAcc)
+                 end, empty_hist(), Row).
 
 fill_histogram (Matrix, Nmax) ->
-    lists:map (fun (X) ->
-                        count_equal (Matrix, X)
-               end, lists:seq (Nmax, 0, -1)).
+    Hists = lists:map (fun (R) -> row_hist (R) end, Matrix),
+    Hist = lists:foldl (fun (Hist, HistAcc) ->
+                                orddict:merge(fun (K, V1, V2) ->
+                                                      V1 + V2
+                                              end, Hist, HistAcc)
+                        end, empty_hist(), Hists),
+    lists:reverse(lists:map (fun ({Idx, Count}) ->
+                                     Count
+                             end, orddict:to_list (Hist))).
 
 get_threshold(-1, [], _) -> 0;
 get_threshold(Index, [Head | Tail], Count) ->
