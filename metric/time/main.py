@@ -1,16 +1,212 @@
 #!/usr/bin/python
 
-# Requires: 
-#   - xfig
-#   - R (by using the R script in the sibling directory)
-#   - gnuplot
-
 from datetime import datetime
 import sys
 import subprocess
 import os
 import math
 
+import rpy2.robjects as robjects
+import rpy2.robjects.lib.ggplot2 as ggplot2
+from rpy2.robjects.packages import importr
+from rpy2.robjects import FloatVector, StrVector, IntVector, DataFrame
+
+languages = ["chapel", "cilk", "erlang", "go", "scoop", "tbb"]
+problems = ["randmat", "thresh", "winnow", "outer", "product", "chain"]
+variations = ["seq","par","expertseq","expertpar"]
+
+start_actions = set(["start", "started", "restart", "resume"])
+end_actions = set(["done", "pause"])
+
+start_times = {}
+total_times = {}
+
+def main():
+  #create_directories()
+  read_table()
+  load_data()
+  #output_tables()
+  #calculate()
+  #test_significance()
+  hist_graphs()
+
+def read_table():
+  with open('tdist.txt', 'r') as f:
+    linenum = 0
+    for line in f:
+      linenum += 1
+      words = line.split()
+      if linenum == 1:
+        for i in range(len(words)):
+          if i == 0:
+            continue
+          words[i] = words[i][0:-1]
+          f = float(words[i])
+          yindex.append(f)
+      elif linenum == 2:
+        continue;
+      else:
+        line = []
+        for i in range(len(words)):
+          if i == 0:
+            xindex.append(float(words[i]))
+          else:
+            line.append(float(words[i]))
+        table.append(line)
+      #print words
+  #print yindex
+  #print table
+
+def load_data():
+  f = open("log_reverse.txt", "r")
+  for line in f:
+    words = line.split ()
+    tz_offset = 5
+    time_string = " ".join (words [:tz_offset])
+
+    fmt = "%a %b %d %H:%M:%S %Y"
+    parsed_date = datetime.strptime(time_string, fmt)
+    #    print parsed_date
+    words = words [tz_offset + 1:]
+    #    print words
+    if len(words) > 1:
+      index = words[0]
+      action = words[1]
+
+      splits = index.split("-")
+
+      if len(splits) > 1:
+        language = splits[0]
+        problem = splits[1]
+
+        if language == "cpp" and len(splits) == 2 and problem != "refac":
+          index = index + "-seq"
+        elif problem == "chain":
+          if len(splits) == 2:
+            index = index + "-par"
+      
+      if len(index.split("-")) == 2 and index.split("-")[1] == "refac":
+        pass
+      elif action in start_actions:
+        assert(index not in start_times);
+        start_times[index] = parsed_date
+      elif action in end_actions:
+        end_time = parsed_date
+        diff = end_time - start_times[index]
+        del start_times[index]
+        assert(diff.days == 0)
+        diff = diff.seconds / 60.0
+        if index in total_times:
+          total_times[index] += diff
+        else:
+          total_times[index] = diff
+      else:
+        pass
+
+  print start_times
+  assert(len(start_times) == 0)
+
+  for key, value in total_times.iteritems():
+    words = key.split("-")
+    if len(words) != 3:
+      assert(False)
+    language = words[0]
+    problem = words[1]
+    variation = words[2]
+
+    if language not in result:
+      result[language] = {}
+
+    if problem not in result[language]:
+      result[language][problem] = {}
+
+    assert (variation not in result[language][problem])
+
+    result[language][problem][variation] = value
+
+  for problem in problems:
+    if problem != "chain":
+      result["tbb"][problem]["seq"] += result["cpp"][problem]["seq"]
+
+  for language in languages:
+    for problem in problems:
+      if problem != "chain":
+        result[language][problem]["par"] += result[language][problem]["seq"]
+
+  # result["erlang"]["chain"]["seq"] = result["erlang"]["chain"]["par"]
+  # result["scoop"]["chain"]["seq"] = result["scoop"]["chain"]["par"]
+
+def hist_graphs ():
+  print result
+  r = robjects.r
+  for var in variations:
+    # each variation gets plot
+    values = []
+    # normalized values
+    nvalues = []
+
+    langs = []
+    probs = []
+
+    for prob in problems:
+      # aggregate by problems
+      lvalues = []
+      lses = []
+      for lang in languages:
+        # each problem displays a list of language times for that problem
+ 
+        langs.append (lang)
+        probs.append (prob)
+        value = 0
+        try:
+          value = result[lang][prob][var]
+        except KeyError:
+          value = 44.083333333333336 # FIXME to account for missing seq-version of Erlang
+        lvalues.append (value)
+        
+      values.extend (lvalues)
+        
+      lmin = min (lvalues)
+      nvalues.extend ([(lambda x: x/lmin)(la) for la in lvalues])
+
+    # plot histogram of actual times
+    r.pdf ('bargraph-codingtime-' + var + '.pdf')
+
+    df = robjects.DataFrame({'Language': StrVector (langs),
+                             'Problem': StrVector (probs),
+                             'Time' : FloatVector (values),
+                             })
+
+    dodge = ggplot2.position_dodge (width=0.9)
+    gp = ggplot2.ggplot (df)
+
+    pp = gp + \
+        ggplot2.aes_string (x='Problem', y='Time', fill='Language') + \
+        ggplot2.geom_bar (position='dodge', stat='identity')
+ 
+    pp.plot ()
+
+    # plot histogram of times normalized with respect to fastest time for a problem
+    r.pdf ('bargraph-codingtime-' + var + '-norm.pdf')
+
+    df = robjects.DataFrame({'Language': StrVector (langs),
+                             'Problem': StrVector (probs),
+                             'Time' : FloatVector (nvalues),
+                             })
+
+    dodge = ggplot2.position_dodge (width=0.9)
+    gp = ggplot2.ggplot (df)
+
+    pp = gp + \
+        ggplot2.aes_string (x='Problem', y='Time', fill='Language') + \
+        ggplot2.geom_bar (position='dodge', stat='identity') 
+    pp.plot ()
+    r['dev.off']()
+
+
+    # Didn't change code below
+    # ----------------------------------------------------------------------------------
+    
 def read_file_values(file_name):
   result = []
   f = open(file_name, 'r')
@@ -91,45 +287,6 @@ def get_tdelta(xa, alpha):
   #print 'meana: %f\nsa2: %f\nna: %d\nt: %f' % (meana, sa * sa, na, t)
   return t * sa / math.sqrt(na)
 
-def read_table():
-  with open('tdist.txt', 'r') as f:
-    linenum = 0
-    for line in f:
-      linenum += 1
-      words = line.split()
-      if linenum == 1:
-        for i in range(len(words)):
-          if i == 0:
-            continue
-          words[i] = words[i][0:-1]
-          f = float(words[i])
-          yindex.append(f)
-      elif linenum == 2:
-        continue;
-      else:
-        line = []
-        for i in range(len(words)):
-          if i == 0:
-            xindex.append(float(words[i]))
-          else:
-            line.append(float(words[i]))
-        table.append(line)
-      #print words
-  #print yindex
-  #print table
-
-
-
-start_actions = set(["start", "started", "restart", "resume"])
-other_actions = set(["commit", ".fuse_hidden*", "branch", "working", ".*.swp", "restart-done", "reduce2d", "fill_histogram", "prefixsum", "binary_search", "fill_mask", "ReduceState", "read_matrix", "max_matrix", "get_threshold", "reduce2d_with_filter", "split", "read_integer", "testing", "still_synchronous", "asynchrony", "matrix", "parallel_scan", "using", "with_filter", "refac", "sequential_sort", "fill_values", "parallel_sort", "parfor", "parsort", "tuple_sorter", "almost", "quit", "merged", "compiles", "files", "tests"])
-end_actions = set(["done", "pause"])
-
-start_times = {}
-total_times = {}
-
-problems = set()
-languages = set()
-variations = ["seq", "par", "expertseq", "expertpar"]
 result = {}
 wc_result = {}
 table_types = {"loc" : "-l", "now" : "-w"}
@@ -142,96 +299,13 @@ def system(cmd, timeout=False):
     print cmd
     assert(False)
 
-def load_data():
-  f = open("log_reverse.txt", "r")
-  for line in f:
-    words = line.split ()
-    tz_offset = 5
-    time_string = " ".join (words [:tz_offset])
-
-    fmt = "%a %b %d %H:%M:%S %Y"
-    parsed_date = datetime.strptime(time_string, fmt)
-
-    words = words [tz_offset + 1:]
-
-    if len(words) > 1:
-      index = words[0]
-      action = words[1]
-      if action in start_actions:
-        # print (line)
-        assert(index not in start_times);
-        start_times[index] = parsed_date
-      elif action in end_actions:
-        # print (line)
-        assert (index in start_times)
-        end_time = parsed_date
-        diff = end_time - start_times[index]
-        del start_times[index]
-        assert(diff.days == 0)
-        diff = diff.seconds / 60.0
-        if index in total_times:
-          total_times[index] += diff
-        else:
-          total_times[index] = diff
-      elif action in other_actions:
-        pass
-      else:
-        pass
-        # print action
-        # print line
-        # assert(False)
-
-  assert(len(start_times) == 0)
-
-  for key, value in total_times.iteritems():
-    words = key.split("-")
-    assert (len(words) == 2 or len(words) == 3)
-    language = words[0]
-    problem = words[1]
-    if language == "cpp":
-      assert (len(words) == 2)
-      words.append("seq")
-    if problem == "refac":
-      assert(False)
-      continue
-
-    if len(words) != 3:
-      print words
-      assert(False)
-
-    variation = words[2]
-
-    problems.add(problem)
-    if language != "cpp":
-      languages.add(language)
-
-    if language not in result:
-      result[language] = {}
-
-    if problem not in result[language]:
-      result[language][problem] = {}
-
-    assert (variation not in result[language][problem])
-
-    result[language][problem][variation] = value
-
-  for problem in problems:
-    if problem != "chain":
-      result["tbb"][problem]["seq"] += result["cpp"][problem]["seq"]
-
-  for language in languages:
-    for problem in problems:
-      if problem != "chain":
-        result[language][problem]["par"] += result[language][problem]["seq"]
-
-  # result["erlang"]["chain"]["seq"] = result["erlang"]["chain"]["par"]
-  # result["scoop"]["chain"]["seq"] = result["scoop"]["chain"]["par"]
 
 def output_tables():
   def create_table(table_name, output_value, extra):
     old_stdout = sys.stdout
 
     for variation in variations:
+      print variation
       sys.stdout = open(os.path.join (output_dir, "table-%s-%s.tex" % (
         table_name, variation)), "w")
 
@@ -256,10 +330,12 @@ def output_tables():
   ########## time tables ###############
 
   def time_table_output(language, problem, variation, extra):
+    print variation
     print (result[language][problem])
     assert(variation in result[language][problem])
-    print " & ",
-    print("%.2f" % result[language][problem][variation])
+    if variation in result[language][problem]:
+      print " & ",
+      print("%.2f" % result[language][problem][variation])
 
   create_table("time", time_table_output, None)
 
@@ -305,82 +381,6 @@ images_dir = os.path.join (output_dir, "images/")
 chapters_dir = os.path.join (output_dir, "chapters/")
 
 graph_dir = os.path.abspath ("graph/")
-
-
-def output_graphs():
-  def create_graph(graph_name, values, max_value, pretty_name, is_relative=True):
-    old_stdout = sys.stdout
-
-    variation_names = {"seq" : "Sequential", 
-                       "par" : "Parallel",
-                       "expertseq" : "Expert sequential",
-                       "expertpar" : "Expert parallel"
-                       }
-    for variation in variations:
-      if is_relative:
-        output_file = os.path.join (images_dir,"graph-%s-%s" % (
-          graph_name, variation))
-      else:
-        output_file = os.path.join (images_dir, "other-graph-%s-%s" % (
-          graph_name, variation))
-      sys.stdout = open('%s.perf' % output_file, "w")
-
-      sys.stdout.write("=cluster")
-      for language in sorted(languages):
-        sys.stdout.write(";" + language)
-      print '''
-colors=black,yellow,red,med_blue,light_green,cyan
-=table
-yformat=%g
-=norotate
-xscale=1
-'''
-      variation_name = variation_names[variation]
-      print "max=%d" % max_value
-      if is_relative:
-        print "ylabel=%s %s versus smallest" % (variation_name, pretty_name)
-      else:
-        print "ylabel=%s %s" % (variation_name, pretty_name)
-      for problem in sorted(problems):
-        print problem,
-        nmin = min(
-            float(
-              values[language][problem][variation]) for language in sorted(
-                languages))
-        if not is_relative:
-          nmin = 1
-        for language in sorted(languages):
-            print("%.2f" % (
-              float(values[language][problem][variation]) / nmin)),
-        print ""
-
-      sys.stdout = old_stdout
-      cmd = os.path.join (graph_dir, "bargraph.pl") + " -fig %s.perf | fig2dev -L ppm -m 4 > %s.ppm" % (output_file, output_file)
-      print cmd
-      system(cmd)
-      cmd = ("mogrify -reverse -flatten %s.ppm" % output_file)
-      system(cmd)
-      cmd = ("mogrify -resize %dx%d -format png %s.ppm" % (
-          GRAPH_SIZE, GRAPH_SIZE, output_file))
-      system(cmd)
-
-
-    sys.stdout = old_stdout
-
-  pretty_names = {"time" : "time to code (in minutes)", "loc" : "LoC", "noc" : "NoC",
-      "now" : "NoW"}
-  create_graph("time", result, 10, pretty_names["time"])
-  for table_name in table_types:
-    pretty_name = pretty_names[table_name]
-    create_graph(table_name, wc_result[table_name], 8, pretty_name)
-
-  create_graph("time", result, 800, pretty_names["time"], is_relative=False)
-  max_sizes = {"loc" : 1200, "now" : 3000}
-  for table_name in table_types:
-    pretty_name = pretty_names[table_name]
-    max_size = max_sizes[table_name]
-    create_graph(table_name, wc_result[table_name], max_size, pretty_name,
-        is_relative=False)
 
 
 ALPHA = 0.1
@@ -580,21 +580,6 @@ def create_directories ():
 
   if not os.path.exists (images_dir):
     os.makedirs (images_dir)
-
-
-
-
-def main():
-  create_directories ()
-  read_table()
-  load_data()
-  output_tables()
-  #calculate()
-  test_significance()
-  output_graphs()
-  global total_lines
-  print "total lines: %d" % total_lines
-  print "done"
 
 if __name__ == "__main__":
   main()
