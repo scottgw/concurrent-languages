@@ -87,6 +87,41 @@ def loc_graph (csv, lang):
       ggplot2.aes_string (x='Problem', y='Lines', fill='Variation') + \
       ggplot2.geom_bar (position='dodge', stat='identity') 
   pp.plot ()
+
+  varis = []
+  tasks = []
+  locs  = []
+  probs = set(probs)
+  for task in probs:
+    loc_seq = sums [(task, 'seq')]
+    loc_expertseq = sums [(task, 'expertseq')]
+    loc_par = sums [(task, 'par')]
+    loc_expertpar = sums [(task, 'expertpar')]
+
+    diff_seq = (float(loc_expertseq) / float(loc_seq) - 1) * 100
+    varis.append ("Sequential")
+    tasks.append (task)
+    locs.append (diff_seq)
+
+    diff_par = (float(loc_expertpar) / float(loc_par) - 1) * 100
+    varis.append ("Parallel")
+    tasks.append (task)
+    locs.append (diff_par)
+    
+  r.pdf ('compare-expert-loc-' + lang + '-diff.pdf')
+  df = robjects.DataFrame({'Variation': StrVector (varis),
+                           'Problem': StrVector (tasks),
+                           'Lines' : IntVector (locs),
+                           })
+
+  print (df)
+  gp = ggplot2.ggplot (df)
+
+  pp = gp + \
+      ggplot2.aes_string (x='Problem', y='Lines', fill='Variation') + \
+      ggplot2.geom_bar (position='dodge', stat='identity') 
+  pp.plot ()
+  
   r['dev.off']()
 
 
