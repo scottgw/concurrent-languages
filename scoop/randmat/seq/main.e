@@ -48,17 +48,16 @@ feature
 
   randmat(nrows, ncols, s: INTEGER; matrix: ARRAY2[INTEGER])
   local
-    seed, lcg_a, lcg_c, rand_max, int_max: INTEGER
+    seed, lcg_a, lcg_c, rand_max: NATURAL
   do
     lcg_a := 1664525
     lcg_c := 1013904223
     rand_max := 100
-    int_max := 2147483647
     across 1 |..| nrows as ic loop
-      seed := s + ic.item
+      seed := s.to_natural_32 + ic.item.to_natural_32 - 1
       across 1 |..| ncols as jc loop
-        seed := (lcg_a * seed + lcg_c) \\ int_max
-        matrix.put((((seed \\ rand_max) + rand_max) \\ rand_max),
+        seed := lcg_a * seed + lcg_c
+        matrix.put((seed \\ rand_max).to_integer_32,
             ic.item, jc.item)
       end
     end
