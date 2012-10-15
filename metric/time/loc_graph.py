@@ -34,7 +34,7 @@ cloc_names = {"Go": ["go"],
 loc_file = "cloc.csv"
 
 # this command line is intended to be run from the 'metric/perf' directory
-cloc_cmd_line = 'cloc --csv --force-lang="C++",cilk --force-lang="C",chpl --by-file --skip-uniqueness --quiet --out=' + loc_file + ' --exclude-dir=cpp,scoop,metric --exclude-lang=make ../../'
+cloc_cmd_line = 'cloc --csv --force-lang="C++",cilk --force-lang="C",chpl --by-file --skip-uniqueness --quiet --out=' + loc_file + ' --exclude-dir=cpp,scoop,metric --exclude-lang=make,Python ../../'
 
 def main():
   subprocess.check_call (cloc_cmd_line, shell=True)
@@ -52,29 +52,27 @@ def loc_graph (csv, lang):
 
   sums = {}
 
+  # skip the header
+  csv.next()
+
   for row in csv:
     csvlang = row [0]
     path = row [1]
     loc  = row [4]
-    if csvlang in cloc_names and lang in cloc_names [csvlang]:
+    (pathlang, task, var) = break_path (path)
 
-      (task, var) = break_path (path)
+    if pathlang == lang and csvlang in cloc_names and lang in cloc_names [csvlang]:
 
       if (task, var) not in sums.keys():
         sums [(task,var)] = int (loc)
       else:
         sums [(task,var)] = sums [(task,var)] + int (loc)
 
-  print sums
-
   for (task, var) in sums.keys():
     loc = sums [(task,var)]
     varis.append (pretty_names [var])
     probs.append (task)
     locs.append (loc)
-
-  print sums
-
   r.pdf ('compare-expert-loc-' + lang + '.pdf')
   df = robjects.DataFrame({'Variation': StrVector (varis),
                            'Problem': StrVector (probs),
@@ -93,9 +91,9 @@ def loc_graph (csv, lang):
 
 def break_path (path):
   parts = normpath (path).split(os.sep)
-  # we take 3 and 4 to account for the ../../<lang>/ beginning,
-  # we only want the problem and the variation
-  return (parts [3], parts [4])
+  # we take 2 3 and 4 to account for the ../../ beginning,
+  # we only want the language, problem and variation
+  return (parts [2], parts [3], parts [4])
 
 
 if __name__ == '__main__':
