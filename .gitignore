@@ -1,7 +1,10 @@
 *~
 *.pdf
 main
+mainw
+*.csv
 *.6
+*.pyc
 .fuse_hidden*
 .*.swp
 erl_crash.dump

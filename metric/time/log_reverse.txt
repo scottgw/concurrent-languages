@@ -481,3 +481,243 @@ Tue Aug 28 15:27:09 2012 +0200 scoop-outer-expertpar resume
 Tue Aug 28 16:18:15 2012 +0200 scoop-outer-expertpar done
 Wed Aug 29 07:51:32 2012 +0200 scoop-winnow-expertpar resume
 Wed Aug 29 08:05:08 2012 +0200 scoop-winnow-expertpar pause
+Wed Aug 29 12:55:00 2012 +0200 scoop-outer-expertpar resume
+Wed Aug 29 13:54:23 2012 +0200 scoop-outer-expertpar pause
+Thu Aug 30 08:57:00 2012 +0200 scoop-outer-expertpar resume
+Thu Aug 30 09:04:51 2012 +0200 scoop-outer-expertpar pause
+Thu Aug 30 09:12:31 2012 +0200 scoop-thresh-expertpar resume
+Thu Aug 30 09:15:42 2012 +0200 scoop-thresh-expertpar done
+Thu Aug 30 09:16:22 2012 +0200 scoop-winnow-expertpar resume
+Thu Aug 30 09:24:36 2012 +0200 scoop-winnow-expertpar pause
+Thu Aug 30 09:25:42 2012 +0200 remove out of date declaration
+Thu Aug 30 10:07:45 2012 +0200 scoop-thresh-expertseq resume
+Thu Aug 30 10:11:16 2012 +0200 scoop-thresh-expertseq pause
+Thu Aug 30 10:14:56 2012 +0200 scoop-thresh-expertpar resume
+Thu Aug 30 10:17:09 2012 +0200 scoop-thresh-expertpar pause
+Thu Aug 30 10:30:47 2012 +0200 scoop-winnow-expertseq resume
+Thu Aug 30 10:32:33 2012 +0200 scoop-winnow-expertseq pause
+Thu Aug 30 10:36:38 2012 +0200 scoop-winnow-expertpar resume
+Thu Aug 30 10:38:34 2012 +0200 scoop-winnow-expertpar pause
+Thu Aug 30 12:16:14 2012 +0200 scoop-outer-expertseq resume
+Thu Aug 30 12:27:15 2012 +0200 scoop-outer-expertseq pause
+Thu Aug 30 12:30:02 2012 +0200 scoop-outer-expertpar resume
+Thu Aug 30 12:31:08 2012 +0200 scoop-outer-expertpar pause
+Thu Aug 30 12:32:35 2012 +0200 scoop-product-expertseq resume
+Thu Aug 30 12:34:59 2012 +0200 scoop-product-expertseq pause
+Thu Aug 30 12:36:26 2012 +0200 scoop-product-expertpar resume
+Thu Aug 30 12:38:14 2012 +0200 scoop-product-expertpar pause
+Thu Aug 30 12:40:54 2012 +0200 scoop-randmat-expertpar resume
+Thu Aug 30 12:42:06 2012 +0200 scoop-randmat-expertpar pause
+Thu Aug 30 12:42:47 2012 +0200 scoop-randmat-expertseq resume
+Thu Aug 30 12:45:04 2012 +0200 scoop-randmat-expertseq pause
+Thu Aug 30 12:46:16 2012 +0200 updating command line params old scoop randmat
+Thu Aug 30 12:55:31 2012 +0200 updating scoop bench string
+Fri Aug 31 08:15:09 2012 +0200 scoop-chain-expertseq start
+Fri Aug 31 08:33:32 2012 +0200 scoop-chain-expertseq pause
+Fri Aug 31 09:19:10 2012 +0200 scoop-chain-expertpar start
+Fri Aug 31 10:14:21 2012 +0200 scoop-chain-expertpar pause
+Fri Aug 31 10:34:12 2012 +0200 scoop-chain-expertpar resume
+Fri Aug 31 11:17:50 2012 +0200 scoop-chain-expertpar pause
+Fri Aug 31 13:13:39 2012 +0200 scoop-chain-expertpar resume
+Fri Aug 31 13:38:30 2012 +0200 scoop-chain-expertpar pause
+Fri Aug 31 14:53:51 2012 +0200 scoop-chain-expertpar resume
+Fri Aug 31 15:47:54 2012 +0200 scoop-chain-expertpar pause
+Fri Aug 31 15:58:28 2012 +0200 scoop-chain-expertpar resume
+Fri Aug 31 16:10:55 2012 +0200 scoop-chain-expertpar pause
+Mon Sep 10 07:46:41 2012 +0200 scoop-chain-expertpar resume
+Mon Sep 10 08:47:00 2012 +0200 scoop-chain-expertpar pause
+Mon Sep 10 09:19:00 2012 +0200 scoop-chain-expertpar resume
+Mon Sep 10 10:14:05 2012 +0200 scoop-chain-expertpar pause
+Tue Sep 11 08:07:22 2012 +0200 scoop-chain-expertpar resume
+Tue Sep 11 08:31:48 2012 +0200 scoop-chain-expertpar pause
+Tue Sep 11 09:54:00 2012 +0200 scoop-randmat-expertpar resume
+Tue Sep 11 10:10:55 2012 +0200 scoop-randmat-expertpar pause
+Tue Sep 11 10:12:52 2012 +0200 scoop-outer-expertpar resume
+Tue Sep 11 10:13:13 2012 +0200 scoop-outer-expertpar pause
+Wed Sep 12 15:06:44 2012 +0200 tbb-randmat-expertpar resume
+Wed Sep 12 15:08:01 2012 +0200 tbb-randmat-expertpar pause
+Wed Sep 12 15:13:23 2012 +0200 tbb-thresh-expertpar resume
+Wed Sep 12 15:24:22 2012 +0200 tbb-thresh-expertpar pause
+Wed Sep 12 15:26:45 2012 +0200 tbb-winnow-expertpar resume
+Wed Sep 12 15:28:55 2012 +0200 tbb-winnow-expertpar pause
+Wed Sep 12 15:32:36 2012 +0200 tbb-outer-expertpar resume
+Wed Sep 12 15:40:41 2012 +0200 tbb-outer-expertpar pause
+Wed Sep 12 15:47:32 2012 +0200 tbb-outer-expertpar resume
+Wed Sep 12 15:50:44 2012 +0200 tbb-outer-expertpar pause
+Wed Sep 12 15:51:22 2012 +0200 tbb-product-expertpar resume
+Wed Sep 12 16:26:24 2012 +0200 tbb-product-expertpar pause
+Thu Sep 13 08:20:19 2012 +0200 tbb-product-expertpar resume
+Thu Sep 13 08:46:31 2012 +0200 tbb-product-expertpar pause
+Thu Sep 13 09:01:40 2012 +0200 chapel-randmat-expertseq resume
+Thu Sep 13 09:13:35 2012 +0200 chapel-randmat-expertseq pause
+Thu Sep 13 09:45:32 2012 +0200 chapel-randmat-expertpar resume
+Thu Sep 13 09:59:01 2012 +0200 chapel-randmat-expertpar pause
+Thu Sep 13 20:27:35 2012 +0200 chapel-thresh-expertpar resume
+Thu Sep 13 20:56:13 2012 +0200 chapel-thresh-expertpar pause
+Fri Sep 14 13:11:27 2012 +0200 chapel-winnow-expertpar resume
+Fri Sep 14 13:20:37 2012 +0200 chapel-winnow-expertpar pause
+Fri Sep 14 13:28:10 2012 +0200 chapel-outer-expertpar resume
+Fri Sep 14 13:35:52 2012 +0200 chapel-outer-expertpar pause
+Fri Sep 14 13:37:28 2012 +0200 chapel-product-expertpar resume
+Fri Sep 14 13:38:48 2012 +0200 chapel-product-expertpar pause
+Mon Sep 17 09:53:53 2012 +0200 chapel-winnow-expertpar resume
+Mon Sep 17 10:04:20 2012 +0200 chapel-winnow-expertpar pause
+Mon Sep 17 10:35:54 2012 +0200 chapel-chain-expertpar resume
+Mon Sep 17 11:06:55 2012 +0200 chapel-chain-expertpar pause
+Mon Sep 17 12:04:32 2012 +0200 chapel-chain-expertpar resume
+Mon Sep 17 12:13:33 2012 +0200 chapel-chain-expertpar pause
+Mon Sep 17 12:22:53 2012 +0200 tbb-chain-expertpar resume
+Mon Sep 17 12:24:32 2012 +0200 tbb-chain-expertpar pause
+Mon Sep 17 13:03:04 2012 +0200 chapel-chain-expertpar resume
+Mon Sep 17 13:07:03 2012 +0200 chapel-chain-expertpar pause
+Tue Sep 18 08:14:18 2012 +0200 cilk-randmat-expertpar resume
+Tue Sep 18 08:22:49 2012 +0200 cilk-randmat-expertpar pause
+Tue Sep 18 08:23:31 2012 +0200 cilk-thresh-expertpar resume
+Tue Sep 18 09:01:48 2012 +0200 cilk-thresh-expertpar pause
+Tue Sep 18 10:01:22 2012 +0200 cilk-thresh-expertpar resume
+Tue Sep 18 10:02:05 2012 +0200 cilk-thresh-expertpar pause
+Tue Sep 18 10:02:29 2012 +0200 cilk-randmat-expertpar resume
+Tue Sep 18 10:47:24 2012 +0200 cilk-randmat-expertpar done
+Tue Sep 18 12:30:07 2012 +0200 cilk-winnow-expertpar resume
+Tue Sep 18 12:33:33 2012 +0200 cilk-winnow-expertpar pause
+Tue Sep 18 12:37:38 2012 +0200 updated metrics and readme
+Tue Sep 18 13:19:51 2012 +0200 cilk-outer-expertpar resume
+Tue Sep 18 13:33:00 2012 +0200 cilk-outer-expertpar pause
+Tue Sep 18 13:33:49 2012 +0200 cilk-product-expertpar resume
+Tue Sep 18 13:36:59 2012 +0200 cilk-product-expertpar pause
+Tue Sep 18 16:33:42 2012 +0200 cilk-chain-expertpar resume
+Tue Sep 18 16:50:14 2012 +0200 cilk-chain-expertpar pause
+Tue Sep 18 16:59:48 2012 +0200 cilk-chain-expertpar resume
+Tue Sep 18 17:14:58 2012 +0200 cilk-chain-expertpar pause
+Wed Sep 19 07:56:20 2012 +0200 cilk-chain-expertpar resume
+Wed Sep 19 08:03:22 2012 +0200 cilk-chain-expertpar pause
+Wed Sep 19 10:35:11 2012 +0200 chapel-randmat-expertseq resume
+Wed Sep 19 10:43:16 2012 +0200 chapel-randmat-expertseq pause
+Wed Sep 19 10:43:41 2012 +0200 chapel-randmat-expertpar resume
+Wed Sep 19 10:53:00 2012 +0200 chapel-randmat-expertpar pause
+Wed Sep 19 10:53:22 2012 +0200 chapel-randmat-expertseq resume
+Wed Sep 19 10:54:40 2012 +0200 chapel-randmat-expertseq pause
+Wed Sep 19 12:59:49 2012 +0200 go-randmat-expertseq resume
+Wed Sep 19 13:16:51 2012 +0200 go-randmat-expertseq pause
+Wed Sep 19 13:18:27 2012 +0200 go-randmat-expertpar resume
+Wed Sep 19 13:25:31 2012 +0200 go-randmat-expertpar pause
+Wed Sep 19 13:26:51 2012 +0200 go-thresh-expertseq resume
+Wed Sep 19 13:51:12 2012 +0200 go-thresh-expertseq pause
+Wed Sep 19 13:52:58 2012 +0200 go-thresh-expertseq resume
+Wed Sep 19 14:11:22 2012 +0200 go-thresh-expertseq pause
+Wed Sep 19 14:11:47 2012 +0200 go-thresh-expertpar resume
+Wed Sep 19 14:42:24 2012 +0200 go-thresh-expertpar pause
+Wed Sep 19 14:44:40 2012 +0200 go-winnow-expertseq resume
+Wed Sep 19 15:33:13 2012 +0200 go-winnow-expertseq pause
+Wed Sep 19 16:02:19 2012 +0200 go-winnow-expertseq resume
+Wed Sep 19 16:35:06 2012 +0200 go-winnow-expertseq pause
+Wed Sep 19 16:36:27 2012 +0200 go-winnow-expertpar resume
+Wed Sep 19 17:14:17 2012 +0200 go-winnow-expertpar pause
+Wed Sep 19 22:37:46 2012 +0200 go-outer-expertseq resume
+Wed Sep 19 23:17:24 2012 +0200 go-outer-expertseq pause
+Wed Sep 19 23:23:29 2012 +0200 go-outer-expertseq resume
+Wed Sep 19 23:25:07 2012 +0200 go-outer-expertseq pause
+Wed Sep 19 23:28:55 2012 +0200 go-outer-expertseq resume
+Wed Sep 19 23:36:02 2012 +0200 go-outer-expertseq pause
+Thu Sep 20 08:02:19 2012 +0200 go-outer-expertpar resume
+Thu Sep 20 08:09:20 2012 +0200 go-outer-expertpar pause
+Thu Sep 20 08:12:52 2012 +0200 go-product-expertseq resume
+Thu Sep 20 08:18:59 2012 +0200 go-product-expertseq pause
+Thu Sep 20 08:22:23 2012 +0200 go-product-expertpar resume
+Thu Sep 20 08:25:21 2012 +0200 go-product-expertpar pause
+Thu Sep 20 08:44:16 2012 +0200 go-chain-expertseq resume
+Thu Sep 20 08:58:03 2012 +0200 go-chain-expertseq pause
+Thu Sep 20 09:01:06 2012 +0200 go-chain-expertseq resume
+Thu Sep 20 09:14:58 2012 +0200 go-chain-expertseq pause
+Thu Sep 20 09:23:35 2012 +0200 go-chain-expertseq resume
+Thu Sep 20 09:49:08 2012 +0200 go-chain-expertseq pause
+Thu Sep 20 09:52:27 2012 +0200 go-chain-expertseq resume
+Thu Sep 20 09:58:30 2012 +0200 go-chain-expertseq pause
+Thu Sep 20 10:05:06 2012 +0200 go-chain-expertpar resume
+Thu Sep 20 10:29:15 2012 +0200 go-chain-expertpar pause
+Thu Sep 20 11:00:49 2012 +0200 go-randmat-expertpar resume
+Thu Sep 20 11:24:31 2012 +0200 go-randmat-expertpar pause
+Thu Sep 20 15:25:14 2012 +0200 updating small things, no timing needed
+Fri Sep 21 13:20:13 2012 +0200 updating sequential versions
+Sat Sep 22 09:46:02 2012 +0200 updating test harness and graph creation script.
+Sun Sep 23 23:18:19 2012 +0200 updating python script
+Mon Sep 24 11:06:59 2012 +0200 updating use t-tests for confidence intervals.
+Mon Sep 24 16:46:27 2012 +0200 updating scripts to have now 2 main scripts.
+Mon Sep 24 20:28:31 2012 +0200 Merge branch 'scoop_expert' of github.com:scottgw/concurrent-languages into scoop_expert
+Tue Sep 25 07:09:25 2012 +0200 updating to re-add cis that were lost in last merge.
+Tue Sep 25 12:26:14 2012 +0200 updating small things in script
+Tue Sep 25 15:08:14 2012 +0200 updating graphs script to use rpy2 and ggplot2
+Tue Sep 25 17:22:57 2012 +0200 updating script with cilk expertpar nproc setting.
+Wed Sep 26 07:35:08 2012 +0200 updating graphs to use different line markers.
+Wed Sep 26 14:01:40 2012 +0200 updating cilk examples to fix arg parsing.
+Wed Sep 26 14:02:04 2012 +0200 updating scripts with memory usage graphs.
+Wed Sep 26 15:33:35 2012 +0200 updating go expert, fixing small indexing bug
+Thu Sep 27 12:32:59 2012 +0200 updating forgotten change to chapel
+Thu Sep 27 12:42:33 2012 +0200 updating argument handling in go-expertseq-randmat
+Thu Sep 27 13:47:03 2012 +0200 updating script for quick-testing and chapel fix.
+Thu Sep 27 13:48:03 2012 +0200 updating to remove unneeded import and wrong path.
+Fri Sep 28 09:51:48 2012 +0200 erlang-randmat-expertseq resume
+Fri Sep 28 10:03:25 2012 +0200 erlang-randmat-expertseq pause
+Fri Sep 28 10:15:33 2012 +0200 erlang-randmat-expertpar resume
+Fri Sep 28 10:21:26 2012 +0200 erlang-randmat-expertpar pause
+Fri Sep 28 10:23:20 2012 +0200 erlang-randmat-expertseq resume
+Fri Sep 28 10:28:20 2012 +0200 erlang-randmat-expertseq pause
+Fri Sep 28 10:28:34 2012 +0200 updating to fix erlang randmat generation
+Fri Sep 28 11:08:12 2012 +0200 erlang-thresh-expertseq resume
+Fri Sep 28 11:11:58 2012 +0200 erlang-thresh-expertseq pause
+Fri Sep 28 11:12:55 2012 +0200 updating erlang thresh with is_bench
+Fri Sep 28 11:13:29 2012 +0200 erlang-thresh-expertpar resume
+Fri Sep 28 11:17:08 2012 +0200 erlang-thresh-expertpar pause
+Fri Sep 28 12:12:59 2012 +0200 erlang-thresh-expertpar resume
+Fri Sep 28 12:21:19 2012 +0200 erlang-thresh-expertpar pause
+Fri Sep 28 12:35:12 2012 +0200 erlang-winnow-expertseq resume
+Fri Sep 28 13:03:43 2012 +0200 erlang-winnow-expertseq pause
+Sat Sep 29 08:29:50 2012 +0200 erlang-winnow-expertpar resume
+Sat Sep 29 08:35:12 2012 +0200 erlang-winnow-expertpar pause
+Tue Oct 2 09:52:29 2012 +0200 updating go makefile for randmat seq
+Tue Oct 2 16:25:41 2012 +0200 updating to use go fmt everywhere
+Wed Oct 3 09:35:01 2012 +0200 updating graphs with expert comparison
+Wed Oct 3 12:23:13 2012 +0200 updating with the old versions fo winnow and thresh.
+Wed Oct 3 12:25:35 2012 +0200 Merge branch 'scoop_expert' of github.com:scottgw/concurrent-languages into scoop_expert
+Wed Oct 3 19:35:37 2012 +0200 updating old erlang-winnow with benchmark flag
+Wed Oct 3 19:36:48 2012 +0200 Merge branch 'scoop_expert' of github.com:scottgw/concurrent-languages into scoop_expert
+Wed Oct 3 19:52:12 2012 +0200 erlang-winnow-expertseq resume
+Wed Oct 3 20:00:51 2012 +0200 erlang-winnow-expertseq pause
+Wed Oct 3 20:02:31 2012 +0200 erlang-winnow-expertpar resume
+Wed Oct 3 20:07:34 2012 +0200 erlang-winnow-expertpar pause
+Wed Oct 3 21:52:27 2012 +0200 updating gitignore to add pdf files
+Wed Oct 3 21:53:33 2012 +0200 Merge branch 'scoop_expert' of github.com:scottgw/concurrent-languages into scoop_expert
+Wed Oct 3 21:55:17 2012 +0200 erlang-winnow-expertpar resume
+Wed Oct 3 21:56:12 2012 +0200 erlang-winnow-expertpar pause
+Wed Oct 3 22:06:01 2012 +0200 updating erlang outer with bench mode.
+Wed Oct 3 22:07:32 2012 +0200 erlang-outer-expertseq resume
+Wed Oct 3 22:25:54 2012 +0200 erlang-outer-expertseq pause
+Wed Oct 3 22:37:53 2012 +0200 erlang-outer-expertpar resume
+Wed Oct 3 22:41:29 2012 +0200 erlang-outer-expertpar pause
+Thu Oct 4 05:04:43 2012 +0200 updating old randmat to par/seq version
+Thu Oct 4 05:15:07 2012 +0200 updating erlang product for benchmark mode
+Thu Oct 4 05:16:18 2012 +0200 erlang-product-expertseq resume
+Thu Oct 4 05:24:31 2012 +0200 erlang-product-expertseq pause
+Thu Oct 4 05:24:45 2012 +0200 updating to supress output under bench mode
+Thu Oct 4 05:27:25 2012 +0200 erlang-product-expertpar resume
+Thu Oct 4 05:28:44 2012 +0200 erlang-product-expertpar pause
+Thu Oct 4 05:31:26 2012 +0200 erlang-chain-expertseq resume
+Thu Oct 4 05:33:34 2012 +0200 erlang-chain-expertseq pause
+Thu Oct 4 05:33:49 2012 +0200 erlang-chain-expertpar resume
+Thu Oct 4 05:36:06 2012 +0200 erlang-chain-expertpar pause
+Thu Oct 4 06:51:16 2012 +0200 updating for big-test build
+Thu Oct 4 06:52:21 2012 +0200 updating main test script to include erlang
+Thu Oct 4 13:40:59 2012 +0200 updating to houseclean a few files out
+Fri Oct 5 11:19:03 2012 +0200 updating tbb to remove constants
+Fri Oct 5 18:01:54 2012 +0200 updating cilk to remove constant sized arrays.
+Sat Oct 6 11:14:55 2012 +0200 updating go to remove constants
+Sat Oct 6 11:36:55 2012 +0200 updating go par chain product removing constant.
+Sat Oct 6 13:26:00 2012 +0200 updating another constant in go chain
+Tue Oct 9 11:11:56 2012 +0200 Added value normalized histogram generation.
+Wed Oct 10 08:02:42 2012 +0200 updating chapel to remove constants
+Wed Oct 10 08:04:19 2012 +0200 updating graphs use expertseq as speedup reference
+Wed Oct 10 08:04:43 2012 +0200 Merge branch 'scoop_expert' of github.com:scottgw/concurrent-languages into scoop_expert
+Wed Oct 10 08:06:03 2012 +0200 updating erlang with expert comments
+Wed Oct 10 08:35:20 2012 +0200 updating is_bench param in chapel-chain
+Wed Oct 10 08:44:40 2012 +0200 updating chapel Makefiles for chain
+Wed Oct 10 10:16:11 2012 +0200 Fixed typos.

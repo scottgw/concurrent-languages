@@ -12,19 +12,20 @@
 
 -module(thresh).
 -export([thresh/4]).
+-export([row_hist/2]).
 
 % worker, processes and sends the results back
 reduce2d_worker(Parent, X, Function) ->
   spawn(fun() ->
       Result = Function(X),
-      Parent ! {self(), Result}
+      Parent ! Result
   end).
 
 reduce2d_join(Pids) ->
   [receive 
-       {Pid, Result} -> Result 
+       Result -> Result 
    end 
-   || Pid <- Pids].
+   || _Pid <- Pids].
 
 reduce2d(Matrix, Agregator, Function) ->
   Parent = self(),
@@ -35,20 +36,31 @@ reduce2d(Matrix, Agregator, Function) ->
 max_matrix(Matrix) ->
   reduce2d(Matrix, fun lists:max/1, fun lists:max/1).
 
-count_equal(Matrix, Value) ->
-  reduce2d(Matrix, 
-           fun lists:sum/1,
-           fun(X) -> 
-                   length(lists:filter(fun(Y) -> Y == Value end, X))
-           end).
+empty_hist () ->
+    orddict:from_list ([{X,0} || X <- lists:seq (0, 99)]).    
 
-fill_histogram_acc (_, -1, Acc) ->
-    lists:reverse (Acc);
-fill_histogram_acc (Matrix, Nmax, Acc) ->
-    fill_histogram_acc (Matrix, Nmax - 1 , [count_equal (Matrix, Nmax)] ++ Acc).
+row_hist (Parent, Row) ->
+    Hist = lists:foldl (fun (Elem, HistAcc) ->
+                                orddict:update_counter (Elem, 1, HistAcc)
+                        end, empty_hist(), Row),
+    Parent ! Hist.
 
 fill_histogram (Matrix, Nmax) ->
-    fill_histogram_acc (Matrix, Nmax, []).
+    Parent = self(),
+    Pids = [spawn(?MODULE, row_hist, [Parent, Row]) || Row <- Matrix],
+    Hists = [receive
+                 Result ->
+                     Result
+             end || _Pid <- Pids], 
+    Hist = lists:foldl (fun (Hist, HistAcc) ->
+                                orddict:merge(fun (K, V1, V2) ->
+                                                      V1 + V2
+                                              end, Hist, HistAcc)
+                        end, empty_hist(), Hists),
+    lists:reverse(lists:map (fun ({Idx, Count}) ->
+                       Count
+               end, orddict:to_list (Hist))).
+    
 
 get_threshold(-1, [], _) -> 0;
 get_threshold(Index, [Head | _], Count) when Head > Count ->

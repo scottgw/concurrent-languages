@@ -175,17 +175,22 @@ def hist_graphs (cfg, values):
       ses.extend (lses)
         
       lmin = min (lavgs)
-      navgs.extend ([(lambda x: x/lmin)(la) for la in lavgs])
-      nses.extend ([(lambda x: x/lmin)(ls) for ls in lses])
+      navgs.extend ([la/lmin for la in lavgs])
+      nses.extend ([ls/lmin for ls in lses])
 
-    # plot histogram of actual times
-    r.pdf ('bargraph-time-' + var + '.pdf')
 
     df = robjects.DataFrame({'Language': StrVector (langs),
                              'Problem': StrVector (probs),
                              'Time' : FloatVector (avgs),
-                             'SE' : FloatVector (ses)
+                             'SE' : FloatVector (ses),
+                             'NormTime' : FloatVector (navgs),
+                             'NormSE' : FloatVector (nses),
+                             'TimeLabel' : StrVector ([str(time) + " sec" for time in avgs])
                              })
+
+    # plot histogram of actual times
+    r.pdf ('bargraph-time-' + var + '.pdf')
+
 
     limits = ggplot2.aes (ymax = 'Time + SE', ymin = 'Time - SE')
     dodge = ggplot2.position_dodge (width=0.9)
@@ -201,20 +206,19 @@ def hist_graphs (cfg, values):
     # plot histogram of times normalized with respect to fastest time for a problem
     r.pdf ('bargraph-time-' + var + '-norm.pdf')
 
-    df = robjects.DataFrame({'Language': StrVector (langs),
-                             'Problem': StrVector (probs),
-                             'Time' : FloatVector (navgs),
-                             'SE' : FloatVector (nses)
-                             })
-
-    limits = ggplot2.aes (ymax = 'Time + SE', ymin = 'Time - SE')
+    limits = ggplot2.aes (ymax = 'NormTime + NormSE', ymin = 'NormTime - NormSE')
     dodge = ggplot2.position_dodge (width=0.9)
     gp = ggplot2.ggplot (df)
 
     pp = gp + \
-        ggplot2.aes_string (x='Problem', y='Time', fill='Language') + \
+        ggplot2.aes_string (x='Problem', y='NormTime', fill='Language') + \
+        robjects.r('ylab("Time (normalized to fastest)")') + \
         ggplot2.geom_bar (position='dodge', stat='identity') + \
-        ggplot2.geom_errorbar (limits, position=dodge, width=0.25)
+        ggplot2.geom_errorbar (limits, position=dodge, width=0.25) +\
+        ggplot2.geom_text(data=df,
+                          mapping = ggplot2.aes_string (x='Problem', 
+                                              y='NormTime + NormSE + 0.1', 
+                                              label='TimeLabel'))
  
     pp.plot ()
     r['dev.off']()

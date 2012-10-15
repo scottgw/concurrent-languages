@@ -22,7 +22,8 @@ row_process (Parent, {RowNo, Columns, Masks}, Ncols) ->
         [ {W, {RowNo, ColNo}}
           || {W, 1, ColNo} <- ColumnData ],
     Parent ! Weighted.
--% bounded sort from: http://jinnipark.tumblr.com/post/156214523/erlang-parallel
+
+% bounded sort from: http://jinnipark.tumblr.com/post/156214523/erlang-parallel
 p_qsort(L) ->
     Self = self(),
     Ref = erlang:make_ref(), % make a unique id
@@ -62,7 +63,7 @@ winnow(Nrows, Ncols, Matrix, Mask, Nelts) ->
                     row_process (Parent, Row, Ncols)
             end)
       || Row <- Rows],
-    Result = [ receive
+    Results = [ receive
                    Res ->
                        Res
                end

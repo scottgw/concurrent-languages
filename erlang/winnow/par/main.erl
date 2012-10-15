@@ -32,7 +32,7 @@ winnow(Nrows, Ncols, Matrix, Mask, Nelts) ->
                     row_process (Parent, Row, Ncols)
             end)
       || Row <- Rows],
-    Result = [ receive
+    Results = [ receive
                    Res ->
                        Res
                end
