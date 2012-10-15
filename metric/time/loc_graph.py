@@ -19,7 +19,7 @@ pretty_names = {"seq"      : "Sequential",
                 "expertpar": "Parallel (expert)"
                 }
 
-langs = ["go", "erlang", "chapel", "cilk", "tbb"]
+langs = ["go", "erlang", "chapel", "cilk", "tbb", "scoop"]
 
 # on the left we have the name of the CLOC language, on the right
 # how we should interpret it for ourselves.
@@ -27,14 +27,15 @@ langs = ["go", "erlang", "chapel", "cilk", "tbb"]
 cloc_names = {"Go": ["go"],
               "Erlang": ["erlang"],
               "C": ["chapel", "cilk"],
-              "C++": ["cilk", "tbb"]
+              "C++": ["cilk", "tbb"],
+              "Eiffel": ["scoop"]
               }
 
 
 loc_file = "cloc.csv"
 
 # this command line is intended to be run from the 'metric/perf' directory
-cloc_cmd_line = 'cloc --csv --force-lang="C++",cilk --force-lang="C",chpl --by-file --skip-uniqueness --quiet --out=' + loc_file + ' --exclude-dir=cpp,scoop,metric --exclude-lang=make,Python ../../'
+cloc_cmd_line = 'cloc --csv --force-lang="C++",cilk --force-lang="C",chpl --by-file --skip-uniqueness --read-lang-def=eiffel_cloc_def.txt --quiet --out=' + loc_file + ' --exclude-dir=cpp,metric --exclude-lang=make,Python ../../'
 
 def main():
   subprocess.check_call (cloc_cmd_line, shell=True)
