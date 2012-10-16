@@ -195,28 +195,6 @@ feature
       workers_join (workers)
     end
 
-  to_local(a_nelts: INTEGER; a_matrix: separate ARRAY2[REAL_64]): ARRAY2[REAL_64]
-    require
-      a_matrix.generator /= Void
-    local
-      i, j: INTEGER
-      d: DOUBLE
-    do
-      create Result.make (a_nelts, a_nelts)
-      from i := 1
-      until i > a_nelts
-      loop
-        from j := 1
-        until j > a_nelts
-        loop
-          d := a_matrix.item (i, j)
-          Result [i, j] := d
-          j := j + 1
-        end
-        i := i + 1
-      end
-    end
-
 feature {NONE}
   workers_live (a_workers: LINKED_LIST [separate PARFOR_WORKER])
     do
@@ -266,11 +244,6 @@ feature {NONE}
       Result := {DOUBLE_MATH}.sqrt(
       sqr(a.integer_32_item(1) - b.integer_32_item(1)) +
         sqr(a.integer_32_item(2) - b.integer_32_item(2)));
-    end
-
-  item(array: separate ARRAY[DOUBLE]; index: INTEGER): DOUBLE
-    do
-      Result := array.item(index)
     end
 
 feature {NONE}
