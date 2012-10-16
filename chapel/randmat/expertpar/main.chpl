@@ -20,9 +20,10 @@ proc randmat() {
   const LCG_A: uint(32) = 1664525,
         LCG_C: uint(32) = 1013904223;
   const cols = 1 .. ncols;
-  forall i in 1 .. nrows do {
+  const rows = 1 .. nrows;
+  forall i in rows {
     var seed : uint(32) = (s + i - 1) : uint (32);
-    for j in cols do {
+    for j in cols {
       seed = LCG_A * seed + LCG_C;
       matrix[i, j] = (seed % 100) : int(32);
     }
