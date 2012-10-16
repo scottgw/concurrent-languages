@@ -16,6 +16,7 @@ config const nrows = read(uint (32)),
              s     = read(uint (32));
 var matrix: [1..nrows, 1..ncols] int (32);
 
+
 proc randmat() {
   const LCG_A: uint(32) = 1664525,
         LCG_C: uint(32) = 1013904223;
