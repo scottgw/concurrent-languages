@@ -18,7 +18,6 @@ var matrix: [1..nelts, 1..nelts]real;
 var vector: [1..nelts]real;
 var points: [1..nelts](int, int);
 
-
 inline
 proc sqr(x: real): real {
   return x ** 2;
