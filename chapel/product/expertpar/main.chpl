@@ -17,6 +17,7 @@ var vector: [1..nelts]real;
 var result: [1..nelts]real;
 
 proc product(nelts: int) {
+
   forall i in 1..nelts do {
     var sum: real = 0;
     for j in 1..nelts do {
