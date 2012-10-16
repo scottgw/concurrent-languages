@@ -19,8 +19,11 @@ use Config;
 proc winnow(nrows: int, ncols: int, nelts: int) {
   var count = 0;
   var values: [0..nrows*ncols] (int, (int, int));
-  for i in 1..nrows {
-    for j in 1..ncols {
+  const RowSpace = [1..nrows];
+  const ColSpace = [1..ncols];
+
+  for i in RowSpace {
+    for j in ColSpace {
       if (mask[i, j]) {
         values[count] = (matrix[i, j], (i, j));
         count += 1;
