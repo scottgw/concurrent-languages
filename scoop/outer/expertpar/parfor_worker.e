@@ -87,43 +87,6 @@ feature
         vector [to_local_row (i)] := distance ( [0,0], a_points [i])
         i := i + 1
       end
-
-      set_result_vector (vector, result_vector)
-      set_result_matrix (matrix, result_matrix)
-    end
-
-  set_result_matrix (mat: ARRAY2[DOUBLE]; smat: separate ARRAY2[DOUBLE])
-    require
-      smat.generator /= Void
-    local
-      i, j: INTEGER
-    do
-      from i := start
-      until i > final
-      loop
-        from j := 1
-        until j > nelts
-        loop
-          smat.put (mat [to_local_row (i), j], i, j)
-          j := j + 1
-        end
-        i := i + 1
-      end
-
-    end
-
-  set_result_vector (vec: ARRAY[DOUBLE]; svec: separate ARRAY[DOUBLE])
-    local
-      i, j: INTEGER
-    do
-      from i := start
-      until i > final
-      loop
-        svec [i] := vec [to_local_row (i)]
-        svec [i].do_nothing
-        i := i + 1
-      end
-
     end
 
   vec_item (i: INTEGER): DOUBLE
