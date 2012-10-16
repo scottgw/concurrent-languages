@@ -14,6 +14,7 @@ config const is_bench = false;
 config const nrows = read (int(32)),
              ncols = read (int(32)),
              s     = read (int(32));
+
 var matrix: [1..nrows, 1..ncols] int(32);
 
 proc randmat() {
