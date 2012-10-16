@@ -30,10 +30,11 @@ proc distance(l, r: (int, int)): real {
 
 proc outer(nelts: int)
 {
-  forall i in 1..nelts do {
+  const NeltSpace = [1..nelts];
+  forall i in NeltSpace {
     var nmax: real = -1;
 
-    for j in 1..nelts do {
+    for j in NeltSpace {
       if (i != j) {
         dists[i, j] = distance(points[i], points[j]);
         nmax = max(nmax, dists[i, j]);
@@ -41,7 +42,7 @@ proc outer(nelts: int)
     }
 
     dists[i, i] = nmax * nelts;
-    vector[i] = distance((0, 0), points[i]);
+    vector[i] = distance((1, 1), points[i]);
   }
 }
 }
