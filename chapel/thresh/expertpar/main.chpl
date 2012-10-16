@@ -15,6 +15,9 @@ config const nrows = read(int),
 
 const ProbSpace = [1..nrows, 1..ncols],
       HistSpace = [1..nrows, 0..100];
+const RowSpace = [1..nrows];
+const ColSpace = [1..ncols];
+
 var matrix: [ProbSpace] int; 
 var mask: [ProbSpace] int;
 var histogram: [HistSpace] int;
@@ -22,7 +25,7 @@ var histogram: [HistSpace] int;
 proc thresh(nrows: int, ncols: int, percent: int) {
   var nmax = max reduce matrix;
 
-  forall i in 1..nrows {
+  forall i in RowSpace {
     for j in 1..ncols {
       histogram[i, matrix[i, j]] += 1;
     }
