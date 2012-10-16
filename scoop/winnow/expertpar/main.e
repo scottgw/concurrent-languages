@@ -109,7 +109,6 @@ feature
         i := i + 1
       end
     end
-
   
   winnow(nrows, ncols: INTEGER; nelts: INTEGER):
       ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
