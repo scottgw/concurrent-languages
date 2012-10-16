@@ -19,6 +19,7 @@ var matrix: [ProbSpace] int;
 var mask: [ProbSpace] int;
 var histogram: [HistSpace] int;
 
+
 proc thresh(nrows: int, ncols: int, percent: int) {
   var nmax = max reduce matrix;
 
