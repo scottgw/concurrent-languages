@@ -25,21 +25,27 @@ feature
     file_name := separate_character_option_value('i')
     !!in.make_open_read(separate_character_option_value('i'))
 
+    is_bench := index_of_word_option ("bench") > 0
+
     nrows := read_integer
     ncols := read_integer
     matrix := read_matrix(nrows, ncols)
-    mask := read_matrix(nrows, ncols)
+    mask := read_mask(nrows, ncols)
     nelts := read_integer
 
     points := winnow(nrows, ncols, matrix, mask, nelts)
 
-    print(nelts.out + "%N");
-    across 1 |..| nelts as ic loop
-      print(points.item(ic.item).integer_32_item(2).out + " " +
-          points.item(ic.item).integer_32_item(3).out + "%N");
+    if not is_bench then
+      print(nelts.out + "%N");
+      across 1 |..| nelts as ic loop
+        print(points.item(ic.item).integer_32_item(2).out + " " +
+            points.item(ic.item).integer_32_item(3).out + "%N");
+      end
+      print("%N");
     end
-    print("%N");
   end
+
+  is_bench: BOOLEAN
 
   read_integer(): INTEGER
   do
@@ -49,13 +55,43 @@ feature
 
   read_matrix(nrows, ncols: INTEGER): ARRAY2[INTEGER]
   local
-    i, j: INTEGER
+    i, j, v: INTEGER
     matrix: ARRAY2[INTEGER]
   do
     create matrix.make(nrows, ncols)
     across 1 |..| nrows as ic loop
       across 1 |..| ncols as jc loop
-        matrix.put(read_integer, ic.item, jc.item)
+        if is_bench then
+          v := 0
+        else
+          v := read_integer
+        end 
+         
+        matrix.put(v, ic.item, jc.item)
+      end
+    end
+    Result := matrix
+  end
+
+  read_mask(nrows, ncols: INTEGER): ARRAY2[INTEGER]
+  local
+    i, j, v: INTEGER
+    matrix: ARRAY2[INTEGER]
+  do
+    create matrix.make(nrows, ncols)
+    across 1 |..| nrows as ic loop
+      across 1 |..| ncols as jc loop
+        if is_bench then
+          if ((ic.item * jc.item) \\ (ncols + 1)) = 1 then
+            v := 1
+          else
+            v := 0
+          end
+        else
+          v := read_integer
+        end
+          
+        matrix.put(v, ic.item, jc.item)
       end
     end
     Result := matrix

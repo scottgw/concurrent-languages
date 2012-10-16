@@ -7,5 +7,5 @@ all: main
 	./main -i main6.in
 
 main: main.e
-	ec main.e
-
+	ec -config main.ecf -target main -finalize -c_compile;
+	cp EIFGENs/main/F_code/main .

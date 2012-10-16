@@ -9,5 +9,5 @@ all: main
 	diff main4.out main4.gold
 
 main: main.e comparator.e
-	ec main.e
-
+	ec -config main.ecf -target main -finalize -c_compile;
+	cp EIFGENs/main/F_code/main .
