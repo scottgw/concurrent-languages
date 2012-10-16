@@ -11,12 +11,28 @@ import rpy2.robjects.lib.ggplot2 as ggplot2
 from rpy2.robjects.packages import importr
 from rpy2.robjects import FloatVector, StrVector, IntVector, DataFrame
 
+def ggplot2_options ():
+  return ggplot2.opts (**{'axis.title.x' : ggplot2.theme_text(family = 'serif', face = 'bold', vjust=-0.2),
+                          'axis.title.y' : ggplot2.theme_text(family = 'serif', face = 'bold', angle=90, vjust=0.2),
+                          'axis.text.x' : ggplot2.theme_text(family = 'serif'),
+                          'axis.text.y' : ggplot2.theme_text(family = 'serif'),
+                          'legend.title' : ggplot2.theme_text(family = 'serif', face = 'bold'),
+                          'legend.text' : ggplot2.theme_text(family = 'serif'),
+    })
 
+  
 bargraph_dir = os.path.abspath(".")
-pretty_names = {"seq"      : "Sequential",
+pretty_varis = {"seq"      : "Sequential",
                 "par"      : "Parallel",
                 "expertseq": "Sequential (expert)",
                 "expertpar": "Parallel (expert)"
+                }
+pretty_langs = {"chapel"   : "Chapel",
+                "cilk"     : "Cilk",
+                "erlang"   : "Erlang",
+                "go"       : "Go",
+                "scoop"    : "SCOOP",
+                "tbb"      : "TBB"
                 }
 
 languages = ["chapel", "cilk", "erlang", "go", "scoop", "tbb"]
@@ -42,14 +58,11 @@ cloc_cmd_line = 'cloc --csv --force-lang="C++",cilk --force-lang="C",chpl --by-f
 
 def main():
   subprocess.check_call (cloc_cmd_line, shell=True)
-  #for lang in langs:
-  #  with open (loc_file, 'r') as csvfile:
-  #    contents = csv.reader (csvfile)
-  #    loc_graph (contents, lang)
   results = get_results ()
-  hist_varis (results)
-  hist_varis_diff (results)
-  hist_langs (results)
+  bargraph_varis (results)
+  bargraph_varis_norm (results)
+  bargraph_varis_diff (results)
+  bargraph_langs (results)
   
 def get_results ():
   results = {}
@@ -73,7 +86,7 @@ def get_results ():
             results [(lang, prob, var)] = results [(lang, prob, var)] + int (loc)
   return results
 
-def hist_varis (results):
+def bargraph_varis (results):
   r = robjects.r
 
   for variation in variations:
@@ -83,10 +96,10 @@ def hist_varis (results):
     for (lang, prob, var) in results.keys():
       if var == variation:
         loc = results [(lang, prob, var)]
-        langs.append (lang)
+        langs.append (pretty_langs [lang])
         probs.append (prob)
         locs.append (loc)
-    r.pdf ('compare-loc-' + variation + '.pdf')
+    r.pdf ('bargraph-loc-var-' + variation + '.pdf')
     df = robjects.DataFrame({'Language': StrVector (langs),
                              'Problem': StrVector (probs),
                              'Lines' : IntVector (locs),
@@ -97,11 +110,47 @@ def hist_varis (results):
   
     pp = gp + \
         ggplot2.aes_string (x='Problem', y='Lines', fill='Language') + \
-        ggplot2.geom_bar (position='dodge', stat='identity') 
+        ggplot2.geom_bar (position='dodge', stat='identity') + \
+        ggplot2_options () + \
+        robjects.r('ylab("Lines of Code")')
     pp.plot ()
     r['dev.off']()
 
-def hist_varis_diff (results):
+def bargraph_varis_norm (results):
+  r = robjects.r
+
+  for variation in variations:
+    langs = []
+    probs = []
+    locs  = []
+    for problem in problems:
+      results_filtered = { key: results[key] for key in [ (lang, problem, variation) for lang in languages ] }
+      loc_min = min (results_filtered.values())
+      
+      for (lang, prob, var) in results_filtered.keys():
+        loc_norm = (float (results_filtered [(lang, prob, var)])) / float(loc_min)
+        langs.append (pretty_langs [lang])
+        probs.append (prob)
+        locs.append (loc_norm)
+
+    r.pdf ('bargraph-loc-var-' + variation + '-norm.pdf')
+    df = robjects.DataFrame({'Language': StrVector (langs),
+                             'Problem': StrVector (probs),
+                             'Lines' : FloatVector (locs),
+      })
+    
+    #print (df)
+    gp = ggplot2.ggplot (df)
+  
+    pp = gp + \
+        ggplot2.aes_string (x='Problem', y='Lines', fill='Language') + \
+        ggplot2.geom_bar (position='dodge', stat='identity') + \
+        ggplot2_options () + \
+        robjects.r('ylab("Lines of Code (normalized to smallest)")')
+    pp.plot ()
+    r['dev.off']()
+
+def bargraph_varis_diff (results):
   r = robjects.r
 
   for (standard, expert) in [('seq', 'expertseq'), ('par', 'expertpar')]:
@@ -114,11 +163,11 @@ def hist_varis_diff (results):
         loc_expert = results [(lang, prob, expert)]
         diff = (float(loc_expert) / float(loc) - 1) * 100
 
-        langs.append (lang)
+        langs.append (pretty_langs [lang])
         probs.append (prob)
         diffs.append (diff)
 
-    r.pdf ('compare-loc-diff-' + standard + '.pdf')
+    r.pdf ('bargraph-loc-diff-' + standard + '.pdf')
     df = robjects.DataFrame({'Language': StrVector (langs),
                              'Problem': StrVector (probs),
                              'Difference' : IntVector (diffs),
@@ -129,11 +178,13 @@ def hist_varis_diff (results):
   
     pp = gp + \
         ggplot2.aes_string (x='Problem', y='Difference', fill='Language') + \
-        ggplot2.geom_bar (position='dodge', stat='identity') 
+        ggplot2.geom_bar (position='dodge', stat='identity') + \
+        ggplot2_options () + \
+        robjects.r('ylab("Difference (in percent) between expert and non-expert versions")')
     pp.plot ()
     r['dev.off']()
 
-def hist_langs (results):
+def bargraph_langs (results):
   r = robjects.r
 
   for language in languages:
@@ -143,10 +194,10 @@ def hist_langs (results):
     for (lang, prob, var) in results.keys():
       if lang == language:
         loc = results [(lang, prob, var)]
-        varis.append (pretty_names [var])
+        varis.append (pretty_varis [var])
         probs.append (prob)
         locs.append (loc)
-    r.pdf ('bargraph-loc-' + language + '.pdf')
+    r.pdf ('bargraph-loc-lang-' + language + '.pdf')
     df = robjects.DataFrame({'Variation': StrVector (varis),
                              'Problem': StrVector (probs),
                              'Lines' : IntVector (locs),
@@ -157,7 +208,9 @@ def hist_langs (results):
   
     pp = gp + \
         ggplot2.aes_string (x='Problem', y='Lines', fill='Variation') + \
-        ggplot2.geom_bar (position='dodge', stat='identity') 
+        ggplot2.geom_bar (position='dodge', stat='identity') + \
+        ggplot2_options () + \
+        robjects.r('ylab("Lines of Code")')
     pp.plot ()
     r['dev.off']()
     
