@@ -15,17 +15,14 @@ use Config;
 
 proc product(nelts: int)
 {
-  var result: [vectorSpace] real;
-
-  forall i in 1..nelts do {
+  const NeltSpace = [1..nelts];
+  forall i in NeltSpace {
     var sum: real = 0;
-    for j in 1..nelts do {
+    for j in NeltSpace {
       sum += dists[i, j] * vector[j];
     }
     result[i] = sum;
   }
-
-  return result;
 }
 
 }

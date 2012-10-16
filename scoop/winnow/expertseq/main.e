@@ -35,10 +35,7 @@ feature
       nrows := read_integer
       ncols := read_integer
 
-      if not is_bench then
-        matrix := read_matrix(nrows, ncols)
-      end
-              
+      matrix := read_matrix(nrows, ncols)
       mask := read_mask(nrows, ncols)
       
       nelts := read_integer
@@ -67,6 +64,7 @@ feature
   read_matrix(nrows, ncols: INTEGER): ARRAY2[INTEGER]
     local
       i, j: INTEGER
+      v: INTEGER
     do
       create Result.make(nrows, ncols)
       from i := 1
@@ -75,7 +73,12 @@ feature
         from j := 1
         until j > ncols
         loop
-          Result [i, j] := read_integer
+          if is_bench then
+            v := 0
+          else
+            v := read_integer
+          end 
+          Result [i, j] := v
           j := j + 1
         end
         i := i + 1

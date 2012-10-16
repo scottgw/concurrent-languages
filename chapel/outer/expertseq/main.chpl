@@ -18,7 +18,6 @@ var matrix: [1..nelts, 1..nelts]real;
 var vector: [1..nelts]real;
 var points: [1..nelts](int, int);
 
-
 inline
 proc sqr(x: real): real {
   return x ** 2;
@@ -33,9 +32,10 @@ proc distance(l, r: (int, int)): real {
 }
 
 proc outer(nelts: int) {
-  for i in 1..nelts do {
+  const NeltSpace = [1..nelts];
+  for i in NeltSpace {
     var nmax: real = -1;
-    for j in 1..nelts do {
+    for j in NeltSpace {
       if (i != j) {
         matrix[i, j] = distance(points[i], points[j]);
         nmax = max(nmax, matrix[i, j]);

@@ -4,7 +4,7 @@ module Config {
                thresh_percent = read (int),
                winnow_nelts = read (int);
 
-
+  const neltSpace = [1..nelts];
   const randSpace = [1..nelts, 1..nelts];
   const histSpace = [0..99];
   const pointSpace = [1 ..winnow_nelts];

@@ -70,7 +70,11 @@ feature
         from j := 1
         until j > ncols
         loop
-          v := read_integer
+          if is_bench then
+            v := 0
+          else
+            v := read_integer
+          end
           a_matrix [i, j] := v
           j := j + 1
         end

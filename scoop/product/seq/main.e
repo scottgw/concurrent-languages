@@ -20,30 +20,39 @@ feature
     res: ARRAY[DOUBLE]
   do
     create in.make_open_read(separate_character_option_value('i'))
+    is_bench := index_of_word_option ("bench") > 0
 
     in.read_integer
     nelts := in.last_integer
 
     create matrix.make_filled(0.0, nelts, nelts)
-    across 1 |..| nelts as ic loop
-      across 1 |..| nelts as jc loop
-        matrix.put(read_double(), ic.item, jc.item)
+    if not is_bench then
+      across 1 |..| nelts as ic loop
+        across 1 |..| nelts as jc loop
+          matrix.put(read_double(), ic.item, jc.item)
+        end
       end
     end
 
     create vector.make_filled(0.0, 1, nelts)
-    across 1 |..| nelts as ic loop
-      vector.put(read_double(), ic.item)
+    if not is_bench then
+      across 1 |..| nelts as ic loop
+        vector.put(read_double(), ic.item)
+      end
     end
 
     res := product(nelts, matrix, vector)
 
-    print(nelts.out + "%N");
-    across 1 |..| nelts as ic loop
-      print(res.item(ic.item).out + " ");
+    if not is_bench then
+      print(nelts.out + "%N");
+      across 1 |..| nelts as ic loop
+        print(res.item(ic.item).out + " ");
+      end
+      print("%N");
     end
-    print("%N");
   end
+
+  is_bench: BOOLEAN
 
   read_double(): DOUBLE
   do
