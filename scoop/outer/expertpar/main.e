@@ -16,7 +16,6 @@ create make
 feature
   make
     local
-      nelts: INTEGER
       local_matrix: ARRAY2[DOUBLE]
       local_vector: ARRAY [DOUBLE]
       file_name: STRING
@@ -68,12 +67,13 @@ feature
       end
     end
 
+  nelts: INTEGER
 
-  get_vector (nelts: INTEGER): ARRAY [DOUBLE]
+  get_vector (a_nelts: INTEGER): ARRAY [DOUBLE]
     local
       i: INTEGER
     do
-      create Result.make (1, nelts)
+      create Result.make (1, a_nelts)
       from i := 1
       until i > num_workers
       loop
@@ -94,27 +94,32 @@ feature
       end
     end
 
-  get_vector (nelts: INTEGER): ARRAY [DOUBLE]
+  get_matrix (a_nelts: INTEGER): ARRAY2 [DOUBLE]
     local
       i: INTEGER
     do
-      create Result.make (1, nelts)
+      create Result.make (a_nelts, a_nelts)
       from i := 1
       until i > num_workers
       loop
-        get_sub_vector (Result, workers[i])
+        get_sub_matrix (Result, workers[i])
         i := i + 1
       end
     end
 
-  get_sub_vector (arr: ARRAY[DOUBLE]; worker: separate PARFOR_WORKER)
+  get_sub_matrix (arr: ARRAY2[DOUBLE]; worker: separate PARFOR_WORKER)
     local
-      i: INTEGER
+      i,j : INTEGER
     do
       from i := worker.start
       until i > worker.final
       loop
-        arr [i] := worker.vec_item (i)
+        from j := 1
+        until j > nelts
+        loop
+          arr [i, j] := worker.matrix_item (i,j)
+          j := j + 1
+        end
         i := i + 1
       end
     end
@@ -125,14 +130,14 @@ feature
       Result := in.last_integer
     end
 
-  read_vector_of_points(nelts: INTEGER;
+  read_vector_of_points(a_nelts: INTEGER;
                         x_vector, y_vector: separate ARRAY[INTEGER])
     local
       i: INTEGER
       x, y: INTEGER
     do      
       from i := 1
-      until i > nelts 
+      until i > a_nelts 
       loop
         if is_bench then
           x := 0
@@ -153,7 +158,7 @@ feature
   num_workers: INTEGER = 32
   
   -- parallel for on nelts
-  outer (nelts: INTEGER): ARRAY2[REAL_64]
+  outer (a_nelts: INTEGER)
     local
       worker: separate PARFOR_WORKER
       start, height, i: INTEGER
@@ -165,13 +170,13 @@ feature
         i := 0
       until i >= num_workers
       loop
-        height := (nelts - start) // (num_workers - i)
+        height := (a_nelts - start) // (num_workers - i)
 
         if height > 0 then
           create worker.make
                      (start + 1
                       , start + height
-                      , nelts
+                      , a_nelts
                       , x_points
                       , y_points
                       , result_vector
@@ -188,23 +193,21 @@ feature
 
       -- join workers
       workers_join (workers)
-
-      Result := to_local (nelts, result_matrix)
     end
 
-  to_local(nelts: INTEGER; a_matrix: separate ARRAY2[REAL_64]): ARRAY2[REAL_64]
+  to_local(a_nelts: INTEGER; a_matrix: separate ARRAY2[REAL_64]): ARRAY2[REAL_64]
     require
       a_matrix.generator /= Void
     local
       i, j: INTEGER
       d: DOUBLE
     do
-      create Result.make (nelts, nelts)
+      create Result.make (a_nelts, a_nelts)
       from i := 1
-      until i > nelts
+      until i > a_nelts
       loop
         from j := 1
-        until j > nelts
+        until j > a_nelts
         loop
           d := a_matrix.item (i, j)
           Result [i, j] := d
@@ -215,23 +218,23 @@ feature
     end
 
 feature {NONE}
-  workers_live (workers: LINKED_LIST [separate PARFOR_WORKER])
+  workers_live (a_workers: LINKED_LIST [separate PARFOR_WORKER])
     do
-      from workers.start
-      until workers.after
+      from a_workers.start
+      until a_workers.after
       loop
-        worker_live (workers.item)
-        workers.forth
+        worker_live (a_workers.item)
+        a_workers.forth
       end
     end
 
-  workers_join (workers: LINKED_LIST [separate PARFOR_WORKER])
+  workers_join (a_workers: LINKED_LIST [separate PARFOR_WORKER])
     do
-      from workers.start
-      until workers.after
+      from a_workers.start
+      until a_workers.after
       loop
-        worker_join (workers.item)
-        workers.forth
+        worker_join (a_workers.item)
+        a_workers.forth
       end
     end
 
