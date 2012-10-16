@@ -15,17 +15,21 @@ use Config;
 proc thresh(nrows: int, ncols: int, percent: int) {
   var nmax = max reduce matrix;
   var histogram: [1..nrows, 0..99] int;
+  const RowSpace = [1..nrows];
+  const ColSpace = [1..ncols];
 
   // it was recommended to use a 1D array of atomic ints,
   // but it was much slower
-  forall i in 1..nrows do {
-    for j in 1..ncols do {
+  forall i in RowSpace {
+    for j in ColSpace {
       histogram[i, matrix[i, j]] += 1;
     }
   }
 
-  forall j in 0..(nmax) do {
-    for i in 2..nrows do {
+  const RowSpace2 = [2..nrows];
+
+  forall j in 0..(nmax) {
+    for i in RowSpace2 {
       histogram[1, j] += histogram[i, j];
     }
   }
@@ -41,8 +45,8 @@ proc thresh(nrows: int, ncols: int, percent: int) {
     threshold = 99 - i;
   }
 
-  forall i in 1..nrows do {
-    for j in 1..ncols do {
+  forall i in RowSpace {
+    for j in ColSpace {
       mask[i, j] = matrix[i, j] >= threshold;
     }
   }
