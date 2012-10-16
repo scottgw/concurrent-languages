@@ -60,6 +60,7 @@ proc winnow(nelts: int) {
     ind = (i - 1) * chunk + 1;
     (, points[i]) = values[ind];
   }
+
   return points;
 }
 
