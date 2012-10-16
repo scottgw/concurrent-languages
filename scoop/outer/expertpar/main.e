@@ -37,7 +37,9 @@ feature
       create result_vector.make_filled(0.0, 1, nelts)
       create result_matrix.make (nelts, nelts)
 
-      local_matrix := outer (nelts)
+      outer (nelts)
+      local_matrix := get_matrix (nelts)
+      local_vector := get_vector (nelts)
 
       if not is_bench then
         print(nelts.out + " " + nelts.out + "%N")
@@ -55,7 +57,6 @@ feature
         end
         print("%N")
 
-        local_vector := get_vector (nelts, result_vector)
         print(nelts.out + "%N")
         from i := 1
         until i> nelts
@@ -68,18 +69,52 @@ feature
     end
 
 
-  get_vector (nelts: INTEGER; a_vector: separate ARRAY [DOUBLE]):
-      ARRAY [DOUBLE]
+  get_vector (nelts: INTEGER): ARRAY [DOUBLE]
     local
       i: INTEGER
-      d: DOUBLE
     do
       create Result.make (1, nelts)
       from i := 1
-      until i > nelts
+      until i > num_workers
       loop
-        d := a_vector.item (i)
-        Result [i] := d
+        get_sub_vector (Result, workers[i])
+        i := i + 1
+      end
+    end
+
+  get_sub_vector (arr: ARRAY[DOUBLE]; worker: separate PARFOR_WORKER)
+    local
+      i: INTEGER
+    do
+      from i := worker.start
+      until i > worker.final
+      loop
+        arr [i] := worker.vec_item (i)
+        i := i + 1
+      end
+    end
+
+  get_vector (nelts: INTEGER): ARRAY [DOUBLE]
+    local
+      i: INTEGER
+    do
+      create Result.make (1, nelts)
+      from i := 1
+      until i > num_workers
+      loop
+        get_sub_vector (Result, workers[i])
+        i := i + 1
+      end
+    end
+
+  get_sub_vector (arr: ARRAY[DOUBLE]; worker: separate PARFOR_WORKER)
+    local
+      i: INTEGER
+    do
+      from i := worker.start
+      until i > worker.final
+      loop
+        arr [i] := worker.vec_item (i)
         i := i + 1
       end
     end
@@ -113,13 +148,14 @@ feature
       end
     end
 
+  workers: LINKED_LIST [separate PARFOR_WORKER]
+
   num_workers: INTEGER = 32
   
   -- parallel for on nelts
   outer (nelts: INTEGER): ARRAY2[REAL_64]
     local
       worker: separate PARFOR_WORKER
-      workers: LINKED_LIST [separate PARFOR_WORKER]
       start, height, i: INTEGER
     do
       create workers.make

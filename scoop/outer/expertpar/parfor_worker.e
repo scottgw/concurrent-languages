@@ -128,6 +128,16 @@ feature
 
     end
 
+  vec_item (i: INTEGER): DOUBLE
+    do
+      Result := result_vector (to_local_row (i))
+    end
+
+  matrix_item (i, j: INTEGER): DOUBLE
+    do
+      Result := result_matrix [to_local_row (i), j]
+    end
+  
   sqr(a: DOUBLE): DOUBLE
     do
       Result := a * a
@@ -138,10 +148,11 @@ feature
       Result := {DOUBLE_MATH}.sqrt(sqr(a.x - b.x) + sqr(a.y - b.y));
     end
 
-feature {NONE}
   start, final, nelts: INTEGER
   result_vector: separate ARRAY[DOUBLE]
   result_matrix: separate ARRAY2[DOUBLE]
+  
+feature {NONE}
   x_points, y_points: separate ARRAY[INTEGER]
 
 end
