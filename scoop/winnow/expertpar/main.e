@@ -17,7 +17,7 @@ feature
   make
     local
       nrows, ncols, nelts: INTEGER
-      points: ARRAY[TUPLE[value, i, j: INTEGER]]
+      points: ARRAY[VALUE3]
       k: INTEGER
     do
       create in.make_open_read(separate_character_option_value('i'))
@@ -46,7 +46,7 @@ feature
         from k := 1
         until k > nelts
         loop
-          print(points [k].i.out + " " + points [k].j.out + "%N")
+          print(points [k].x.out + " " + points [k].y.out + "%N")
           k := k + 1
         end
         print("%N")
@@ -110,25 +110,24 @@ feature
       end
     end
   
-  winnow(nrows, ncols: INTEGER; nelts: INTEGER):
-      ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
+  winnow(nrows, ncols: INTEGER; nelts: INTEGER): ARRAY[VALUE3]
     local
-      points: ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
-      values: ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
-      sorter: TUPLE_SORTER
+      points: ARRAY[VALUE3]
+      values: ARRAYED_LIST[VALUE3]
+      sorter: QUICK_SORTER[VALUE3]
       i: INTEGER
       n, chunk, index: INTEGER
     do
       -- parallel for on matrix
       values := parfor (nelts, nrows, ncols);
       
-      create sorter.make()
-      values := sorter.sort(values)
+      create sorter.make(create {VALUE3_COMPARATOR})
+      sorter.sort(values)
       
       n := values.count
       chunk := n // nelts
       
-      create points.make_filled([0, 0, 0], 1, nelts);
+      create points.make_filled(create {VALUE3}.make (0, 0, 0), 1, nelts);
       -- this should also be a parallel for
       from i := 1
       until i > nelts
@@ -140,14 +139,46 @@ feature
       
       Result := points
     end
+
+
+  get_vector (a_nelts: INTEGER): ARRAYED_LIST [VALUE3]
+    local
+      i: INTEGER
+    do
+      create Result.make (10)
+      from i := 1
+      until i > num_workers
+      loop
+        get_sub_vector (Result, workers[i])
+        i := i + 1
+      end
+    end
+
+  get_sub_vector (arr: ARRAYED_LIST[VALUE3]; worker: separate PARFOR_WORKER)
+    local
+      i: INTEGER
+      v,x,y: INTEGER
+      val: VALUE3
+    do
+      from i := 1
+      until i > worker.values_count
+      loop
+        v := worker.vec_item_v (i)
+        x := worker.vec_item_x (i)
+        y := worker.vec_item_y (i)
+        create val.make (v,x,y)
+        arr.extend (val)
+        i := i + 1
+      end
+    end
+
   
   num_workers: INTEGER = 32
+  workers: LINKED_LIST [separate PARFOR_WORKER]
   
-  parfor (nelts, nrows, ncols: INTEGER):
-      ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
+  parfor (nelts, nrows, ncols: INTEGER): ARRAYED_LIST [VALUE3]
     local
       worker: separate PARFOR_WORKER
-      workers: LINKED_LIST [separate PARFOR_WORKER]
       start, height, i: INTEGER
     do
       create workers.make
@@ -183,27 +214,27 @@ feature
       -- join workers
       workers_join (workers)
 
-      Result := to_local_values (v_vector, x_vector, y_vector)
+      Result := get_vector (nelts)
     end
 
 feature {NONE}
-  workers_live (workers: LINKED_LIST [separate PARFOR_WORKER])
+  workers_live (a_workers: LINKED_LIST [separate PARFOR_WORKER])
     do
-      from workers.start
-      until workers.after
+      from a_workers.start
+      until a_workers.after
       loop
-        worker_live (workers.item)
-        workers.forth
+        worker_live (a_workers.item)
+        a_workers.forth
       end
     end
 
-  workers_join (workers: LINKED_LIST [separate PARFOR_WORKER])
+  workers_join (a_workers: LINKED_LIST [separate PARFOR_WORKER])
     do
-      from workers.start
-      until workers.after
+      from a_workers.start
+      until a_workers.after
       loop
-        worker_join (workers.item)
-        workers.forth
+        worker_join (a_workers.item)
+        a_workers.forth
       end
     end
   
@@ -224,29 +255,6 @@ feature {NONE}
       worker.live
     end
 
-  to_local_values(vs, xs, ys: separate ARRAY[INTEGER]):
-      ARRAY[TUPLE[INTEGER, INTEGER, INTEGER]]
-    require
-      xs.generator /= Void
-    local
-      i: INTEGER
-      n: INTEGER
-      v,x,y: INTEGER
-    do
-      n := vs.count
-      create Result.make (1, n)
-      
-      from i := 1
-      until i > n
-      loop
-        v := vs [i]
-        x := xs [i]
-        y := ys [i]
-        
-        Result [i] := [v, x, y]
-        i := i + 1
-      end
-    end
   
 feature {NONE}
   in: PLAIN_TEXT_FILE
