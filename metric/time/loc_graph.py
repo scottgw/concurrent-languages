@@ -59,10 +59,10 @@ cloc_cmd_line = 'cloc --csv --force-lang="C++",cilk --force-lang="C",chpl --by-f
 def main():
   subprocess.check_call (cloc_cmd_line, shell=True)
   results = get_results ()
-  bargraph_varis (results)
-  bargraph_varis_norm (results)
-  bargraph_varis_diff (results)
-  bargraph_langs (results)
+  bargraph_variation (results)
+  bargraph_variation_norm (results)
+  bargraph_variation_diff (results)
+  bargraph_language (results)
   
 def get_results ():
   results = {}
@@ -86,7 +86,7 @@ def get_results ():
             results [(lang, prob, var)] = results [(lang, prob, var)] + int (loc)
   return results
 
-def bargraph_varis (results):
+def bargraph_variation (results):
   r = robjects.r
 
   for variation in variations:
@@ -116,7 +116,7 @@ def bargraph_varis (results):
     pp.plot ()
     r['dev.off']()
 
-def bargraph_varis_norm (results):
+def bargraph_variation_norm (results):
   r = robjects.r
 
   for variation in variations:
@@ -133,7 +133,7 @@ def bargraph_varis_norm (results):
         probs.append (prob)
         locs.append (loc_norm)
 
-    r.pdf ('bargraph-loc-var-' + variation + '-norm.pdf')
+    r.pdf ('bargraph-loc-var-norm-' + variation + '.pdf')
     df = robjects.DataFrame({'Language': StrVector (langs),
                              'Problem': StrVector (probs),
                              'Lines' : FloatVector (locs),
@@ -150,7 +150,7 @@ def bargraph_varis_norm (results):
     pp.plot ()
     r['dev.off']()
 
-def bargraph_varis_diff (results):
+def bargraph_variation_diff (results):
   r = robjects.r
 
   for (standard, expert) in [('seq', 'expertseq'), ('par', 'expertpar')]:
@@ -184,7 +184,7 @@ def bargraph_varis_diff (results):
     pp.plot ()
     r['dev.off']()
 
-def bargraph_langs (results):
+def bargraph_language (results):
   r = robjects.r
 
   for language in languages:
