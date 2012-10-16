@@ -31,8 +31,10 @@ proc thresh(nrows: int, ncols: int, percent: int) {
     }
   }
 
+  const RowSpace2 = [2..nrows];
+
   forall j in 0..(nmax) {
-    for i in 2..nrows {
+    for i in RowSpace2 {
       histogram[1, j] += histogram[i, j];
     }
   }
