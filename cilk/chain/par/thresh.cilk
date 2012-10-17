@@ -17,7 +17,7 @@
 
 extern int *randmat_matrix;
 int *thresh_mask;
-static int histogram[16][100];
+static int histogram[128][100];
 
 int max(int a, int b) {
   return a > b ? a : b;

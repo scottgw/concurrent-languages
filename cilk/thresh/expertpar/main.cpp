@@ -19,13 +19,11 @@
 
 #include <algorithm>
 
-#include "reducer_opadd_array.h"
-
 int is_bench = 0;
 static int *matrix;
 static int *mask;
 
-int* histogram;
+static int histogram[16][200];
 
 int reduce_max (int nrows, int ncols) {
   cilk::reducer_max <int> max_reducer (0);
@@ -43,17 +41,21 @@ int reduce_max (int nrows, int ncols) {
 }
 
 void fill_histogram(int nrows, int ncols) {
-  // Declare a reducer array of type int[100];
-  reducer_opadd_array<int, 100>* hist = new reducer_opadd_array<int, 100>();
-  cilk_for(int r = 0; r < nrows; ++r) {
-    int* hist_view = hist->get_view();
-    // Access a view of the underlying array
-    for (int c = 0; c < ncols; ++c) {
-      hist_view[matrix[r*ncols + c]]++;
+  int P = __cilkrts_get_nworkers();
+  cilk_for (int r = 0; r < nrows; ++r) {
+    int Self = __cilkrts_get_worker_number();
+    for (int i = 0; i < ncols; i++) {
+      histogram [Self][matrix[r*ncols + i]]++;
     }
   }
-  // After the loop, the view has been implicitly merged.
-  histogram = hist->get_view();
+}
+
+void merge_histogram () {
+  int P = __cilkrts_get_nworkers();
+  cilk_for (int v = 0; v < 100; ++v) {
+    int merge_val = __sec_reduce_add (histogram [1:(P-1)][v]);
+    histogram [0][v] += merge_val;
+  }
 }
 
 void fill_mask (int nrows, int ncols, int threshold) {
@@ -72,7 +74,7 @@ void thresh(int nrows, int ncols, int percent) {
   nmax = reduce_max(nrows, ncols);
 
   fill_histogram(nrows, ncols);
-  // merge_histogram();
+  merge_histogram();
 
   count = (nrows * ncols * percent) / 100;
 
@@ -80,7 +82,7 @@ void thresh(int nrows, int ncols, int percent) {
   threshold = nmax;
 
   for (i = nmax; i >= 0 && prefixsum <= count; i--) {
-    prefixsum += histogram[i];
+    prefixsum += histogram[0][i];
     threshold = i;
   }
 
@@ -98,7 +100,6 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  histogram = (int*) calloc (100, sizeof(int));
   scanf("%d%d", &nrows, &ncols);
   matrix = (int*) malloc (sizeof(int) * ncols * nrows);
   mask = (int*) malloc (sizeof(int) * ncols * nrows);
