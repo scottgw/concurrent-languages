@@ -8,7 +8,7 @@ all: main
 	./main -i main4.in > main4.out
 	diff main4.out main4.gold
 
-main: main.e tuple_comparator.e tuple_sorter.e parfor_worker.e
+main: main.e value3_comparator.e parfor_worker.e
 	ec -config main.ecf -target main -finalize -c_compile;
 	cp EIFGENs/main/F_code/main .
 
@@ -23,7 +23,7 @@ allw: mainw
 	diff main4.out main4.gold
 
 
-mainw: main.e tuple_comparator.e parfor_worker.e tuple_sorter.e
+mainw: main.e value3_comparator.e parfor_worker.e
 	ec -config main.ecf -target main -c_compile;
 	cp EIFGENs/main/W_code/main mainw
 

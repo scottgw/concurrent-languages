@@ -56,11 +56,11 @@ feature
   
   get_result(a_matrix, a_mask: ARRAY2[INTEGER])
     local
-      vector: ARRAY [TUPLE[INTEGER, INTEGER, INTEGER]]
       i, j: INTEGER
       count: INTEGER
+      val: VALUE3
     do
-      create vector.make_empty
+      create vector.make (10)
 
       from
         count := 1
@@ -72,38 +72,40 @@ feature
         until j > ncols
         loop
           if a_mask [to_local_row (i), j] = 1 then
-            vector.force ([a_matrix [to_local_row (i), j], i, j], count)
+            create val.make (a_matrix [to_local_row (i), j], i, j)
+            vector.extend (val)
             count := count + 1
           end
           j := j + 1
         end
         i := i + 1
       end
-
-      put_vector (vector, v_vector, x_vector, y_vector)
     end
 
-  put_vector (a_vector: ARRAY [TUPLE[v,x,y: INTEGER]];
-              vs, xs, ys: separate ARRAY [INTEGER])
-    local
-      i: INTEGER
-      n: INTEGER
-      t: TUPLE [v,x,y: INTEGER]
+  values_count: INTEGER
     do
-      n := xs.count
-      from i := 1
-      until i > a_vector.count
-      loop
-        t := a_vector [i]
-        vs.force (t.v, n + i)
-        xs.force (t.x, n + i)
-        ys.force (t.y, n + i)
-        i := i + 1
-      end
+      Result := vector.count
     end
-              
+
+  vec_item_x (i: INTEGER): INTEGER
+    do
+      Result := vector [i].x
+    end
+
+  vec_item_v (i: INTEGER): INTEGER
+    do
+      Result := vector [i].v
+    end
+
+  vec_item_y (i: INTEGER): INTEGER
+    do
+      Result := vector [i].y
+    end
+  
   
 feature {NONE}
+  vector: ARRAYED_LIST [VALUE3]
+
   start, final: INTEGER
   nelts: INTEGER
   ncols: INTEGER

@@ -63,8 +63,6 @@ feature
       d: DOUBLE
       p1, p2: TUPLE [x,y : INTEGER]
       i, j: INTEGER
-      matrix: ARRAY2[DOUBLE]
-      vector: ARRAY [DOUBLE]
     do
       create matrix.make (to_local_row (final), nelts)
       create vector.make (1, to_local_row (final))
@@ -89,45 +87,18 @@ feature
         vector [to_local_row (i)] := distance ( [0,0], a_points [i])
         i := i + 1
       end
-
-      set_result_vector (vector, result_vector)
-      set_result_matrix (matrix, result_matrix)
     end
 
-  set_result_matrix (mat: ARRAY2[DOUBLE]; smat: separate ARRAY2[DOUBLE])
-    require
-      smat.generator /= Void
-    local
-      i, j: INTEGER
+  vec_item (i: INTEGER): DOUBLE
     do
-      from i := start
-      until i > final
-      loop
-        from j := 1
-        until j > nelts
-        loop
-          smat.put (mat [to_local_row (i), j], i, j)
-          j := j + 1
-        end
-        i := i + 1
-      end
-
+      Result := vector [to_local_row (i)]
     end
 
-  set_result_vector (vec: ARRAY[DOUBLE]; svec: separate ARRAY[DOUBLE])
-    local
-      i, j: INTEGER
+  matrix_item (i, j: INTEGER): DOUBLE
     do
-      from i := start
-      until i > final
-      loop
-        svec [i] := vec [to_local_row (i)]
-        svec [i].do_nothing
-        i := i + 1
-      end
-
+      Result := matrix [to_local_row (i), j]
     end
-
+  
   sqr(a: DOUBLE): DOUBLE
     do
       Result := a * a
@@ -138,10 +109,13 @@ feature
       Result := {DOUBLE_MATH}.sqrt(sqr(a.x - b.x) + sqr(a.y - b.y));
     end
 
-feature {NONE}
+  matrix: ARRAY2[DOUBLE]
+  vector: ARRAY [DOUBLE]
   start, final, nelts: INTEGER
+  
+feature {NONE}
+  x_points, y_points: separate ARRAY[INTEGER]
   result_vector: separate ARRAY[DOUBLE]
   result_matrix: separate ARRAY2[DOUBLE]
-  x_points, y_points: separate ARRAY[INTEGER]
 
 end

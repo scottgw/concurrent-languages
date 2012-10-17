@@ -5,24 +5,41 @@ from config import *
 
 import rpy2.robjects as robjects
 import rpy2.robjects.lib.ggplot2 as ggplot2
+#ggplot2.theme_set(ggplot2.theme_bw ())
 from rpy2.robjects.packages import importr
 from rpy2.robjects import FloatVector, StrVector, IntVector, DataFrame
 
+def ggplot2_options ():
+  return ggplot2.opts (**{'axis.title.x' : ggplot2.theme_blank(),
+                          'axis.title.y' : ggplot2.theme_text(family = 'serif', face = 'bold', size = 15, angle=90, vjust=0.2),
+                          'axis.text.x' : ggplot2.theme_text(family = 'serif', size = 15),
+                          'axis.text.y' : ggplot2.theme_text(family = 'serif', size = 15),
+                          'legend.title' : ggplot2.theme_text(family = 'serif', face = 'bold', size = 15),
+                          'legend.text' : ggplot2.theme_text(family = 'serif', size = 15),
+    })
 
 bargraph_dir = os.path.abspath("../time/graph")
-pretty_names = {"seq"      : "Sequential",
+pretty_varis = {"seq"      : "Sequential",
                 "par"      : "Parallel",
                 "expertseq": "Sequential (expert)",
                 "expertpar": "Parallel (expert)"
+                }
+pretty_langs = {"chapel"   : "Chapel",
+                "cilk"     : "Cilk",
+                "erlang"   : "Erlang",
+                "go"       : "Go",
+                "scoop"    : "SCOOP",
+                "tbb"      : "TBB"
                 }
 
 def main():
   results = get_results()
 
-  expert_compare_graphs (cfg, results[threads[-1]])
-  hist_graphs(cfg, results[threads[-1]])
-  speedup_lang_var (cfg, results)
-  speedup_prob_var (cfg, results)
+  bargraph_language (cfg, results[threads[-1]])
+  bargraph_variation(cfg, results[threads[-1]])
+  bargraph_variation_diff (cfg, results[threads[-1]])
+  speedup_lang_var (cfg, results, 'fastest') # p1, seq, fastest
+  speedup_prob_var (cfg, results, 'fastest') # p1, seq, fastest
   mem_usage_graph (cfg)
 
 def get_results():
@@ -60,12 +77,12 @@ def mem_usage_graph (cfg):
         with open (mem_filename, 'r') as mem_file:
           mem = mem_file.readline()
           mems.append (float (mem))
-        varis.append (var)
-        langs.append (lang)
+        varis.append (pretty_varis [var])
+        langs.append (pretty_langs [lang])
         probs.append (prob)
 
   # memory usage is a simple histogram with all information in one graph.
-  r.pdf ('mem_usage.pdf')
+  r.pdf ('bargraph-memusage.pdf')
   df = robjects.DataFrame({'Language': StrVector (langs),
                            'Problem': StrVector (probs),
                            'Variation' : StrVector (varis),
@@ -74,13 +91,14 @@ def mem_usage_graph (cfg):
 
   gp = ggplot2.ggplot (df)
 
-
   # we rotate the x labels to make sure they don't overlap
   pp = gp  +\
       ggplot2.opts (**{'axis.text.x': ggplot2.theme_text (angle = 90, hjust=1)}) + \
       ggplot2.aes_string (x='Problem', y='Mem', fill='Language') + \
       ggplot2.geom_bar (position='dodge', stat='identity') + \
-      ggplot2.facet_wrap ('Variation')# + \
+      ggplot2.facet_wrap ('Variation') + \
+      ggplot2_options () + \
+      robjects.r('ylab("Memory usage (in bytes)")')# + \
 #      ggplot2.scale_y_log10()
   pp.plot ()
   r['dev.off']()
@@ -101,7 +119,7 @@ def fieller (aa, bb):
 
   return (q - t * se_q, q + t * se_q)
 
-def expert_compare_graphs (cfg, values):
+def bargraph_language (cfg, values):
   r = robjects.r
   for lang in cfg.languages:
     times = []
@@ -112,7 +130,7 @@ def expert_compare_graphs (cfg, values):
     for prob in cfg.problems:
       for var in cfg.variations:
         # we use the pretty names to make the 
-        varss.append (pretty_names [var])
+        varss.append (pretty_varis [var])
         probs.append (prob)
 
         data = FloatVector (values[prob][var][lang][0])
@@ -121,7 +139,7 @@ def expert_compare_graphs (cfg, values):
         t_result = r['t.test'] (data, **{"conf.level": 0.975}).rx ('conf.int')[0]
         ses.append ((t_result[1] - t_result[0])/2)
 
-    r.pdf ('compare-expert-time-' + lang + '.pdf')
+    r.pdf ('bargraph-executiontime-lang-' + lang + '.pdf')
     df = robjects.DataFrame({'Variation': StrVector (varss),
                              'Problem': StrVector (probs),
                              'Time' : FloatVector (times),
@@ -136,12 +154,14 @@ def expert_compare_graphs (cfg, values):
     pp = gp + \
         ggplot2.aes_string (x='Problem', y='Time', fill='Variation') + \
         ggplot2.geom_bar (position='dodge', stat='identity') + \
-        ggplot2.geom_errorbar (limits, position=dodge, width=0.25) 
+        ggplot2.geom_errorbar (limits, position=dodge, width=0.25) + \
+        ggplot2_options () + \
+        robjects.r('ylab("Execution time (in seconds)")') 
     pp.plot ()
     r['dev.off']()
 
 
-def hist_graphs (cfg, values):
+def bargraph_variation (cfg, values):
   r = robjects.r
   for var in cfg.variations:
     # each variation gets plot
@@ -163,7 +183,7 @@ def hist_graphs (cfg, values):
         # each problem displays a list of language times for that problem
         data = FloatVector (values[prob][var][lang][0])
         
-        langs.append (lang)
+        langs.append (pretty_langs [lang])
         probs.append (prob)
         mean = r['mean'] (data)[0]
         lavgs.append (mean)
@@ -185,11 +205,11 @@ def hist_graphs (cfg, values):
                              'SE' : FloatVector (ses),
                              'NormTime' : FloatVector (navgs),
                              'NormSE' : FloatVector (nses),
-                             'TimeLabel' : StrVector ([str(time) + " sec" for time in avgs])
+                             'TimeLabel' : StrVector ([str(round(time, 1)) + "s" for time in avgs])
                              })
 
     # plot histogram of actual times
-    r.pdf ('bargraph-time-' + var + '.pdf')
+    r.pdf ('bargraph-executiontime-var-' + var + '.pdf')
 
 
     limits = ggplot2.aes (ymax = 'Time + SE', ymin = 'Time - SE')
@@ -199,12 +219,14 @@ def hist_graphs (cfg, values):
     pp = gp + \
         ggplot2.aes_string (x='Problem', y='Time', fill='Language') + \
         ggplot2.geom_bar (position='dodge', stat='identity') + \
-        ggplot2.geom_errorbar (limits, position=dodge, width=0.25)
+        ggplot2.geom_errorbar (limits, position=dodge, width=0.25) + \
+        ggplot2_options () + \
+        robjects.r('ylab("Execution time (in seconds)")')
  
     pp.plot ()
 
     # plot histogram of times normalized with respect to fastest time for a problem
-    r.pdf ('bargraph-time-' + var + '-norm.pdf')
+    r.pdf ('bargraph-executiontime-var-norm-' + var + '.pdf')
 
     limits = ggplot2.aes (ymax = 'NormTime + NormSE', ymin = 'NormTime - NormSE')
     dodge = ggplot2.position_dodge (width=0.9)
@@ -212,14 +234,52 @@ def hist_graphs (cfg, values):
 
     pp = gp + \
         ggplot2.aes_string (x='Problem', y='NormTime', fill='Language') + \
-        robjects.r('ylab("Time (normalized to fastest)")') + \
         ggplot2.geom_bar (position='dodge', stat='identity') + \
         ggplot2.geom_errorbar (limits, position=dodge, width=0.25) +\
-        ggplot2.geom_text(data=df,
-                          mapping = ggplot2.aes_string (x='Problem', 
-                                              y='NormTime + NormSE + 0.1', 
-                                              label='TimeLabel'))
+        ggplot2_options () + \
+        robjects.r('ylab("Execution time (normalized to fastest)")')
+        #ggplot2.geom_text(data=df,
+        #                  mapping = ggplot2.aes_string (x='Problem', 
+        #                                                y='NormTime + NormSE + 0.1', 
+        #                                                label='TimeLabel')
  
+    pp.plot ()
+    r['dev.off']()
+
+def bargraph_variation_diff (cfg, values):
+  r = robjects.r
+
+  for (standard, expert) in [('seq', 'expertseq'), ('par', 'expertpar')]:
+    langs = []
+    probs = []
+    diffs  = []
+    for lang in cfg.languages:
+      for prob in cfg.problems:
+        data = FloatVector (values[prob][standard][lang][0])
+        data_expert = FloatVector (values[prob][expert][lang][0])
+
+        mean = r['mean'] (data)[0]
+        mean_expert = r['mean'] (data_expert)[0]
+        diff = (float(mean_expert) / float(mean) - 1) * 100
+
+        langs.append (pretty_langs [lang])
+        probs.append (prob)
+        diffs.append (diff)
+
+    r.pdf ('bargraph-executiontime-diff-' + standard + '.pdf')
+    df = robjects.DataFrame({'Language': StrVector (langs),
+                             'Problem': StrVector (probs),
+                             'Difference' : IntVector (diffs),
+      })
+    
+    #print (df)
+    gp = ggplot2.ggplot (df)
+  
+    pp = gp + \
+        ggplot2.aes_string (x='Problem', y='Difference', fill='Language') + \
+        ggplot2.geom_bar (position='dodge', stat='identity') + \
+        ggplot2_options () + \
+        robjects.r('ylab("Execution time difference (in percent)")')
     pp.plot ()
     r['dev.off']()
 
@@ -229,7 +289,7 @@ def hist_graphs (cfg, values):
 
 # produce a graph for each problem/variation that shows all languages
 # speedup
-def speedup_prob_var (cfg, values):
+def speedup_prob_var (cfg, values, basis):
   for var in cfg.variations:
     if var.find ('par') >= 0:
       for prob in cfg.problems:
@@ -238,11 +298,11 @@ def speedup_prob_var (cfg, values):
 
         selector = lambda lang: lambda thread:\
             values [thread][prob][var][lang][0]
-        line_plot (cfg, var, prob, 'Language', cfg.languages, selector, base_selector)
+        line_plot (cfg, var, prob, 'Language', cfg.languages, selector, base_selector, basis)
 
 # produce a graph for each language/variation that shows all problems
 # speedups
-def speedup_lang_var (cfg, values):
+def speedup_lang_var (cfg, values, basis):
   for var in cfg.variations:
     if var.find ('par') >= 0:
       for lang in cfg.languages:
@@ -251,12 +311,12 @@ def speedup_lang_var (cfg, values):
 
         selector = lambda prob: lambda thread:\
             values [thread][prob][var][lang][0]
-        line_plot (cfg, var, lang, 'Problem', cfg.problems, selector, base_selector)
+        line_plot (cfg, var, lang, 'Problem', cfg.problems, selector, base_selector, basis)
 
 
 # Function to plot lines for a given dataset. Here these
 # datasets will be either per-problem or per-language.
-def line_plot (cfg, var, control, change_name, changing, selector, base_selector):
+def line_plot (cfg, var, control, change_name, changing, selector, base_selector, basis):
   r = robjects.r
 
   r.pdf ('speedup-' + var + '-' + control + '.pdf')
@@ -272,11 +332,23 @@ def line_plot (cfg, var, control, change_name, changing, selector, base_selector
 
   for c in changing:
     sel  = selector (c)
+    # sequential base
     base = robjects.r.mean (FloatVector (base_selector(c)))[0]
-
+    # base with p = 1
+    base_p1 = robjects.r.mean (FloatVector (sel(1)))[0]
+    # use fastest sequential program
+    if basis == 'fastest' and base_p1 < base:
+      base = base_p1
+    elif basis == 'seq':
+      pass
+    elif basis == 'p1':
+      base = base_p1
+      
     for n in cfg.threads:
       mn = r.mean (FloatVector (sel(n)))[0]
       speedups.append (base / mn)
+      # plot slowdowns
+      #speedups.append (-mn/base)#(base / mn)
       thrds.append (n)
       changes.append (c)
 
@@ -296,7 +368,11 @@ def line_plot (cfg, var, control, change_name, changing, selector, base_selector
       ggplot2.aes_string(x='Threads', y='Speedup', 
                          group=change_name, color=change_name, 
                          shape=change_name) +\
-      ggplot2.scale_shape_manual(values=legendVec)
+      ggplot2.scale_shape_manual(values=legendVec) + \
+      ggplot2_options () + \
+      ggplot2.opts (**{'axis.title.x' : ggplot2.theme_text(family = 'serif', face = 'bold', size = 15, vjust=-0.2)}) + \
+      robjects.r('ylab("Speedup")') + \
+      robjects.r('xlab("Cores")')
 
       # ggplot2.xlim (min(threads), max(threads)) + ggplot2.ylim(min(threads), max(threads)) +\
   pp.plot()

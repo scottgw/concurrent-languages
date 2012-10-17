@@ -8,8 +8,32 @@ import math
 
 import rpy2.robjects as robjects
 import rpy2.robjects.lib.ggplot2 as ggplot2
+#ggplot2.theme_set(ggplot2.theme_bw ())
+#print ggplot2.theme_get()
 from rpy2.robjects.packages import importr
 from rpy2.robjects import FloatVector, StrVector, IntVector, DataFrame
+
+def ggplot2_options ():
+  return ggplot2.opts (**{'axis.title.x' : ggplot2.theme_blank(),
+                          'axis.title.y' : ggplot2.theme_text(family = 'serif', face = 'bold', size = 15, angle=90, vjust=0.2),
+                          'axis.text.x' : ggplot2.theme_text(family = 'serif', size = 15),
+                          'axis.text.y' : ggplot2.theme_text(family = 'serif', size = 15),
+                          'legend.title' : ggplot2.theme_text(family = 'serif', face = 'bold', size = 15),
+                          'legend.text' : ggplot2.theme_text(family = 'serif', size = 15),
+    })
+
+pretty_varis = {"seq"      : "Sequential",
+                "par"      : "Parallel",
+                "expertseq": "Sequential (expert)",
+                "expertpar": "Parallel (expert)"
+                }
+pretty_langs = {"chapel"   : "Chapel",
+                "cilk"     : "Cilk",
+                "erlang"   : "Erlang",
+                "go"       : "Go",
+                "scoop"    : "SCOOP",
+                "tbb"      : "TBB"
+                }
 
 languages = ["chapel", "cilk", "erlang", "go", "scoop", "tbb"]
 problems = ["randmat", "thresh", "winnow", "outer", "product", "chain"]
@@ -28,7 +52,9 @@ def main():
   #output_tables()
   #calculate()
   #test_significance()
-  hist_graphs()
+  bargraph_variation()
+  bargraph_variation_diff()
+  bargraph_language()
 
 def read_table():
   with open('tdist.txt', 'r') as f:
@@ -103,7 +129,6 @@ def load_data():
       else:
         pass
 
-  print start_times
   assert(len(start_times) == 0)
 
   for key, value in total_times.iteritems():
@@ -136,8 +161,7 @@ def load_data():
   # result["erlang"]["chain"]["seq"] = result["erlang"]["chain"]["par"]
   # result["scoop"]["chain"]["seq"] = result["scoop"]["chain"]["par"]
 
-def hist_graphs ():
-  print result
+def bargraph_variation ():
   r = robjects.r
   for var in variations:
     # each variation gets plot
@@ -151,26 +175,34 @@ def hist_graphs ():
     for prob in problems:
       # aggregate by problems
       lvalues = []
-      lses = []
       for lang in languages:
         # each problem displays a list of language times for that problem
  
-        langs.append (lang)
+        langs.append (pretty_langs [lang])
         probs.append (prob)
         value = 0
         try:
           value = result[lang][prob][var]
         except KeyError:
-          value = 44.083333333333336 # FIXME to account for missing seq-version of Erlang
+          print "Warning: no value for:"
+          print (lang, prob, var)
+          value = 0 # FIXME to account for missing seq-version of Erlang
+
+        # for the expert times, add expert and non-expert times together
+        if var.startswith('expert'):
+          try:
+            value = value + result[lang][prob][var.replace('expert','')]
+          except KeyError:
+            pass
         lvalues.append (value)
         
       values.extend (lvalues)
         
-      lmin = min (lvalues)
+      lmin = min ([x for x in lvalues if x != 0])
       nvalues.extend ([(lambda x: x/lmin)(la) for la in lvalues])
 
     # plot histogram of actual times
-    r.pdf ('bargraph-codingtime-' + var + '.pdf')
+    r.pdf ('bargraph-codingtime-var-' + var + '.pdf')
 
     df = robjects.DataFrame({'Language': StrVector (langs),
                              'Problem': StrVector (probs),
@@ -182,12 +214,14 @@ def hist_graphs ():
 
     pp = gp + \
         ggplot2.aes_string (x='Problem', y='Time', fill='Language') + \
-        ggplot2.geom_bar (position='dodge', stat='identity')
+        ggplot2.geom_bar (position='dodge', stat='identity') + \
+        ggplot2_options () + \
+        robjects.r('ylab("Coding time (in minutes)")')
  
     pp.plot ()
 
     # plot histogram of times normalized with respect to fastest time for a problem
-    r.pdf ('bargraph-codingtime-' + var + '-norm.pdf')
+    r.pdf ('bargraph-codingtime-var-norm-' + var + '.pdf')
 
     df = robjects.DataFrame({'Language': StrVector (langs),
                              'Problem': StrVector (probs),
@@ -199,7 +233,96 @@ def hist_graphs ():
 
     pp = gp + \
         ggplot2.aes_string (x='Problem', y='Time', fill='Language') + \
-        ggplot2.geom_bar (position='dodge', stat='identity') 
+        ggplot2.geom_bar (position='dodge', stat='identity') + \
+        ggplot2_options () + \
+        robjects.r('ylab("Coding time (normalized to fastest)")')
+
+    pp.plot ()
+    r['dev.off']()
+
+def bargraph_variation_diff ():
+  r = robjects.r
+
+  for (standard, expert) in [('seq', 'expertseq'), ('par', 'expertpar')]:
+    langs = []
+    probs = []
+    diffs  = []
+    for lang in languages:
+      for prob in problems:
+        error = False
+        try:
+          time = result[lang][prob][standard]
+        except KeyError:
+          error = True
+        try:
+          time_expert = result[lang][prob][expert]
+        except KeyError:
+          error = True
+
+        if not error:
+          diff = (float(time_expert + time) / float(time) - 1) * 100
+        else:
+          diff = 0
+
+        langs.append (pretty_langs [lang])
+        probs.append (prob)
+        diffs.append (diff)
+
+    r.pdf ('bargraph-codingtime-diff-' + standard + '.pdf')
+    df = robjects.DataFrame({'Language': StrVector (langs),
+                             'Problem': StrVector (probs),
+                             'Difference' : IntVector (diffs),
+      })
+    
+    #print (df)
+    gp = ggplot2.ggplot (df)
+  
+    pp = gp + \
+        ggplot2.aes_string (x='Problem', y='Difference', fill='Language') + \
+        ggplot2.geom_bar (position='dodge', stat='identity') + \
+        ggplot2_options () + \
+        robjects.r('ylab("Coding time difference (in percent)")')
+    pp.plot ()
+    r['dev.off']()
+
+def bargraph_language ():
+  r = robjects.r
+
+  for language in languages:
+    varis = []
+    probs = []
+    times  = []
+    for prob in problems:
+      for var in variations:
+        try:
+          time = result[language][prob][var]
+        except KeyError:
+          time = 0
+
+        # for the expert times, add expert and non-expert times together
+        if var.startswith('expert'):
+          try:
+            time = time + result[language][prob][var.replace('expert','')]
+          except KeyError:
+            pass
+          
+        varis.append (pretty_varis [var])
+        probs.append (prob)
+        times.append (time)
+    r.pdf ('bargraph-codingtime-lang-' + language + '.pdf')
+    df = robjects.DataFrame({'Variation': StrVector (varis),
+                             'Problem': StrVector (probs),
+                             'Time' : IntVector (times),
+      })
+    
+    #print (df)
+    gp = ggplot2.ggplot (df)
+  
+    pp = gp + \
+        ggplot2.aes_string (x='Problem', y='Time', fill='Variation') + \
+        ggplot2.geom_bar (position='dodge', stat='identity') + \
+        ggplot2_options () + \
+        robjects.r('ylab("Coding time (in minutes)")')
     pp.plot ()
     r['dev.off']()
 
