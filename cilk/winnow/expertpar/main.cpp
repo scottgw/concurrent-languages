@@ -31,25 +31,41 @@ static int *count_per_line;
 static pair <int, int> *points;
 static pair <int, pair <int, int> > *values;
 
-int reduce_sum(int begin, int end, int ncols) {
-  int middle = begin + (end - begin) / 2;
-  int left, right, res, i;
-  if (begin + 1 == end) {
-    if (is_bench) {
-      for (i = 0; i < ncols; i++) {
-        mask[begin*ncols +i] = ((begin * i) % (ncols + 1)) == 1;
+// int reduce_sum(int begin, int end, int ncols) {
+//   int middle = begin + (end - begin) / 2;
+//   int left, right, res, i;
+//   if (begin + 1 == end) {
+//     if (is_bench) {
+//       for (i = 0; i < ncols; i++) {
+//         mask[begin*ncols +i] = ((begin * i) % (ncols + 1)) == 1;
+//       }
+//     }
+//     res = mask[begin*ncols +0];
+//     for (i = 1; i < ncols; i++) {
+//       res += mask[begin*ncols +i];
+//     }
+//     return count_per_line[begin + 1] = res;
+//   }
+//   left = cilk_spawn reduce_sum(begin, middle, ncols);
+//   right = reduce_sum(middle, end, ncols);
+//   cilk_sync;
+//   return left + right;
+// }
+
+int reduce_sum (int nrows, int ncols) {
+  cilk::reducer_opadd<int> total_sum(0);
+  cilk_for (int q  = 0; q < nrows; ++q) {
+    int tmp_sum = 0;
+    for (int i = 0; i < ncols; ++i) {
+      if (is_bench) {
+        mask[i*ncols +i] = ((nrows * i) % (ncols + 1)) == 1;
       }
-    }
-    res = mask[begin*ncols +0];
-    for (i = 1; i < ncols; i++) {
-      res += mask[begin*ncols +i];
-    }
-    return count_per_line[begin + 1] = res;
+      tmp_sum += mask[q * ncols + i];
+    } 
+    count_per_line[q+1] = tmp_sum;
+    total_sum += tmp_sum;
   }
-  left = cilk_spawn reduce_sum(begin, middle, ncols);
-  right = reduce_sum(middle, end, ncols);
-  cilk_sync;
-  return left + right;
+  return total_sum.get_value(); 
 }
 
 void scan_update_elements(int begin, int end, int* array, int size) {
@@ -64,7 +80,7 @@ void scan_update_elements(int begin, int end, int* array, int size) {
     count += count % 2;  // to ensure it is even
     middle = begin + count * size;
     cilk_spawn scan_update_elements(begin, middle, array, size);
-    cilk_spawn scan_update_elements(middle, end, array, size);
+    scan_update_elements(middle, end, array, size);
   }
 }
 
@@ -102,13 +118,13 @@ void fill_values(int begin, int end, int ncols) {
     return;
   }
   cilk_spawn fill_values(begin, middle, ncols);
-  cilk_spawn fill_values(middle, end, ncols);
+  fill_values(middle, end, ncols);
 }
 
 void winnow(int nrows, int ncols, int nelts) {
   int i, n =  0, chunk, index;
 
-  n = reduce_sum(0, nrows, ncols);
+  n = reduce_sum(nrows, ncols);
 
   prefix_sum(nrows + 1);
   fill_values(0, nrows, ncols);
