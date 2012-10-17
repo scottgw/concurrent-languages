@@ -17,6 +17,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <algorithm>
+
 int is_bench = 0;
 static int *matrix;
 static int *mask;
@@ -30,7 +32,7 @@ int reduce_max (int nrows, int ncols) {
     int begin = i;
     int tmp_max = 0;
     for (int j = 0; j < ncols; j++) {
-      tmp_max = max (tmp_max, matrix [begin*ncols + j]);
+      tmp_max = std::max (tmp_max, matrix [begin*ncols + j]);
     }
     max_reducer.calc_max (tmp_max);
   }
