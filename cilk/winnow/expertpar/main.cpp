@@ -102,7 +102,7 @@ void fill_values(int begin, int end, int ncols) {
 }
 
 void winnow(int nrows, int ncols, int nelts) {
-  int i, n =  0, chunk, index;
+  int i, n, chunk, index;
 
   n = reduce_sum(nrows, ncols);
 
@@ -114,7 +114,7 @@ void winnow(int nrows, int ncols, int nelts) {
   chunk = n / nelts;
   free (count_per_line);
   points = (pair<int, int>*) malloc (sizeof(pair<int, int>) * nelts);
-  for (i = 0; i < nelts; i++) {
+  cilk_for (int i = 0; i < nelts; i++) {
     index = i * chunk;
     points[i] = values[index].second;
   }
