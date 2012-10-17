@@ -17,6 +17,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <algorithm>
+
 extern int *randmat_matrix;
 int *thresh_mask;
 static int histogram[16][200];
@@ -29,7 +31,7 @@ int reduce_max (int nrows, int ncols) {
     int begin = i;
     int tmp_max = 0;
     for (int j = 0; j < ncols; j++) {
-      tmp_max = std::max (tmp_max, matrix [begin*ncols + j]);
+      tmp_max = std::max (tmp_max, randmat_matrix [begin*ncols + j]);
     }
     max_reducer.calc_max (tmp_max);
   }
