@@ -31,25 +31,21 @@ static int *count_per_line;
 static pair <int, int> *points;
 static pair <int, pair <int, int> > *values;
 
-int reduce_sum(int begin, int end, int ncols) {
-  int middle = begin + (end - begin) / 2;
-  int left, right, res, i;
-  if (begin + 1 == end) {
-    if (is_bench) {
-      for (i = 0; i < ncols; i++) {
-        mask[begin*ncols +i] = ((begin * i) % (ncols + 1)) == 1;
+int reduce_sum (int nrows, int ncols) {
+  cilk::reducer_opadd<int> total_sum(0);
+  
+  cilk_for (int q  = 0; q < nrows; ++q) {
+    int tmp_sum = 0;
+    for (int i = 0; i < ncols; ++i) {
+      if (is_bench) {
+        mask[q*ncols + i] = ((nrows * i) % (ncols + 1)) == 1;
       }
-    }
-    res = mask[begin*ncols +0];
-    for (i = 1; i < ncols; i++) {
-      res += mask[begin*ncols +i];
-    }
-    return count_per_line[begin + 1] = res;
+      tmp_sum += mask[q * ncols + i];
+    } 
+    count_per_line[q+1] = tmp_sum;
+    total_sum += tmp_sum;
   }
-  left = cilk_spawn reduce_sum(begin, middle, ncols);
-  right = cilk_spawn reduce_sum(middle, end, ncols);
-  cilk_sync;
-  return left + right;
+  return total_sum.get_value(); 
 }
 
 void scan_update_elements(int begin, int end, int* array, int size) {
@@ -64,7 +60,7 @@ void scan_update_elements(int begin, int end, int* array, int size) {
     count += count % 2;  // to ensure it is even
     middle = begin + count * size;
     cilk_spawn scan_update_elements(begin, middle, array, size);
-    cilk_spawn scan_update_elements(middle, end, array, size);
+    scan_update_elements(middle, end, array, size);
   }
 }
 
@@ -72,20 +68,18 @@ void scan_update_elements(int begin, int end, int* array, int size) {
 // parallel scan on [begin, end)
 void scan_impl(int begin, int end, int* array, int size) {
   if (end - begin > size) {
-    cilk_spawn scan_update_elements(begin, end, array, size);
-    cilk_sync;
-    cilk_spawn scan_impl(begin + size, end, array, 2 * size);
-    cilk_sync;
-    cilk_spawn scan_update_elements(begin + size, end, array, size);
+    scan_update_elements(begin, end, array, size);
+    scan_impl(begin + size, end, array, 2 * size);
+    scan_update_elements(begin + size, end, array, size);
   }
 }
 
 void scan(int n, int* array) {
-  cilk_spawn scan_impl(0, n, array, 1);
+  scan_impl(0, n, array, 1);
 }
 
 void prefix_sum(int n) {
-  cilk_spawn scan(n, count_per_line);
+  scan(n, count_per_line);
 }
 
 void fill_values(int begin, int end, int ncols) {
@@ -104,26 +98,23 @@ void fill_values(int begin, int end, int ncols) {
     return;
   }
   cilk_spawn fill_values(begin, middle, ncols);
-  cilk_spawn fill_values(middle, end, ncols);
+  fill_values(middle, end, ncols);
 }
 
 void winnow(int nrows, int ncols, int nelts) {
-  int i, n =  0, chunk, index;
+  int i, n, chunk, index;
 
-  n = cilk_spawn reduce_sum(0, nrows, ncols);
-  cilk_sync;
+  n = reduce_sum(nrows, ncols);
 
-  cilk_spawn prefix_sum(nrows + 1);
-  cilk_sync;
-
-  cilk_spawn fill_values(0, nrows, ncols);
-  cilk_sync;
+  prefix_sum(nrows + 1);
+  fill_values(0, nrows, ncols);
 
   sort(values, values + n);
 
   chunk = n / nelts;
-
-  for (i = 0; i < nelts; i++) {
+  free (count_per_line);
+  points = (pair<int, int>*) malloc (sizeof(pair<int, int>) * nelts);
+  cilk_for (int i = 0; i < nelts; i++) {
     index = i * chunk;
     points[i] = values[index].second;
   }
@@ -171,8 +162,7 @@ int main(int argc, char *argv[]) {
 
   scanf("%d", &nelts);
 
-  count_per_line = (int*) malloc (sizeof(int) * (nrows + 1));
-  points = (pair<int, int>*) malloc (sizeof(pair<int, int>) * nelts);
+  count_per_line = (int*) calloc (nrows+1, sizeof(int));
 
   cilk_spawn winnow(nrows, ncols, nelts);
   cilk_sync;
@@ -184,6 +174,9 @@ int main(int argc, char *argv[]) {
     }
     printf("\n");
   }
-
+  free (matrix);
+  free (mask);
+  free (values);
+  free (points);
   return 0;
 }
