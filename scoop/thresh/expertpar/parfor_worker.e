@@ -5,14 +5,12 @@ create make
 feature
   make (start_, final_, ncols_: INTEGER;
         from_array_: separate ARRAY2[INTEGER];
-        shared_: separate ARRAY2[INTEGER];
         threshold_: INTEGER)
     do
       start := start_
       final := final_
       ncols := ncols_
       from_array := from_array_
-      shared := shared_
       threshold := threshold_
     end
 
@@ -52,7 +50,6 @@ feature
     local
       i, j: INTEGER
       res: INTEGER
-      to_array: ARRAY2 [INTEGER]
     do
       create to_array.make (final - start + 1, ncols)
 
@@ -71,8 +68,6 @@ feature
         end
         i := i + 1
       end
-
-      update_separate_result (to_array, shared)
     end
 
   update_separate_result (a_array: ARRAY2 [INTEGER];
@@ -93,10 +88,16 @@ feature
       end
     end
 
+  get (i: INTEGER): INTEGER
+    do
+      Result := to_array [to_local_row (i)]
+    end
+
 feature {NONE}
   start, final: INTEGER
   ncols: INTEGER
-  shared: separate ARRAY2[INTEGER]
+  to_array: ARRAY2 [INTEGER]
+
   from_array: separate ARRAY2[INTEGER]
   threshold: INTEGER
 
