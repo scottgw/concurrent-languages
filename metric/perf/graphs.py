@@ -5,16 +5,17 @@ from config import *
 
 import rpy2.robjects as robjects
 import rpy2.robjects.lib.ggplot2 as ggplot2
+#ggplot2.theme_set(ggplot2.theme_bw ())
 from rpy2.robjects.packages import importr
 from rpy2.robjects import FloatVector, StrVector, IntVector, DataFrame
 
 def ggplot2_options ():
-  return ggplot2.opts (**{'axis.title.x' : ggplot2.theme_text(family = 'serif', face = 'bold', vjust=-0.2),
-                          'axis.title.y' : ggplot2.theme_text(family = 'serif', face = 'bold', angle=90, vjust=0.2),
-                          'axis.text.x' : ggplot2.theme_text(family = 'serif'),
-                          'axis.text.y' : ggplot2.theme_text(family = 'serif'),
-                          'legend.title' : ggplot2.theme_text(family = 'serif', face = 'bold'),
-                          'legend.text' : ggplot2.theme_text(family = 'serif'),
+  return ggplot2.opts (**{'axis.title.x' : ggplot2.theme_blank(),
+                          'axis.title.y' : ggplot2.theme_text(family = 'serif', face = 'bold', size = 15, angle=90, vjust=0.2),
+                          'axis.text.x' : ggplot2.theme_text(family = 'serif', size = 15),
+                          'axis.text.y' : ggplot2.theme_text(family = 'serif', size = 15),
+                          'legend.title' : ggplot2.theme_text(family = 'serif', face = 'bold', size = 15),
+                          'legend.text' : ggplot2.theme_text(family = 'serif', size = 15),
     })
 
 bargraph_dir = os.path.abspath("../time/graph")
@@ -34,8 +35,9 @@ pretty_langs = {"chapel"   : "Chapel",
 def main():
   results = get_results()
 
-  expert_compare_graphs (cfg, results[threads[-1]])
-  hist_graphs(cfg, results[threads[-1]])
+  bargraph_language (cfg, results[threads[-1]])
+  bargraph_variation(cfg, results[threads[-1]])
+  bargraph_variation_diff (cfg, results[threads[-1]])
   speedup_lang_var (cfg, results, 'fastest') # p1, seq, fastest
   speedup_prob_var (cfg, results, 'fastest') # p1, seq, fastest
   mem_usage_graph (cfg)
@@ -89,7 +91,6 @@ def mem_usage_graph (cfg):
 
   gp = ggplot2.ggplot (df)
 
-
   # we rotate the x labels to make sure they don't overlap
   pp = gp  +\
       ggplot2.opts (**{'axis.text.x': ggplot2.theme_text (angle = 90, hjust=1)}) + \
@@ -118,7 +119,7 @@ def fieller (aa, bb):
 
   return (q - t * se_q, q + t * se_q)
 
-def expert_compare_graphs (cfg, values):
+def bargraph_language (cfg, values):
   r = robjects.r
   for lang in cfg.languages:
     times = []
@@ -160,7 +161,7 @@ def expert_compare_graphs (cfg, values):
     r['dev.off']()
 
 
-def hist_graphs (cfg, values):
+def bargraph_variation (cfg, values):
   r = robjects.r
   for var in cfg.variations:
     # each variation gets plot
@@ -242,6 +243,43 @@ def hist_graphs (cfg, values):
         #                                                y='NormTime + NormSE + 0.1', 
         #                                                label='TimeLabel')
  
+    pp.plot ()
+    r['dev.off']()
+
+def bargraph_variation_diff (cfg, values):
+  r = robjects.r
+
+  for (standard, expert) in [('seq', 'expertseq'), ('par', 'expertpar')]:
+    langs = []
+    probs = []
+    diffs  = []
+    for lang in cfg.languages:
+      for prob in cfg.problems:
+        data = FloatVector (values[prob][standard][lang][0])
+        data_expert = FloatVector (values[prob][expert][lang][0])
+
+        mean = r['mean'] (data)[0]
+        mean_expert = r['mean'] (data_expert)[0]
+        diff = (float(mean_expert) / float(mean) - 1) * 100
+
+        langs.append (pretty_langs [lang])
+        probs.append (prob)
+        diffs.append (diff)
+
+    r.pdf ('bargraph-executiontime-diff-' + standard + '.pdf')
+    df = robjects.DataFrame({'Language': StrVector (langs),
+                             'Problem': StrVector (probs),
+                             'Difference' : IntVector (diffs),
+      })
+    
+    #print (df)
+    gp = ggplot2.ggplot (df)
+  
+    pp = gp + \
+        ggplot2.aes_string (x='Problem', y='Difference', fill='Language') + \
+        ggplot2.geom_bar (position='dodge', stat='identity') + \
+        ggplot2_options () + \
+        robjects.r('ylab("Execution time difference (in percent)")')
     pp.plot ()
     r['dev.off']()
 
@@ -332,7 +370,9 @@ def line_plot (cfg, var, control, change_name, changing, selector, base_selector
                          shape=change_name) +\
       ggplot2.scale_shape_manual(values=legendVec) + \
       ggplot2_options () + \
-      robjects.r('ylab("Speedup (parallel vs. fastest sequential)")')
+      ggplot2.opts (**{'axis.title.x' : ggplot2.theme_text(family = 'serif', face = 'bold', size = 15, vjust=-0.2)}) + \
+      robjects.r('ylab("Speedup")') + \
+      robjects.r('xlab("Cores")')
 
       # ggplot2.xlim (min(threads), max(threads)) + ggplot2.ylim(min(threads), max(threads)) +\
   pp.plot()

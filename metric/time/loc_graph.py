@@ -12,12 +12,12 @@ from rpy2.robjects.packages import importr
 from rpy2.robjects import FloatVector, StrVector, IntVector, DataFrame
 
 def ggplot2_options ():
-  return ggplot2.opts (**{'axis.title.x' : ggplot2.theme_text(family = 'serif', face = 'bold', vjust=-0.2),
-                          'axis.title.y' : ggplot2.theme_text(family = 'serif', face = 'bold', angle=90, vjust=0.2),
-                          'axis.text.x' : ggplot2.theme_text(family = 'serif'),
-                          'axis.text.y' : ggplot2.theme_text(family = 'serif'),
-                          'legend.title' : ggplot2.theme_text(family = 'serif', face = 'bold'),
-                          'legend.text' : ggplot2.theme_text(family = 'serif'),
+  return ggplot2.opts (**{'axis.title.x' : ggplot2.theme_blank(),
+                          'axis.title.y' : ggplot2.theme_text(family = 'serif', face = 'bold', size = 15, angle=90, vjust=0.2),
+                          'axis.text.x' : ggplot2.theme_text(family = 'serif', size = 15),
+                          'axis.text.y' : ggplot2.theme_text(family = 'serif', size = 15),
+                          'legend.title' : ggplot2.theme_text(family = 'serif', face = 'bold', size = 15),
+                          'legend.text' : ggplot2.theme_text(family = 'serif', size = 15),
     })
 
   
@@ -180,7 +180,7 @@ def bargraph_variation_diff (results):
         ggplot2.aes_string (x='Problem', y='Difference', fill='Language') + \
         ggplot2.geom_bar (position='dodge', stat='identity') + \
         ggplot2_options () + \
-        robjects.r('ylab("Difference (in percent) between expert and non-expert versions")')
+        robjects.r('ylab("Lines of code difference (in percent)")')
     pp.plot ()
     r['dev.off']()
 

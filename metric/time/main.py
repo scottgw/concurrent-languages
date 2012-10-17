@@ -8,16 +8,18 @@ import math
 
 import rpy2.robjects as robjects
 import rpy2.robjects.lib.ggplot2 as ggplot2
+#ggplot2.theme_set(ggplot2.theme_bw ())
+#print ggplot2.theme_get()
 from rpy2.robjects.packages import importr
 from rpy2.robjects import FloatVector, StrVector, IntVector, DataFrame
 
 def ggplot2_options ():
-  return ggplot2.opts (**{'axis.title.x' : ggplot2.theme_text(family = 'serif', face = 'bold', vjust=-0.2),
-                          'axis.title.y' : ggplot2.theme_text(family = 'serif', face = 'bold', angle=90, vjust=0.2),
-                          'axis.text.x' : ggplot2.theme_text(family = 'serif'),
-                          'axis.text.y' : ggplot2.theme_text(family = 'serif'),
-                          'legend.title' : ggplot2.theme_text(family = 'serif', face = 'bold'),
-                          'legend.text' : ggplot2.theme_text(family = 'serif'),
+  return ggplot2.opts (**{'axis.title.x' : ggplot2.theme_blank(),
+                          'axis.title.y' : ggplot2.theme_text(family = 'serif', face = 'bold', size = 15, angle=90, vjust=0.2),
+                          'axis.text.x' : ggplot2.theme_text(family = 'serif', size = 15),
+                          'axis.text.y' : ggplot2.theme_text(family = 'serif', size = 15),
+                          'legend.title' : ggplot2.theme_text(family = 'serif', face = 'bold', size = 15),
+                          'legend.text' : ggplot2.theme_text(family = 'serif', size = 15),
     })
 
 pretty_varis = {"seq"      : "Sequential",
@@ -185,6 +187,13 @@ def bargraph_variation ():
           print "Warning: no value for:"
           print (lang, prob, var)
           value = 0 # FIXME to account for missing seq-version of Erlang
+
+        # for the expert times, add expert and non-expert times together
+        if var.startswith('expert'):
+          try:
+            value = value + result[lang][prob][var.replace('expert','')]
+          except KeyError:
+            pass
         lvalues.append (value)
         
       values.extend (lvalues)
@@ -226,7 +235,8 @@ def bargraph_variation ():
         ggplot2.aes_string (x='Problem', y='Time', fill='Language') + \
         ggplot2.geom_bar (position='dodge', stat='identity') + \
         ggplot2_options () + \
-        robjects.r('ylab("Coding time (normalized to fastest)")') 
+        robjects.r('ylab("Coding time (normalized to fastest)")')
+
     pp.plot ()
     r['dev.off']()
 
@@ -248,8 +258,9 @@ def bargraph_variation_diff ():
           time_expert = result[lang][prob][expert]
         except KeyError:
           error = True
+
         if not error:
-          diff = (float(time_expert) / float(time) - 1) * 100
+          diff = (float(time_expert + time) / float(time) - 1) * 100
         else:
           diff = 0
 
@@ -270,7 +281,7 @@ def bargraph_variation_diff ():
         ggplot2.aes_string (x='Problem', y='Difference', fill='Language') + \
         ggplot2.geom_bar (position='dodge', stat='identity') + \
         ggplot2_options () + \
-        robjects.r('ylab("Difference (in percent) between expert and non-expert versions")')
+        robjects.r('ylab("Coding time difference (in percent)")')
     pp.plot ()
     r['dev.off']()
 
@@ -287,6 +298,14 @@ def bargraph_language ():
           time = result[language][prob][var]
         except KeyError:
           time = 0
+
+        # for the expert times, add expert and non-expert times together
+        if var.startswith('expert'):
+          try:
+            time = time + result[language][prob][var.replace('expert','')]
+          except KeyError:
+            pass
+          
         varis.append (pretty_varis [var])
         probs.append (prob)
         times.append (time)
