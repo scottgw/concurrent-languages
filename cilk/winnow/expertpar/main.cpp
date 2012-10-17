@@ -31,34 +31,14 @@ static int *count_per_line;
 static pair <int, int> *points;
 static pair <int, pair <int, int> > *values;
 
-// int reduce_sum(int begin, int end, int ncols) {
-//   int middle = begin + (end - begin) / 2;
-//   int left, right, res, i;
-//   if (begin + 1 == end) {
-//     if (is_bench) {
-//       for (i = 0; i < ncols; i++) {
-//         mask[begin*ncols +i] = ((begin * i) % (ncols + 1)) == 1;
-//       }
-//     }
-//     res = mask[begin*ncols +0];
-//     for (i = 1; i < ncols; i++) {
-//       res += mask[begin*ncols +i];
-//     }
-//     return count_per_line[begin + 1] = res;
-//   }
-//   left = cilk_spawn reduce_sum(begin, middle, ncols);
-//   right = reduce_sum(middle, end, ncols);
-//   cilk_sync;
-//   return left + right;
-// }
-
 int reduce_sum (int nrows, int ncols) {
   cilk::reducer_opadd<int> total_sum(0);
+  
   cilk_for (int q  = 0; q < nrows; ++q) {
     int tmp_sum = 0;
     for (int i = 0; i < ncols; ++i) {
       if (is_bench) {
-        mask[i*ncols +i] = ((nrows * i) % (ncols + 1)) == 1;
+        mask[q*ncols + i] = ((nrows * i) % (ncols + 1)) == 1;
       }
       tmp_sum += mask[q * ncols + i];
     } 
