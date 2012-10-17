@@ -21,15 +21,17 @@ extern int *randmat_matrix;
 int *thresh_mask;
 static int histogram[16][200];
 
+
 int reduce_max (int nrows, int ncols) {
   cilk::reducer_max <int> max_reducer (0);
 
   cilk_for (int i = 0; i < nrows; i++) {
     int begin = i;
-
+    int tmp_max = 0;
     for (int j = 0; j < ncols; j++) {
-      max_reducer.calc_max (randmat_matrix [begin*ncols +j]);
+      tmp_max = std::max (tmp_max, matrix [begin*ncols + j]);
     }
+    max_reducer.calc_max (tmp_max);
   }
 
   return max_reducer.get_value ();
