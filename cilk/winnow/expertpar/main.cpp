@@ -47,7 +47,7 @@ int reduce_sum(int begin, int end, int ncols) {
     return count_per_line[begin + 1] = res;
   }
   left = cilk_spawn reduce_sum(begin, middle, ncols);
-  right = cilk_spawn reduce_sum(middle, end, ncols);
+  right = reduce_sum(middle, end, ncols);
   cilk_sync;
   return left + right;
 }
@@ -72,20 +72,18 @@ void scan_update_elements(int begin, int end, int* array, int size) {
 // parallel scan on [begin, end)
 void scan_impl(int begin, int end, int* array, int size) {
   if (end - begin > size) {
-    cilk_spawn scan_update_elements(begin, end, array, size);
-    cilk_sync;
-    cilk_spawn scan_impl(begin + size, end, array, 2 * size);
-    cilk_sync;
-    cilk_spawn scan_update_elements(begin + size, end, array, size);
+    scan_update_elements(begin, end, array, size);
+    scan_impl(begin + size, end, array, 2 * size);
+    scan_update_elements(begin + size, end, array, size);
   }
 }
 
 void scan(int n, int* array) {
-  cilk_spawn scan_impl(0, n, array, 1);
+  scan_impl(0, n, array, 1);
 }
 
 void prefix_sum(int n) {
-  cilk_spawn scan(n, count_per_line);
+  scan(n, count_per_line);
 }
 
 void fill_values(int begin, int end, int ncols) {
@@ -110,19 +108,16 @@ void fill_values(int begin, int end, int ncols) {
 void winnow(int nrows, int ncols, int nelts) {
   int i, n =  0, chunk, index;
 
-  n = cilk_spawn reduce_sum(0, nrows, ncols);
-  cilk_sync;
+  n = reduce_sum(0, nrows, ncols);
 
-  cilk_spawn prefix_sum(nrows + 1);
-  cilk_sync;
-
-  cilk_spawn fill_values(0, nrows, ncols);
-  cilk_sync;
+  prefix_sum(nrows + 1);
+  fill_values(0, nrows, ncols);
 
   sort(values, values + n);
 
   chunk = n / nelts;
-
+  free (count_per_line);
+  points = (pair<int, int>*) malloc (sizeof(pair<int, int>) * nelts);
   for (i = 0; i < nelts; i++) {
     index = i * chunk;
     points[i] = values[index].second;
@@ -171,8 +166,7 @@ int main(int argc, char *argv[]) {
 
   scanf("%d", &nelts);
 
-  count_per_line = (int*) malloc (sizeof(int) * (nrows + 1));
-  points = (pair<int, int>*) malloc (sizeof(pair<int, int>) * nelts);
+  count_per_line = (int*) calloc (nrows+1, sizeof(int));
 
   cilk_spawn winnow(nrows, ncols, nelts);
   cilk_sync;
@@ -184,6 +178,9 @@ int main(int argc, char *argv[]) {
     }
     printf("\n");
   }
-
+  free (matrix);
+  free (mask);
+  free (values);
+  free (points);
   return 0;
 }
