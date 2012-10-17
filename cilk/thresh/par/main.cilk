@@ -19,7 +19,7 @@ int is_bench = 0;
 
 static int *matrix;
 static int *mask;
-static int histogram[16][100];
+static int histogram[256][100];
 
 int max(int a, int b) {
   return a > b ? a : b;
