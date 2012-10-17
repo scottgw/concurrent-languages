@@ -70,31 +70,14 @@ feature
       end
     end
 
-  update_separate_result (a_array: ARRAY2 [INTEGER];
-                          a_shared: separate ARRAY2 [INTEGER])
-    local
-      i, j: INTEGER
+  get (i,j : INTEGER): INTEGER
     do
-      from i := start
-      until i > final
-      loop
-        from j := 1
-        until j > ncols
-        loop
-          a_shared.put (a_array [to_local_row (i), j], i ,j)
-          j := j + 1
-        end
-        i := i + 1
-      end
+      Result := to_array [to_local_row (i), j]
     end
-
-  get (i: INTEGER): INTEGER
-    do
-      Result := to_array [to_local_row (i)]
-    end
-
-feature {NONE}
+  
   start, final: INTEGER
+  
+feature {NONE}
   ncols: INTEGER
   to_array: ARRAY2 [INTEGER]
 

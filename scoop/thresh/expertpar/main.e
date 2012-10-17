@@ -160,7 +160,6 @@ feature
                      , start + height
                      , ncols
                      , matrix
-                     , shared
                      , threshold)
 
           workers.extend(worker)
@@ -177,9 +176,38 @@ feature
       -- join workers
       workers_parfor_join (workers)
 
-      Result := fetch_matrix (nrows, ncols, shared)
+      Result := get_vector (nrows, ncols, workers)
     end
 
+  get_vector (nrows, ncols: INTEGER;
+              workers: LIST [separate PARFOR_WORKER]): ARRAY2 [INTEGER]
+    do
+      create Result.make (nrows, ncols)
+      across workers as wc loop
+        get_sub_vector (nrows, ncols, Result, wc.item)
+      end
+    end
+
+  get_sub_vector (nrows, ncols: INTEGER;
+                  arr: ARRAY2 [INTEGER];
+                  worker: separate PARFOR_WORKER)
+    local
+      i, j: INTEGER
+    do
+      from i := worker.start
+      until i > worker.final
+      loop
+        from j := 1
+        until j > ncols
+        loop
+          arr [i, j] := worker.get (i, j)
+          j := j + 1
+        end
+        i := i + 1
+      end
+    end
+
+  
   fetch_matrix (nrows, ncols: INTEGER;
                 a_array: separate ARRAY2[INTEGER]): ARRAY2 [INTEGER]
     local
