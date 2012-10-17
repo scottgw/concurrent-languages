@@ -72,7 +72,6 @@ void thresh(int nrows, int ncols, int percent) {
   nmax = reduce_max(nrows, ncols);
 
   fill_histogram(nrows, ncols);
-  // merge_histogram();
 
   count = (nrows * ncols * percent) / 100;
 
