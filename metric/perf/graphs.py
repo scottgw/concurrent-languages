@@ -33,6 +33,8 @@ pretty_langs = {"chapel"   : "Chapel",
                 }
 
 def main():
+  importr ('pairwiseCI')
+
   results = get_results()
 
   bargraph_language (cfg, results[threads[-1]])
@@ -99,7 +101,7 @@ def mem_usage_graph (cfg):
       ggplot2.facet_wrap ('Variation') + \
       ggplot2_options () + \
       robjects.r('ylab("Memory usage (in bytes)")')# + \
-#      ggplot2.scale_y_log10()
+
   pp.plot ()
   r['dev.off']()
 
@@ -324,20 +326,25 @@ def line_plot (cfg, var, control, change_name, changing, selector, base_selector
   speedups = []
   thrds = []
   changes = []
-
+  ci = []
+  lowers = []
+  uppers = []
   for n in cfg.threads:
     speedups.append (n)
     thrds.append (n)
     changes.append ('ideal')
+    lowers.append (n)
+    uppers.append (n)
 
   for c in changing:
     sel  = selector (c)
+
     # sequential base
-    base = robjects.r.mean (FloatVector (base_selector(c)))[0]
+    base = FloatVector (base_selector(c))
     # base with p = 1
-    base_p1 = robjects.r.mean (FloatVector (sel(1)))[0]
+    base_p1 = FloatVector (sel(1))
     # use fastest sequential program
-    if basis == 'fastest' and base_p1 < base:
+    if basis == 'fastest' and mean (base_p1) < mean(base):
       base = base_p1
     elif basis == 'seq':
       pass
@@ -345,8 +352,25 @@ def line_plot (cfg, var, control, change_name, changing, selector, base_selector
       base = base_p1
       
     for n in cfg.threads:
-      mn = r.mean (FloatVector (sel(n)))[0]
-      speedups.append (base / mn)
+      ntimes = FloatVector (sel(n))
+
+      # ratio confidence interval
+      labels = ['Base'] * r.length(base)[0] + ['N']*r.length (ntimes)[0]
+      df = DataFrame ({'Times': base + ntimes, 
+                       'Type': StrVector(labels)})
+      ratio_test = r['pairwiseCI'] (r('Times ~ Type'), data=df,
+                                    control='N',
+                                    method='Param.ratio',
+                                    **{'var.equal': False})[0][0]
+
+      lowers.append (ratio_test[1][0])
+      uppers.append (ratio_test[2][0])
+      
+      # print lowers
+      # print uppers
+
+      mn = mean (ntimes)      
+      speedups.append (mean(base) / mn)
       # plot slowdowns
       #speedups.append (-mn/base)#(base / mn)
       thrds.append (n)
@@ -354,7 +378,9 @@ def line_plot (cfg, var, control, change_name, changing, selector, base_selector
 
   df = DataFrame ({'Speedup': FloatVector (speedups),
                    'Threads': IntVector (thrds),
-                   change_name: StrVector (changes)
+                   change_name: StrVector (changes),
+                   'Lower': FloatVector (lowers),
+                   'Upper': FloatVector (uppers)
                    })
   ideal_changing = ['ideal']
   ideal_changing.extend (changing)
@@ -363,12 +389,16 @@ def line_plot (cfg, var, control, change_name, changing, selector, base_selector
 
   gg = ggplot2.ggplot (df)
 
+  limits = ggplot2.aes (ymax = 'Upper', ymin = 'Lower')
+  dodge = ggplot2.position_dodge (width=0.9)
+
   pp = gg + \
       ggplot2.geom_line() + ggplot2.geom_point() +\
       ggplot2.aes_string(x='Threads', y='Speedup', 
                          group=change_name, color=change_name, 
                          shape=change_name) +\
       ggplot2.scale_shape_manual(values=legendVec) + \
+      ggplot2.geom_errorbar (limits, width=0.25) + \
       ggplot2_options () + \
       ggplot2.opts (**{'axis.title.x' : ggplot2.theme_text(family = 'serif', face = 'bold', size = 15, vjust=-0.2)}) + \
       robjects.r('ylab("Speedup")') + \
@@ -378,6 +408,9 @@ def line_plot (cfg, var, control, change_name, changing, selector, base_selector
   pp.plot()
 
   r['dev.off']()
+
+def mean (xs):
+  return robjects.r.mean (xs)[0]
 
 if __name__ == '__main__':
   main ()
