@@ -3,6 +3,7 @@ import csv
 
 import os.path
 from os.path import abspath, normpath
+import sys
 
 import subprocess
 
@@ -35,8 +36,8 @@ pretty_langs = {"chapel"   : "Chapel",
                 "tbb"      : "TBB"
                 }
 
-languages = ["chapel", "cilk", "erlang", "go", "scoop", "tbb"]
-#languages = ["chapel", "cilk", "go", "tbb"]
+#languages = ["chapel", "cilk", "erlang", "go", "scoop", "tbb"]
+languages = ["chapel", "cilk", "go", "tbb"]
 problems = ["randmat", "thresh", "winnow", "outer", "product", "chain"]
 variations = ["seq", "par", "expertseq", "expertpar"]
 
@@ -57,12 +58,46 @@ loc_file = "cloc.csv"
 cloc_cmd_line = 'cloc --csv --force-lang="C++",cilk --force-lang="C",chpl --by-file --skip-uniqueness --read-lang-def=eiffel_cloc_def.txt --quiet --out=' + loc_file + ' --exclude-dir=cpp,metric --exclude-lang=make,Python ../../'
 
 def main():
-  subprocess.check_call (cloc_cmd_line, shell=True)
+  #subprocess.check_call (cloc_cmd_line, shell=True)
   results = get_results ()
-  bargraph_variation (results)
-  bargraph_variation_norm (results)
-  bargraph_variation_diff (results)
-  bargraph_language (results)
+  #bargraph_variation (results)
+  #bargraph_variation_norm (results)
+  #bargraph_variation_diff (results)
+  #bargraph_language (results)
+  stat_test (results)
+
+def stat_test (results):
+  r = robjects.r
+
+  res = {}
+
+  for var in variations:
+    for lang1 in languages:
+      lang1_vals = FloatVector ([ results[key]  for key in [ (lang1, prob, var) for prob in problems ] ])
+      for lang2 in languages:
+        lang2_vals = FloatVector ([ results[key]  for key in [ (lang2, prob, var) for prob in problems ] ])
+
+        if lang1 not in res:
+          res[lang1] = {}
+        if lang2 not in res[lang1]:
+          res[lang1][lang2] = {}
+
+        pval = (r['wilcox.test'] (lang1_vals, lang2_vals, paired = True))[2][0]
+        if lang1 == lang2:
+          res[lang1][lang2] = 0
+        else:
+          res[lang1][lang2] = pval
+
+    # trivial data display
+    print var
+    print languages
+    for lang1 in languages:
+      for lang2 in languages:
+        if lang1 == lang2:
+          sys.stdout.write ("        ")
+        else:
+          sys.stdout.write (str (round(res[lang1][lang2], 4)) + "  ")
+      print lang1
   
 def get_results ():
   results = {}
