@@ -34,11 +34,11 @@ int main(int argc, char** argv) {
 
   scanf("%d%d%d%d", &nelts, &randmat_seed, &thresh_percent, &winnow_nelts);
   
-  cilk_spawn randmat(nelts, nelts, randmat_seed); cilk_sync;
-  cilk_spawn thresh(nelts, nelts, thresh_percent); cilk_sync;
-  cilk_spawn winnow(nelts, nelts, winnow_nelts); cilk_sync;
-  cilk_spawn outer(winnow_nelts); cilk_sync;
-  cilk_spawn product(winnow_nelts); cilk_sync;
+  randmat(nelts, nelts, randmat_seed); cilk_sync;
+  thresh(nelts, nelts, thresh_percent); cilk_sync;
+  winnow(nelts, nelts, winnow_nelts); cilk_sync;
+  outer(winnow_nelts); cilk_sync;
+  product(winnow_nelts); cilk_sync;
 
   if (!is_bench) {
     for (i = 0; i < winnow_nelts; i++) {
