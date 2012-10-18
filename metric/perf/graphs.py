@@ -35,14 +35,68 @@ pretty_langs = {"chapel"   : "Chapel",
 def main():
   importr ('pairwiseCI')
 
+  basis = 'fastest' # p1, seq, fastest
+  
   results = get_results()
 
   bargraph_language (cfg, results[threads[-1]])
   bargraph_variation(cfg, results[threads[-1]])
   bargraph_variation_diff (cfg, results[threads[-1]])
-  speedup_lang_var (cfg, results, 'fastest') # p1, seq, fastest
-  speedup_prob_var (cfg, results, 'fastest') # p1, seq, fastest
+  speedup_lang_var (cfg, results, basis)
+  speedup_prob_var (cfg, results, basis)
   mem_usage_graph (cfg)
+  simple_rank (cfg, results[threads[-1]])
+  simple_rank_speedup (cfg, results, basis)
+
+def simple_rank (cfg, values):
+  print "\nexecution time rank"
+  r = robjects.r
+  for var in variations:
+    print var
+    for lang in languages:
+      agg = 0
+      for prob in problems:
+        data = FloatVector (values[prob][var][lang][0])
+        val = r['mean'] (data)[0]
+        valmin = min ([ (r['mean'] (FloatVector (values[prob][var][l][0])))[0] for l in languages ])
+        agg = agg + float (val) / float (valmin)
+      agg = agg / len (problems)
+      print lang + '\t' + str (round (agg, 1))
+
+def simple_rank_speedup (cfg, values, basis):
+  print "\nspeedup rank"
+  r = robjects.r
+  for var in ['par', 'expertpar']:
+    print var
+    speedups = {}
+    for lang in languages:
+      speedups[lang] = {}
+      for prob in problems:
+        speedups[lang][prob] = []
+        base = r.mean (FloatVector (values [cfg.threads[-1]][prob][var.replace ('par','seq')][lang][0]))[0]
+        # base with p = 1
+        base_p1 = r.mean (FloatVector (values [1][prob][var][lang][0]))[0]
+        # use fastest sequential program
+        if basis == 'fastest' and base_p1 < base:
+          base = base_p1
+        elif basis == 'seq':
+          pass
+        elif basis == 'p1':
+          base = base_p1
+        
+        for n in cfg.threads:
+          mn = (r.mean (FloatVector (values[n][prob][var][lang][0])))[0]
+          # slowdowns
+          speedups[lang][prob].append (mn / base)
+
+    for lang in languages:
+      agg = 0
+      for prob in problems:
+        val = (r.mean (FloatVector (speedups[lang][prob])))[0]
+        valmin = min ([ (r.mean (FloatVector (speedups[l][prob])))[0] for l in languages])
+        agg = agg + float (val) / float (valmin)
+      agg = agg / len (problems)
+      print lang + '\t' + str (round (agg, 1))
 
 def get_results():
   results = {}
