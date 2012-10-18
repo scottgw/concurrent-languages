@@ -23,7 +23,7 @@ int is_bench = 0;
 static int *matrix;
 static int *mask;
 
-static int histogram[16][200];
+static int histogram[128][200];
 
 int reduce_max (int nrows, int ncols) {
   cilk::reducer_max <int> max_reducer (0);
