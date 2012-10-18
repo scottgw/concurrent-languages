@@ -2,7 +2,7 @@
 from problems import *
 from utils import *
 from config import *
-
+import sys
 import rpy2.robjects as robjects
 import rpy2.robjects.lib.ggplot2 as ggplot2
 #ggplot2.theme_set(ggplot2.theme_bw ())
@@ -37,12 +37,48 @@ def main():
 
   results = get_results()
 
+  mww_perf_tests (results)
   bargraph_language (cfg, results[threads[-1]])
   bargraph_variation(cfg, results[threads[-1]])
   bargraph_variation_diff (cfg, results[threads[-1]])
   speedup_lang_var (cfg, results, 'fastest') # p1, seq, fastest
   speedup_prob_var (cfg, results, 'fastest') # p1, seq, fastest
   mem_usage_graph (cfg)
+
+def mww_perf_tests (results):
+  r = robjects.r
+
+  res = {}
+  for var in variations:
+    for lang1 in languages:
+      def get_res (lang, prob):
+        return results [threads[-1]][prob][var][lang][0]
+      lang1_vals = FloatVector([mean (FloatVector(get_res (lang1, prob))) for prob in problems])
+      for lang2 in languages:
+        lang2_vals = FloatVector([mean (FloatVector(get_res (lang2, prob))) for prob in problems])
+
+        if lang1 not in res:
+          res[lang1] = {}
+        if lang2 not in res[lang1]:
+          res[lang1][lang2] = {}
+
+        pval = (r['wilcox.test'] (lang1_vals, lang2_vals, paired = True))[2][0]
+        if lang1 == lang2:
+          res[lang1][lang2] = 0
+        else:
+          res[lang1][lang2] = pval
+
+    # trivial data display
+    print var
+    print languages
+    for lang1 in languages:
+      for lang2 in languages:
+        if lang1 == lang2:
+          sys.stdout.write ("        ")
+        else:
+          sys.stdout.write (str (round(res[lang1][lang2], 4)) + "  ")
+      print lang1
+
 
 def get_results():
   results = {}
