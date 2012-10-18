@@ -31,8 +31,9 @@ feature
       
       create x_points.make (1, nelts)
       create y_points.make (1, nelts)
+
       read_vector_of_points(nelts, x_points, y_points)
-  
+        
       create result_vector.make_filled(0.0, 1, nelts)
       create result_matrix.make (nelts, nelts)
 
@@ -174,7 +175,7 @@ feature
 
         if height > 0 then
           create worker.make
-                     (start + 1
+                      (start + 1
                       , start + height
                       , a_nelts
                       , x_points

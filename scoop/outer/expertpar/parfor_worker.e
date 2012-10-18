@@ -1,53 +1,56 @@
 class
-  PARFOR_WORKER
+   PARFOR_WORKER
 
 create
-  make
+   make
 
 feature
-  make (start_, final_, nelts_: INTEGER;
-        x_points_: separate ARRAY[INTEGER];
-        y_points_: separate ARRAY[INTEGER];
-        result_vector_: separate ARRAY[DOUBLE];
-        result_matrix_: separate ARRAY2[DOUBLE])
-    do
-      start := start_
-      final := final_
-      nelts := nelts_
-      x_points := x_points_
-      y_points := y_points_
-      result_vector := result_vector_
-      result_matrix := result_matrix_
-    end
+   make (start_, final_, nelts_: INTEGER;
+         is_bench_: BOOLEAN;
+         x_points_: separate ARRAY[INTEGER];
+         y_points_: separate ARRAY[INTEGER];
+         result_vector_: separate ARRAY[DOUBLE];
+         result_matrix_: separate ARRAY2[DOUBLE])
+      do
+         is_bench := is_bench_
+
+         start := start_
+         final := final_
+         nelts := nelts_
+         x_points := x_points_
+         y_points := y_points_
+         result_vector := result_vector_
+         result_matrix := result_matrix_
+      end
 
 feature
-  
-  live
-    local
-      a: ARRAY [TUPLE [INTEGER, INTEGER]]
-    do
-      a := fetch_array (x_points, y_points)
-      get_result(a)
-    end
 
+   live
+      local
+         a: ARRAY [TUPLE [INTEGER, INTEGER]]
+      do
+         a := fetch_array (x_points, y_points)
+         get_result(a)
+      end
 
-  fetch_array (xs, ys: separate ARRAY[INTEGER]):
+   fetch_array (xs, ys: separate ARRAY[INTEGER]):
       ARRAY [TUPLE[INTEGER, INTEGER]]
-    local
-      i: INTEGER
-      x, y: INTEGER
-    do
-      create Result.make (1, nelts)
+      local
+         i: INTEGER
+         x, y: INTEGER
+      do
+         create Result.make (1, nelts)
 
-      from i := 1
-      until i > nelts
-      loop
-        -- SCOOP bug: this doesn't work if I don't store these into
-        -- local variables explicitly.
-        x := xs [i]
-        y := ys [i]
-        Result [i] := [x, y]
-        i := i + 1
+         from i := 1
+         until i > nelts
+         loop
+            -- SCOOP bug: this doesn't work if I don't store these into
+            -- local variables explicitly.
+            x := xs [i]
+            y := ys [i]
+            Result [i] := [x, y]
+            i := i + 1
+         end
       end
     end
 
