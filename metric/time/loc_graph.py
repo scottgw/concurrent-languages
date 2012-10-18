@@ -58,14 +58,27 @@ loc_file = "cloc.csv"
 cloc_cmd_line = 'cloc --csv --force-lang="C++",cilk --force-lang="C",chpl --by-file --skip-uniqueness --read-lang-def=eiffel_cloc_def.txt --quiet --out=' + loc_file + ' --exclude-dir=cpp,metric --exclude-lang=make,Python ../../'
 
 def main():
-  #subprocess.check_call (cloc_cmd_line, shell=True)
+  subprocess.check_call (cloc_cmd_line, shell=True)
   results = get_results ()
-  #bargraph_variation (results)
-  #bargraph_variation_norm (results)
-  #bargraph_variation_diff (results)
-  #bargraph_language (results)
+  bargraph_variation (results)
+  bargraph_variation_norm (results)
+  bargraph_variation_diff (results)
+  bargraph_language (results)
   stat_test (results)
+  simple_rank (results)
 
+def simple_rank (results):
+  for var in variations:
+    print var
+    for lang in languages:
+      agg = 0
+      for prob in problems:
+        val = results [(lang, prob, var)]
+        valmin = min ([ results[key] for key in [ (l, prob, var) for l in languages ] ])
+        agg = agg + float (val) / float (valmin)
+      agg = agg / len (problems)
+      print lang + '\t' + str (round (agg, 1))
+    
 def stat_test (results):
   r = robjects.r
 
