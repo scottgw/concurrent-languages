@@ -35,7 +35,8 @@ pretty_langs = {"chapel"   : "Chapel",
                 "tbb"      : "TBB"
                 }
 
-languages = ["chapel", "cilk", "erlang", "go", "scoop", "tbb"]
+#languages = ["chapel", "cilk", "erlang", "go", "scoop", "tbb"]
+languages = ["chapel", "cilk", "go", "tbb"]
 problems = ["randmat", "thresh", "winnow", "outer", "product", "chain"]
 variations = ["seq","par","expertseq","expertpar"]
 
@@ -45,6 +46,7 @@ end_actions = set(["done", "pause"])
 start_times = {}
 total_times = {}
 
+
 def main():
   #create_directories()
   read_table()
@@ -52,9 +54,63 @@ def main():
   #output_tables()
   #calculate()
   #test_significance()
-  bargraph_variation()
-  bargraph_variation_diff()
-  bargraph_language()
+  #bargraph_variation()
+  #bargraph_variation_diff()
+  #bargraph_language()
+  stat_test()
+
+def stat_test ():
+  r = robjects.r
+
+  res = {}
+
+  for lang in languages:
+    for prob in problems:
+      for var in variations:
+        try:
+          val = result[lang][prob][var]
+        except KeyError:
+          print (lang, prob, var)
+          result[lang][prob][var] = 0.0
+
+  for var in variations:
+    for lang1 in languages:
+      if var.startswith('expert'):
+        lang1_vals = FloatVector ([ result[lang1][prob][var] + result[lang1][prob][var.replace('expert', '')] for prob in problems ] )
+      else:
+        lang1_vals = FloatVector ([ result[lang1][prob][var] for prob in problems ] )
+      for lang2 in languages:
+        if var.startswith('expert'):
+          lang2_vals = FloatVector ([ result[lang2][prob][var] + result[lang2][prob][var.replace('expert', '')] for prob in problems ] )
+        else:
+          lang2_vals = FloatVector ([ result[lang2][prob][var] for prob in problems ] )
+        #print lang1
+        #print lang1_vals
+        #print lang2
+        #print lang2_vals
+
+        if lang1 not in res:
+          res[lang1] = {}
+        if lang2 not in res[lang1]:
+          res[lang1][lang2] = {}
+
+        pval = (r['wilcox.test'] (lang1_vals, lang2_vals, paired = True))[2][0]
+        print pval
+        if lang1 == lang2:
+          res[lang1][lang2] = 0
+        else:
+          res[lang1][lang2] = pval
+
+    # trivial data display
+    print var
+    print languages
+    for lang1 in languages:
+      for lang2 in languages:
+        if lang1 == lang2:
+          sys.stdout.write ("        ")
+        else:
+          sys.stdout.write (str (round(res[lang1][lang2], 4)) + "  ")
+      print lang1
 
 def read_table():
   with open('tdist.txt', 'r') as f:
