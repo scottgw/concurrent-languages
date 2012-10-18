@@ -54,10 +54,36 @@ def main():
   #output_tables()
   #calculate()
   #test_significance()
-  #bargraph_variation()
-  #bargraph_variation_diff()
-  #bargraph_language()
+  bargraph_variation()
+  bargraph_variation_diff()
+  bargraph_language()
   stat_test()
+  simple_rank ()
+
+def simple_rank ():
+  for lang in languages:
+    for prob in problems:
+      for var in variations:
+        try:
+          val = result[lang][prob][var]
+        except KeyError:
+          print (lang, prob, var)
+          result[lang][prob][var] = 0.0
+
+  for var in variations:
+    print var
+    for lang in languages:
+      agg = 0
+      for prob in problems:
+        if var.startswith('expert'):
+          val = result[lang][prob][var] + result[lang][prob][var.replace('expert', '')]
+          valmin = min ([ result[l][prob][var] + result[l][prob][var.replace('expert', '')] for l in languages ])          
+        else:
+          val = result[lang][prob][var]
+          valmin = min ([ result[l][prob][var] for l in languages ])
+        agg = agg + float (val) / float (valmin)
+      agg = agg / len (problems)
+      print lang + '\t' + str (round (agg, 1))
 
 def stat_test ():
   r = robjects.r
