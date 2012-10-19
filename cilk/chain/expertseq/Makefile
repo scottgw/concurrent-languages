@@ -4,6 +4,6 @@ all: main
 	./main --nproc 4 < main.in
 	./main --is_bench < main.in
 
-# flags: --cilk-profile, --cilk-span
-main: main.cilk randmat.cilk thresh.cilk winnow.cilk outer.cilk product.cilk
-	cilkc ${CFLAGS} -O2 -o main $^
+# flags: --cpp-profile, --cpp-span
+main: main.cpp randmat.cpp thresh.cpp winnow.cpp outer.cpp product.cpp
+	icpc ${CFLAGS} -O2 -o main $^

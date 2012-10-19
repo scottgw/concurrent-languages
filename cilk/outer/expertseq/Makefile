@@ -4,5 +4,5 @@ all: main
 	./main < main.in
 	./main --is_bench < main.in
 
-main: main.cilk
-	cilkc ${CFLAGS} -O2 -o main main.cilk
+main: main.cpp
+	icpc ${CFLAGS} -O2 -o main main.cpp

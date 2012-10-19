@@ -6,5 +6,5 @@ all: main
 	echo "2 5 9" | ./main
 	echo "2 5 9" | ./main --is_bench
 
-main: main.cilk
-	cilkc ${CFLAGS} -O2 -o main main.cilk
+main: main.cpp
+	icpc ${CFLAGS} -O2 -o main main.cpp
