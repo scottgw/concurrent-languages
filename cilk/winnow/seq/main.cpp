@@ -12,7 +12,7 @@
  *   points: a vector of (x, y) points
  */
 
-#include <cilk-lib.cilkh>
+#include <cilk/cilk.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -30,7 +30,7 @@ static Point *points;
 static Point *values;
 
 int compare(const void* vl, const void* vr) {
-  const Point* l = vl, *r = vr;
+  const Point* l = (Point*) vl, *r = (Point*) vr;
   return (l->value - r->value);
 }
 
