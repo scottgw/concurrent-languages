@@ -19,8 +19,11 @@ def ggplot2_options ():
                           'axis.text.y' : ggplot2.theme_text(family = 'serif', size = 15),
                           'legend.title' : ggplot2.theme_text(family = 'serif', face = 'bold', size = 15),
                           'legend.text' : ggplot2.theme_text(family = 'serif', size = 15),
+                          'aspect.ratio' : 0.6180339888,
     })
 
+def pdf_height (): return 3.7
+def pdf_width (): return 7
   
 bargraph_dir = os.path.abspath(".")
 pretty_varis = {"seq"      : "Sequential",
@@ -66,6 +69,21 @@ def main():
   bargraph_language (results)
   stat_test (results)
   simple_rank (results)
+  print_results (results)
+
+def print_results (results):
+  for lang in languages:
+    print lang
+    for prob in ["chain", "outer", "product", "randmat", "thresh", "winnow",]:
+      for var in ["seq", "expertseq", "par", "expertpar"]:
+        sys.stdout.write (str (results[(lang, prob, var)]) + " & ")
+    for var in ["seq", "expertseq", "par", "expertpar"]:
+      sum = 0
+      for prob in ["chain", "outer", "product", "randmat", "thresh", "winnow",]:
+        sum = sum + results[(lang, prob, var)]
+      sys.stdout.write (str (sum) + " & ")
+    print "\n"
+
 
 def simple_rank (results):
   for var in variations:
@@ -147,12 +165,12 @@ def bargraph_variation (results):
         langs.append (pretty_langs [lang])
         probs.append (prob)
         locs.append (loc)
-    r.pdf ('bargraph-loc-var-' + variation + '.pdf')
+    r.pdf ('bargraph-loc-var-' + variation + '.pdf', height=pdf_height (), width=pdf_width ())
     df = robjects.DataFrame({'Language': StrVector (langs),
                              'Problem': StrVector (probs),
                              'Lines' : IntVector (locs),
       })
-    
+
     #print (df)
     gp = ggplot2.ggplot (df)
   
@@ -181,7 +199,7 @@ def bargraph_variation_norm (results):
         probs.append (prob)
         locs.append (loc_norm)
 
-    r.pdf ('bargraph-loc-var-norm-' + variation + '.pdf')
+    r.pdf ('bargraph-loc-var-norm-' + variation + '.pdf', height=pdf_height (), width=pdf_width ())
     df = robjects.DataFrame({'Language': StrVector (langs),
                              'Problem': StrVector (probs),
                              'Lines' : FloatVector (locs),
@@ -215,7 +233,7 @@ def bargraph_variation_diff (results):
         probs.append (prob)
         diffs.append (diff)
 
-    r.pdf ('bargraph-loc-diff-' + standard + '.pdf')
+    r.pdf ('bargraph-loc-diff-' + standard + '.pdf', height=pdf_height (), width=pdf_width ())
     df = robjects.DataFrame({'Language': StrVector (langs),
                              'Problem': StrVector (probs),
                              'Difference' : IntVector (diffs),
@@ -245,7 +263,7 @@ def bargraph_language (results):
         varis.append (pretty_varis [var])
         probs.append (prob)
         locs.append (loc)
-    r.pdf ('bargraph-loc-lang-' + language + '.pdf')
+    r.pdf ('bargraph-loc-lang-' + language + '.pdf', height=pdf_height (), width=pdf_width ())
     df = robjects.DataFrame({'Variation': StrVector (varis),
                              'Problem': StrVector (probs),
                              'Lines' : IntVector (locs),

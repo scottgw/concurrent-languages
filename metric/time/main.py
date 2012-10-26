@@ -20,7 +20,11 @@ def ggplot2_options ():
                           'axis.text.y' : ggplot2.theme_text(family = 'serif', size = 15),
                           'legend.title' : ggplot2.theme_text(family = 'serif', face = 'bold', size = 15),
                           'legend.text' : ggplot2.theme_text(family = 'serif', size = 15),
+                          'aspect.ratio' : 0.6180339888,
     })
+
+def pdf_height (): return 3.7
+def pdf_width (): return 7
 
 pretty_varis = {"seq"      : "Sequential",
                 "par"      : "Parallel",
@@ -59,6 +63,37 @@ def main():
   bargraph_language()
   stat_test()
   simple_rank ()
+  print_results ()
+
+def print_results ():
+  for lang in languages:
+    for prob in problems:
+      for var in variations:
+        try:
+          val = result[lang][prob][var]
+        except KeyError:
+          print (lang, prob, var)
+          result[lang][prob][var] = 0.0
+          
+  for lang in languages:
+    sys.stdout.write ("& " + pretty_langs [lang])
+    for prob in ["chain", "outer", "product", "randmat", "thresh", "winnow",]:
+      for var in ["seq", "expertseq", "par", "expertpar"]:
+        if var.startswith('expert'):
+          val = result[lang][prob][var] + result[lang][prob][var.replace('expert', '')]
+        else:
+          val = result[lang][prob][var]
+        sys.stdout.write (" & " + str (int(round(val, 0))))
+    for var in ["seq", "expertseq", "par", "expertpar"]:
+      sum = 0
+      for prob in ["chain", "outer", "product", "randmat", "thresh", "winnow",]:
+        if var.startswith('expert'):
+          val = result[lang][prob][var] + result[lang][prob][var.replace('expert', '')]
+        else:
+          val = result[lang][prob][var]
+        sum = sum + val
+      sys.stdout.write (" & " + str (int(round(sum))))
+    sys.stdout.write (" \\\\\n")
 
 def simple_rank ():
   for lang in languages:
@@ -284,7 +319,7 @@ def bargraph_variation ():
       nvalues.extend ([(lambda x: x/lmin)(la) for la in lvalues])
 
     # plot histogram of actual times
-    r.pdf ('bargraph-codingtime-var-' + var + '.pdf')
+    r.pdf ('bargraph-codingtime-var-' + var + '.pdf', height=pdf_height (), width=pdf_width ())
 
     df = robjects.DataFrame({'Language': StrVector (langs),
                              'Problem': StrVector (probs),
@@ -303,7 +338,7 @@ def bargraph_variation ():
     pp.plot ()
 
     # plot histogram of times normalized with respect to fastest time for a problem
-    r.pdf ('bargraph-codingtime-var-norm-' + var + '.pdf')
+    r.pdf ('bargraph-codingtime-var-norm-' + var + '.pdf', height=pdf_height (), width=pdf_width ())
 
     df = robjects.DataFrame({'Language': StrVector (langs),
                              'Problem': StrVector (probs),
@@ -350,7 +385,7 @@ def bargraph_variation_diff ():
         probs.append (prob)
         diffs.append (diff)
 
-    r.pdf ('bargraph-codingtime-diff-' + standard + '.pdf')
+    r.pdf ('bargraph-codingtime-diff-' + standard + '.pdf', height=pdf_height (), width=pdf_width ())
     df = robjects.DataFrame({'Language': StrVector (langs),
                              'Problem': StrVector (probs),
                              'Difference' : IntVector (diffs),
@@ -391,7 +426,7 @@ def bargraph_language ():
         varis.append (pretty_varis [var])
         probs.append (prob)
         times.append (time)
-    r.pdf ('bargraph-codingtime-lang-' + language + '.pdf')
+    r.pdf ('bargraph-codingtime-lang-' + language + '.pdf', height=pdf_height (), width=pdf_width ())
     df = robjects.DataFrame({'Variation': StrVector (varis),
                              'Problem': StrVector (probs),
                              'Time' : IntVector (times),

@@ -16,7 +16,11 @@ def ggplot2_options ():
                           'axis.text.y' : ggplot2.theme_text(family = 'serif', size = 15),
                           'legend.title' : ggplot2.theme_text(family = 'serif', face = 'bold', size = 15),
                           'legend.text' : ggplot2.theme_text(family = 'serif', size = 15),
+                          'aspect.ratio' : 0.6180339888,
     })
+
+def pdf_height (): return 3.7
+def pdf_width (): return 7
 
 bargraph_dir = os.path.abspath("../time/graph")
 pretty_varis = {"seq"      : "Sequential",
@@ -39,15 +43,77 @@ def main():
   
   results = get_results()
 
-  mww_perf_tests (results)
-  bargraph_language (cfg, results[threads[-1]])
-  bargraph_variation(cfg, results[threads[-1]])
-  bargraph_variation_diff (cfg, results[threads[-1]])
-  speedup_lang_var (cfg, results, basis)
-  speedup_prob_var (cfg, results, basis)
-  mem_usage_graph (cfg)
-  simple_rank (cfg, results[threads[-1]])
-  simple_rank_speedup (cfg, results, basis)
+  #mww_perf_tests (results)
+  #bargraph_language (cfg, results[threads[-1]])
+  #bargraph_variation(cfg, results[threads[-1]])
+  #bargraph_variation_diff (cfg, results[threads[-1]])
+  #speedup_lang_var (cfg, results, basis)
+  #speedup_prob_var (cfg, results, basis)
+  #mem_usage_graph (cfg)
+  #simple_rank (cfg, results[threads[-1]])
+  #simple_rank_speedup (cfg, results, basis)
+  #print_results (results[threads[-1]])
+  print_results_speedup (results, basis)
+
+def print_results (values):
+  for lang in languages:
+    sys.stdout.write ("& " + pretty_langs [lang])
+    for prob in ["chain", "outer", "product", "randmat", "thresh", "winnow",]:
+      for var in ["seq", "expertseq", "par", "expertpar"]:
+        data = FloatVector (values[prob][var][lang][0])
+        val = robjects.r['mean'] (data)[0]
+        sys.stdout.write (" & " + str (round(val, 1)))
+    for var in ["seq", "expertseq", "par", "expertpar"]:
+      sum = 0
+      for prob in ["chain", "outer", "product", "randmat", "thresh", "winnow",]:
+        data = FloatVector (values[prob][var][lang][0])
+        val = robjects.r['mean'] (data)[0]
+        sum = sum + val
+      sys.stdout.write (" & " + str (round(sum, 1)))
+    sys.stdout.write (" \\\\\n")
+
+def print_results_speedup (values, basis):
+  r = robjects.r
+  speedups = {}
+  for var in ['par', 'expertpar']:
+    speedups[var] = {}
+    for lang in languages:
+      speedups[var][lang] = {}
+      for prob in problems:
+        speedups[var][lang][prob] = []
+        base = r.mean (FloatVector (values [cfg.threads[-1]][prob][var.replace ('par','seq')][lang][0]))[0]
+        # base with p = 1
+        base_p1 = r.mean (FloatVector (values [1][prob][var][lang][0]))[0]
+        # use fastest sequential program
+        if basis == 'fastest' and base_p1 < base:
+          base = base_p1
+        elif basis == 'seq':
+          pass
+        elif basis == 'p1':
+          base = base_p1
+        
+        mn = (r.mean (FloatVector (values[32][prob][var][lang][0])))[0]
+        speedups[var][lang][prob].append (float (base) / float (mn))
+        
+  for lang in languages:
+    sys.stdout.write ("& " + pretty_langs [lang])
+    for prob in ["chain", "outer", "product", "randmat", "thresh", "winnow",]:
+      for var in ["seq", "expertseq", "par", "expertpar"]:
+        try:
+          val = speedups[var][lang][prob][0]
+          sys.stdout.write (" & " + str (round(float(val), 1)))
+        except KeyError:
+          sys.stdout.write (" & " + "-")
+    for var in ["seq", "expertseq", "par", "expertpar"]:
+      sum = 0
+      if var in ["par", "expertpar"]:
+        for prob in ["chain", "outer", "product", "randmat", "thresh", "winnow",]:
+          val = speedups[var][lang][prob][0]
+          sum = sum + val
+        sys.stdout.write (" & " + str (round(float(sum)/6, 1)))
+      else:
+        sys.stdout.write (" & " + "-")
+    sys.stdout.write (" \\\\\n")
 
 def simple_rank (cfg, values):
   print "\nexecution time rank"
@@ -88,7 +154,7 @@ def simple_rank_speedup (cfg, values, basis):
         for n in cfg.threads:
           mn = (r.mean (FloatVector (values[n][prob][var][lang][0])))[0]
           # slowdowns
-          speedups[lang][prob].append (mn / base)
+          speedups[lang][prob].append (float(mn) / float(base))
 
     for lang in languages:
       agg = 0
@@ -174,7 +240,7 @@ def mem_usage_graph (cfg):
         probs.append (prob)
 
   # memory usage is a simple histogram with all information in one graph.
-  r.pdf ('bargraph-memusage.pdf')
+  r.pdf ('bargraph-memusage.pdf', height=pdf_height (), width=pdf_width ())
   df = robjects.DataFrame({'Language': StrVector (langs),
                            'Problem': StrVector (probs),
                            'Variation' : StrVector (varis),
@@ -231,7 +297,7 @@ def bargraph_language (cfg, values):
         t_result = r['t.test'] (data, **{"conf.level": 0.975}).rx ('conf.int')[0]
         ses.append ((t_result[1] - t_result[0])/2)
 
-    r.pdf ('bargraph-executiontime-lang-' + lang + '.pdf')
+    r.pdf ('bargraph-executiontime-lang-' + lang + '.pdf', height=pdf_height (), width=pdf_width ())
     df = robjects.DataFrame({'Variation': StrVector (varss),
                              'Problem': StrVector (probs),
                              'Time' : FloatVector (times),
@@ -301,7 +367,7 @@ def bargraph_variation (cfg, values):
                              })
 
     # plot histogram of actual times
-    r.pdf ('bargraph-executiontime-var-' + var + '.pdf')
+    r.pdf ('bargraph-executiontime-var-' + var + '.pdf', height=pdf_height (), width=pdf_width ())
 
 
     limits = ggplot2.aes (ymax = 'Time + SE', ymin = 'Time - SE')
@@ -318,7 +384,7 @@ def bargraph_variation (cfg, values):
     pp.plot ()
 
     # plot histogram of times normalized with respect to fastest time for a problem
-    r.pdf ('bargraph-executiontime-var-norm-' + var + '.pdf')
+    r.pdf ('bargraph-executiontime-var-norm-' + var + '.pdf', height=pdf_height (), width=pdf_width ())
 
     limits = ggplot2.aes (ymax = 'NormTime + NormSE', ymin = 'NormTime - NormSE')
     dodge = ggplot2.position_dodge (width=0.9)
@@ -358,7 +424,7 @@ def bargraph_variation_diff (cfg, values):
         probs.append (prob)
         diffs.append (diff)
 
-    r.pdf ('bargraph-executiontime-diff-' + standard + '.pdf')
+    r.pdf ('bargraph-executiontime-diff-' + standard + '.pdf', height=pdf_height (), width=pdf_width ())
     df = robjects.DataFrame({'Language': StrVector (langs),
                              'Problem': StrVector (probs),
                              'Difference' : IntVector (diffs),
@@ -411,7 +477,7 @@ def speedup_lang_var (cfg, values, basis):
 def line_plot (cfg, var, control, change_name, changing, selector, base_selector, basis):
   r = robjects.r
 
-  r.pdf ('speedup-' + var + '-' + control + '.pdf')
+  r.pdf ('speedup-' + var + '-' + control + '.pdf', height=pdf_height (), width=pdf_width ())
 
   speedups = []
   thrds = []
