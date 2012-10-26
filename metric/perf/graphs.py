@@ -5,7 +5,7 @@ from config import *
 import sys
 import rpy2.robjects as robjects
 import rpy2.robjects.lib.ggplot2 as ggplot2
-#ggplot2.theme_set(ggplot2.theme_bw ())
+ggplot2.theme_set(ggplot2.theme_bw ())
 from rpy2.robjects.packages import importr
 from rpy2.robjects import FloatVector, StrVector, IntVector, DataFrame
 
@@ -18,6 +18,9 @@ def ggplot2_options ():
                           'legend.text' : ggplot2.theme_text(family = 'serif', size = 15),
                           'aspect.ratio' : 0.6180339888,
     })
+
+def ggplot2_colors ():
+  return ggplot2.scale_fill_brewer(palette="Spectral")
 
 def pdf_height (): return 3.7
 def pdf_width (): return 7
@@ -43,16 +46,16 @@ def main():
   
   results = get_results()
 
-  #mww_perf_tests (results)
-  #bargraph_language (cfg, results[threads[-1]])
-  #bargraph_variation(cfg, results[threads[-1]])
-  #bargraph_variation_diff (cfg, results[threads[-1]])
+  mww_perf_tests (results)
+  bargraph_language (cfg, results[threads[-1]])
+  bargraph_variation(cfg, results[threads[-1]])
+  bargraph_variation_diff (cfg, results[threads[-1]])
   #speedup_lang_var (cfg, results, basis)
-  #speedup_prob_var (cfg, results, basis)
-  #mem_usage_graph (cfg)
-  #simple_rank (cfg, results[threads[-1]])
-  #simple_rank_speedup (cfg, results, basis)
-  #print_results (results[threads[-1]])
+  speedup_prob_var (cfg, results, basis)
+  mem_usage_graph (cfg)
+  simple_rank (cfg, results[threads[-1]])
+  simple_rank_speedup (cfg, results, basis)
+  print_results (results[threads[-1]])
   print_results_speedup (results, basis)
 
 def print_results (values):
@@ -256,6 +259,7 @@ def mem_usage_graph (cfg):
       ggplot2.geom_bar (position='dodge', stat='identity') + \
       ggplot2.facet_wrap ('Variation') + \
       ggplot2_options () + \
+      ggplot2_colors () + \
       robjects.r('ylab("Memory usage (in bytes)")')# + \
 
   pp.plot ()
@@ -314,6 +318,7 @@ def bargraph_language (cfg, values):
         ggplot2.geom_bar (position='dodge', stat='identity') + \
         ggplot2.geom_errorbar (limits, position=dodge, width=0.25) + \
         ggplot2_options () + \
+        ggplot2_colors () + \
         robjects.r('ylab("Execution time (in seconds)")') 
     pp.plot ()
     r['dev.off']()
@@ -379,6 +384,7 @@ def bargraph_variation (cfg, values):
         ggplot2.geom_bar (position='dodge', stat='identity') + \
         ggplot2.geom_errorbar (limits, position=dodge, width=0.25) + \
         ggplot2_options () + \
+        ggplot2_colors () + \
         robjects.r('ylab("Execution time (in seconds)")')
  
     pp.plot ()
@@ -395,6 +401,7 @@ def bargraph_variation (cfg, values):
         ggplot2.geom_bar (position='dodge', stat='identity') + \
         ggplot2.geom_errorbar (limits, position=dodge, width=0.25) +\
         ggplot2_options () + \
+        ggplot2_colors () + \
         robjects.r('ylab("Execution time (normalized to fastest)")')
         #ggplot2.geom_text(data=df,
         #                  mapping = ggplot2.aes_string (x='Problem', 
@@ -437,6 +444,7 @@ def bargraph_variation_diff (cfg, values):
         ggplot2.aes_string (x='Problem', y='Difference', fill='Language') + \
         ggplot2.geom_bar (position='dodge', stat='identity') + \
         ggplot2_options () + \
+        ggplot2_colors () + \
         robjects.r('ylab("Execution time difference (in percent)")')
     pp.plot ()
     r['dev.off']()
@@ -530,7 +538,10 @@ def line_plot (cfg, var, control, change_name, changing, selector, base_selector
       # plot slowdowns
       #speedups.append (-mn/base)#(base / mn)
       thrds.append (n)
-      changes.append (c)
+      if change_name == 'Language':
+        changes.append (pretty_langs [c])
+      else:
+        changes.append (c)
 
   df = DataFrame ({'Speedup': FloatVector (speedups),
                    'Threads': IntVector (thrds),
@@ -539,7 +550,10 @@ def line_plot (cfg, var, control, change_name, changing, selector, base_selector
                    'Upper': FloatVector (uppers)
                    })
   ideal_changing = ['ideal']
-  ideal_changing.extend (changing)
+  if change_name == 'Language':
+    ideal_changing.extend ([pretty_langs [c] for c in changing])
+  else:
+    ideal_changing.extend (c)
   legendVec = IntVector (range (len (ideal_changing)))
   legendVec.names = StrVector (ideal_changing)
 
@@ -556,6 +570,7 @@ def line_plot (cfg, var, control, change_name, changing, selector, base_selector
       ggplot2.scale_shape_manual(values=legendVec) + \
       ggplot2.geom_errorbar (limits, width=0.25) + \
       ggplot2_options () + \
+      ggplot2_colors () + \
       ggplot2.opts (**{'axis.title.x' : ggplot2.theme_text(family = 'serif', face = 'bold', size = 15, vjust=-0.2)}) + \
       robjects.r('ylab("Speedup")') + \
       robjects.r('xlab("Cores")')

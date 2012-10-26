@@ -9,6 +9,8 @@ import subprocess
 
 import rpy2.robjects as robjects
 import rpy2.robjects.lib.ggplot2 as ggplot2
+ggplot2.theme_set(ggplot2.theme_bw ())
+
 from rpy2.robjects.packages import importr
 from rpy2.robjects import FloatVector, StrVector, IntVector, DataFrame
 
@@ -21,6 +23,9 @@ def ggplot2_options ():
                           'legend.text' : ggplot2.theme_text(family = 'serif', size = 15),
                           'aspect.ratio' : 0.6180339888,
     })
+
+def ggplot2_colors ():
+  return ggplot2.scale_fill_brewer(palette="Spectral")
 
 def pdf_height (): return 3.7
 def pdf_width (): return 7
@@ -178,6 +183,7 @@ def bargraph_variation (results):
         ggplot2.aes_string (x='Problem', y='Lines', fill='Language') + \
         ggplot2.geom_bar (position='dodge', stat='identity') + \
         ggplot2_options () + \
+        ggplot2_colors () + \
         robjects.r('ylab("Lines of Code")')
     pp.plot ()
     r['dev.off']()
@@ -212,6 +218,7 @@ def bargraph_variation_norm (results):
         ggplot2.aes_string (x='Problem', y='Lines', fill='Language') + \
         ggplot2.geom_bar (position='dodge', stat='identity') + \
         ggplot2_options () + \
+        ggplot2_colors () + \
         robjects.r('ylab("Lines of Code (normalized to smallest)")')
     pp.plot ()
     r['dev.off']()
@@ -246,6 +253,7 @@ def bargraph_variation_diff (results):
         ggplot2.aes_string (x='Problem', y='Difference', fill='Language') + \
         ggplot2.geom_bar (position='dodge', stat='identity') + \
         ggplot2_options () + \
+        ggplot2_colors () + \
         robjects.r('ylab("Lines of code difference (in percent)")')
     pp.plot ()
     r['dev.off']()
@@ -276,6 +284,7 @@ def bargraph_language (results):
         ggplot2.aes_string (x='Problem', y='Lines', fill='Variation') + \
         ggplot2.geom_bar (position='dodge', stat='identity') + \
         ggplot2_options () + \
+        ggplot2_colors () + \
         robjects.r('ylab("Lines of Code")')
     pp.plot ()
     r['dev.off']()
