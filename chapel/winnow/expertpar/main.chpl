@@ -14,7 +14,7 @@
 config const is_bench = false;
 config const nrows = read(int),
              ncols = read(int);
-const MatrixSpace = [1..nrows, 1..ncols];
+const MatrixSpace = {1..nrows, 1..ncols};
 
 var matrix: [MatrixSpace] int;
 var mask: [MatrixSpace] bool;
@@ -26,7 +26,7 @@ var count_per_line: [1..nrows+1] int;
 proc winnow(nelts: int) {
   var n: int = 0;
   var points: [1..nelts] (int, int);
-  const ColSpace = [1..ncols];
+  const ColSpace = {1..ncols};
 
   forall i in 1..nrows {
     count_per_line[i + 1] = 0;
@@ -58,7 +58,7 @@ proc winnow(nelts: int) {
   forall i in 1..nelts do {
     var ind: int;
     ind = (i - 1) * chunk + 1;
-    (, points[i]) = values[ind];
+    (_, points[i]) = values[ind];
   }
 
   return points;

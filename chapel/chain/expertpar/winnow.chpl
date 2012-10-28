@@ -18,8 +18,8 @@ proc winnow(nrows: int, ncols: int, nelts: int) {
   var n: int = 0;
   var count_per_line: [1..nrows+1] int;
   var values: [0..nrows*ncols] (int, (int, int)); // (value, i, j))
-  const RowSpace = [1..nrows];
-  const ColSpace = [1..ncols];
+  const RowSpace = {1..nrows};
+  const ColSpace = {1..ncols};
 
   forall i in RowSpace {
     count_per_line[i + 1] = 0;
@@ -48,7 +48,7 @@ proc winnow(nrows: int, ncols: int, nelts: int) {
   forall i in 1..nelts do {
     var ind: int;
     ind = (i - 1) * chunk + 1;
-    (, points[i]) = values[ind];
+    (_, points[i]) = values[ind];
   }
 }
 }

@@ -15,7 +15,7 @@ use Config;
 
 proc product(nelts: int)
 {
-  for (i, j) in [1..nelts, 1..nelts] {
+  for (i, j) in {1..nelts, 1..nelts} {
     result [i] += dists[i, j] * vector[j];
   }
 }

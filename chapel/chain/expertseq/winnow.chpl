@@ -19,8 +19,8 @@ use Config;
 proc winnow(nrows: int, ncols: int, nelts: int) {
   var count = 0;
   var values: [0..nrows*ncols] (int, (int, int));
-  const RowSpace = [1..nrows];
-  const ColSpace = [1..ncols];
+  const RowSpace = {1..nrows};
+  const ColSpace = {1..ncols};
 
   for i in RowSpace {
     for j in ColSpace {
@@ -38,7 +38,7 @@ proc winnow(nrows: int, ncols: int, nelts: int) {
   forall i in 1..nelts do {
     var ind: int;
     ind = (i - 1) * chunk + 1;
-    (, points[i]) = values[ind];
+    (_, points[i]) = values[ind];
   }
 }
 }

@@ -15,8 +15,8 @@ use Config;
 proc randmat(nrows: int, ncols: int, s: int){
   const LCG_A: uint(32) = 1664525;
   const LCG_C: uint(32) = 1013904223;
-  const RowSpace = [1..nrows];
-  const ColSpace = [1..ncols];
+  const RowSpace = {1..nrows};
+  const ColSpace = {1..ncols};
   forall i in RowSpace {
     var seed: uint(32);
     seed = (s + i - 1): uint(32);

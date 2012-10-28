@@ -13,8 +13,8 @@ config const is_bench = false;
 config const nrows = read(int),
              ncols = read(int);
 
-const ProbSpace = [1..nrows, 1..ncols],
-      HistSpace = [0..100];
+const ProbSpace = {1..nrows, 1..ncols},
+      HistSpace = {0..100};
 var matrix: [ProbSpace] int; 
 var mask: [ProbSpace] int;
 var histogram: [HistSpace] int;

@@ -15,8 +15,8 @@ config const nrows = read(uint (32)),
              ncols = read(uint (32)),
              s     = read(uint (32));
 
-const RowSpace = [1..nrows];
-const ColSpace = [1..ncols];
+const RowSpace = {1..nrows};
+const ColSpace = {1..ncols};
 var matrix: [1..nrows, 1..ncols] int (32);
 
 

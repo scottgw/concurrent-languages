@@ -30,7 +30,7 @@ proc distance(l, r: (int, int)): real {
 
 proc outer(nelts: int)
 {
-  const NeltSpace = [1..nelts];
+  const NeltSpace = {1..nelts};
 
   forall i in NeltSpace {
     var nmax: real = 0;
