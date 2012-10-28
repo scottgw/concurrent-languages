@@ -132,7 +132,7 @@ def stat_test (results):
         if lang1 == lang2:
           sys.stdout.write ("        ")
         else:
-          sys.stdout.write (str (round(res[lang1][lang2], 4)) + "  ")
+          sys.stdout.write (str (round(res[lang1][lang2], 3)) + "  ")
       print lang1
   
 def get_results ():

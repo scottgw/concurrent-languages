@@ -154,10 +154,8 @@ def simple_rank_speedup (cfg, values, basis):
         elif basis == 'p1':
           base = base_p1
         
-        for n in cfg.threads:
-          mn = (r.mean (FloatVector (values[n][prob][var][lang][0])))[0]
-          # slowdowns
-          speedups[lang][prob].append (float(mn) / float(base))
+        mn = (r.mean (FloatVector (values[32][prob][var][lang][0])))[0]
+        speedups[lang][prob].append (float(mn) / float(base))
 
     for lang in languages:
       agg = 0
@@ -167,6 +165,36 @@ def simple_rank_speedup (cfg, values, basis):
         agg = agg + float (val) / float (valmin)
       agg = agg / len (problems)
       print lang + '\t' + str (round (agg, 1))
+      
+    res = {}
+    for lang1 in languages:
+      def get_res (lang, prob):
+        return speedups[lang][prob]
+      lang1_vals = FloatVector([mean (FloatVector(get_res (lang1, prob))) for prob in problems])
+      for lang2 in languages:
+        lang2_vals = FloatVector([mean (FloatVector(get_res (lang2, prob))) for prob in problems])
+
+        if lang1 not in res:
+          res[lang1] = {}
+        if lang2 not in res[lang1]:
+          res[lang1][lang2] = {}
+
+        pval = (r['wilcox.test'] (lang1_vals, lang2_vals, paired = True))[2][0]
+        if lang1 == lang2:
+          res[lang1][lang2] = 0
+        else:
+          res[lang1][lang2] = pval
+          
+    print var
+    print languages
+    for lang1 in languages:
+      for lang2 in languages:
+        if lang1 == lang2:
+          sys.stdout.write ("        ")
+        else:
+          sys.stdout.write (str (round(res[lang1][lang2], 3)) + "  ")
+      print lang1
+
 
 def mww_perf_tests (results):
   r = robjects.r
@@ -199,9 +227,8 @@ def mww_perf_tests (results):
         if lang1 == lang2:
           sys.stdout.write ("        ")
         else:
-          sys.stdout.write (str (round(res[lang1][lang2], 4)) + "  ")
+          sys.stdout.write (str (round(res[lang1][lang2], 3)) + "  ")
       print lang1
-
 
 def get_results():
   results = {}
@@ -563,7 +590,7 @@ def line_plot (cfg, var, control, change_name, changing, selector, base_selector
   dodge = ggplot2.position_dodge (width=0.9)
 
   pp = gg + \
-      ggplot2.geom_line() + ggplot2.geom_point() +\
+      ggplot2.geom_line() + ggplot2.geom_point(size=3) +\
       ggplot2.aes_string(x='Threads', y='Speedup', 
                          group=change_name, color=change_name, 
                          shape=change_name) +\
