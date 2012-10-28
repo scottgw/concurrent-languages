@@ -315,8 +315,6 @@ Thu May 31 09:39:10 2012 -0300 chapel-winnow-par done
 Thu May 31 09:46:18 2012 -0300 metric-perf fix tests
 Thu May 31 09:47:05 2012 -0300 chapel-outer-par restart
 Thu May 31 10:22:06 2012 -0300 chapel-outer-par done
-Thu May 31 10:26:08 2012 -0300 chapel-product-par restart
-Thu May 31 13:01:45 2012 -0300 chapel-product-par done
 Thu May 31 13:03:01 2012 -0300 chapel-chain restart
 Thu May 31 13:46:21 2012 -0300 chapel-chain done
 Thu May 31 16:57:43 2012 -0300 testing all
