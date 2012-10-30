@@ -176,15 +176,49 @@ func (p *WinnowPoints) Swap(i, j int) {
 }
 
 func (p *WinnowPoints) Less(i, j int) bool {
-	if p.m.array[p.e[i]] != p.m.array[p.e[j]] {
-		return p.m.array[p.e[i]] < p.m.array[p.e[j]]
-	}
+	return ArrayLess (p.m.array, p.e[i], p.e[j])
+}
 
-	return p.e[i] < p.e[j]
+func ArrayLess (array []byte, x, y int) bool {
+	if array[x] != array[y] {
+		return array[x] < array[y]
+	}	
+	return x < y
 }
 
 type Point struct {
 	x, y int
+}
+
+func WinnowMerge (x, y WinnowPoints) WinnowPoints {
+	var merged WinnowPoints
+	
+	new_size := len(x.e) + len (y.e)
+	
+	merged.m = x.m
+	merged.e = make ([]int, new_size)
+	
+	j := 0 
+	k := 0 
+	for i := 0; i < new_size; i++ {
+		if j < len(x.e) && k < len(y.e) {
+			if ArrayLess (merged.m.array, x.e[j], y.e[k]) {
+				merged.e[i] = x.e[j]
+				j++
+			} else {
+				merged.e[i] = y.e[k]
+				k++
+			}
+		} else if j < len(x.e) {
+			merged.e[i] = x.e[j]
+			j++
+		} else if k < len(y.e) {
+			merged.e[i] = y.e[k]
+			k++
+		}
+	}
+	
+	return merged
 }
 
 func Winnow(m *ByteMatrix, mask []bool, nelts, winnow_nelts int) (points []Point) {
@@ -193,7 +227,7 @@ func Winnow(m *ByteMatrix, mask []bool, nelts, winnow_nelts int) (points []Point
 	values.m = m
 
 	values_work := make(chan int)
-	values_done := make(chan []int)
+	values_done := make(chan WinnowPoints)
 
 	go func() {
 		for i := 0; i < nelts; i++ {
@@ -213,22 +247,21 @@ func Winnow(m *ByteMatrix, mask []bool, nelts, winnow_nelts int) (points []Point
 					}
 				}
 			}
-			values_done <- local_indexes
+			var local_values WinnowPoints
+			local_values.m = m
+			local_values.e = local_indexes
+			sort.Sort (&local_values)
+			values_done <- local_values
 		}()
 	}
 
-	var accum []int
+	accum := WinnowPoints {m, make ([]int, 0)}
 	for i := 0; i < NP; i++ {
-		local_indexes := <-values_done
-		temp_slice := make([]int, len(accum)+len(local_indexes))
-		copy(temp_slice, accum)
-		copy(temp_slice[len(accum):], local_indexes)
-		accum = temp_slice
+		local_values := <-values_done
+		accum = WinnowMerge (accum, local_values)
 	}
 
-	values.e = accum
-
-	sort.Sort(&values)
+	values = accum
 
 	chunk := values.Len() / nelts
 
