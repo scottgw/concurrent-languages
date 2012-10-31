@@ -190,9 +190,11 @@ type Point struct {
 	x, y int
 }
 
-func WinnowMerge (x, y WinnowPoints) WinnowPoints {
+func WinnowMerge (points chan WinnowPoints) {
 	var merged WinnowPoints
-	
+	x := <-points
+	y := <-points
+
 	new_size := len(x.e) + len (y.e)
 	
 	merged.m = x.m
@@ -217,8 +219,7 @@ func WinnowMerge (x, y WinnowPoints) WinnowPoints {
 			k++
 		}
 	}
-	
-	return merged
+	points <- merged
 }
 
 func Winnow(m *ByteMatrix, mask []bool, nelts, winnow_nelts int) (points []Point) {
@@ -236,6 +237,15 @@ func Winnow(m *ByteMatrix, mask []bool, nelts, winnow_nelts int) (points []Point
 		close(values_work)
 	}()
 
+	merged := make (chan bool)
+
+	for i := 0; i < NP; i++ {
+		go func () {
+			WinnowMerge (values_done)
+			merged <- true
+		} ()
+	}
+
 	for i := 0; i < NP; i++ {
 		go func() {
 			var local_indexes []int
@@ -250,18 +260,19 @@ func Winnow(m *ByteMatrix, mask []bool, nelts, winnow_nelts int) (points []Point
 			var local_values WinnowPoints
 			local_values.m = m
 			local_values.e = local_indexes
+
 			sort.Sort (&local_values)
 			values_done <- local_values
 		}()
 	}
+	
+	values_done <- WinnowPoints {m, make ([]int, 0)}
 
-	accum := WinnowPoints {m, make ([]int, 0)}
-	for i := 0; i < NP; i++ {
-		local_values := <-values_done
-		accum = WinnowMerge (accum, local_values)
+	for i := 0; i < NP - 1; i++ {
+		<-merged
 	}
 
-	values = accum
+	values = <- values_done
 
 	chunk := values.Len() / nelts
 
