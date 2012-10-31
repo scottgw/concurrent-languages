@@ -228,7 +228,7 @@ func Winnow(m *ByteMatrix, mask []bool, nelts, winnow_nelts int) (points []Point
 	values.m = m
 
 	values_work := make(chan int)
-	values_done := make(chan WinnowPoints)
+	values_done := make(chan WinnowPoints, NP)
 
 	go func() {
 		for i := 0; i < nelts; i++ {
@@ -262,13 +262,17 @@ func Winnow(m *ByteMatrix, mask []bool, nelts, winnow_nelts int) (points []Point
 			local_values.e = local_indexes
 
 			sort.Sort (&local_values)
+
 			values_done <- local_values
+			// WinnowMerge (values_done)
+			// merged <- true
+
 		}()
 	}
-	
-	values_done <- WinnowPoints {m, make ([]int, 0)}
 
-	for i := 0; i < NP - 1; i++ {
+	values_done <- WinnowPoints {m, make ([]int, 0)}
+	
+	for i := 0; i < NP; i++ {
 		<-merged
 	}
 
