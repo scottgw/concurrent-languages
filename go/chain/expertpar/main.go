@@ -17,6 +17,9 @@ import (
 	"math"
 	"runtime"
 	"sort"
+	"os"
+	"runtime/pprof"
+	"log"
 )
 
 type ByteMatrix struct {
@@ -46,13 +49,14 @@ const (
 )
 
 var (
-	is_bench = flag.Bool("is_bench", false, "")
+	is_bench   = flag.Bool("is_bench", false, "")
+	cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 )
 
 func Randmat(nelts int, s uint32) *ByteMatrix {
 	matrix := NewByteMatrix(nelts, nelts)
 
-	work := make(chan int)
+	work := make(chan int, 256)
 
 	go func() {
 		for i := 0; i < nelts; i++ {
@@ -176,13 +180,13 @@ func (p *WinnowPoints) Swap(i, j int) {
 }
 
 func (p *WinnowPoints) Less(i, j int) bool {
-	return ArrayLess (p.m.array, p.e[i], p.e[j])
+	return ArrayLess(p.m.array, p.e[i], p.e[j])
 }
 
-func ArrayLess (array []byte, x, y int) bool {
+func ArrayLess(array []byte, x, y int) bool {
 	if array[x] != array[y] {
 		return array[x] < array[y]
-	}	
+	}
 	return x < y
 }
 
@@ -190,21 +194,21 @@ type Point struct {
 	x, y int
 }
 
-func WinnowMerge (points chan WinnowPoints) {
+func WinnowMerge(points chan WinnowPoints) {
 	var merged WinnowPoints
 	x := <-points
 	y := <-points
 
-	new_size := len(x.e) + len (y.e)
-	
+	new_size := len(x.e) + len(y.e)
+
 	merged.m = x.m
-	merged.e = make ([]int, new_size)
-	
-	j := 0 
-	k := 0 
+	merged.e = make([]int, new_size)
+
+	j := 0
+	k := 0
 	for i := 0; i < new_size; i++ {
 		if j < len(x.e) && k < len(y.e) {
-			if ArrayLess (merged.m.array, x.e[j], y.e[k]) {
+			if ArrayLess(merged.m.array, x.e[j], y.e[k]) {
 				merged.e[i] = x.e[j]
 				j++
 			} else {
@@ -229,6 +233,7 @@ func Winnow(m *ByteMatrix, mask []bool, nelts, winnow_nelts int) (points []Point
 
 	values_work := make(chan int)
 	values_done := make(chan WinnowPoints, NP)
+	values_done <- WinnowPoints{m, make([]int, 0)}
 
 	go func() {
 		for i := 0; i < nelts; i++ {
@@ -237,13 +242,13 @@ func Winnow(m *ByteMatrix, mask []bool, nelts, winnow_nelts int) (points []Point
 		close(values_work)
 	}()
 
-	merged := make (chan bool)
+	merged := make(chan bool, NP)
 
 	for i := 0; i < NP; i++ {
-		go func () {
-			WinnowMerge (values_done)
+		go func() {
+			WinnowMerge(values_done)
 			merged <- true
-		} ()
+		}()
 	}
 
 	for i := 0; i < NP; i++ {
@@ -261,22 +266,16 @@ func Winnow(m *ByteMatrix, mask []bool, nelts, winnow_nelts int) (points []Point
 			local_values.m = m
 			local_values.e = local_indexes
 
-			sort.Sort (&local_values)
-
+			sort.Sort(&local_values)
 			values_done <- local_values
-			// WinnowMerge (values_done)
-			// merged <- true
-
 		}()
 	}
 
-	values_done <- WinnowPoints {m, make ([]int, 0)}
-	
 	for i := 0; i < NP; i++ {
 		<-merged
 	}
 
-	values = <- values_done
+	values = <-values_done
 
 	chunk := values.Len() / nelts
 
@@ -319,7 +318,7 @@ func Outer(wp []Point, nelts int) (m [][]float64, vec []float64) {
 	vec = make([]float64, nelts)
 
 	NP := runtime.GOMAXPROCS(0)
-	work := make(chan int)
+	work := make(chan int, 256)
 	done := make(chan bool)
 
 	go func() {
@@ -392,7 +391,15 @@ func Product(m [][]float64, vec []float64, nelts int) (result []float64) {
 
 func main() {
 	flag.Parse()
-
+	flag.Parse()
+	if *cpuprofile != "" {
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
 	var nelts, thresh_percent, seed, winnow_nelts int
 
 	fmt.Scan(&nelts)
