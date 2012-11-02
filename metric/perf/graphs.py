@@ -9,15 +9,24 @@ ggplot2.theme_set(ggplot2.theme_bw ())
 from rpy2.robjects.packages import importr
 from rpy2.robjects import FloatVector, StrVector, IntVector, DataFrame
 
+
 def ggplot2_options ():
+  def normal_text():
+    return ggplot2.theme_text(family = 'serif', size = 15)
+  def rotated_text():
+    return ggplot2.theme_text(family = 'serif', face = 'bold', 
+                              size = 15, angle=90, vjust=0.2)
+  def bold_text():
+    return ggplot2.theme_text(family = 'serif', face = 'bold', size = 15)
+
   return ggplot2.opts (**{'axis.title.x' : ggplot2.theme_blank(),
-                          'axis.title.y' : ggplot2.theme_text(family = 'serif', face = 'bold', size = 15, angle=90, vjust=0.2),
-                          'axis.text.x' : ggplot2.theme_text(family = 'serif', size = 15),
-                          'axis.text.y' : ggplot2.theme_text(family = 'serif', size = 15),
-                          'legend.title' : ggplot2.theme_text(family = 'serif', face = 'bold', size = 15),
-                          'legend.text' : ggplot2.theme_text(family = 'serif', size = 15),
+                          'axis.title.y' : rotated_text(),
+                          'axis.text.x' : normal_text(),
+                          'axis.text.y' : normal_text(),
+                          'legend.title' : bold_text(),
+                          'legend.text' : normal_text(),
                           'aspect.ratio' : 0.6180339888,
-    })
+                          })
 
 def ggplot2_colors ():
   return ggplot2.scale_fill_brewer(palette="Spectral")
@@ -50,7 +59,7 @@ def main():
   bargraph_language (cfg, results[threads[-1]])
   bargraph_variation(cfg, results[threads[-1]])
   bargraph_variation_diff (cfg, results[threads[-1]])
-  #speedup_lang_var (cfg, results, basis)
+  speedup_lang_var (cfg, results, basis)
   speedup_prob_var (cfg, results, basis)
   mem_usage_graph (cfg)
   simple_rank (cfg, results[threads[-1]])
@@ -325,10 +334,14 @@ def bargraph_language (cfg, values):
         data = FloatVector (values[prob][var][lang][0])
         times.append (r['mean'] (data)[0])
 
-        t_result = r['t.test'] (data, **{"conf.level": 0.975}).rx ('conf.int')[0]
+        t_result = r['t.test'] (data, 
+                                **{" conf.level": 0.975}).rx ('conf.int')[0]
         ses.append ((t_result[1] - t_result[0])/2)
 
-    r.pdf ('bargraph-executiontime-lang-' + lang + '.pdf', height=pdf_height (), width=pdf_width ())
+
+
+    r.pdf ('bargraph-executiontime-lang-' + lang + '.pdf', 
+           height=pdf_height (), width=pdf_width ())
     df = robjects.DataFrame({'Variation': StrVector (varss),
                              'Problem': StrVector (probs),
                              'Time' : FloatVector (times),
@@ -485,6 +498,11 @@ def bargraph_variation_diff (cfg, values):
 def speedup_prob_var (cfg, values, basis):
   for var in cfg.variations:
     if var.find ('par') >= 0:
+      r = robjects.r
+
+      r.pdf ('speedup-' + var + '-' + control + '.pdf', 
+             height=pdf_height (), width=pdf_width ())
+
       for prob in cfg.problems:
         base_selector = lambda lang:\
           values [cfg.threads[-1]][prob][var.replace ('par','seq')][lang][0]
@@ -498,6 +516,7 @@ def speedup_prob_var (cfg, values, basis):
 def speedup_lang_var (cfg, values, basis):
   for var in cfg.variations:
     if var.find ('par') >= 0:
+
       for lang in cfg.languages:
         base_selector = lambda prob:\
           values [cfg.threads[-1]][prob][var.replace ('par','seq')][lang][0]
@@ -507,25 +526,125 @@ def speedup_lang_var (cfg, values, basis):
         line_plot (cfg, var, lang, 'Problem', cfg.problems, selector, base_selector, basis)
 
 
+def as_dataframe (cfg, results):
+  r = robjects.r
+  varis = []
+  langs = []
+  probs = []
+  times = []
+  threads = []
+
+  # speedups, with upper and lower bounds below
+  speedups = [] 
+  speedup_lower = []
+  speedup_upper = []
+
+  ses = [] # standard errors
+  mems = [] # memory usage
+
+  for n in cfg.threads:
+    threads.append (n)
+    probs.append ('ideal')
+    langs.append ('ideal')
+    speedups.append (n)
+    speedup_lowers.append (n)
+    speedup_uppers.append (n)
+
+  for var in cfg.variations:
+    for lang in cfg.languages:
+      for prob in cfg.problems:
+        for thread in cfg.threads:
+          varis.append (pretty_varis [var])
+          langs.append (pretty_langs [lang])
+          probs.append (prob)
+          threads.append (thread)
+    
+          #
+          # speedup values and confidence intervals
+          #
+          vals = results[thread][prob][var][lang][0]
+          seq_vals = results[cfg.threads[-1]][prob][var.replace ('par','seq')][lang][0]
+          time = mean (FloatVector (vals))
+          times.append (time)
+
+          # sequential base
+          base = FloatVector (seq_vals)
+          # base with p = 1
+          base_p1 = FloatVector (results[1][prob][var][lang][0])
+          # use fastest sequential program
+          if basis == 'fastest' and mean (base_p1) < mean(base):
+            base = base_p1
+          elif basis == 'seq':
+            pass
+          elif basis == 'p1':
+            base = base_p1
+      
+
+          labels = ['Base'] * r.length(base)[0] + ['N']*r.length (vals)[0]
+          df = DataFrame ({'Times': base + vals, 
+                           'Type': StrVector(labels)})
+          ratio_test = r['pairwiseCI'] (r('Times ~ Type'), data=df,
+                                        control='N',
+                                        method='Param.ratio',
+                                        **{'var.equal': False})[0][0]
+
+          speedups.append (mean(base) / time)
+          speedup_lowers.append (ratio_test[1][0])
+          speedup_uppers.append (ratio_test[2][0])
+
+
+          #
+          # time confidence interval
+          #
+          t_result = r['t.test'] (data, 
+                                  **{" conf.level": 0.975}).rx ('conf.int')[0]
+          ses.append ((t_result[1] - t_result[0])/2)
+
+          #
+          # memory usage
+          #
+          mem_filename = get_mem_output (lang, prob, var)
+          with open (mem_filename, 'r') as mem_file:
+            mem = mem_file.readline()
+            mems.append (float (mem))
+
+  return robjects.DataFrame({'Language': StrVector (langs),
+                             'Problem': StrVector (probs),
+                             'Variation' : StrVector (varis),
+                             'Threads': IntVector (threads),
+
+                             'Time': FloatVector (times),
+                             'SE': FloatVector (ses),
+
+                             'Speedup': FloatVector (speedups),
+                             'SpeedupLower': FloatVector (speedup_lowers),
+                             'SpeedupUpper': FloatVector (speedup_uppers),
+
+                             'Mem' : FloatVector (mems)
+                             })
+
+
+  # post processing:
+  #  - for a particular variation/problem divide by the fastest language for 
+  #    the normalized graphs
+  #  - take a diff between memory usage and time
+
 # Function to plot lines for a given dataset. Here these
 # datasets will be either per-problem or per-language.
 def line_plot (cfg, var, control, change_name, changing, selector, base_selector, basis):
-  r = robjects.r
-
-  r.pdf ('speedup-' + var + '-' + control + '.pdf', height=pdf_height (), width=pdf_width ())
-
   speedups = []
   thrds = []
   changes = []
-  ci = []
   lowers = []
   uppers = []
+
   for n in cfg.threads:
+    threads.append (n)
+    probs.append ('ideal')
+    langs.append ('ideal')
     speedups.append (n)
-    thrds.append (n)
-    changes.append ('ideal')
-    lowers.append (n)
-    uppers.append (n)
+    speedup_lowers.append (n)
+    speedup_uppers.append (n)
 
   for c in changing:
     sel  = selector (c)
@@ -556,9 +675,6 @@ def line_plot (cfg, var, control, change_name, changing, selector, base_selector
 
       lowers.append (ratio_test[1][0])
       uppers.append (ratio_test[2][0])
-      
-      # print lowers
-      # print uppers
 
       mn = mean (ntimes)      
       speedups.append (mean(base) / mn)
@@ -580,7 +696,8 @@ def line_plot (cfg, var, control, change_name, changing, selector, base_selector
   if change_name == 'Language':
     ideal_changing.extend ([pretty_langs [c] for c in changing])
   else:
-    ideal_changing.extend (c)
+    ideal_changing.extend (changing)
+
   legendVec = IntVector (range (len (ideal_changing)))
   legendVec.names = StrVector (ideal_changing)
 
@@ -593,7 +710,7 @@ def line_plot (cfg, var, control, change_name, changing, selector, base_selector
       ggplot2.geom_line() + ggplot2.geom_point(size=3) +\
       ggplot2.aes_string(x='Threads', y='Speedup', 
                          group=change_name, color=change_name, 
-                         shape=change_name) +\
+                         shape=change_name) + \
       ggplot2.scale_shape_manual(values=legendVec) + \
       ggplot2.geom_errorbar (limits, width=0.25) + \
       ggplot2_options () + \
