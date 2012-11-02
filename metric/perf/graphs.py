@@ -4,6 +4,7 @@ from utils import *
 from config import *
 import sys
 import rpy2.robjects as robjects
+robjects.r('library("scales")')  
 import rpy2.robjects.lib.ggplot2 as ggplot2
 ggplot2.theme_set(ggplot2.theme_bw ())
 from rpy2.robjects.packages import importr
@@ -452,7 +453,7 @@ def bargraph_variation_diff (cfg, values):
 
         mean = r['mean'] (data)[0]
         mean_expert = r['mean'] (data_expert)[0]
-        diff = (float(mean_expert) / float(mean) - 1) * 100
+        diff = (float(mean_expert) / float(mean) - 1)
 
         langs.append (pretty_langs [lang])
         probs.append (prob)
@@ -461,7 +462,7 @@ def bargraph_variation_diff (cfg, values):
     r.pdf ('bargraph-executiontime-diff-' + standard + '.pdf', height=pdf_height (), width=pdf_width ())
     df = robjects.DataFrame({'Language': StrVector (langs),
                              'Problem': StrVector (probs),
-                             'Difference' : IntVector (diffs),
+                             'Difference' : FloatVector (diffs),
       })
     
     #print (df)
@@ -472,7 +473,8 @@ def bargraph_variation_diff (cfg, values):
         ggplot2.geom_bar (position='dodge', stat='identity') + \
         ggplot2_options () + \
         ggplot2_colors () + \
-        robjects.r('ylab("Execution time difference (in percent)")')
+        robjects.r('ylab("Execution time difference (in percent)")') +\
+        robjects.r('scale_y_continuous(labels = percent_format())')
     pp.plot ()
     r['dev.off']()
 
