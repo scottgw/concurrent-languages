@@ -15,7 +15,7 @@ use Config;
 
 proc product(nelts: int)
 {
-  const NeltSpace = [1..nelts];
+  const NeltSpace = {1..nelts};
   forall i in NeltSpace {
     var sum: real = 0;
     for j in NeltSpace {

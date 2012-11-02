@@ -5,4 +5,4 @@ all: main
 	./main --is_bench < main.in
 
 main: main.chpl
-	chpl -O main.chpl -o main
+	chpl --fast main.chpl -o main

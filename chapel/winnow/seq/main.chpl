@@ -52,7 +52,7 @@ proc winnow(nrows: int, ncols: int, nelts: int) {
   for i in 1..nelts do {
     var ind: int;
     ind = (i - 1) * chunk + 1;
-    (, points[i]) = values[ind];
+    (_, points[i]) = values[ind];
   }
   return points;
 }

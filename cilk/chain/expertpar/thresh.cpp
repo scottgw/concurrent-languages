@@ -21,7 +21,7 @@
 
 extern int *randmat_matrix;
 int *thresh_mask;
-static int histogram[16][200];
+static int histogram[128][200];
 
 
 int reduce_max (int nrows, int ncols) {

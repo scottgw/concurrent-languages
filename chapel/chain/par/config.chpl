@@ -5,11 +5,11 @@ module Config {
                winnow_nelts = read (int);
 
 
-  const randSpace = [1..nelts, 1..nelts];
-  const histSpace = [0..99];
-  const pointSpace = [1..winnow_nelts];
-  const distSpace = [1..winnow_nelts, 1..winnow_nelts];
-  const vectorSpace = [1..winnow_nelts];
+  const randSpace = {1..nelts, 1..nelts};
+  const histSpace = {0..99};
+  const pointSpace = {1..winnow_nelts};
+  const distSpace = {1..winnow_nelts, 1..winnow_nelts};
+  const vectorSpace = {1..winnow_nelts};
 
   var matrix: [randSpace] int;
   var mask: [randSpace] bool;

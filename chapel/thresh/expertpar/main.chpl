@@ -13,10 +13,10 @@ config const is_bench = false;
 config const nrows = read(int),
              ncols = read(int);
 
-const ProbSpace = [1..nrows, 1..ncols],
-      HistSpace = [1..nrows, 0..100];
-const RowSpace = [1..nrows];
-const ColSpace = [1..ncols];
+const ProbSpace = {1..nrows, 1..ncols},
+      HistSpace = {1..nrows, 0..100};
+const RowSpace = {1..nrows};
+const ColSpace = {1..ncols};
 
 var matrix: [ProbSpace] int; 
 var mask: [ProbSpace] int;
@@ -31,7 +31,7 @@ proc thresh(nrows: int, ncols: int, percent: int) {
     }
   }
 
-  const RowSpace2 = [2..nrows];
+  const RowSpace2 = {2..nrows};
 
   forall j in 0..(nmax) {
     for i in RowSpace2 {

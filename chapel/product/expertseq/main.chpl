@@ -11,7 +11,7 @@
 
 config const is_bench = false;
 config const nelts = read(int);
-const Space = [1..nelts, 1..nelts];
+const Space = {1..nelts, 1..nelts};
 var matrix: [Space]real;
 var vector: [1..nelts]real;
 var result: [1..nelts]real;
