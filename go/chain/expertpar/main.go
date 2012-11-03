@@ -231,7 +231,7 @@ func Winnow(m *ByteMatrix, mask []bool, nelts, winnow_nelts int) (points []Point
 	var values WinnowPoints
 	values.m = m
 
-	values_work := make(chan int)
+	values_work := make(chan int, 1024)
 	values_done := make(chan WinnowPoints, NP)
 	values_done <- WinnowPoints{m, make([]int, 0)}
 
@@ -277,10 +277,10 @@ func Winnow(m *ByteMatrix, mask []bool, nelts, winnow_nelts int) (points []Point
 
 	values = <-values_done
 
-	chunk := values.Len() / nelts
+	chunk := values.Len() / winnow_nelts
 
 	points = make([]Point, winnow_nelts)
-	point_work := make(chan int)
+	point_work := make(chan int, 1024)
 	point_done := make(chan bool)
 	go func() {
 		for i := 0; i < winnow_nelts; i++ {
