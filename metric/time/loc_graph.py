@@ -129,12 +129,13 @@ def stat_test (results):
     print var
     print languages
     for lang1 in languages:
+      sys.stdout.write (pretty_langs [lang1])
       for lang2 in languages:
         if lang1 == lang2:
-          sys.stdout.write ("        ")
+          sys.stdout.write (" &      ")
         else:
-          sys.stdout.write (str (round(res[lang1][lang2], 3)) + "  ")
-      print lang1
+          sys.stdout.write (" & " + str (round(res[lang1][lang2], 3)) + "  ")
+      sys.stdout.write ("\\\\\n")
   
 def get_results ():
   results = {}

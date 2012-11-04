@@ -6,7 +6,7 @@ problems = ["randmat", "thresh", "winnow", "outer", "product", "chain"]
 #problems = ["randmat", "thresh", "winnow", "outer", "product"]
 #variations = ["seq","expertseq","expertpar"]
 variations = ["seq","expertseq","expertpar", "par"]
-threads = [1, 4, 16, 32]
+threads = [1, 2, 4, 8, 16, 32]
 output_dir = "output"
 
 
