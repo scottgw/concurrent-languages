@@ -17,9 +17,6 @@ import (
 	"math"
 	"runtime"
 	"sort"
-	"os"
-	"runtime/pprof"
-	"log"
 )
 
 type ByteMatrix struct {
@@ -50,7 +47,6 @@ const (
 
 var (
 	is_bench   = flag.Bool("is_bench", false, "")
-	cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 )
 
 func Randmat(nelts int, s uint32) *ByteMatrix {
@@ -391,15 +387,6 @@ func Product(m [][]float64, vec []float64, nelts int) (result []float64) {
 
 func main() {
 	flag.Parse()
-	flag.Parse()
-	if *cpuprofile != "" {
-		f, err := os.Create(*cpuprofile)
-		if err != nil {
-			log.Fatal(err)
-		}
-		pprof.StartCPUProfile(f)
-		defer pprof.StopCPUProfile()
-	}
 	var nelts, thresh_percent, seed, winnow_nelts int
 
 	fmt.Scan(&nelts)
