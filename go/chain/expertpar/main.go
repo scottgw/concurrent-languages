@@ -17,9 +17,6 @@ import (
 	"math"
 	"runtime"
 	"sort"
-	"os"
-	"runtime/pprof"
-	"log"
 )
 
 type ByteMatrix struct {
@@ -50,7 +47,6 @@ const (
 
 var (
 	is_bench   = flag.Bool("is_bench", false, "")
-	cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 )
 
 func Randmat(nelts int, s uint32) *ByteMatrix {
@@ -231,7 +227,7 @@ func Winnow(m *ByteMatrix, mask []bool, nelts, winnow_nelts int) (points []Point
 	var values WinnowPoints
 	values.m = m
 
-	values_work := make(chan int)
+	values_work := make(chan int, 1024)
 	values_done := make(chan WinnowPoints, NP)
 	values_done <- WinnowPoints{m, make([]int, 0)}
 
@@ -277,10 +273,10 @@ func Winnow(m *ByteMatrix, mask []bool, nelts, winnow_nelts int) (points []Point
 
 	values = <-values_done
 
-	chunk := values.Len() / nelts
+	chunk := values.Len() / winnow_nelts
 
 	points = make([]Point, winnow_nelts)
-	point_work := make(chan int)
+	point_work := make(chan int, 1024)
 	point_done := make(chan bool)
 	go func() {
 		for i := 0; i < winnow_nelts; i++ {
@@ -391,15 +387,6 @@ func Product(m [][]float64, vec []float64, nelts int) (result []float64) {
 
 func main() {
 	flag.Parse()
-	flag.Parse()
-	if *cpuprofile != "" {
-		f, err := os.Create(*cpuprofile)
-		if err != nil {
-			log.Fatal(err)
-		}
-		pprof.StartCPUProfile(f)
-		defer pprof.StopCPUProfile()
-	}
 	var nelts, thresh_percent, seed, winnow_nelts int
 
 	fmt.Scan(&nelts)

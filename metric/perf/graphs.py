@@ -102,7 +102,11 @@ def speedup_diffs (values, basis):
     speedups[var] = {}
     for lang in languages:
       speedups[var][lang] = {}
+      i = 0
+      p1 = 0
+      print lang
       for prob in problems:
+        i = i + 1
         speedups[var][lang][prob] = []
         base = r.mean (FloatVector (values [cfg.threads[-1]][prob][var.replace ('par','seq')][lang][0]))[0]
         # base with p = 1
@@ -110,6 +114,7 @@ def speedup_diffs (values, basis):
         # use fastest sequential program
         if basis == 'fastest' and base_p1 < base:
           base = base_p1
+          p1 = p1 + 1
         elif basis == 'seq':
           pass
         elif basis == 'p1':
@@ -117,7 +122,8 @@ def speedup_diffs (values, basis):
         
         mn = (r.mean (FloatVector (values[32][prob][var][lang][0])))[0]
         speedups[var][lang][prob].append (float (base) / float (mn))
-
+      print i
+      print p1
   langs = []
   probs = []
   diffs  = []
@@ -264,12 +270,13 @@ def simple_rank_speedup (cfg, values, basis):
     print var
     print languages
     for lang1 in languages:
+      sys.stdout.write (pretty_langs [lang1])
       for lang2 in languages:
         if lang1 == lang2:
-          sys.stdout.write ("        ")
+          sys.stdout.write (" &       ")
         else:
-          sys.stdout.write (str (round(res[lang1][lang2], 3)) + "  ")
-      print lang1
+          sys.stdout.write (" & " + str (round(res[lang1][lang2], 3)) + "  ")
+      sys.stdout.write ("\\\\\n")
 
 
 def mww_perf_tests (results):
@@ -299,12 +306,13 @@ def mww_perf_tests (results):
     print var
     print languages
     for lang1 in languages:
+      sys.stdout.write (pretty_langs [lang1])
       for lang2 in languages:
         if lang1 == lang2:
-          sys.stdout.write ("        ")
+          sys.stdout.write (" &        ")
         else:
-          sys.stdout.write (str (round(res[lang1][lang2], 3)) + "  ")
-      print lang1
+          sys.stdout.write (" & " + str (round(res[lang1][lang2], 3)) + "  ")
+      sys.stdout.write("\\\\\n")
 
 def get_results():
   results = {}
@@ -792,13 +800,14 @@ def line_plot (cfg, var, control, change_name, changing, selector, base_selector
   uppers = []
 
   for n in cfg.threads:
-    threads.append (n)
     probs.append ('ideal')
     langs.append ('ideal')
     speedups.append (n)
-    speedup_lowers.append (n)
-    speedup_uppers.append (n)
-
+    thrds.append (n)
+    changes.append ('ideal')
+    lowers.append (n)
+    uppers.append (n)
+    
   for c in changing:
     sel  = selector (c)
 
@@ -824,7 +833,8 @@ def line_plot (cfg, var, control, change_name, changing, selector, base_selector
       ratio_test = r['pairwiseCI'] (r('Times ~ Type'), data=df,
                                     control='N',
                                     method='Param.ratio',
-                                    **{'var.equal': False})[0][0]
+                                    **{'var.equal': False,
+                                    'conf.level': 0.975})[0][0]
 
       lowers.append (ratio_test[1][0])
       uppers.append (ratio_test[2][0])

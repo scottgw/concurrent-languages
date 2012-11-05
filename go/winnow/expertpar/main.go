@@ -11,7 +11,7 @@
  * output:
  *   points: a vector of (x, y) points
  *
- :b*/
+ */
 package main
 
 import (
@@ -61,20 +61,56 @@ func (p *WinnowPoints) Swap(i, j int) {
 }
 
 func (p *WinnowPoints) Less(i, j int) bool {
-	if p.m.array[p.e[i]] != p.m.array[p.e[j]] {
-		return p.m.array[p.e[i]] < p.m.array[p.e[j]]
-	}
-
-	return p.e[i] < p.e[j]
+	return ArrayLess(p.m.array, p.e[i], p.e[j])
 }
 
-func Winnow(m *ByteMatrix, nrows, ncols, nelts int) {
+func ArrayLess(array []byte, x, y int) bool {
+	if array[x] != array[y] {
+		return array[x] < array[y]
+	}
+	return x < y
+}
+
+func WinnowMerge(points chan WinnowPoints) {
+	var merged WinnowPoints
+	x := <-points
+	y := <-points
+
+	new_size := len(x.e) + len(y.e)
+
+	merged.m = x.m
+	merged.e = make([]int, new_size)
+
+	j := 0
+	k := 0
+	for i := 0; i < new_size; i++ {
+		if j < len(x.e) && k < len(y.e) {
+			if ArrayLess(merged.m.array, x.e[j], y.e[k]) {
+				merged.e[i] = x.e[j]
+				j++
+			} else {
+				merged.e[i] = y.e[k]
+				k++
+			}
+		} else if j < len(x.e) {
+			merged.e[i] = x.e[j]
+			j++
+		} else if k < len(y.e) {
+			merged.e[i] = y.e[k]
+			k++
+		}
+	}
+	points <- merged
+}
+
+func Winnow(m *ByteMatrix, nrows, ncols, winnow_nelts int) {
 	NP := runtime.GOMAXPROCS(0)
 	var values WinnowPoints
 	values.m = m
 
-	values_work := make(chan int)
-	values_done := make(chan []int)
+	values_work := make(chan int, 1024)
+	values_done := make(chan WinnowPoints, NP)
+	values_done <- WinnowPoints{m, make([]int, 0)}
 
 	go func() {
 		for i := 0; i < nrows; i++ {
@@ -83,44 +119,51 @@ func Winnow(m *ByteMatrix, nrows, ncols, nelts int) {
 		close(values_work)
 	}()
 
+	merged := make(chan bool, NP)
+
+	for i := 0; i < NP; i++ {
+		go func() {
+			WinnowMerge(values_done)
+			merged <- true
+		}()
+	}
+
 	for i := 0; i < NP; i++ {
 		go func() {
 			var local_indexes []int
 			for i := range values_work {
 				for j := 0; j < ncols; j++ {
+					idx := i*ncols + j
 					if *is_bench {
 						mask[i][j] = ((i * j) % (ncols + 1)) == 1
 					}
-
 					if mask[i][j] {
-						idx := i*ncols + j
 						local_indexes = append(local_indexes, idx)
 					}
 				}
 			}
-			values_done <- local_indexes
+			var local_values WinnowPoints
+			local_values.m = m
+			local_values.e = local_indexes
+
+			sort.Sort(&local_values)
+			values_done <- local_values
 		}()
 	}
 
-	var accum []int
 	for i := 0; i < NP; i++ {
-		local_indexes := <-values_done
-		temp_slice := make([]int, len(accum)+len(local_indexes))
-		copy(temp_slice, accum)
-		copy(temp_slice[len(accum):], local_indexes)
-		accum = temp_slice
+		<-merged
 	}
 
-	values.e = accum
+	values = <-values_done
 
-	sort.Sort(&values)
+	chunk := values.Len() / winnow_nelts
 
-	chunk := values.Len() / nelts
-
-	point_work := make(chan int)
+	points = make([]int, winnow_nelts)
+	point_work := make(chan int, 1024)
 	point_done := make(chan bool)
 	go func() {
-		for i := 0; i < nelts; i++ {
+		for i := 0; i < winnow_nelts; i++ {
 			point_work <- i
 		}
 		close(point_work)
@@ -179,10 +222,10 @@ func main() {
 
 	matrix = m.array
 
-  mask = make ([][]bool, nrows)
-  for i := range mask {
-    mask [i] = make ([]bool, ncols)
-  }
+	mask = make([][]bool, nrows)
+	for i := range mask {
+		mask[i] = make([]bool, ncols)
+	}
 	if !*is_bench {
 		read_matrix(nrows, ncols)
 		read_mask(nrows, ncols)
