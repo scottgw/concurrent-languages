@@ -4,6 +4,7 @@ from utils import *
 from config import *
 import sys
 import rpy2.robjects as robjects
+robjects.r('library("scales")')  
 import rpy2.robjects.lib.ggplot2 as ggplot2
 ggplot2.theme_set(ggplot2.theme_bw ())
 from rpy2.robjects.packages import importr
@@ -57,6 +58,7 @@ def main():
   simple_rank_speedup (cfg, results, basis)
   print_results (results[threads[-1]])
   print_results_speedup (results, basis)
+  speedup_diffs (results, basis)
 
 def print_results (values):
   for lang in languages:
@@ -74,6 +76,68 @@ def print_results (values):
         sum = sum + val
       sys.stdout.write (" & " + str (round(sum, 1)))
     sys.stdout.write (" \\\\\n")
+
+def speedup_diffs (values, basis):
+  r = robjects.r
+  speedups = {}
+  for var in ['par', 'expertpar']:
+    speedups[var] = {}
+    for lang in languages:
+      speedups[var][lang] = {}
+      i = 0
+      p1 = 0
+      print lang
+      for prob in problems:
+        i = i + 1
+        speedups[var][lang][prob] = []
+        base = r.mean (FloatVector (values [cfg.threads[-1]][prob][var.replace ('par','seq')][lang][0]))[0]
+        # base with p = 1
+        base_p1 = r.mean (FloatVector (values [1][prob][var][lang][0]))[0]
+        # use fastest sequential program
+        if basis == 'fastest' and base_p1 < base:
+          base = base_p1
+          p1 = p1 + 1
+        elif basis == 'seq':
+          pass
+        elif basis == 'p1':
+          base = base_p1
+        
+        mn = (r.mean (FloatVector (values[32][prob][var][lang][0])))[0]
+        speedups[var][lang][prob].append (float (base) / float (mn))
+      print i
+      print p1
+  langs = []
+  probs = []
+  diffs  = []
+  for lang in languages:
+    for prob in problems:
+      sp = speedups['par'][lang][prob][0]
+      sp_expert = speedups['expertpar'][lang][prob][0]
+      diff = (float(sp_expert) / float(sp) - 1)
+
+      langs.append (pretty_langs [lang])
+      probs.append (prob)
+      diffs.append (diff)
+
+  r.pdf ('bargraph-speedup-diff.pdf', height=pdf_height (), width=pdf_width ())
+  df = robjects.DataFrame({'Language': StrVector (langs),
+                           'Problem': StrVector (probs),
+                           'Difference' : FloatVector (diffs),
+    })
+    
+  #print (df)
+  gp = ggplot2.ggplot (df)
+    
+  pp = gp + \
+      ggplot2.aes_string (x='Problem', y='Difference', fill='Language') + \
+      ggplot2.geom_bar (position='dodge', stat='identity') + \
+      ggplot2_options () + \
+      ggplot2_colors () + \
+      robjects.r('ylab("Speedup difference (in percent)")') +\
+      robjects.r('scale_y_continuous(labels = percent_format())')
+  pp.plot ()
+  r['dev.off']()
+
 
 def print_results_speedup (values, basis):
   r = robjects.r
@@ -188,12 +252,13 @@ def simple_rank_speedup (cfg, values, basis):
     print var
     print languages
     for lang1 in languages:
+      sys.stdout.write (pretty_langs [lang1])
       for lang2 in languages:
         if lang1 == lang2:
-          sys.stdout.write ("        ")
+          sys.stdout.write (" &       ")
         else:
-          sys.stdout.write (str (round(res[lang1][lang2], 3)) + "  ")
-      print lang1
+          sys.stdout.write (" & " + str (round(res[lang1][lang2], 3)) + "  ")
+      sys.stdout.write ("\\\\\n")
 
 
 def mww_perf_tests (results):
@@ -223,12 +288,13 @@ def mww_perf_tests (results):
     print var
     print languages
     for lang1 in languages:
+      sys.stdout.write (pretty_langs [lang1])
       for lang2 in languages:
         if lang1 == lang2:
-          sys.stdout.write ("        ")
+          sys.stdout.write (" &        ")
         else:
-          sys.stdout.write (str (round(res[lang1][lang2], 3)) + "  ")
-      print lang1
+          sys.stdout.write (" & " + str (round(res[lang1][lang2], 3)) + "  ")
+      sys.stdout.write("\\\\\n")
 
 def get_results():
   results = {}
@@ -452,7 +518,7 @@ def bargraph_variation_diff (cfg, values):
 
         mean = r['mean'] (data)[0]
         mean_expert = r['mean'] (data_expert)[0]
-        diff = (float(mean_expert) / float(mean) - 1) * 100
+        diff = (float(mean_expert) / float(mean) - 1)
 
         langs.append (pretty_langs [lang])
         probs.append (prob)
@@ -461,7 +527,7 @@ def bargraph_variation_diff (cfg, values):
     r.pdf ('bargraph-executiontime-diff-' + standard + '.pdf', height=pdf_height (), width=pdf_width ())
     df = robjects.DataFrame({'Language': StrVector (langs),
                              'Problem': StrVector (probs),
-                             'Difference' : IntVector (diffs),
+                             'Difference' : FloatVector (diffs),
       })
     
     #print (df)
@@ -472,7 +538,8 @@ def bargraph_variation_diff (cfg, values):
         ggplot2.geom_bar (position='dodge', stat='identity') + \
         ggplot2_options () + \
         ggplot2_colors () + \
-        robjects.r('ylab("Execution time difference (in percent)")')
+        robjects.r('ylab("Execution time difference (in percent)")') +\
+        robjects.r('scale_y_continuous(labels = percent_format())')
     pp.plot ()
     r['dev.off']()
 
@@ -526,7 +593,7 @@ def line_plot (cfg, var, control, change_name, changing, selector, base_selector
     changes.append ('ideal')
     lowers.append (n)
     uppers.append (n)
-
+    
   for c in changing:
     sel  = selector (c)
 
@@ -552,7 +619,8 @@ def line_plot (cfg, var, control, change_name, changing, selector, base_selector
       ratio_test = r['pairwiseCI'] (r('Times ~ Type'), data=df,
                                     control='N',
                                     method='Param.ratio',
-                                    **{'var.equal': False})[0][0]
+                                    **{'var.equal': False,
+                                    'conf.level': 0.975})[0][0]
 
       lowers.append (ratio_test[1][0])
       uppers.append (ratio_test[2][0])

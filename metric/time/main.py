@@ -7,6 +7,7 @@ import os
 import math
 
 import rpy2.robjects as robjects
+robjects.r('library("scales")')  
 import rpy2.robjects.lib.ggplot2 as ggplot2
 ggplot2.theme_set(ggplot2.theme_bw ())
 #print ggplot2.theme_get()
@@ -169,12 +170,13 @@ def stat_test ():
     print var
     print languages
     for lang1 in languages:
+      sys.stdout.write (pretty_langs [lang1])
       for lang2 in languages:
         if lang1 == lang2:
-          sys.stdout.write ("        ")
+          sys.stdout.write (" &        ")
         else:
-          sys.stdout.write (str (round(res[lang1][lang2], 4)) + "  ")
-      print lang1
+          sys.stdout.write (" & " + str (round(res[lang1][lang2], 3)) + "  ")
+      sys.stdout.write("\n")
 
 def read_table():
   with open('tdist.txt', 'r') as f:
@@ -382,7 +384,7 @@ def bargraph_variation_diff ():
           error = True
 
         if not error:
-          diff = (float(time_expert + time) / float(time) - 1) * 100
+          diff = (float(time_expert + time) / float(time) - 1)
         else:
           diff = 0
 
@@ -393,7 +395,7 @@ def bargraph_variation_diff ():
     r.pdf ('bargraph-codingtime-diff-' + standard + '.pdf', height=pdf_height (), width=pdf_width ())
     df = robjects.DataFrame({'Language': StrVector (langs),
                              'Problem': StrVector (probs),
-                             'Difference' : IntVector (diffs),
+                             'Difference' : FloatVector (diffs),
       })
     
     #print (df)
@@ -404,7 +406,8 @@ def bargraph_variation_diff ():
         ggplot2.geom_bar (position='dodge', stat='identity') + \
         ggplot2_options () + \
         ggplot2_colors () + \
-        robjects.r('ylab("Coding time difference (in percent)")')
+        robjects.r('ylab("Coding time difference (in percent)")') +\
+        robjects.r('scale_y_continuous(labels = percent_format())')
     pp.plot ()
     r['dev.off']()
 

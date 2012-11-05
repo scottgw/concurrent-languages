@@ -8,6 +8,7 @@ import sys
 import subprocess
 
 import rpy2.robjects as robjects
+robjects.r('library("scales")')  
 import rpy2.robjects.lib.ggplot2 as ggplot2
 ggplot2.theme_set(ggplot2.theme_bw ())
 
@@ -128,12 +129,13 @@ def stat_test (results):
     print var
     print languages
     for lang1 in languages:
+      sys.stdout.write (pretty_langs [lang1])
       for lang2 in languages:
         if lang1 == lang2:
-          sys.stdout.write ("        ")
+          sys.stdout.write (" &      ")
         else:
-          sys.stdout.write (str (round(res[lang1][lang2], 3)) + "  ")
-      print lang1
+          sys.stdout.write (" & " + str (round(res[lang1][lang2], 3)) + "  ")
+      sys.stdout.write ("\\\\\n")
   
 def get_results ():
   results = {}
@@ -234,7 +236,7 @@ def bargraph_variation_diff (results):
       for prob in problems:
         loc = results [(lang, prob, standard)]
         loc_expert = results [(lang, prob, expert)]
-        diff = (float(loc_expert) / float(loc) - 1) * 100
+        diff = (float(loc_expert) / float(loc) - 1)
 
         langs.append (pretty_langs [lang])
         probs.append (prob)
@@ -243,18 +245,19 @@ def bargraph_variation_diff (results):
     r.pdf ('bargraph-loc-diff-' + standard + '.pdf', height=pdf_height (), width=pdf_width ())
     df = robjects.DataFrame({'Language': StrVector (langs),
                              'Problem': StrVector (probs),
-                             'Difference' : IntVector (diffs),
+                             'Difference' : FloatVector (diffs),
       })
     
     #print (df)
     gp = ggplot2.ggplot (df)
-  
+    
     pp = gp + \
         ggplot2.aes_string (x='Problem', y='Difference', fill='Language') + \
         ggplot2.geom_bar (position='dodge', stat='identity') + \
         ggplot2_options () + \
         ggplot2_colors () + \
-        robjects.r('ylab("Lines of code difference (in percent)")')
+        robjects.r('ylab("Lines of code difference (in percent)")') +\
+        robjects.r('scale_y_continuous(labels = percent_format())')
     pp.plot ()
     r['dev.off']()
 
