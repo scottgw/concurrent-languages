@@ -9,15 +9,14 @@ ggplot2.theme_set(ggplot2.theme_bw ())
 from rpy2.robjects.packages import importr
 from rpy2.robjects import FloatVector, StrVector, IntVector, DataFrame
 
-
 def ggplot2_options ():
   def normal_text():
     return ggplot2.theme_text(family = 'serif', size = 15)
+  def bold_text():
+    return ggplot2.theme_text(family = 'serif', face = 'bold', size = 15)
   def rotated_text():
     return ggplot2.theme_text(family = 'serif', face = 'bold', 
                               size = 15, angle=90, vjust=0.2)
-  def bold_text():
-    return ggplot2.theme_text(family = 'serif', face = 'bold', size = 15)
 
   return ggplot2.opts (**{'axis.title.x' : ggplot2.theme_blank(),
                           'axis.title.y' : rotated_text(),
@@ -29,7 +28,7 @@ def ggplot2_options ():
                           })
 
 def ggplot2_colors ():
-  return ggplot2.scale_fill_brewer(palette="Spectral")
+  return ggplot2.scale_fill_brewer(palette="PuOr")
 
 def pdf_height (): return 3.7
 def pdf_width (): return 7
@@ -45,8 +44,17 @@ pretty_langs = {"chapel"   : "Chapel",
                 "erlang"   : "Erlang",
                 "go"       : "Go",
                 "scoop"    : "SCOOP",
-                "tbb"      : "TBB"
+                "tbb"      : "TBB",
+                "ideal"    : "ideal"
                 }
+
+def setup():
+  importr ('pairwiseCI')
+  basis = 'fastest' # p1, seq, fastest
+  
+  results = get_results()
+  return as_dataframe (cfg, results, basis)
+
 
 def main():
   importr ('pairwiseCI')
@@ -54,13 +62,14 @@ def main():
   basis = 'fastest' # p1, seq, fastest
   
   results = get_results()
+  as_dataframe (cfg, results, basis)
 
   mww_perf_tests (results)
   bargraph_language (cfg, results[threads[-1]])
   bargraph_variation(cfg, results[threads[-1]])
   bargraph_variation_diff (cfg, results[threads[-1]])
-  speedup_lang_var (cfg, results, basis)
-  speedup_prob_var (cfg, results, basis)
+  # speedup_lang_var (cfg, results, basis)
+  # speedup_prob_var (cfg, results, basis)
   mem_usage_graph (cfg)
   simple_rank (cfg, results[threads[-1]])
   simple_rank_speedup (cfg, results, basis)
@@ -526,7 +535,7 @@ def speedup_lang_var (cfg, values, basis):
         line_plot (cfg, var, lang, 'Problem', cfg.problems, selector, base_selector, basis)
 
 
-def as_dataframe (cfg, results):
+def as_dataframe (cfg, results, basis):
   r = robjects.r
   varis = []
   langs = []
@@ -536,36 +545,77 @@ def as_dataframe (cfg, results):
 
   # speedups, with upper and lower bounds below
   speedups = [] 
-  speedup_lower = []
-  speedup_upper = []
+  speedup_lowers = []
+  speedup_uppers = []
 
   ses = [] # standard errors
   mems = [] # memory usage
 
-  for n in cfg.threads:
-    threads.append (n)
-    probs.append ('ideal')
-    langs.append ('ideal')
-    speedups.append (n)
-    speedup_lowers.append (n)
-    speedup_uppers.append (n)
+  langs_ideal = list (cfg.languages)
+  langs_ideal.append ('ideal')
+
+  probs_ideal = list (cfg.problems)
+  probs_ideal.append ('ideal')
 
   for var in cfg.variations:
-    for lang in cfg.languages:
-      for prob in cfg.problems:
+    for lang in langs_ideal: # cfg.languages:
+      for prob in probs_ideal: # cfg.problems:
         for thread in cfg.threads:
-          varis.append (pretty_varis [var])
+
+          if lang == 'ideal' and prob == 'ideal':
+            continue
+          elif lang == 'ideal' or prob == 'ideal':
+            varis.append (var)
+            langs.append (pretty_langs[lang])
+            probs.append (prob)
+            threads.append (thread)
+            speedups.append (thread)
+            speedup_lowers.append (thread)
+            speedup_uppers.append (thread)
+            times.append (0)
+            ses.append(0)
+            mems.append (0)
+            continue
+
+          varis.append (var) # pretty_varis [var])
           langs.append (pretty_langs [lang])
           probs.append (prob)
           threads.append (thread)
-    
+          
+          if var.find('seq') >= 0:
+            thread = cfg.threads[-1]
+
+          vals = FloatVector (results[thread][prob][var][lang][0])
+          time = mean (vals)
+          times.append (time)
+
+          #
+          # time confidence interval
+          #
+          t_result = r['t.test'] (FloatVector(vals), 
+                                  **{" conf.level": 0.975}).rx ('conf.int')[0]
+          ses.append ((t_result[1] - t_result[0])/2)
+
+          #
+          # memory usage
+          #
+          mem_filename = get_mem_output (lang, prob, var)
+          with open (mem_filename, 'r') as mem_file:
+            mem = mem_file.readline()
+            mems.append (float (mem))
+
+          # we include dummy data for the sequential case to avoid the 
+          # speedup calculation below
+          if var.find('seq') >= 0:
+            speedups.append (1)
+            speedup_lowers.append (1)
+            speedup_uppers.append (1)
+            continue
+            
           #
           # speedup values and confidence intervals
           #
-          vals = results[thread][prob][var][lang][0]
-          seq_vals = results[cfg.threads[-1]][prob][var.replace ('par','seq')][lang][0]
-          time = mean (FloatVector (vals))
-          times.append (time)
+          seq_vals = results[cfg.threads[-1]][prob][var.replace ('par', 'seq')][lang][0]
 
           # sequential base
           base = FloatVector (seq_vals)
@@ -592,38 +642,82 @@ def as_dataframe (cfg, results):
           speedup_lowers.append (ratio_test[1][0])
           speedup_uppers.append (ratio_test[2][0])
 
-
-          #
-          # time confidence interval
-          #
-          t_result = r['t.test'] (data, 
-                                  **{" conf.level": 0.975}).rx ('conf.int')[0]
-          ses.append ((t_result[1] - t_result[0])/2)
-
-          #
-          # memory usage
-          #
-          mem_filename = get_mem_output (lang, prob, var)
-          with open (mem_filename, 'r') as mem_file:
-            mem = mem_file.readline()
-            mems.append (float (mem))
-
-  return robjects.DataFrame({'Language': StrVector (langs),
-                             'Problem': StrVector (probs),
-                             'Variation' : StrVector (varis),
-                             'Threads': IntVector (threads),
-
-                             'Time': FloatVector (times),
-                             'SE': FloatVector (ses),
-
-                             'Speedup': FloatVector (speedups),
-                             'SpeedupLower': FloatVector (speedup_lowers),
-                             'SpeedupUpper': FloatVector (speedup_uppers),
-
-                             'Mem' : FloatVector (mems)
-                             })
+  df = robjects.DataFrame({'Language': StrVector (langs),
+                           'Problem': StrVector (probs),
+                           'Variation' : StrVector (varis),
+                           'Threads': IntVector (threads),
+                           
+                           'Time': FloatVector (times),
+                           'SE': FloatVector (ses),
+                           
+                           'Speedup': FloatVector (speedups),
+                           'SpeedupLower': FloatVector (speedup_lowers),
+                           'SpeedupUpper': FloatVector (speedup_uppers),
+                           
+                           'Mem' : FloatVector (mems)
+                           })
 
 
+  r.assign ('df', df)
+
+  r ('save (df, file="performance.Rda")')
+  
+  # reshape the data to make variation not a column itself, but a part of
+  # the other columns describe ie, time, speedup, etc.
+  #
+  # also, remove the 'ideal' problem as we don't want it in this plot.
+  df = r('''
+redf = reshape (df, 
+                timevar="Variation", 
+                idvar = c("Language","Problem","Threads"), 
+                direction="wide")
+redf[which(redf$Problem != "ideal"),]
+''')
+  
+  r.pdf ('speedup-expertpar-all.pdf',
+         height=10, width=10)
+
+  change_name = 'Language'
+
+  legendVec = IntVector (range (len (langs_ideal)))
+  legendVec.names = StrVector (langs_ideal)
+
+  gg = ggplot2.ggplot (df)
+
+  limits = ggplot2.aes (ymax = 'SpeedupUpper.expertpar', ymin = 'SpeedupLower.expertpar')
+  dodge = ggplot2.position_dodge (width=0.9)
+
+  pp = gg + \
+      ggplot2.geom_line() + ggplot2.geom_point(size=3) +\
+      ggplot2.aes_string(x='Threads', y='Speedup.expertpar', 
+                         group=change_name, color=change_name, 
+                         shape=change_name) + \
+      ggplot2.geom_errorbar (limits, width=0.25) + \
+      ggplot2_options () + \
+      ggplot2_colors () + \
+      ggplot2.opts (**{'axis.title.x' : ggplot2.theme_text(family = 'serif', 
+                                                           face = 'bold', 
+                                                           size = 15, 
+                                                           vjust=-0.2)}) + \
+      robjects.r('ylab("Speedup")') + \
+      robjects.r('xlab("Cores")') + \
+      ggplot2.facet_wrap ('Problem', nrow = 3)
+
+  pp.plot()
+
+  r['dev.off']()
+
+#   r.assign ('df', df)
+
+#   r ('save (df, file="performance.Rda")')
+#   df = r('''
+# redf = reshape (df, timevar="Variation", idvar = c("Language","Problem","Threads"), direction="wide")
+
+# min ((redf [which(redf$Threads == %(threads) & redf$Problem == %(prob)),][c("Threads", "Language","Problem", "Time.expertpar")])$Time.expertpar)
+# ''')
+  
+  # use merge to put new information into tables with tips from:
+  # http://stackoverflow.com/questions/8594747/replacing-certain-values-in-data-frame-in-r
   # post processing:
   #  - for a particular variation/problem divide by the fastest language for 
   #    the normalized graphs
