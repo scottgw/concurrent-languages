@@ -33,24 +33,10 @@ void product(int nelts) {
     range(0, nelts),
     [&](range r) {
       for (size_t i = r.begin(); i != r.end(); ++i) {
-        int j = 0;
         double sum = 0;
-
-        for (; (nelts - j) & 3; ++j)
-          sum  += outer_matrix [i*nelts + j]     * outer_vector [j];
-
-        double acc1, acc2, acc3, acc4;
-        acc1 = acc2 = acc3 = acc4 = 0;
-
-        for (; j < nelts; j += 4) {
-          acc1 += outer_matrix [i*nelts + j]     * outer_vector [j];
-          acc2 += outer_matrix [i*nelts + j + 1] * outer_vector [j + 1];
-          acc3 += outer_matrix [i*nelts + j + 2] * outer_vector [j + 2];
-          acc4 += outer_matrix [i*nelts + j + 3] * outer_vector [j + 3];
+        for (int j=0; j < nelts; ++j) {
+          sum += outer_matrix [i*nelts + j] * outer_vector [j];
         }
-
-        sum += acc1 + acc2 + acc3 + acc4;
-
         product_result [i] = sum;
       }
   });
