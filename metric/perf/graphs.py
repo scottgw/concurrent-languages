@@ -26,10 +26,11 @@ def ggplot2_options ():
                           'legend.title' : bold_text(),
                           'legend.text' : normal_text(),
                           'aspect.ratio' : 0.6180339888,
+                          'strip.text.x' : normal_text(),
                           })
 
 def ggplot2_colors ():
-  return ggplot2.scale_fill_brewer(palette="PuOr")
+  return ggplot2.scale_fill_brewer(palette="YlGn")
 
 def pdf_height (): return 3.7
 def pdf_width (): return 7
@@ -742,7 +743,7 @@ redf[which(redf$Problem != "ideal"),]
 ''')
   
   r.pdf ('speedup-expertpar-all.pdf',
-         height=10, width=10)
+         height=6.5, width=10)
 
   change_name = 'Language'
 
@@ -760,15 +761,19 @@ redf[which(redf$Problem != "ideal"),]
                          group=change_name, color=change_name, 
                          shape=change_name) + \
       ggplot2.geom_errorbar (limits, width=0.25) + \
-      ggplot2_options () + \
+      ggplot2.opts (**{'axis.title.x' : ggplot2.theme_text(family = 'serif', face = 'bold', size = 10, vjust=-0.2),
+                       'axis.title.y' : ggplot2.theme_text(family = 'serif', face = 'bold', size = 10, angle=90, vjust=0.2),
+                       'axis.text.x' : ggplot2.theme_text(family = 'serif', size = 10),
+                       'axis.text.y' : ggplot2.theme_text(family = 'serif', size = 10),
+                       'legend.title' : ggplot2.theme_text(family = 'serif', face = 'bold', size = 10),
+                       'legend.text' : ggplot2.theme_text(family = 'serif', size = 10),
+                       'strip.text.x' : ggplot2.theme_text(family = 'serif', size = 10),
+                       'aspect.ratio' : 1,
+                       }) + \
       ggplot2_colors () + \
-      ggplot2.opts (**{'axis.title.x' : ggplot2.theme_text(family = 'serif', 
-                                                           face = 'bold', 
-                                                           size = 15, 
-                                                           vjust=-0.2)}) + \
       robjects.r('ylab("Speedup")') + \
-      robjects.r('xlab("Cores")') + \
-      ggplot2.facet_wrap ('Problem', nrow = 3)
+      robjects.r('xlab("Number of cores")') + \
+      ggplot2.facet_wrap ('Problem', nrow = 2)
 
   pp.plot()
 
