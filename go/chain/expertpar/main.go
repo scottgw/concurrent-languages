@@ -387,7 +387,6 @@ func Product(m [][]float64, vec []float64, nelts int) (result []float64) {
 
 func main() {
 	flag.Parse()
-
   var nelts, thresh_percent, seed, winnow_nelts int
 
 	fmt.Scan(&nelts)
