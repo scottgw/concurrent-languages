@@ -212,7 +212,6 @@ func read_mask(nrows, ncols int) {
 
 func main() {
 	var nrows, ncols, nelts int
-
 	flag.Parse()
 
 	nrows = int(read_integer())
