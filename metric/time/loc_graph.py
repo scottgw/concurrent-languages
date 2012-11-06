@@ -26,7 +26,7 @@ def ggplot2_options ():
     })
 
 def ggplot2_colors ():
-  return ggplot2.scale_fill_brewer(palette="Spectral")
+  return robjects.r('scale_fill_manual(values = c("#ffcb7e", "#1da06b", "#b94646", "#00368a"))')
 
 def pdf_height (): return 3.7
 def pdf_width (): return 7

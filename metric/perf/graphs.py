@@ -4,7 +4,7 @@ from utils import *
 from config import *
 import sys
 import rpy2.robjects as robjects
-robjects.r('library("scales")')  
+robjects.r('library("scales")')
 import rpy2.robjects.lib.ggplot2 as ggplot2
 ggplot2.theme_set(ggplot2.theme_bw ())
 from rpy2.robjects.packages import importr
@@ -29,8 +29,9 @@ def ggplot2_options ():
                           'strip.text.x' : normal_text(),
                           })
 
+#ggplot2.scale_fill_brewer(palette="YlGn")
 def ggplot2_colors ():
-  return ggplot2.scale_fill_brewer(palette="YlGn")
+  return robjects.r('scale_fill_manual(values = c("#ffcb7e", "#1da06b", "#b94646", "#00368a"))')
 
 def pdf_height (): return 3.7
 def pdf_width (): return 7
@@ -756,7 +757,8 @@ redf[which(redf$Problem != "ideal"),]
   dodge = ggplot2.position_dodge (width=0.9)
 
   pp = gg + \
-      ggplot2.geom_line() + ggplot2.geom_point(size=3) +\
+      ggplot2.geom_line() + ggplot2.geom_point(size=2) +\
+      ggplot2_colors () + \
       ggplot2.aes_string(x='Threads', y='Speedup.expertpar', 
                          group=change_name, color=change_name, 
                          shape=change_name) + \
@@ -770,7 +772,6 @@ redf[which(redf$Problem != "ideal"),]
                        'strip.text.x' : ggplot2.theme_text(family = 'serif', size = 10),
                        'aspect.ratio' : 1,
                        }) + \
-      ggplot2_colors () + \
       robjects.r('ylab("Speedup")') + \
       robjects.r('xlab("Number of cores")') + \
       ggplot2.facet_wrap ('Problem', nrow = 2)
