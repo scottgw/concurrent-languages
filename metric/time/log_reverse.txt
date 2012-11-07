@@ -717,3 +717,124 @@ Wed Oct 10 08:06:03 2012 +0200 updating erlang with expert comments
 Wed Oct 10 08:35:20 2012 +0200 updating is_bench param in chapel-chain
 Wed Oct 10 08:44:40 2012 +0200 updating chapel Makefiles for chain
 Wed Oct 10 10:16:11 2012 +0200 Fixed typos.
+Thu Oct 11 12:15:51 2012 +0200 updating erlang to remove some waiting (scales better).
+Thu Oct 11 13:57:36 2012 +0200 updating same thresh improvement to expertseq versions.
+Thu Oct 11 16:31:27 2012 +0200 Getting coding time measurement script to run, plotting with ggplot2.
+Thu Oct 11 16:32:05 2012 +0200 Merge branch 'scoop_expert' of https://github.com/scottgw/concurrent-languages into scoop_expert
+Mon Oct 15 08:06:34 2012 +0200 updating graphs to put times on top of normalized values.
+Mon Oct 15 08:24:47 2012 +0200 updating SCOOP seq and par randmat for correctness
+Mon Oct 15 09:43:19 2012 +0200 Updated coding time log (keeping old times, adding times since Aug 29).
+Mon Oct 15 11:46:43 2012 +0200 Adding loc_graph utility to graph line counts.
+Mon Oct 15 11:47:24 2012 +0200 Merge branch 'scoop_expert' of github.com:scottgw/concurrent-languages into scoop_expert
+Mon Oct 15 11:53:45 2012 +0200 Updating loc_graph to remove duplicate counting.
+Mon Oct 15 12:03:17 2012 +0200 Updating loc_graph to handle eiffel/scoop files.
+Mon Oct 15 12:11:22 2012 +0200 Updating gitignore with mainw and csv files.
+Mon Oct 15 13:08:25 2012 +0200 Merge branch 'scoop_expert' of github.com:scottgw/concurrent-languages into scoop_expert
+Mon Oct 15 14:59:53 2012 +0200 Added generation of expert/non-expert difference graphs.
+Mon Oct 15 17:36:02 2012 +0200 Refactored to be able to produce additional graphs.
+Tue Oct 16 08:10:09 2012 +0200 chapel-randmat-expertseq resume
+Tue Oct 16 08:12:26 2012 +0200 chapel-randmat-expertseq pause
+Tue Oct 16 08:13:37 2012 +0200 chapel-randmat-expertpar resume
+Tue Oct 16 08:14:28 2012 +0200 chapel-randmat-expertpar pause
+Tue Oct 16 08:18:58 2012 +0200 chapel-thresh-expertpar resume
+Tue Oct 16 08:25:12 2012 +0200 chapel-thresh-expertpar pause
+Tue Oct 16 08:28:00 2012 +0200 chapel-thresh-expertseq resume
+Tue Oct 16 08:28:36 2012 +0200 chapel-thresh-expertseq pause
+Tue Oct 16 08:30:59 2012 +0200 chapel-winnow-expertpar resume
+Tue Oct 16 08:31:45 2012 +0200 chapel-winnow-expertpar pause
+Tue Oct 16 09:43:10 2012 +0200 chapel-outer-expertseq resume
+Tue Oct 16 09:45:14 2012 +0200 chapel-outer-expertseq pause
+Tue Oct 16 09:45:53 2012 +0200 chapel-outer-expertpar resume
+Tue Oct 16 09:47:24 2012 +0200 chapel-outer-expertpar pause
+Tue Oct 16 09:48:31 2012 +0200 chapel-product-expertpar resume
+Tue Oct 16 09:49:07 2012 +0200 chapel-product-expertpar pause
+Tue Oct 16 09:51:06 2012 +0200 chapel-chain-expertseq resume
+Tue Oct 16 09:56:40 2012 +0200 chapel-chain-expertseq pause
+Tue Oct 16 09:59:19 2012 +0200 chapel-chain-expertpar resume
+Tue Oct 16 10:15:45 2012 +0200 chapel-chain-expertpar pause
+Tue Oct 16 10:16:35 2012 +0200 Merge branch 'scoop_expert' of github.com:scottgw/concurrent-languages into scoop_expert
+Tue Oct 16 10:28:00 2012 +0200 Updating SCOOP versions with crash fixes
+Tue Oct 16 10:28:25 2012 +0200 Merge branch 'scoop_expert' of github.com:scottgw/concurrent-languages into scoop_expert
+Tue Oct 16 10:30:49 2012 +0200 Updating to remove preconditions from ecf.
+Tue Oct 16 12:16:38 2012 +0200 Added normalization and changed formatting.
+Tue Oct 16 12:16:49 2012 +0200 Merge branch 'scoop_expert' of ssh://github.com/scottgw/concurrent-languages into scoop_expert
+Tue Oct 16 13:27:35 2012 +0200 Added normalizations, formatting.
+Tue Oct 16 16:02:21 2012 +0200 Added selection of basis for speedup, formatting.
+Tue Oct 16 16:37:58 2012 +0200 scoop-outer-expertpar resume
+Tue Oct 16 16:50:21 2012 +0200 scoop-outer-expertpar pause
+Tue Oct 16 16:56:31 2012 +0200 scoop-outer-expertpar resume
+Tue Oct 16 16:59:16 2012 +0200 scoop-outer-expertpar pause
+Tue Oct 16 17:01:55 2012 +0200 scoop-winnow-expertpar resume
+Tue Oct 16 17:46:29 2012 +0200 scoop-winnow-expertpar pause
+Tue Oct 16 18:52:39 2012 +0200 Generate diff for execution time, add non-expert to expert coding times now, font sizes.
+Tue Oct 16 18:52:46 2012 +0200 Merge branch 'scoop_expert' of ssh://github.com/scottgw/concurrent-languages into scoop_expert
+Wed Oct 17 09:16:52 2012 +0200 scoop-thresh-expertpar resume
+Wed Oct 17 09:31:47 2012 +0200 scoop-thresh-expertpar pause
+Wed Oct 17 09:31:56 2012 +0200 Merge branch 'scoop_expert' of github.com:scottgw/concurrent-languages into scoop_expert
+Wed Oct 17 09:33:28 2012 +0200 Merge branch 'master' of github.com:scottgw/concurrent-languages into scoop_expert
+Wed Oct 17 09:48:49 2012 +0200 Merge branch 'scoop_expert' of github.com:scottgw/concurrent-languages into scoop_expert
+Wed Oct 17 11:23:33 2012 +0200 cilk-thresh-expertpar resume
+Wed Oct 17 11:25:18 2012 +0200 cilk-thresh-expertpar pause
+Wed Oct 17 11:25:49 2012 +0200 cilk-chain-expertpar resume
+Wed Oct 17 11:26:49 2012 +0200 cilk-chain-expertpar pause
+Wed Oct 17 11:29:44 2012 +0200 cilk-winnow-expertpar resume
+Wed Oct 17 11:35:00 2012 +0200 cilk-winnow-expertpar pause
+Wed Oct 17 12:42:25 2012 +0200 fixing reduce-sum cilk_for loop in benchmark mode.
+Wed Oct 17 12:44:06 2012 +0200 adding another cilk_for loop
+Wed Oct 17 12:48:07 2012 +0200 cilk-chain-expertpar resume
+Wed Oct 17 12:49:22 2012 +0200 cilk-chain-expertpar pause
+Wed Oct 17 12:53:53 2012 +0200 Merge branch 'scoop_expert' of github.com:scottgw/concurrent-languages into scoop_expert
+Wed Oct 17 12:54:25 2012 +0200 Merge branch 'scoop_expert' of github.com:scottgw/concurrent-languages into scoop_expert
+Wed Oct 17 13:28:37 2012 +0200 cilk-thresh-expertpar resume
+Wed Oct 17 13:30:54 2012 +0200 cilk-thresh-expertpar pause
+Wed Oct 17 13:31:12 2012 +0200 Merge branch 'scoop_expert' of github.com:scottgw/concurrent-languages into scoop_expert
+Wed Oct 17 14:13:56 2012 +0200 updating to fix par thresh, improve expertpar perf
+Wed Oct 17 14:21:53 2012 +0200 Wilcoxon test for LOC data.
+Wed Oct 17 14:29:28 2012 +0200 Merge branch 'scoop_expert' of github.com:scottgw/concurrent-languages into scoop_expert
+Wed Oct 17 16:48:09 2012 +0200 adding error bars to speedup graphs using Fieller.
+Wed Oct 17 16:49:27 2012 +0200 Wilcoxon for coding times.
+Wed Oct 17 16:49:33 2012 +0200 Merge branch 'scoop_expert' of ssh://github.com/scottgw/concurrent-languages into scoop_expert
+Thu Oct 18 08:30:19 2012 +0200 merging changes
+Thu Oct 18 08:41:26 2012 +0200 Fixing expertpar thresh as the fix for par.
+Thu Oct 18 08:41:51 2012 +0200 Merge branch 'scoop_expert' of github.com:scottgw/concurrent-languages into scoop_expert
+Thu Oct 18 11:34:11 2012 +0200 Added simple rank function.
+Thu Oct 18 13:48:01 2012 +0200 Merge branch 'scoop_expert' of github.com:scottgw/concurrent-languages into scoop_expert
+Thu Oct 18 13:57:27 2012 +0200 Merge branch 'scoop_expert' of github.com:scottgw/concurrent-languages into scoop_expert
+Thu Oct 18 13:58:45 2012 +0200 Merge branch 'scoop_expert' of github.com:scottgw/concurrent-languages into scoop_expert
+Thu Oct 18 14:31:16 2012 +0200 Added simple rank computation for execution time and speedups.
+Thu Oct 18 14:48:30 2012 +0200 adding MWW comparison for performance
+Thu Oct 18 14:48:46 2012 +0200 Merge branch 'scoop_expert' of github.com:scottgw/concurrent-languages into scoop_expert
+Fri Oct 19 12:40:00 2012 +0200 updating to use cilk plus
+Mon Oct 22 09:08:20 2012 +0200 Fixed cilk/winnow/seq (move to Cilk Plus).
+Fri Oct 26 11:28:34 2012 +0200 Added print output (LaTeX) routines.
+Fri Oct 26 14:18:29 2012 +0200 Changed colors.
+Sun Oct 28 15:38:45 2012 +0100 Added Wilcoxon for speedup.
+Sun Oct 28 16:09:31 2012 +0100 changes for Chapel 1.6
+Sun Oct 28 16:10:06 2012 +0100 Updating Makefile to use --fast even for old code.
+Sun Oct 28 16:10:56 2012 +0100 Fixing a array out of bounds error, and a compile error.
+Sun Oct 28 16:13:15 2012 +0100 Merge branch 'scoop_expert' of github.com:scottgw/concurrent-languages into scoop_expert
+Tue Oct 30 16:36:50 2012 +0100 Using parallel merge-sort.
+Wed Oct 31 08:36:00 2012 +0100 Updaing merge to be parallel
+Wed Oct 31 10:33:47 2012 +0100 Using asynchronous channels for merging.
+Wed Oct 31 11:11:30 2012 +0100 Introducing more asynchronous channels.
+Fri Nov 2 10:43:14 2012 +0100 Added percentages for diffs on y-axes.
+Fri Nov 2 10:43:33 2012 +0100 Merge branch 'scoop_expert' of ssh://github.com/scottgw/concurrent-languages into scoop_expert
+Fri Nov 2 11:13:19 2012 +0100 Added speedup diff graph.
+Fri Nov 2 13:02:10 2012 +0100 Consolodating data into an R data-frame.
+Sat Nov 3 19:23:34 2012 +0100 Synchronizing implementations
+Sun Nov 4 18:19:28 2012 +0100 Changed printouts, confidence value Fieller.
+Mon Nov 5 12:42:36 2012 +0100 Removing optional profiling code.
+Mon Nov 5 12:43:06 2012 +0100 Merge branch 'scoop_expert' of github.com:scottgw/concurrent-languages into scoop_expert
+Mon Nov 5 15:23:19 2012 +0100 Faceted speedup graphs with a single data frame.
+Mon Nov 5 15:25:08 2012 +0100 Merge branch 'use_r_data' into scoop_expert
+Mon Nov 5 15:27:28 2012 +0100 Merge branch 'scoop_expert' of github.com:scottgw/concurrent-languages into scoop_expert
+Tue Nov 6 11:27:35 2012 +0100 Changed formatting for speedup-all.
+Tue Nov 6 13:31:50 2012 +0100 go-winnow-expertpar resume
+Tue Nov 6 13:44:06 2012 +0100 Changed to printer-friendly colors.
+Tue Nov 6 14:04:54 2012 +0100 go-winnow-expertpar pause
+Tue Nov 6 14:10:32 2012 +0100 go-chain-expertpar resume
+Tue Nov 6 14:20:56 2012 +0100 go-chain-expertpar pause
+Tue Nov 6 14:35:28 2012 +0100 Reverting to simpler product implementation.
+Tue Nov 6 14:39:23 2012 +0100 Merge branch 'scoop_expert' of github.com:scottgw/concurrent-languages into scoop_expert
+Tue Nov 6 17:26:16 2012 +0100 Removing needless extra time for TBB.
+Wed Nov 7 13:35:46 2012 +0100 Added Kaue's comment about chapel-product-par.
