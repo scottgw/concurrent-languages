@@ -81,7 +81,7 @@ def print_results ():
           
   for lang in languages:
     sys.stdout.write ("& " + pretty_langs [lang])
-    for prob in ["chain", "outer", "product", "randmat", "thresh", "winnow",]:
+    for prob in ["randmat", "thresh", "winnow", "outer", "product", "chain"]:
       for var in ["seq", "expertseq", "par", "expertpar"]:
         if var.startswith('expert'):
           val = result[lang][prob][var] + result[lang][prob][var.replace('expert', '')]
@@ -339,6 +339,7 @@ def bargraph_variation ():
         ggplot2.geom_bar (position='dodge', stat='identity') + \
         ggplot2_options () + \
         ggplot2_colors () + \
+        robjects.r('scale_x_discrete(limits=c("randmat", "thresh", "winnow", "outer", "product", "chain"))') +\
         robjects.r('ylab("Coding time (in minutes)")')
  
     pp.plot ()
@@ -359,6 +360,7 @@ def bargraph_variation ():
         ggplot2.geom_bar (position='dodge', stat='identity') + \
         ggplot2_options () + \
         ggplot2_colors () + \
+        robjects.r('scale_x_discrete(limits=c("randmat", "thresh", "winnow", "outer", "product", "chain"))') +\
         robjects.r('ylab("Coding time (normalized to fastest)")')
 
     pp.plot ()
@@ -407,6 +409,7 @@ def bargraph_variation_diff ():
         ggplot2_options () + \
         ggplot2_colors () + \
         robjects.r('ylab("Coding time difference (in percent)")') +\
+        robjects.r('scale_x_discrete(limits=c("randmat", "thresh", "winnow", "outer", "product", "chain"))') +\
         robjects.r('scale_y_continuous(labels = percent_format())')
     pp.plot ()
     r['dev.off']()
@@ -449,6 +452,7 @@ def bargraph_language ():
         ggplot2.geom_bar (position='dodge', stat='identity') + \
         ggplot2_options () + \
         ggplot2_colors () + \
+        robjects.r('scale_x_discrete(limits=c("randmat", "thresh", "winnow", "outer", "product", "chain"))') +\
         robjects.r('ylab("Coding time (in minutes)")')
     pp.plot ()
     r['dev.off']()

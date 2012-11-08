@@ -83,7 +83,7 @@ def main():
 def print_results (values):
   for lang in languages:
     sys.stdout.write ("& " + pretty_langs [lang])
-    for prob in ["chain", "outer", "product", "randmat", "thresh", "winnow",]:
+    for prob in ["randmat", "thresh", "winnow", "outer", "product", "chain"]:
       for var in ["seq", "expertseq", "par", "expertpar"]:
         data = FloatVector (values[prob][var][lang][0])
         val = robjects.r['mean'] (data)[0]
@@ -151,6 +151,7 @@ def speedup_diffs (values, basis):
   pp = gp + \
       ggplot2.aes_string (x='Problem', y='Difference', fill='Language') + \
       ggplot2.geom_bar (position='dodge', stat='identity') + \
+      robjects.r('scale_x_discrete(limits=c("randmat", "thresh", "winnow", "outer", "product", "chain"))') +\
       ggplot2_options () + \
       ggplot2_colors () + \
       robjects.r('ylab("Speedup difference (in percent)")') +\
@@ -184,7 +185,7 @@ def print_results_speedup (values, basis):
         
   for lang in languages:
     sys.stdout.write ("& " + pretty_langs [lang])
-    for prob in ["chain", "outer", "product", "randmat", "thresh", "winnow",]:
+    for prob in ["randmat", "thresh", "winnow", "outer", "product", "chain"]:
       for var in ["seq", "expertseq", "par", "expertpar"]:
         try:
           val = speedups[var][lang][prob][0]
@@ -373,6 +374,7 @@ def mem_usage_graph (cfg):
       ggplot2.facet_wrap ('Variation') + \
       ggplot2_options () + \
       ggplot2_colors () + \
+      robjects.r('scale_x_discrete(limits=c("randmat", "thresh", "winnow", "outer", "product", "chain"))') +\
       robjects.r('ylab("Memory usage (in bytes)")')# + \
 
   pp.plot ()
@@ -436,6 +438,7 @@ def bargraph_language (cfg, values):
         ggplot2.geom_errorbar (limits, position=dodge, width=0.25) + \
         ggplot2_options () + \
         ggplot2_colors () + \
+        robjects.r('scale_x_discrete(limits=c("randmat", "thresh", "winnow", "outer", "product", "chain"))') +\
         robjects.r('ylab("Execution time (in seconds)")') 
     pp.plot ()
     r['dev.off']()
@@ -502,6 +505,7 @@ def bargraph_variation (cfg, values):
         ggplot2.geom_errorbar (limits, position=dodge, width=0.25) + \
         ggplot2_options () + \
         ggplot2_colors () + \
+        robjects.r('scale_x_discrete(limits=c("randmat", "thresh", "winnow", "outer", "product", "chain"))') +\
         robjects.r('ylab("Execution time (in seconds)")')
  
     pp.plot ()
@@ -519,6 +523,7 @@ def bargraph_variation (cfg, values):
         ggplot2.geom_errorbar (limits, position=dodge, width=0.25) +\
         ggplot2_options () + \
         ggplot2_colors () + \
+        robjects.r('scale_x_discrete(limits=c("randmat", "thresh", "winnow", "outer", "product", "chain"))') +\
         robjects.r('ylab("Execution time (normalized to fastest)")')
         #ggplot2.geom_text(data=df,
         #                  mapping = ggplot2.aes_string (x='Problem', 
@@ -562,6 +567,7 @@ def bargraph_variation_diff (cfg, values):
         ggplot2.geom_bar (position='dodge', stat='identity') + \
         ggplot2_options () + \
         ggplot2_colors () + \
+        robjects.r('scale_x_discrete(limits=c("randmat", "thresh", "winnow", "outer", "product", "chain"))') +\
         robjects.r('ylab("Execution time difference (in percent)")') +\
         robjects.r('scale_y_continuous(labels = percent_format())')
     pp.plot ()
