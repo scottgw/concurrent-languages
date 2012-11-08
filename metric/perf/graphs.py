@@ -740,6 +740,7 @@ redf = reshape (df,
                 timevar="Variation", 
                 idvar = c("Language","Problem","Threads"), 
                 direction="wide")
+redf$Problem <- factor(redf$Problem, levels = c("randmat","thresh","winnow","outer","product","chain"))
 redf[which(redf$Problem != "ideal"),]
 ''')
   
