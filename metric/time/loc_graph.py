@@ -79,16 +79,16 @@ def main():
 
 def print_results (results):
   for lang in languages:
-    print lang
+    sys.stdout.write ("& " + pretty_langs [lang])
     for prob in ["chain", "outer", "product", "randmat", "thresh", "winnow",]:
       for var in ["seq", "expertseq", "par", "expertpar"]:
-        sys.stdout.write (str (results[(lang, prob, var)]) + " & ")
-    for var in ["seq", "expertseq", "par", "expertpar"]:
-      sum = 0
-      for prob in ["chain", "outer", "product", "randmat", "thresh", "winnow",]:
-        sum = sum + results[(lang, prob, var)]
-      sys.stdout.write (str (sum) + " & ")
-    print "\n"
+        sys.stdout.write (" & " + str (results[(lang, prob, var)]))
+    #for var in ["seq", "expertseq", "par", "expertpar"]:
+    #  sum = 0
+    #  for prob in ["chain", "outer", "product", "randmat", "thresh", "winnow",]:
+    #    sum = sum + results[(lang, prob, var)]
+    #  sys.stdout.write (str (sum) + " & ")
+    print "\\\\"
 
 
 def simple_rank (results):

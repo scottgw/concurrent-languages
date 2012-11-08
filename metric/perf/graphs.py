@@ -87,14 +87,14 @@ def print_results (values):
       for var in ["seq", "expertseq", "par", "expertpar"]:
         data = FloatVector (values[prob][var][lang][0])
         val = robjects.r['mean'] (data)[0]
-        sys.stdout.write (" & " + str (round(val, 1)))
-    for var in ["seq", "expertseq", "par", "expertpar"]:
-      sum = 0
-      for prob in ["chain", "outer", "product", "randmat", "thresh", "winnow",]:
-        data = FloatVector (values[prob][var][lang][0])
-        val = robjects.r['mean'] (data)[0]
-        sum = sum + val
-      sys.stdout.write (" & " + str (round(sum, 1)))
+        sys.stdout.write (" & " + str (round(val, 2)))
+    #for var in ["seq", "expertseq", "par", "expertpar"]:
+    #  sum = 0
+    #  for prob in ["chain", "outer", "product", "randmat", "thresh", "winnow",]:
+    #    data = FloatVector (values[prob][var][lang][0])
+    #    val = robjects.r['mean'] (data)[0]
+    #    sum = sum + val
+    #  sys.stdout.write (" & " + str (round(sum, 1)))
     sys.stdout.write (" \\\\\n")
 
 def speedup_diffs (values, basis):
@@ -191,15 +191,15 @@ def print_results_speedup (values, basis):
           sys.stdout.write (" & " + str (round(float(val), 1)))
         except KeyError:
           sys.stdout.write (" & " + "-")
-    for var in ["seq", "expertseq", "par", "expertpar"]:
-      sum = 0
-      if var in ["par", "expertpar"]:
-        for prob in ["chain", "outer", "product", "randmat", "thresh", "winnow",]:
-          val = speedups[var][lang][prob][0]
-          sum = sum + val
-        sys.stdout.write (" & " + str (round(float(sum)/6, 1)))
-      else:
-        sys.stdout.write (" & " + "-")
+    #for var in ["seq", "expertseq", "par", "expertpar"]:
+    #  sum = 0
+    #  if var in ["par", "expertpar"]:
+    #    for prob in ["chain", "outer", "product", "randmat", "thresh", "winnow",]:
+    #      val = speedups[var][lang][prob][0]
+    #      sum = sum + val
+    #    sys.stdout.write (" & " + str (round(float(sum)/6, 1)))
+    #  else:
+    #    sys.stdout.write (" & " + "-")
     sys.stdout.write (" \\\\\n")
 
 def simple_rank (cfg, values):
@@ -412,7 +412,7 @@ def bargraph_language (cfg, values):
         times.append (r['mean'] (data)[0])
 
         t_result = r['t.test'] (data, 
-                                **{" conf.level": 0.975}).rx ('conf.int')[0]
+                                **{" conf.level": 0.999}).rx ('conf.int')[0]
         ses.append ((t_result[1] - t_result[0])/2)
 
 
@@ -468,7 +468,7 @@ def bargraph_variation (cfg, values):
         mean = r['mean'] (data)[0]
         lavgs.append (mean)
 
-        t_result = r['t.test'] (data, **{"conf.level": 0.975}).rx ('conf.int')[0]
+        t_result = r['t.test'] (data, **{"conf.level": 0.999}).rx ('conf.int')[0]
         lses.append ((t_result[1] - t_result[0])/2)
         
       avgs.extend (lavgs)
@@ -662,7 +662,7 @@ def as_dataframe (cfg, results, basis):
           # time confidence interval
           #
           t_result = r['t.test'] (FloatVector(vals), 
-                                  **{" conf.level": 0.975}).rx ('conf.int')[0]
+                                  **{" conf.level": 0.999}).rx ('conf.int')[0]
           ses.append ((t_result[1] - t_result[0])/2)
 
           #
@@ -757,7 +757,7 @@ redf[which(redf$Problem != "ideal"),]
   dodge = ggplot2.position_dodge (width=0.9)
 
   pp = gg + \
-      ggplot2.geom_line() + ggplot2.geom_point(size=2) +\
+      ggplot2.geom_line() + ggplot2.geom_point(size=2.5) +\
       ggplot2_colors () + \
       ggplot2.aes_string(x='Threads', y='Speedup.expertpar', 
                          group=change_name, color=change_name, 
@@ -840,7 +840,7 @@ def line_plot (cfg, var, control, change_name, changing, selector, base_selector
                                     control='N',
                                     method='Param.ratio',
                                     **{'var.equal': False,
-                                    'conf.level': 0.975})[0][0]
+                                    'conf.level': 0.999})[0][0]
 
       lowers.append (ratio_test[1][0])
       uppers.append (ratio_test[2][0])

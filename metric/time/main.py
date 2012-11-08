@@ -88,15 +88,15 @@ def print_results ():
         else:
           val = result[lang][prob][var]
         sys.stdout.write (" & " + str (int(round(val, 0))))
-    for var in ["seq", "expertseq", "par", "expertpar"]:
-      sum = 0
-      for prob in ["chain", "outer", "product", "randmat", "thresh", "winnow",]:
-        if var.startswith('expert'):
-          val = result[lang][prob][var] + result[lang][prob][var.replace('expert', '')]
-        else:
-          val = result[lang][prob][var]
-        sum = sum + val
-      sys.stdout.write (" & " + str (int(round(sum))))
+    #for var in ["seq", "expertseq", "par", "expertpar"]:
+    #  sum = 0
+    #  for prob in ["chain", "outer", "product", "randmat", "thresh", "winnow",]:
+    #    if var.startswith('expert'):
+    #      val = result[lang][prob][var] + result[lang][prob][var.replace('expert', '')]
+    #    else:
+    #      val = result[lang][prob][var]
+    #    sum = sum + val
+    #  sys.stdout.write (" & " + str (int(round(sum))))
     sys.stdout.write (" \\\\\n")
 
 def simple_rank ():
