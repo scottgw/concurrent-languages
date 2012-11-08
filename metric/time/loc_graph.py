@@ -79,16 +79,16 @@ def main():
 
 def print_results (results):
   for lang in languages:
-    print lang
-    for prob in ["chain", "outer", "product", "randmat", "thresh", "winnow",]:
+    sys.stdout.write ("& " + pretty_langs [lang])
+    for prob in ["randmat", "thresh", "winnow", "outer", "product", "chain"]:
       for var in ["seq", "expertseq", "par", "expertpar"]:
-        sys.stdout.write (str (results[(lang, prob, var)]) + " & ")
-    for var in ["seq", "expertseq", "par", "expertpar"]:
-      sum = 0
-      for prob in ["chain", "outer", "product", "randmat", "thresh", "winnow",]:
-        sum = sum + results[(lang, prob, var)]
-      sys.stdout.write (str (sum) + " & ")
-    print "\n"
+        sys.stdout.write (" & " + str (results[(lang, prob, var)]))
+    #for var in ["seq", "expertseq", "par", "expertpar"]:
+    #  sum = 0
+    #  for prob in ["chain", "outer", "product", "randmat", "thresh", "winnow",]:
+    #    sum = sum + results[(lang, prob, var)]
+    #  sys.stdout.write (str (sum) + " & ")
+    print "\\\\"
 
 
 def simple_rank (results):
@@ -186,6 +186,7 @@ def bargraph_variation (results):
         ggplot2.geom_bar (position='dodge', stat='identity') + \
         ggplot2_options () + \
         ggplot2_colors () + \
+        robjects.r('scale_x_discrete(limits=c("randmat", "thresh", "winnow", "outer", "product", "chain"))') +\
         robjects.r('ylab("Lines of Code")')
     pp.plot ()
     r['dev.off']()
@@ -221,6 +222,7 @@ def bargraph_variation_norm (results):
         ggplot2.geom_bar (position='dodge', stat='identity') + \
         ggplot2_options () + \
         ggplot2_colors () + \
+        robjects.r('scale_x_discrete(limits=c("randmat", "thresh", "winnow", "outer", "product", "chain"))') +\
         robjects.r('ylab("Lines of Code (normalized to smallest)")')
     pp.plot ()
     r['dev.off']()
@@ -257,6 +259,7 @@ def bargraph_variation_diff (results):
         ggplot2_options () + \
         ggplot2_colors () + \
         robjects.r('ylab("Lines of code difference (in percent)")') +\
+        robjects.r('scale_x_discrete(limits=c("randmat", "thresh", "winnow", "outer", "product", "chain"))') +\
         robjects.r('scale_y_continuous(labels = percent_format())')
     pp.plot ()
     r['dev.off']()
@@ -288,6 +291,7 @@ def bargraph_language (results):
         ggplot2.geom_bar (position='dodge', stat='identity') + \
         ggplot2_options () + \
         ggplot2_colors () + \
+        robjects.r('scale_x_discrete(limits=c("randmat", "thresh", "winnow", "outer", "product", "chain"))') +\
         robjects.r('ylab("Lines of Code")')
     pp.plot ()
     r['dev.off']()
