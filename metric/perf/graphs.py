@@ -87,7 +87,7 @@ def print_results (values):
       for var in ["seq", "expertseq", "par", "expertpar"]:
         data = FloatVector (values[prob][var][lang][0])
         val = robjects.r['mean'] (data)[0]
-        sys.stdout.write (" & " + str (round(val, 2)))
+        sys.stdout.write (" & " + str (round(val, 1)))
     #for var in ["seq", "expertseq", "par", "expertpar"]:
     #  sum = 0
     #  for prob in ["chain", "outer", "product", "randmat", "thresh", "winnow",]:
@@ -758,7 +758,7 @@ redf[which(redf$Problem != "ideal"),]
 
   pp = gg + \
       ggplot2.geom_line() + ggplot2.geom_point(size=2.5) +\
-      ggplot2_colors () + \
+      robjects.r('scale_color_manual(values = c("#ffcb7e", "#1da06b", "#b94646", "#00368a", "#CCCCCC"))') +\
       ggplot2.aes_string(x='Threads', y='Speedup.expertpar', 
                          group=change_name, color=change_name, 
                          shape=change_name) + \
