@@ -133,7 +133,7 @@ def speedup_diffs (values, basis):
     for prob in problems:
       sp = speedups['par'][lang][prob][0]
       sp_expert = speedups['expertpar'][lang][prob][0]
-      diff = (float(sp_expert) / float(sp) - 1)
+      diff = (float(sp_expert) / float(sp))
 
       langs.append (pretty_langs [lang])
       probs.append (prob)
@@ -147,15 +147,23 @@ def speedup_diffs (values, basis):
     
   #print (df)
   gp = ggplot2.ggplot (df)
-    
+  
+  scale = r('''
+xformatter <- function(x) {
+  sprintf("%dX", x)
+}
+scale_y_continuous(labels = xformatter)
+''')
+
   pp = gp + \
       ggplot2.aes_string (x='Problem', y='Difference', fill='Language') + \
       ggplot2.geom_bar (position='dodge', stat='identity') + \
       robjects.r('scale_x_discrete(limits=c("randmat", "thresh", "winnow", "outer", "product", "chain"))') +\
       ggplot2_options () + \
       ggplot2_colors () + \
-      robjects.r('ylab("Speedup difference (in percent)")') +\
-      robjects.r('scale_y_continuous(labels = percent_format())')
+      r('ylab("Change in speedup  (in percent)")') +\
+      scale
+#      r('scale_y_continuous(labels = percent_format())')
   pp.plot ()
   r['dev.off']()
 
