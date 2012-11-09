@@ -150,7 +150,7 @@ def speedup_diffs (values, basis):
   
   scale = r('''
 xformatter <- function(x) {
-  sprintf("%dX", x)
+  sprintf("%d x", x)
 }
 scale_y_continuous(labels = xformatter)
 ''')
@@ -161,7 +161,7 @@ scale_y_continuous(labels = xformatter)
       robjects.r('scale_x_discrete(limits=c("randmat", "thresh", "winnow", "outer", "product", "chain"))') +\
       ggplot2_options () + \
       ggplot2_colors () + \
-      r('ylab("Change in speedup  (in percent)")') +\
+      r('ylab("Change in speedup")') +\
       scale
 #      r('scale_y_continuous(labels = percent_format())')
   pp.plot ()
