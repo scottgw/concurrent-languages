@@ -68,6 +68,7 @@ def main():
   stat_test()
   simple_rank ()
   print_results ()
+  as_dataframe()
 
 def print_results ():
   for lang in languages:
@@ -414,6 +415,42 @@ def bargraph_variation_diff ():
     pp.plot ()
     r['dev.off']()
 
+def as_dataframe():
+  r = robjects.r
+
+  varis = []
+  probs = []
+  times = []
+  langs = []
+
+  for language in languages:
+    for prob in problems:
+      for var in variations:
+        try:
+          time = result[language][prob][var]
+        except KeyError:
+          time = 0
+
+        # for the expert times, add expert and non-expert times together
+        if var.startswith('expert'):
+          try:
+            time = time + result[language][prob][var.replace('expert','')]
+          except KeyError:
+            pass
+          
+        varis.append (var) # pretty_varis [var])
+        probs.append (prob)
+        times.append (time)
+        langs.append (pretty_langs[language])
+
+  df = robjects.DataFrame({'Variation': StrVector (varis),
+                           'Problem': StrVector (probs),
+                           'Language': StrVector (langs),
+                           'CodingTime' : IntVector (times),
+                           })
+  r.assign ('df', df)
+  r ('save(df, file="time.Rda")')
+
 def bargraph_language ():
   r = robjects.r
 
@@ -435,7 +472,7 @@ def bargraph_language ():
           except KeyError:
             pass
           
-        varis.append (pretty_varis [var])
+        varis.append (var) # pretty_varis [var])
         probs.append (prob)
         times.append (time)
     r.pdf ('bargraph-codingtime-lang-' + language + '.pdf', height=pdf_height (), width=pdf_width ())
@@ -443,7 +480,7 @@ def bargraph_language ():
                              'Problem': StrVector (probs),
                              'Time' : IntVector (times),
       })
-    
+     
     #print (df)
     gp = ggplot2.ggplot (df)
   

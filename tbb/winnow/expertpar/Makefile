@@ -1,4 +1,4 @@
-CXXFLAGS+=-std=c++0x -O2 -m64 -ltbb -lpthread -lrt -lrt
+CXXFLAGS+=-std=c++0x -O2 -m64 -ltbb -lpthread -lrt -lstdc++
 all: main
 	./$< --threads 4 < $<.in > main.out
 	diff main.out main.gold
@@ -14,4 +14,4 @@ all: main
 
 CXXFLAGS+=-std=c++0x -O2
 LDFLAGS+=-ltbb
-CXX=icpc
+CXX=gcc

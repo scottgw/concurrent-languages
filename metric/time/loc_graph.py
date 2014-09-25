@@ -76,6 +76,7 @@ def main():
   stat_test (results)
   simple_rank (results)
   print_results (results)
+  as_dataframe (results)
 
 def print_results (results):
   for lang in languages:
@@ -214,6 +215,7 @@ def bargraph_variation_norm (results):
                              'Lines' : FloatVector (locs),
       })
     
+
     #print (df)
     gp = ggplot2.ggplot (df)
   
@@ -295,6 +297,35 @@ def bargraph_language (results):
         robjects.r('ylab("Lines of Code")')
     pp.plot ()
     r['dev.off']()
+
+
+def as_dataframe (results):
+  r = robjects.r
+
+  varis = []
+  probs = []
+  locs  = []
+  langs = []
+
+
+  for language in languages:
+    for (lang, prob, var) in results.keys():
+      if lang == language:
+        loc = results [(lang, prob, var)]
+        varis.append (var)
+        probs.append (prob)
+        locs.append (loc)
+        langs.append (pretty_langs[lang])
+
+  df = robjects.DataFrame({'Variation': StrVector (varis),
+                           'Problem': StrVector (probs),
+                           'Lines' : IntVector (locs),
+                           'Language': StrVector (langs)
+                           })
+
+  r.assign ('df', df)
+  r ('save(df,file="loc.Rda")')
+
     
 def break_path (path):
   parts = normpath (path).split(os.sep)

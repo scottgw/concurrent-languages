@@ -3,4 +3,4 @@ all: main.beam
 
 main: main.beam
 main.beam: main.erl randmat.erl thresh.erl winnow.erl outer.erl product.erl
-	erl -compile $^ 
+	erlc $^

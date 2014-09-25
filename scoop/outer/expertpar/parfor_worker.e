@@ -6,14 +6,11 @@ create
 
 feature
    make (start_, final_, nelts_: INTEGER;
-         is_bench_: BOOLEAN;
          x_points_: separate ARRAY[INTEGER];
          y_points_: separate ARRAY[INTEGER];
          result_vector_: separate ARRAY[DOUBLE];
          result_matrix_: separate ARRAY2[DOUBLE])
       do
-         is_bench := is_bench_
-
          start := start_
          final := final_
          nelts := nelts_
@@ -52,7 +49,6 @@ feature
             i := i + 1
          end
       end
-    end
 
   to_local_row (i: INTEGER): INTEGER
     do
